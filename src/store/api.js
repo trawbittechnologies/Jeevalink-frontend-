@@ -75,10 +75,11 @@ export const getBaseURL = () => {
   const envApiUrl = import.meta.env.VITE_API_URL;
   if (envApiUrl && typeof envApiUrl === 'string') {
     const trimmed = envApiUrl.trim();
-    // Only use VITE_API_URL if it is an absolute URL not pointing to Vercel frontend host
-    if (trimmed.startsWith('http') && !trimmed.includes('vercel.app')) {
-      return trimmed.replace(/\/+$/, '');
+    // Enforce backend URL. If the environment variable mistakenly points to the frontend domain or is a relative path, fallback to the actual backend.
+    if (trimmed.includes('jeevalink-frontend.vercel.app') || trimmed.includes('jeevalink.vercel.app') || trimmed === '/api/v1' || !trimmed.startsWith('http')) {
+      return DEFAULT_BACKEND_URL;
     }
+    return trimmed.replace(/\/+$/, '');
   }
   return DEFAULT_BACKEND_URL;
 };
