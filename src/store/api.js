@@ -69,8 +69,29 @@ export function toSnake(obj) {
   return obj;
 }
 
+const DEFAULT_BACKEND_URL = 'https://jeevalink-backend-production.up.railway.app/api/v1';
+
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || typeof envUrl !== 'string') {
+    return DEFAULT_BACKEND_URL;
+  }
+  const trimmed = envUrl.trim();
+  // Override invalid domain without '-production' or Vercel URLs or relative paths
+  if (
+    trimmed.includes('jeevalink-backend.up.railway.app') ||
+    trimmed.includes('vercel.app') ||
+    !trimmed.startsWith('http')
+  ) {
+    return DEFAULT_BACKEND_URL;
+  }
+  return trimmed.replace(/\/+$/, '');
+};
+
+const BASE_URL = getApiBaseUrl();
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://jeevalink-backend-production.up.railway.app/api/v1',
+  baseURL: BASE_URL,
   timeout: 30000,
   headers: {
     'Accept': 'application/json',
