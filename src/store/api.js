@@ -69,18 +69,35 @@ export function toSnake(obj) {
   return obj;
 }
 
+// The authoritative production backend URL.
+// This is the single source of truth — it matches Railway deployment.
 const DEFAULT_BACKEND_URL = 'https://jeevalink-backend-production.up.railway.app/api/v1';
 
+/**
+ * Resolves the API base URL with the following priority:
+ * 1. VITE_API_URL env var (if set to a valid absolute backend URL)
+ * 2. DEFAULT_BACKEND_URL (hardcoded Railway fallback — always safe)
+ *
+ * Guards against:
+ * - Relative paths (e.g. "/api/v1") — these would route to the frontend domain
+ * - Vercel frontend domains — these are never backend URLs
+ * - Non-HTTP values — invalid URLs are silently ignored
+ */
 export const getBaseURL = () => {
   const envApiUrl = import.meta.env.VITE_API_URL;
   if (envApiUrl && typeof envApiUrl === 'string') {
     const trimmed = envApiUrl.trim();
-    // Enforce backend URL. If the environment variable mistakenly points to the frontend domain or is a relative path, fallback to the actual backend.
-    const isVercelFrontend = trimmed.includes('.vercel.app') && !trimmed.includes('railway.app');
-    const isRelativePath = !trimmed.startsWith('http');
-    if (isVercelFrontend || isRelativePath) {
+    // Reject if not an absolute HTTP(S) URL
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      console.warn('[Jeevalink API] VITE_API_URL is not an absolute URL — using default backend.');
       return DEFAULT_BACKEND_URL;
     }
+    // Reject if it points to a Vercel frontend domain (never a valid backend)
+    if (trimmed.includes('.vercel.app') && !trimmed.includes('railway.app')) {
+      console.warn('[Jeevalink API] VITE_API_URL points to a Vercel frontend domain — using default backend.');
+      return DEFAULT_BACKEND_URL;
+    }
+    // Strip trailing slashes for consistent path joining
     return trimmed.replace(/\/+$/, '');
   }
   return DEFAULT_BACKEND_URL;
