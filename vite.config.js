@@ -7,12 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://mindful-exploration-production-8f55.up.railway.app',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
       },
       '/storage': {
-        target: 'https://mindful-exploration-production-8f55.up.railway.app',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
       }

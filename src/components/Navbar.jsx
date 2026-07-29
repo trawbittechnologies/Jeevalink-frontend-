@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
-import { LogOut, User, Bell, ChevronDown, Settings, Droplets, Siren, Award, CheckCircle2, MapPin } from 'lucide-react';
+import { LogOut, User, Bell, ChevronDown, Settings, Siren, Award, CheckCircle2, MapPin, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getStorageUrl } from '../store/api.js';
+
+import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
 const publicLinks = [
   { label: 'Home', to: '/' },
   { label: 'Find Donors', to: '/donor/search' },
   { label: 'Blood Requests', to: '/requests' },
-  { label: 'About', to: '/about' },
-  { label: 'Contact', to: '/contact' },
+  { label: 'Leaderboard', to: '/leaderboard' },
+  { label: 'Block Committee Directory', to: '/volunteer-directory' },
+  { label: 'Tech Reports', to: '/technical-reports' },
 ];
 
 export default function Navbar() {
@@ -38,6 +41,8 @@ export default function Navbar() {
   };
 
   const dashboardLink =
+    user?.role === 'technical_admin' ? '/technical-admin' :
+    user?.role === 'super_admin' ? '/super-admin' :
     user?.role === 'admin' ? '/admin/dashboard' :
     user?.role === 'volunteer' ? '/volunteer/dashboard' :
     '/donor/dashboard';
@@ -91,15 +96,8 @@ export default function Navbar() {
       <div className="container-wide flex items-center justify-between h-16">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-1 shrink-0 group">
-          <img
-            src="/logo.png"
-            alt="JeevaLink"
-            className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105"
-          />
-          <span className="text-[17px] font-black text-gray-900 tracking-tight leading-none">
-            Jeeva<span className="text-primary">Link</span>
-          </span>
+        <Link to="/" className="flex items-center shrink-0">
+          <JeevaLinkLogo size={36} textClassName="text-[17px]" />
         </Link>
 
         {/* Desktop Nav — hidden on mobile */}
@@ -219,6 +217,11 @@ export default function Navbar() {
                       <Link to={dashboardLink} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                         <User className="w-4 h-4" /> Dashboard
                       </Link>
+                      {(user?.role === 'donor' || user?.role === 'user') && (
+                        <Link to="/donor/eligibility" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
+                          <ShieldCheck className="w-4 h-4 text-emerald-600" /> Health Check
+                        </Link>
+                      )}
                       <Link to="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                         <User className="w-4 h-4" /> Profile
                       </Link>

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../../store/authStore.js';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Activity, Search, Filter, Clock, User, Shield, Trash2, CheckCircle2, AlertTriangle, LogIn, LogOut } from 'lucide-react';
+import { Filter, Clock, User, Shield, Trash2, CheckCircle2, AlertTriangle, LogIn, LogOut } from 'lucide-react';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 
 const MOCK_LOGS = [];

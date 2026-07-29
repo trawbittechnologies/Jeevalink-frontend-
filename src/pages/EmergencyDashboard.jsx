@@ -20,8 +20,6 @@ export default function EmergencyDashboard() {
     createEmergencyRequest,
     fetchEmergencyDetails,
     emergencyDetails,
-    acceptEmergencyRequest,
-    rejectEmergencyRequest,
     fetchLiveDonorCount,
     liveDonorCount,
     allUsers,
@@ -208,51 +206,65 @@ export default function EmergencyDashboard() {
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 p-4 lg:p-6 space-y-6">
       
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-zinc-800 pb-5">
-        <div className="text-left">
-          <div className="flex items-center gap-2">
-            <span className="p-2 bg-red-100 dark:bg-red-950/60 text-red-650 rounded-xl">
-              <Siren className="w-6 h-6 animate-pulse" />
-            </span>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Emergency Blood Alert Portal</h1>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative bg-gradient-to-br from-red-600 via-red-700 to-rose-800 rounded-3xl p-6 text-white overflow-hidden shadow-lg shadow-red-200/40"
+      >
+        <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_80%,rgba(255,255,255,0.05)_0%,transparent_60%)] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-10 h-10 bg-white/15 border border-white/25 rounded-2xl flex items-center justify-center">
+                <Siren className="w-5 h-5 animate-heartbeat" />
+              </div>
+              <div className="flex items-center gap-1.5 bg-red-500/40 border border-white/20 px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 bg-red-300 rounded-full animate-pulse" />
+                <span className="text-white/90 text-[10px] font-bold uppercase tracking-wider">Live Emergency Feed</span>
+              </div>
+            </div>
+            <h1 className="text-2xl font-black tracking-tight mb-1">Emergency Blood Alert Portal</h1>
+            <p className="text-red-200 text-sm">Real-time FCM alert dispatcher & emergency response command dashboard</p>
           </div>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">Real-time Firebase-FCM alert dispatcher & emergency response command dashboard</p>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {user && (
-            <span className="px-3 py-1.5 bg-red-50 dark:bg-red-950/45 text-primary dark:text-red-400 text-xs font-bold rounded-xl border border-red-100/50">
-              {user.fullName}
-            </span>
-          )}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {user && (
+              <span className="px-3 py-1.5 bg-white/15 border border-white/25 text-white text-xs font-bold rounded-xl backdrop-blur-sm">
+                {user.fullName}
+              </span>
+            )}
 
-          {/* New alert creation */}
-          <button
-            onClick={() => setShowRequestModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-bold rounded-2xl text-xs transition-all cursor-pointer hover:scale-105"
-          >
-            <Plus className="w-3.5 h-3.5" /> Dispatch Alert
-          </button>
-
-          {/* Export items */}
-          <div className="flex bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-0.5">
+            {/* New alert creation */}
             <button
-              onClick={exportToCSV}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl text-slate-500 dark:text-zinc-400 cursor-pointer"
-              title="Export to CSV"
+              onClick={() => setShowRequestModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-white text-red-700 font-bold rounded-2xl text-xs transition-all cursor-pointer hover:bg-red-50 shadow-md"
             >
-              <Download className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" /> Dispatch Alert
             </button>
-            <button
-              onClick={handlePrintPDF}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl text-slate-500 dark:text-zinc-400 cursor-pointer"
-              title="Print Dashboard Report"
-            >
-              <Plus className="w-4 h-4 rotate-45" /> {/* Print trigger mock */}
-            </button>
+
+            {/* Export items */}
+            <div className="flex bg-white/10 border border-white/20 rounded-2xl p-0.5">
+              <button
+                onClick={exportToCSV}
+                className="p-2 hover:bg-white/10 rounded-xl text-white/80 hover:text-white cursor-pointer transition-colors"
+                title="Export to CSV"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handlePrintPDF}
+                className="p-2 hover:bg-white/10 rounded-xl text-white/80 hover:text-white cursor-pointer transition-colors"
+                title="Print Dashboard Report"
+              >
+                <Plus className="w-4 h-4 rotate-45" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* SYSTEM CONTROLS & STATUS (Firebase vs WebSockets Toggle) */}
       <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
@@ -301,55 +313,55 @@ export default function EmergencyDashboard() {
 
       {/* DASHBOARD STATISTICS WIDGETS */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        
-        {/* Widget 1: Active Requests */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left">
-          <div className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-650 flex items-center justify-center mb-3">
-            <Siren className="w-4.5 h-4.5" />
+
+        <div className="card p-4 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-rose-600" />
+          <div className="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mb-3">
+            <Siren className="w-4 h-4" />
           </div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">{activeAlerts}</p>
-          <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider mt-0.5">Active Requests</p>
-          <p className="text-[9px] text-slate-400 dark:text-zinc-550 mt-1">Pending donor confirmation</p>
+          <p className="text-2xl font-black text-slate-900 tracking-tight">{activeAlerts}</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Active Requests</p>
+          <p className="text-[9px] text-slate-400 mt-1">Pending donor confirmation</p>
         </div>
 
-        {/* Widget 2: Critical Alerts */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left">
-          <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-500 flex items-center justify-center mb-3">
-            <Activity className="w-4.5 h-4.5" />
+        <div className="card p-4 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400 to-amber-500" />
+          <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center mb-3">
+            <Activity className="w-4 h-4" />
           </div>
-          <p className="text-2xl font-black text-orange-500">{criticalAlerts}</p>
-          <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider mt-0.5">Critical Cases</p>
-          <p className="text-[9px] text-slate-400 dark:text-zinc-550 mt-1">Requiring immediate dispatch</p>
+          <p className="text-2xl font-black text-orange-500 tracking-tight">{criticalAlerts}</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Critical Cases</p>
+          <p className="text-[9px] text-slate-400 mt-1">Requiring immediate dispatch</p>
         </div>
 
-        {/* Widget 3: Completed Requests */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left">
-          <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center mb-3">
-            <CheckCircle2 className="w-4.5 h-4.5" />
+        <div className="card p-4 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-600" />
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+            <CheckCircle2 className="w-4 h-4" />
           </div>
-          <p className="text-2xl font-black text-emerald-600">{completedAlerts}</p>
-          <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider mt-0.5">Saved Lives</p>
-          <p className="text-[9px] text-slate-400 dark:text-zinc-550 mt-1">Requests fully fulfilled</p>
+          <p className="text-2xl font-black text-emerald-600 tracking-tight">{completedAlerts}</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Saved Lives</p>
+          <p className="text-[9px] text-slate-400 mt-1">Requests fully fulfilled</p>
         </div>
 
-        {/* Widget 4: Available Donors */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left">
-          <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 flex items-center justify-center mb-3">
-            <Users className="w-4.5 h-4.5" />
+        <div className="card p-4 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-600" />
+          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+            <Users className="w-4 h-4" />
           </div>
-          <p className="text-2xl font-black text-blue-600">{liveDonorCount}</p>
-          <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider mt-0.5">Online Donors</p>
-          <p className="text-[9px] text-slate-400 dark:text-zinc-550 mt-1">Available: {availableDonorsCount} donors</p>
+          <p className="text-2xl font-black text-blue-600 tracking-tight">{liveDonorCount}</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Online Donors</p>
+          <p className="text-[9px] text-slate-400 mt-1">Available: {availableDonorsCount}</p>
         </div>
 
-        {/* Widget 5: Match Rate */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left col-span-2 lg:col-span-1">
-          <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 flex items-center justify-center mb-3">
-            <Database className="w-4.5 h-4.5" />
+        <div className="card p-4 relative overflow-hidden col-span-2 lg:col-span-1">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-violet-600" />
+          <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
+            <Database className="w-4 h-4" />
           </div>
-          <p className="text-2xl font-black text-purple-650">{totalAlerts > 0 ? `${Math.round((completedAlerts / totalAlerts) * 100)}%` : '100%'}</p>
-          <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider mt-0.5">Completion Rate</p>
-          <p className="text-[9px] text-slate-400 dark:text-zinc-550 mt-1">Success alert percentage</p>
+          <p className="text-2xl font-black text-purple-600 tracking-tight">{totalAlerts > 0 ? `${Math.round((completedAlerts / totalAlerts) * 100)}%` : '100%'}</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Completion Rate</p>
+          <p className="text-[9px] text-slate-400 mt-1">Success alert percentage</p>
         </div>
 
       </div>

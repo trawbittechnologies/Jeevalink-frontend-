@@ -1,13 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import "../jl-landing.css";
 import { useAppStore } from "../store/appStore.js";
-import dyfiLogoImg from "../assets/images (1) (2).png";
 import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
 import {
   Heart, Droplets, MapPin, ArrowRight, Shield, Users,
   Activity, Zap, Handshake, Bell, Search, UserPlus,
-  Building2, Star, CheckCircle2, Clock, TrendingUp, Globe,
+  Building2, Star, Clock, TrendingUp, Globe,
 } from "lucide-react";
 
 /* ── Inline Social Icons ───────────────────────── */
@@ -47,7 +46,7 @@ function AnimatedCounter({ target, suffix = "", duration = 2 }) {
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const count = useMotionValue(0);
   const rounded = useSpring(count, { duration: duration * 1000 });
-  const [display, setDisplay] = React.useState(0);
+  const [display, setDisplay] = useState(0);
   useEffect(() => { if (isInView) count.set(target); }, [isInView, target, count]);
   useEffect(() => rounded.on("change", (v) => setDisplay(Math.round(v))), [rounded]);
   return <span ref={ref}>{display.toLocaleString()}{suffix}</span>;
@@ -59,14 +58,6 @@ const fadeUp = {
   show: (i = 0) => ({
     opacity: 1, y: 0,
     transition: { type: "spring", damping: 22, stiffness: 100, delay: i * 0.1 },
-  }),
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  show: (i = 0) => ({
-    opacity: 1,
-    transition: { duration: 0.5, delay: i * 0.08 },
   }),
 };
 
@@ -145,7 +136,7 @@ export default function Landing() {
 
   useEffect(() => {
     fetchPartners();
-  }, []);
+  }, [fetchPartners]);
 
   const getSocialIconComponent = (platform) => {
     const type = (platform || '').toLowerCase();
@@ -326,7 +317,7 @@ export default function Landing() {
             {processSteps.map((step, i) => {
               const Icon = step.icon;
               return (
-                <React.Fragment key={step.num}>
+                <Fragment key={step.num}>
                   <motion.div
                     className="jl-process-step"
                     variants={fadeUp}
@@ -349,7 +340,7 @@ export default function Landing() {
                       <ArrowRight className="w-5 h-5" />
                     </div>
                   )}
-                </React.Fragment>
+                </Fragment>
               );
             })}
           </div>

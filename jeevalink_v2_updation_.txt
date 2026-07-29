@@ -1,0 +1,339 @@
+{
+  "project": {
+    "name": "JeevaLink Blood Donation Management System",
+    "version": "2.0",
+    "description": "Enterprise Blood Donation Platform for DYFI Kerala with hierarchical role-based management.",
+    "frontend": {
+      "framework": "React",
+      "styling": "Tailwind CSS"
+    },
+    "mobile": {
+      "framework": "React Native Expo"
+    },
+    "backend": {
+      "framework": "Laravel 12",
+      "language": "PHP 8.4"
+    },
+    "database": {
+      "type": "MySQL"
+    }
+  },
+
+  "architecture": {
+    "authentication": "RBAC",
+    "roles": [
+      "Technical Admin",
+      "Super Admin",
+      "Admin",
+      "Volunteer",
+      "User"
+    ],
+    "login": "Email + Password",
+    "password": "Auto Generated",
+    "mail": "Laravel Mail",
+    "otp": "SMS OTP Verification",
+    "storage": "Laravel Storage",
+    "notifications": [
+      "Email",
+      "Firebase Push Notification"
+    ]
+  },
+
+  "role_permissions": {
+
+    "technical_admin": {
+      "permissions": [
+        "Login",
+        "Manage Super Admin",
+        "Generate Password",
+        "Send Password Email",
+        "View/Edit Profile",
+        "View Technical Reports",
+        "Reply Technical Reports"
+      ]
+    },
+
+    "super_admin": {
+      "scope": "District",
+      "permissions": [
+        "Login",
+        "Manage Block Admin",
+        "Generate Password",
+        "Send Password Email",
+        "View All Users",
+        "View All Volunteers",
+        "View All Admins",
+        "Hide Password Fields",
+        "View/Edit Profile",
+        "Reply Feedback",
+        "Take Action Against Admin/Volunteer/User",
+        "Send Technical Reports",
+        "Create Blood Requests",
+        "Generate Blood Request Poster"
+      ]
+    },
+
+    "admin": {
+      "scope": "Own Block Only",
+      "permissions": [
+        "Login",
+        "Manage Volunteers",
+        "Generate Password",
+        "Send Password Email",
+        "View Own Block Data",
+        "View/Edit Profile",
+        "Reply Feedback",
+        "Take Action",
+        "Send Technical Reports",
+        "Create Blood Requests",
+        "Generate Posters"
+      ]
+    },
+
+    "volunteer": {
+      "scope": "Own Meghala Only",
+      "permissions": [
+        "Login",
+        "Manage Users",
+        "Generate Password",
+        "Send Password Email",
+        "View Own Users",
+        "View/Edit Profile",
+        "Reply Feedback",
+        "Take Action",
+        "Send Technical Reports",
+        "Create Blood Requests",
+        "Generate Posters",
+        "Approve Blood Requests",
+        "Select Top 5 Donors"
+      ]
+    },
+
+    "user": {
+      "permissions": [
+        "Login",
+        "Edit Limited Profile",
+        "Create Blood Request",
+        "Accept Blood Request",
+        "Send Technical Report",
+        "Send Complaint Against Volunteer"
+      ]
+    }
+
+  },
+
+  "hierarchy": {
+    "Technical Admin": [
+      "Super Admin"
+    ],
+    "Super Admin": [
+      "Admin"
+    ],
+    "Admin": [
+      "Volunteer"
+    ],
+    "Volunteer": [
+      "User"
+    ]
+  },
+
+  "blood_request_flow": {
+
+    "user_request": [
+      "User creates request",
+      "Volunteer receives request",
+      "Volunteer approves",
+      "Request becomes Public",
+      "Volunteer can download poster"
+    ],
+
+    "accept_request": [
+      "Volunteer receives donor acceptance",
+      "System recommends Top 5 donors",
+      "Priority = Distance + Age + Weight"
+    ]
+
+  },
+
+  "leaderboard": {
+
+    "points": {
+      "successful_donation": 100,
+      "volunteer_success": 50
+    },
+
+    "monthly": [
+      "Highest Donor",
+      "Highest Volunteer",
+      "Highest Meghala"
+    ]
+
+  },
+
+  "badges": [
+    {
+      "points": 100,
+      "badge": "First Drop"
+    },
+    {
+      "points": 500,
+      "badge": "Life Saver"
+    },
+    {
+      "points": 1000,
+      "badge": "Blood Hero"
+    },
+    {
+      "points": 2500,
+      "badge": "Red Guardian"
+    },
+    {
+      "points": 5000,
+      "badge": "Legend Donor"
+    }
+  ],
+
+  "posters": {
+
+    "blood_request": {
+      "template": "Common Template",
+      "fields": [
+        "Blood Group",
+        "Date",
+        "Time",
+        "Venue",
+        "Units Required"
+      ]
+    },
+
+    "successful_donation": {
+      "template": "Certificate Style",
+      "fields": [
+        "Donor Image",
+        "Donor Name",
+        "Date",
+        "Time",
+        "Venue"
+      ]
+    }
+
+  },
+
+  "registration": {
+
+    "super_admin": [
+      "District",
+      "Name",
+      "Primary Contact",
+      "Secondary Contact",
+      "WhatsApp",
+      "Email"
+    ],
+
+    "admin": [
+      "Block Name",
+      "Primary Contact",
+      "Secondary Contact",
+      "WhatsApp",
+      "Email"
+    ],
+
+    "volunteer": [
+      "Volunteer Name",
+      "Primary Contact",
+      "Secondary Contact",
+      "WhatsApp",
+      "Email"
+    ],
+
+    "user": [
+      "Full Name",
+      "DOB",
+      "Gender",
+      "Weight",
+      "Blood Group",
+      "PIN",
+      "Post Office",
+      "Place",
+      "Profile Image",
+      "Phone",
+      "OTP Verification",
+      "Email"
+    ]
+
+  },
+
+  "validations": {
+
+    "minimum_age": 18,
+
+    "otp": {
+      "expiry": "1 Minute",
+      "continuous_limit": 2,
+      "cooldown": "10 Minutes"
+    },
+
+    "profile": {
+      "editable_fields": "Limited"
+    }
+
+  },
+
+  "security": [
+
+    "RBAC Authorization",
+    "SQL Injection Protection",
+    "CSRF Protection",
+    "Laravel Policies",
+    "Password Hashing",
+    "Audit Logs",
+    "Activity Logs",
+    "Soft Delete",
+    "Email Verification"
+
+  ],
+
+  "important_rules": [
+
+    "Users never see donor phone numbers",
+
+    "Blood Request Call Button redirects to assigned Volunteer phone number",
+
+    "Non Registered User selects District -> Block -> Volunteer",
+
+    "Show Volunteer Contact Details",
+
+    "Volunteer only sees own Meghala",
+
+    "Admin only sees own Block",
+
+    "Super Admin sees own District",
+
+    "Technical Admin sees entire system"
+
+  ],
+
+  "future_features": [
+
+    "Live GPS Distance",
+
+    "Google Maps",
+
+    "AI Donor Recommendation",
+
+    "Firebase Notifications",
+
+    "Offline Sync",
+
+    "Dark Mode",
+
+    "QR Donation Certificate",
+
+    "Analytics Dashboard",
+
+    "Export PDF",
+
+    "Excel Reports"
+
+  ]
+}

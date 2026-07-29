@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Phone, Mail, MapPin, Droplets, ArrowRight, Shield, Clock, Globe } from 'lucide-react';
+import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
 /* ── Inline Social SVGs (lucide-react removed these) ── */
 const IconFacebook = () => (
@@ -82,8 +82,8 @@ export default function Footer() {
 
         <div style={{ maxWidth: 1240, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
-              🩸 Every Donation Matters
+            <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.7)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Heart size={13} fill="currentColor" /> Every Donation Matters
             </p>
             <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', margin: 0, lineHeight: 1.1 }}>
               Ready to save a life today?
@@ -151,17 +151,8 @@ export default function Footer() {
           {/* Brand Column */}
           <div style={{ gridColumn: 'span 1' }}>
             {/* Logo */}
-            <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginBottom: 16 }}>
-              <div style={{
-                width: 40, height: 40, background: 'linear-gradient(135deg, #EF4444, #B91C1C)',
-                borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(220,38,38,0.3)',
-              }}>
-                <Droplets size={20} color="#fff" fill="#fff" />
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 900, color: '#111827', letterSpacing: '-0.02em' }}>
-                Jeeva<span style={{ color: '#DC2626' }}>Link</span>
-              </span>
+            <Link to="/" style={{ display: 'inline-block', textDecoration: 'none', marginBottom: 16 }}>
+              <JeevaLinkLogo size={36} textClassName="text-xl" />
             </Link>
 
             <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.75, marginBottom: 24, maxWidth: 280 }}>

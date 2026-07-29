@@ -1,70 +1,94 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import Toast from '../components/Toast.jsx';
 import Sidebar from '../components/Sidebar.jsx';
+import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
 import SOSButton from '../components/SOSButton.jsx';
 import {
   LayoutDashboard, Droplets, Users, ClipboardList, User,
-  Bell, Siren, LogOut
+  Bell, Siren, ShieldCheck, Building2, Megaphone
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function DashboardLayout() {
-  const { user, logout, loadProfile } = useAuthStore();
+  const { user, loadProfile } = useAuthStore();
   const { notifications, startSOSCountdown } = useAppStore();
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const unread = notifications.filter((n) => !n.read).length;
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadProfile();
-  }, []);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  }, [loadProfile]);
 
   const donorNav = [
     { to: '/donor/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
     { to: '/donor/search', icon: Users, label: 'Donors' },
     { to: '/requests', icon: Droplets, label: 'Requests' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
   const volNav = [
     { to: '/volunteer/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
     { to: '/volunteer/users', icon: Users, label: 'Users' },
-    { to: '/requests', icon: ClipboardList, label: 'Requests' },
+    { to: '/requests', icon: Droplets, label: 'Requests' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
   const adminNav = [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/requests', icon: ClipboardList, label: 'Requests' },
-    { to: '/donor/search', icon: Users, label: 'Donors' },
+    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
+    { to: '/role-management', icon: ShieldCheck, label: 'Roles' },
+    { to: '/admin/volunteers', icon: Users, label: 'Volunteers' },
+    { to: '/requests', icon: Droplets, label: 'Requests' },
+    { to: '/profile', icon: User, label: 'Profile' },
+  ];
+  const superAdminNav = [
+    { to: '/super-admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
+    { to: '/super-admin/blocks', icon: Building2, label: 'Block Committees' },
+    { to: '/requests', icon: Droplets, label: 'Requests' },
+    { to: '/profile', icon: User, label: 'Profile' },
+  ];
+  const techAdminNav = [
+    { to: '/technical-admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
+    { to: '/role-management', icon: ShieldCheck, label: 'Roles' },
+    { to: '/technical-reports', icon: ClipboardList, label: 'Reports' },
+    { to: '/profile', icon: User, label: 'Profile' },
+  ];
+  const unitSquadNav = [
+    { to: '/volunteer/users', icon: Users, label: 'Manage Users' },
+    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
+    { to: '/technical-reports', icon: ClipboardList, label: 'Tech Report' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
   const hospitalNav = [
     { to: '/hospital/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
     { to: '/donor/search', icon: Users, label: 'Donors' },
     { to: '/requests', icon: Droplets, label: 'Requests' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
   // Intercept navigation for pending hospital
-  React.useEffect(() => {
+  useEffect(() => {
     if (user?.role === 'hospital' && user?.status === 'Pending Approval' && location.pathname !== '/hospital/dashboard') {
       navigate('/hospital/dashboard', { replace: true });
     }
   }, [user, location.pathname, navigate]);
 
   let navLinks =
-    user?.role === 'admin' ? adminNav :
-    user?.role === 'volunteer' ? volNav :
-    user?.role === 'hospital' ? hospitalNav :
-    donorNav;
+    user?.role === 'technical_admin' ? techAdminNav :
+      user?.role === 'super_admin' ? superAdminNav :
+        user?.role === 'admin' ? adminNav :
+          user?.role === 'volunteer' ? volNav :
+            user?.role === 'unit_squad' ? unitSquadNav :
+              user?.role === 'hospital' ? hospitalNav :
+                donorNav;
 
   if (user?.role === 'hospital' && user?.status === 'Pending Approval') {
     navLinks = [
@@ -88,16 +112,8 @@ export default function DashboardLayout() {
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-100 h-14 flex items-center justify-between px-4 lg:px-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
 
           {/* Logo (mobile only) */}
-          <Link to="/" className="flex items-center gap-1 lg:hidden">
-            <img
-              src="/logo.png"
-              alt="JeevaLink"
-              className="w-11 h-11 object-contain"
-              style={{ mixBlendMode: 'multiply' }}
-            />
-            <span className="text-sm font-black text-gray-900">
-              Jeeva<span className="text-primary">Link</span>
-            </span>
+          <Link to="/" className="flex items-center lg:hidden">
+            <JeevaLinkLogo size={32} textClassName="text-sm" />
           </Link>
 
           {/* Page breadcrumb (desktop) */}

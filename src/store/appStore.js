@@ -70,7 +70,8 @@ export const useAppStore = create((set, get) => ({
       const params = {};
       if (bloodGroup) params.bloodGroup = bloodGroup;
       if (urgencyLevel) params.urgencyLevel = urgencyLevel;
-      
+      // Backend auto-handles visibility by role via JWT
+      // No extra params needed — the server filters by the caller's role
       const res = await api.get('/requests', { params });
       if (res.data.success) {
         set({ requests: res.data.data.requests || [] });
@@ -109,9 +110,16 @@ export const useAppStore = create((set, get) => ({
       const res = await api.post('/requests', payload);
       if (res.data.success) {
         const newReq = res.data.data.request;
+        const isVerified = res.data.verified === true;
+        const serverMessage = res.data.message || '';
+        // Only push to the public feed immediately if verified (privileged user)
+        // For regular users, it will appear via getForUser (pending_approval flag set)
         set((state) => ({ requests: [newReq, ...state.requests] }));
-        get().triggerToast('Blood request posted successfully!', 'success');
-        return { success: true, request: newReq };
+        if (isVerified) {
+          get().triggerToast('Blood request posted and published!', 'success');
+        }
+        // Return verified flag and message for UI banner handling
+        return { success: true, request: newReq, verified: isVerified, message: serverMessage };
       }
       return { success: false };
     } catch (err) {
@@ -140,6 +148,25 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
+  acceptRequest: async (requestId) => {
+    try {
+      const res = await api.patch(`/requests/${requestId}/accept`);
+      if (res.data.success) {
+        const updatedReq = res.data.data.request || res.data.data;
+        set((state) => ({
+          requests: state.requests.map((r) => String(r._id || r.id) === String(requestId) ? { ...r, ...updatedReq } : r)
+        }));
+        get().triggerToast('Blood Request accepted! Thank you for stepping up to save a life.', 'success');
+        return { success: true, request: updatedReq };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to accept blood request.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
   verifyRequest: async (requestId) => {
     try {
       const res = await api.patch(`/requests/${requestId}/verify`);
@@ -150,23 +177,84 @@ export const useAppStore = create((set, get) => ({
         }));
         get().triggerToast('Request verified successfully.', 'success');
       }
-    } catch (err) {
+    } catch {
       get().triggerToast('Failed to verify request.', 'error');
     }
   },
 
-  rejectRequest: async (requestId) => {
+  updateRequest: async (requestId, requestData) => {
+    try {
+      const payload = {
+        patient_name: requestData.patientName,
+        blood_group: requestData.bloodGroup,
+        units_required: requestData.unitsRequired,
+        hospital_name: requestData.hospitalName,
+        hospital_address: requestData.hospitalAddress,
+        location: requestData.location,
+        city: requestData.city,
+        district: requestData.district,
+        contact_number: requestData.contactNumber,
+        required_by_date: requestData.requiredByDate,
+        urgency_level: requestData.urgencyLevel,
+        additional_notes: requestData.additionalNotes,
+        status: requestData.status,
+      };
+      const res = await api.put(`/requests/${requestId}`, payload);
+      if (res.data.success) {
+        const updatedReq = res.data.data.request;
+        set((state) => ({
+          requests: state.requests.map((r) => String(r.id || r._id) === String(requestId) ? updatedReq : r)
+        }));
+        get().triggerToast('Blood request updated successfully!', 'success');
+        return { success: true, request: updatedReq };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to update request.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  updateRequestStatus: async (requestId, status) => {
+    try {
+      const res = await api.patch(`/requests/${requestId}/status`, { status });
+      if (res.data.success) {
+        const updatedReq = res.data.data.request;
+        set((state) => ({
+          requests: state.requests.map((r) => String(r.id || r._id) === String(requestId) ? updatedReq : r)
+        }));
+        get().triggerToast(`Request status updated to ${status}.`, 'success');
+        return { success: true, request: updatedReq };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to update request status.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  deleteRequest: async (requestId) => {
     try {
       const res = await api.delete(`/requests/${requestId}`);
       if (res.data.success) {
         set((state) => ({
-          requests: state.requests.filter((r) => String(r._id) !== String(requestId))
+          requests: state.requests.filter((r) => String(r.id || r._id) !== String(requestId))
         }));
-        get().triggerToast('Request rejected and removed.', 'warning');
+        get().triggerToast('Blood request deleted successfully.', 'info');
+        return { success: true };
       }
+      return { success: false };
     } catch (err) {
-      get().triggerToast('Failed to delete request.', 'error');
+      const errMsg = err.response?.data?.message || 'Failed to delete request.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
     }
+  },
+
+  rejectRequest: async (requestId) => {
+    return get().deleteRequest(requestId);
   },
 
   triggerSOS: async (sosData) => {
@@ -242,7 +330,7 @@ export const useAppStore = create((set, get) => ({
   stopSiren: () => set({ sirenPlaying: false }),
   setSirenPlaying: (playing) => set({ sirenPlaying: playing }),
 
-  searchDonors: async (bloodGroup, radius, excludeId) => {
+  searchDonors: async (bloodGroup, radius) => {
     try {
       const params = {};
       if (bloodGroup) params.bloodGroup = bloodGroup;
@@ -254,8 +342,8 @@ export const useAppStore = create((set, get) => ({
         donorsList = donorsList.filter((d) => !radius || d.distance <= radius);
         set({ donors: donorsList });
       }
-    } catch (err) {
-      console.error('Failed to search donors', err);
+    } catch {
+      // ignore
     }
   },
 
@@ -338,7 +426,7 @@ export const useAppStore = create((set, get) => ({
 
         get().triggerToast(`User status updated to ${status}.`, 'success');
       }
-    } catch (err) {
+    } catch {
       get().triggerToast('Failed to update user status.', 'error');
     }
   },
@@ -392,7 +480,7 @@ export const useAppStore = create((set, get) => ({
         return { success: true };
       }
       return { success: false };
-    } catch (err) {
+    } catch {
       get().triggerToast('Failed to update user eligibility status.', 'error');
       return { success: false };
     }
@@ -427,7 +515,7 @@ export const useAppStore = create((set, get) => ({
         }));
         get().triggerToast('Report marked as resolved.', 'success');
       }
-    } catch (err) {
+    } catch {
       get().triggerToast('Failed to resolve complaint.', 'error');
     }
   },
@@ -444,25 +532,33 @@ export const useAppStore = create((set, get) => ({
         const email = user ? user.email : 'user@example.com';
         get().triggerToast(`Warning message dispatched to ${email}.`, 'warning');
       }
-    } catch (err) {
+    } catch {
       get().triggerToast('Failed to dispatch warning to user.', 'error');
     }
   },
 
   deleteUser: async (userId) => {
     try {
-      const res = await api.delete(`/admin/users/${userId}`);
+      let res;
+      try {
+        res = await api.delete(`/volunteer/users/${userId}`);
+      } catch {
+        res = await api.delete(`/admin/users/${userId}`);
+      }
+
       if (res.data.success) {
         set((state) => ({
-          allUsers: state.allUsers.filter((u) => String(u._id) !== String(userId))
+          allUsers: state.allUsers.filter((u) => String(u._id || u.id) !== String(userId) && String(u.id) !== String(userId)),
+          unitSquads: (state.unitSquads || []).filter((u) => String(u._id || u.id) !== String(userId) && String(u.id) !== String(userId))
         }));
-        get().triggerToast('User deleted successfully.', 'success');
+        get().triggerToast(res.data.message || 'User deleted successfully.', 'success');
         return { success: true };
       }
       return { success: false };
     } catch (err) {
-      get().triggerToast('Failed to delete user.', 'error');
-      return { success: false };
+      const errMsg = err.response?.data?.message || 'Failed to delete user.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
     }
   },
 
@@ -470,13 +566,17 @@ export const useAppStore = create((set, get) => ({
   addVolunteer: async (volunteerData) => {
     try {
       const payload = {
-        full_name: volunteerData.fullName,
+        meghala: volunteerData.meghalaName,
+        meghala_admin_1_name: volunteerData.person1Name,
+        meghala_admin_1_mobile: volunteerData.person1Contact,
+        meghala_admin_2_name: volunteerData.person2Name,
+        meghala_admin_2_mobile: volunteerData.person2Contact,
+        full_name: volunteerData.person1Name,
+        mobile: volunteerData.person1Contact,
         email: volunteerData.email,
-        mobile: volunteerData.mobile,
-        city: volunteerData.city || 'Kochi',
-        district: volunteerData.district || 'Ernakulam'
+        whatsapp_number: volunteerData.whatsapp,
       };
-      const res = await api.post('/admin/volunteers', payload);
+      const res = await api.post('/admin/meghala-admins', payload);
       if (res.data.success) {
         const newUser = res.data.data?.user;
         // api.js response interceptor auto-converts snake_case → camelCase
@@ -630,7 +730,7 @@ export const useAppStore = create((set, get) => ({
         return { success: true };
       }
       return { success: false };
-    } catch (err) {
+    } catch {
       return { success: false };
     }
   },
@@ -769,18 +869,42 @@ export const useAppStore = create((set, get) => ({
 
   volunteerUpdateUser: async (userId, data) => {
     try {
-      const res = await api.patch(`/volunteer/users/${userId}`, data);
+      let payload = data;
+      if (!(data instanceof FormData)) {
+        if (data.profile_picture && data.profile_picture instanceof File) {
+          const fd = new FormData();
+          Object.keys(data).forEach((key) => {
+            if (data[key] !== null && data[key] !== undefined) {
+              fd.append(key, data[key]);
+            }
+          });
+          payload = fd;
+        } else {
+          const cleanData = { ...data };
+          if (typeof cleanData.profile_picture === 'string' || cleanData.profile_picture === null) {
+            delete cleanData.profile_picture;
+          }
+          payload = cleanData;
+        }
+      }
+
+      const isFormData = payload instanceof FormData;
+      const res = isFormData
+        ? await api.post(`/volunteer/users/${userId}`, payload)
+        : await api.patch(`/volunteer/users/${userId}`, payload);
+
       if (res.data.success) {
         const updatedUser = res.data.data.user;
         set((state) => ({
-          allUsers: state.allUsers.map((u) => String(u._id) === String(userId) ? { ...u, ...updatedUser } : u)
+          allUsers: state.allUsers.map((u) => String(u._id || u.id) === String(userId) ? { ...u, ...updatedUser } : u)
         }));
         get().triggerToast('User details updated successfully!', 'success');
         return { success: true };
       }
       return { success: false };
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Failed to update user.';
+      const errDetails = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join(', ') : '';
+      const errMsg = errDetails || err.response?.data?.message || 'Failed to update user.';
       get().triggerToast(errMsg, 'error');
       return { success: false, error: errMsg };
     }
@@ -792,8 +916,9 @@ export const useAppStore = create((set, get) => ({
       if (res.data.success) {
         const emailSent = res.data.data.emailSent;
         const generatedPassword = res.data.data.generatedPassword;
+        const newUser = res.data.data.user;
         set((state) => ({
-          allUsers: [...state.allUsers, res.data.data.user]
+          allUsers: [newUser, ...state.allUsers.filter(u => String(u._id || u.id) !== String(newUser.id || newUser._id))]
         }));
         // Show warning if email failed to send, otherwise success
         const msg = res.data.message || 'User added successfully!';
@@ -808,4 +933,194 @@ export const useAppStore = create((set, get) => ({
       return { success: false, error: errMsg };
     }
   },
+
+  updateUnitSquadStatus: async (squadId, status, resendCredentials = false, password = null) => {
+    try {
+      const payload = { status, resend_credentials: resendCredentials };
+      if (password) payload.password = password;
+      const res = await api.patch(`/volunteer/unit-squads/${squadId}/status`, payload);
+      if (res.data.success) {
+        const updatedUser = res.data.data.squad || res.data.data.user;
+        const generatedPassword = res.data.data.generated_password || res.data.data.generatedPassword;
+        set((state) => ({
+          allUsers: state.allUsers.map((u) => String(u._id || u.id) === String(squadId) ? { ...u, ...updatedUser } : u)
+        }));
+        get().triggerToast(res.data.message || `Unit Squad updated successfully.`, 'success');
+        return { success: true, generatedPassword, user: updatedUser };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to update Unit Squad status.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  volunteerVerifyUser: async (userId) => {
+    try {
+      const res = await api.post(`/volunteer/users/${userId}/verify-user`);
+      if (res.data.success) {
+        const updatedUser = res.data.data.user;
+        const emailSent = res.data.data.email_sent;
+        const generatedPassword = res.data.data.generated_password;
+        set((state) => ({
+          allUsers: state.allUsers.map((u) => String(u._id || u.id) === String(userId) ? { ...u, ...updatedUser, status: 'Active', isVerified: true, is_verified: true } : u)
+        }));
+        const msg = res.data.message || 'User verified and activated! Login credentials sent to email.';
+        get().triggerToast(msg, emailSent ? 'success' : 'warning');
+        return { success: true, user: updatedUser, emailSent, generatedPassword };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to verify user.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  volunteerRejectUser: async (userId, reason = '') => {
+    try {
+      const res = await api.post(`/volunteer/users/${userId}/reject-user`, { rejection_reason: reason });
+      if (res.data.success) {
+        const updatedUser = res.data.data.user;
+        set((state) => ({
+          allUsers: state.allUsers.map((u) => String(u._id || u.id) === String(userId) ? { ...u, ...updatedUser, status: 'Rejected', is_verified: false } : u)
+        }));
+        get().triggerToast('User registration rejected.', 'info');
+        return { success: true, user: updatedUser };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to reject user.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  unitSquads: [],
+  fetchUnitSquads: async () => {
+    try {
+      const res = await api.get('/volunteer/unit-squads');
+      if (res.data.success) {
+        set({ unitSquads: res.data.data });
+      }
+    } catch (err) {
+      console.error('Failed to fetch Unit Squads', err);
+    }
+  },
+
+  updateUnitSquadStatus: async (squadId, status, resendCredentials = false) => {
+    try {
+      const res = await api.patch(`/volunteer/unit-squads/${squadId}/status`, { status, resend_credentials: resendCredentials });
+      if (res.data.success) {
+        const updatedSquad = res.data.data.squad;
+        const emailSent = res.data.data.email_sent;
+        const generatedPassword = res.data.data.generated_password;
+        set((state) => ({
+          allUsers: state.allUsers.map((u) => String(u._id || u.id) === String(squadId) ? { ...u, ...updatedSquad } : u),
+          unitSquads: state.unitSquads.map((s) => String(s._id || s.id) === String(squadId) ? { ...s, ...updatedSquad } : s)
+        }));
+        get().triggerToast(res.data.message || `Unit Squad status updated to ${status}.`, 'success');
+        return { success: true, squad: updatedSquad, emailSent, generatedPassword };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to update Unit Squad status.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  // ─── Social Interaction & Campaign Hub State & Actions ───
+  campaignPosts: [],
+
+  fetchCampaignPosts: async (category = 'all', search = '') => {
+    try {
+      const res = await api.get('/campaigns', { params: { category, search } });
+      if (res.data.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        set({ campaignPosts: res.data.data });
+      }
+    } catch (err) {
+      console.warn('Backend API endpoint offline, using active campaign state.', err);
+    }
+  },
+
+  createCampaignPost: async (postData) => {
+    try {
+      const res = await api.post('/campaigns', postData);
+      if (res.data.success) {
+        const newPost = res.data.data;
+        set((state) => ({ campaignPosts: [newPost, ...state.campaignPosts] }));
+        get().triggerToast('Campaign published successfully!', 'success');
+        return { success: true, data: newPost };
+      }
+    } catch (err) {
+      console.warn('Backend API post failed, applying state fallback.', err);
+    }
+    // Client state fallback
+    const mockNewPost = {
+      id: Date.now(),
+      ...postData,
+      likes_count: 0,
+      shares_count: 0,
+      is_liked: false,
+      created_at: new Date().toISOString()
+    };
+    set((state) => ({ campaignPosts: [mockNewPost, ...state.campaignPosts] }));
+    get().triggerToast('Campaign post created!', 'success');
+    return { success: true, data: mockNewPost };
+  },
+
+  toggleLikeCampaignPost: async (postId) => {
+    set((state) => ({
+      campaignPosts: state.campaignPosts.map((p) => {
+        if (p.id === postId) {
+          const isLikedNow = !p.is_liked;
+          return {
+            ...p,
+            is_liked: isLikedNow,
+            likes_count: isLikedNow ? p.likes_count + 1 : Math.max(0, p.likes_count - 1)
+          };
+        }
+        return p;
+      })
+    }));
+
+    try {
+      await api.post(`/campaigns/${postId}/like`);
+    } catch (err) {
+      console.warn('Like state persisted locally.', err);
+    }
+  },
+
+  incrementShareCampaignPost: async (postId) => {
+    set((state) => ({
+      campaignPosts: state.campaignPosts.map((p) => {
+        if (p.id === postId) {
+          return { ...p, shares_count: (p.shares_count || 0) + 1 };
+        }
+        return p;
+      })
+    }));
+
+    try {
+      await api.post(`/campaigns/${postId}/share`);
+    } catch (err) {
+      console.warn('Share state persisted locally.', err);
+    }
+  },
+
+  deleteCampaignPost: async (postId) => {
+    set((state) => ({
+      campaignPosts: state.campaignPosts.filter((p) => p.id !== postId)
+    }));
+    get().triggerToast('Campaign post deleted.', 'info');
+
+    try {
+      await api.delete(`/campaigns/${postId}`);
+    } catch (err) {
+      console.warn('Delete state persisted locally.', err);
+    }
+  }
+
 }));

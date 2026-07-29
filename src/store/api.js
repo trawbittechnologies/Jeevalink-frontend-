@@ -99,7 +99,11 @@ const api = axios.create({
   timeout: 30000,
   headers: {
     'Accept': 'application/json',
-    'Content-Type': 'application/json',
+    // NOTE: Do NOT set Content-Type here.
+    // Axios auto-sets it per request:
+    //   - 'application/json'           for plain objects
+    //   - 'multipart/form-data; boundary=...' for FormData (file uploads)
+    // Setting it globally breaks multipart file uploads.
   },
 });
 
@@ -108,7 +112,11 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('jeevalink_token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (config.headers && typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
     }
     
     // Map outgoing data to snake_case
@@ -140,13 +148,17 @@ api.interceptors.response.use(
 );
 
 export function getStorageUrl(path) {
-  if (!path) return null;
+  if (!path || typeof path !== 'string') return null;
   if (path.startsWith('http') || path.startsWith('data:')) {
     return path;
   }
-  const apiBase = api.defaults.baseURL;
+  let cleanPath = path.replace(/^\/+/, '');
+  if (cleanPath.startsWith('storage/')) {
+    cleanPath = cleanPath.replace(/^storage\//, '');
+  }
+  const apiBase = api.defaults.baseURL || '';
   const rootUrl = apiBase.replace(/\/api\/v1\/?$/, '').replace(/\/v1\/?$/, '');
-  return `${rootUrl}/storage/${path}`;
+  return `${rootUrl}/storage/${cleanPath}`;
 }
 
 export default api;

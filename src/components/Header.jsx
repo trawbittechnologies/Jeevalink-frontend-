@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import { LogOut, Bell, User, HeartPulse, Compass, LayoutDashboard, Settings, Sun, Moon } from 'lucide-react';
+import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
 export default function Header() {
   const { activeView, setActiveView, notifications, triggerToast } = useAppStore();
@@ -53,14 +54,9 @@ export default function Header() {
         <div className="space-y-8">
           <div 
             onClick={() => setActiveView('Dashboard')}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity px-1"
+            className="cursor-pointer hover:opacity-90 transition-opacity px-1"
           >
-            <div className="w-9 h-9 rounded-xl bg-red-500/5 dark:bg-red-500/5 flex items-center justify-center border border-red-500/10 shrink-0">
-              <span className="text-primary font-black text-xl leading-none">🩸</span>
-            </div>
-            <span className="text-xl font-black text-slate-900 dark:text-slate-905 tracking-tight leading-none">
-              Jeeva<span className="text-primary font-black">Link</span>
-            </span>
+            <JeevaLinkLogo size={36} textClassName="text-xl" />
           </div>
 
           {/* Navigation Items List */}
@@ -154,17 +150,11 @@ export default function Header() {
       <header className="md:hidden sticky top-0 z-40 w-full bg-white/95 dark:bg-white/95 border-b border-slate-100 dark:border-rose-100/40 backdrop-blur-md transition-colors duration-300 select-none">
         <div className="px-6 h-16 flex items-center justify-between">
           
-          {/* Logo element */}
           <div 
             onClick={() => setActiveView('Dashboard')}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
+            className="cursor-pointer hover:opacity-90 transition-opacity"
           >
-            <div className="w-8 h-8 rounded-lg bg-red-500/5 dark:bg-red-500/5 flex items-center justify-center border border-red-500/10">
-              <span className="text-primary font-black text-lg">🩸</span>
-            </div>
-            <span className="text-base font-black text-slate-900 dark:text-slate-900 tracking-tight leading-none">
-              Jeeva<span className="text-primary font-black">Link</span>
-            </span>
+            <JeevaLinkLogo size={32} textClassName="text-base" />
           </div>
 
           {/* Quick profile redirect / settings toggle */}

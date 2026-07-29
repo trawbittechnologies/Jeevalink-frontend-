@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
@@ -18,21 +18,23 @@ export default function CompleteProfile() {
   const [district, setDistrict] = useState(user?.district || '');
 
   // Check if profile is already complete
-  const isVolunteer = user?.role === 'volunteer';
-  const isHospitalOrAdmin = ['hospital', 'admin'].includes(user?.role);
+  const isNonDonorRole = ['technical_admin', 'super_admin', 'admin', 'volunteer', 'unit_squad', 'hospital'].includes(user?.role);
   
   const isComplete = () => {
     if (!user) return false;
+    if (isNonDonorRole) return true;
     const basicComplete = !!(user.city && user.district);
-    if (isVolunteer || isHospitalOrAdmin) return basicComplete;
     return basicComplete && !!user.bloodGroup && user.bloodGroup !== 'N/A';
   };
 
   if (!user) return <Navigate to="/login" replace />;
   if (isComplete()) {
     const redirect =
+      user.role === 'technical_admin' ? '/technical-admin' :
+      user.role === 'super_admin' ? '/super-admin' :
       user.role === 'admin' ? '/admin/dashboard' :
       user.role === 'volunteer' ? '/volunteer/dashboard' :
+      user.role === 'unit_squad' ? '/volunteer/users' :
       user.role === 'hospital' ? '/hospital/dashboard' :
       '/donor/dashboard';
     return <Navigate to={redirect} replace />;

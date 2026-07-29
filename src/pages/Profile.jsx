@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { User, Edit3, History, QrCode, LogOut, Calendar, Award, Scale, Phone, Loader2 } from 'lucide-react';
+import { Edit3, History, QrCode, LogOut, Calendar, Award, Scale, Loader2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { getStorageUrl } from '../store/api.js';
 
@@ -19,7 +19,7 @@ export default function Profile() {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit } = useForm({
     defaultValues: {
       fullName: user?.fullName || '',
       email: user?.email || '',
@@ -199,12 +199,14 @@ export default function Profile() {
     }
   };
 
+  const isUserRole = user?.role === 'user' || user?.role === 'donor';
+
   const allTabs = [
     { id: 'edit', label: 'Edit Profile', icon: Edit3 },
     { id: 'card', label: 'QR Passport', icon: QrCode },
     { id: 'history', label: 'History', icon: History },
   ];
-  const tabs = user?.role === 'donor' ? allTabs : [allTabs[0]];
+  const tabs = isUserRole ? allTabs : [allTabs[0]];
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -212,9 +214,13 @@ export default function Profile() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black text-gray-900">
-            {user?.role === 'donor' ? 'Donor Profile' : user?.role === 'hospital' ? 'Hospital Profile' : user?.role === 'volunteer' ? 'Volunteer Profile' : 'Admin Profile'}
+            {isUserRole ? 'User Profile' : 
+             user?.role === 'volunteer' ? 'Volunteer Profile' : 
+             user?.role === 'super_admin' ? 'Super Admin Profile' : 
+             user?.role === 'technical_admin' ? 'Technical Admin Profile' : 
+             'Admin Profile'}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your info and account details</p>
+          <p className="text-sm text-gray-500 mt-1">Manage your account information and credentials</p>
         </div>
         <button
           onClick={handleLogout}
@@ -253,13 +259,13 @@ export default function Profile() {
         </div>
         <div className="min-w-0 flex-1 text-left">
           <h3 className="text-lg font-black text-gray-900">{user?.fullName}</h3>
-          <p className="text-sm text-gray-500">{user?.city ? `${user.city}, ${user.district}` : user?.district}</p>
+          <p className="text-sm text-gray-500">{user?.city ? `${user.city}, ${user.district}` : user?.district || 'System Role'}</p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
-            {user?.role === 'donor' ? (
+            {isUserRole ? (
               <>
-                <span className="text-xs font-black text-primary bg-red-50 px-2.5 py-1 rounded-xl border border-red-100">{user?.bloodGroup}</span>
-                <span className="text-xs text-gray-500 font-semibold">{user?.totalDonations} donations</span>
-                <span className="text-xs text-amber-600 font-semibold flex items-center gap-1"><Award className="w-3 h-3" />{user?.rewardPoints} pts</span>
+                <span className="text-xs font-black text-primary bg-red-50 px-2.5 py-1 rounded-xl border border-red-100">{user?.bloodGroup || 'N/A'}</span>
+                <span className="text-xs text-gray-500 font-semibold">{user?.totalDonations || 0} donations</span>
+                <span className="text-xs text-amber-600 font-semibold flex items-center gap-1"><Award className="w-3 h-3" />{user?.rewardPoints || 0} pts</span>
                 <span className={`text-xs font-black px-2.5 py-1 rounded-xl border ${
                   user?.eligibilityStatus === 'Eligible'
                     ? 'text-emerald-700 bg-emerald-50 border-emerald-100'
@@ -272,16 +278,17 @@ export default function Profile() {
               </>
             ) : (
               <span className={`text-xs font-bold px-2.5 py-1 rounded-xl border uppercase ${
-                user?.role === 'hospital' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' :
                 user?.role === 'volunteer' ? 'text-purple-700 bg-purple-50 border-purple-100' :
-                'text-gray-600 bg-slate-50 border-slate-200'
+                user?.role === 'super_admin' ? 'text-amber-700 bg-amber-50 border-amber-100' :
+                user?.role === 'technical_admin' ? 'text-red-700 bg-red-50 border-red-100' :
+                'text-blue-700 bg-blue-50 border-blue-100'
               }`}>
-                {user?.role} Portal
+                {(user?.role || 'Admin').replace('_', ' ')} Role
               </span>
             )}
           </div>
         </div>
-        {user?.role === 'donor' && (
+        {isUserRole && (
           <div className="ml-auto shrink-0 hidden sm:flex items-center gap-3">
             <div className="text-center">
               <p className="text-2xl font-black text-gray-900">{user?.livesSaved ?? 0}</p>
@@ -292,14 +299,16 @@ export default function Profile() {
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
-        {tabs.map(({ id, label, icon: Icon }) => (
-          <button key={id} onClick={() => setTab(id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${tab === id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            <Icon className="w-3.5 h-3.5" />{label}
-          </button>
-        ))}
-      </div>
+      {tabs.length > 1 && (
+        <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
+          {tabs.map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => setTab(id)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${tab === id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+              <Icon className="w-3.5 h-3.5" />{label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Tab: Edit Profile */}
       {tab === 'edit' && (
@@ -335,7 +344,7 @@ export default function Profile() {
               </div>
               <div className="min-w-0 flex-1 text-center sm:text-left space-y-1">
                 <h4 className="text-xs font-bold text-gray-800">Profile Picture</h4>
-                <p className="text-[10px] text-gray-400">Click to upload a square JPEG or PNG image (max 1MB). It will display across your dashboard and donor cards.</p>
+                <p className="text-[10px] text-gray-400">Click to upload a square JPEG or PNG image (max 1MB).</p>
                 <label htmlFor="avatar-file-form-btn" className={`inline-block px-3 py-1.5 bg-white border border-slate-200 text-gray-700 hover:bg-slate-50 rounded-xl text-[10px] font-bold cursor-pointer transition-colors shadow-sm mt-1 ${isUploadingPhoto ? 'opacity-50 pointer-events-none' : ''}`}>
                   {isUploadingPhoto ? 'Uploading...' : 'Choose Image File'}
                 </label>
@@ -352,7 +361,7 @@ export default function Profile() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">{user?.role === 'hospital' ? 'Hospital Name' : 'Full Name'}</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Full Name</label>
                 <input type="text" {...register('fullName', { required: true })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
@@ -367,7 +376,7 @@ export default function Profile() {
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
               
-              {user?.role === 'donor' && (
+              {isUserRole && (
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Blood Group</label>
                   <select {...register('bloodGroup')}
@@ -377,7 +386,7 @@ export default function Profile() {
                 </div>
               )}
 
-              {user?.role === 'donor' && (
+              {isUserRole && (
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Sex / Gender</label>
                   <select {...register('sex')}
@@ -390,16 +399,8 @@ export default function Profile() {
                 </div>
               )}
 
-              {user?.role === 'hospital' && (
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Street Address</label>
-                  <input type="text" {...register('address')}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
-                </div>
-              )}
-
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">City</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">City / Place</label>
                 <input type="text" {...register('city')}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
@@ -414,7 +415,7 @@ export default function Profile() {
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
 
-              {user?.role === 'donor' && (
+              {isUserRole && (
                 <>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 flex items-center gap-1">

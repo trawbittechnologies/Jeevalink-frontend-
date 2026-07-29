@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Handshake, Plus, Edit2, Trash2, Globe, Link as LinkIcon, Save, X, AlertTriangle,
-  Upload, CheckCircle2, ChevronRight, Image as ImageIcon, Loader2
+  Upload, Image as ImageIcon, Loader2
 } from 'lucide-react';
 
 /* ── Inline Social Icons ───────────────────────── */
@@ -46,7 +46,6 @@ const SOCIAL_PLATFORMS = [
 export default function PartnerManagement() {
   const { partners, fetchPartners, addPartner, updatePartner, deletePartner, triggerToast } = useAppStore();
   const [loading, setLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingPartner, setEditingPartner] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
@@ -59,13 +58,8 @@ export default function PartnerManagement() {
   const [logoPreview, setLogoPreview] = useState(null);
 
   useEffect(() => {
-    const initFetch = async () => {
-      setIsFetching(true);
-      await fetchPartners();
-      setIsFetching(false);
-    };
-    initFetch();
-  }, []);
+    fetchPartners();
+  }, [fetchPartners]);
 
   const openAddModal = () => {
     setEditingPartner(null);
@@ -206,7 +200,7 @@ export default function PartnerManagement() {
       </div>
 
       {/* Partners Cards Grid */}
-      {isFetching ? (
+      {loading ? (
         <div className="bg-white border border-slate-100 rounded-2xl p-12 flex flex-col items-center justify-center min-h-[300px]">
           <Loader2 className="w-8 h-8 text-red-500 animate-spin mb-4" />
           <p className="text-slate-500 text-sm font-medium">Loading partners data...</p>
@@ -297,37 +291,47 @@ export default function PartnerManagement() {
               exit={{ scale: 0.95, opacity: 0 }}
               className="bg-white border border-slate-100 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden my-8"
             >
-              {/* Modal Head */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                <h3 className="text-slate-900 font-black text-sm">
-                  {editingPartner ? 'Edit Partner Card' : 'Add New Partner'}
-                </h3>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              {/* Modal Head Banner */}
+              <div className="bg-red-600 p-6 relative overflow-hidden">
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-white text-lg font-black tracking-tight">
+                        {editingPartner ? 'Edit Partner Card' : 'Add New Partner'}
+                      </h3>
+                      <p className="text-red-100 text-[10px] font-medium">Configure community partner details & social links</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Form Body */}
-              <form onSubmit={handleSubmit} className="p-5 space-y-4">
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 {/* Name */}
                 <div>
-                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1.5">Partner Name</label>
+                  <label className="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Partner Name *</label>
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. DYFI Cheemeni East"
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-900 text-xs placeholder:text-slate-400 focus:outline-none focus:border-red-500/50 transition-colors"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                   />
                 </div>
 
                 {/* Logo Image */}
                 <div>
-                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1.5">Logo Image</label>
+                  <label className="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Logo Image *</label>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="col-span-2 relative">
                       <label htmlFor="logo-upload" className="flex items-center justify-center gap-2 w-full px-3 py-2.5 bg-red-50 border border-red-200 border-dashed rounded-xl text-red-600 text-xs font-bold cursor-pointer hover:bg-red-100/50 transition-colors">
@@ -357,11 +361,12 @@ export default function PartnerManagement() {
 
                 {/* Social media platform type */}
                 <div>
-                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1.5">Social Platform Type</label>
+                  <label className="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Social Platform Type *</label>
                   <select
                     value={socialPlatform}
                     onChange={(e) => setSocialPlatform(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-red-500/50 transition-colors capitalize cursor-pointer"
+                    required
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary transition-all capitalize cursor-pointer"
                   >
                     {SOCIAL_PLATFORMS.map((platform) => (
                       <option key={platform.value} value={platform.value}>
@@ -373,32 +378,32 @@ export default function PartnerManagement() {
 
                 {/* Social Media Link */}
                 <div>
-                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1.5">Social Profile Link</label>
+                  <label className="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Social Profile Link *</label>
                   <input
                     type="url"
                     required
                     value={socialLink}
                     onChange={(e) => setSocialLink(e.target.value)}
                     placeholder="https://facebook.com/dyfi..."
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-900 text-xs placeholder:text-slate-400 focus:outline-none focus:border-red-500/50 transition-colors"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                   />
                 </div>
 
                 {/* Form Action Controls */}
-                <div className="flex gap-3 pt-3">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    <Save className="w-4 h-4" /> {loading ? 'Saving...' : 'Save Partner'}
-                  </button>
+                <div className="flex gap-3 pt-3 mt-4 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                    className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer shadow-sm"
                   >
                     Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                  >
+                    <Save className="w-4 h-4" /> {loading ? 'Saving...' : 'Save Partner'}
                   </button>
                 </div>
               </form>

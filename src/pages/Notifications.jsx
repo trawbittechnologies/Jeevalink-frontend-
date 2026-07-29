@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Siren, Award, CheckSquare, Sparkles, Inbox, Trash2, ArrowLeft, MapPin } from 'lucide-react';
+import { Bell, Siren, Award, CheckSquare, Sparkles, Inbox, ArrowLeft, MapPin } from 'lucide-react';
 
 export default function Notifications() {
   const { 
@@ -14,7 +14,7 @@ export default function Notifications() {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
 
   const handleMarkRead = (id) => {
     markNotificationRead(id);

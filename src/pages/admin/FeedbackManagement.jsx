@@ -1,19 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Trash2, Star, Archive, CheckCircle2, MessageSquare, Send } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAppStore } from '../../store/appStore.js';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  MessageSquare, CheckCircle2, Archive, Reply, X, Send,
-  Clock, Star, AlertCircle
-} from 'lucide-react';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 
-const MOCK_FEEDBACK = [];
+import api from '../../store/api.js';
 
 const StatusBadge = ({ status }) => {
   const map = {
-    open:     'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    replied:  'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    resolved: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    open:     'bg-amber-500/10 text-amber-600 border-amber-500/20',
+    replied:  'bg-blue-500/10 text-blue-600 border-blue-500/20',
+    resolved: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
     archived: 'bg-slate-100 text-slate-500 border-slate-500/20',
   };
   return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border capitalize ${map[status] || 'bg-slate-100 text-slate-500 border-slate-500/20'}`}>{status}</span>;
@@ -22,19 +19,40 @@ const StatusBadge = ({ status }) => {
 const StarRating = ({ rating }) => (
   <div className="flex items-center gap-0.5">
     {Array.from({ length: 5 }, (_, i) => (
-      <Star key={i} className={`w-3 h-3 ${i < rating ? 'text-amber-400 fill-amber-400' : 'text-slate-700'}`} />
+      <Star key={i} className={`w-3 h-3 ${i < rating ? 'text-amber-400 fill-amber-400' : 'text-slate-300'}`} />
     ))}
   </div>
 );
 
 export default function FeedbackManagement() {
   const { triggerToast } = useAppStore();
-  const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
+  const [feedback, setFeedback] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selected, setSelected] = useState(null);
   const [reply, setReply] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      try {
+        const res = await api.get('/admin/feedback');
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setFeedback(res.data.data);
+        }
+      } catch (err) {
+        console.error("Fetch feedback error:", err);
+      }
+    };
+    fetchFeedback();
+  }, []);
+
+  const handleDeleteFeedback = (id) => {
+    if (!window.confirm("Delete this feedback record?")) return;
+    setFeedback(f => f.filter(fb => fb._id !== id));
+    if (selected?._id === id) setSelected(null);
+    triggerToast('Feedback removed.', 'info');
+  };
 
   const filtered = feedback.filter(f => {
     const q = search.toLowerCase();
@@ -182,16 +200,20 @@ export default function FeedbackManagement() {
                 )}
 
                 {/* Action buttons */}
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   {selected.status !== 'resolved' && (
                     <button onClick={() => handleResolve(selected._id)}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded-xl hover:bg-emerald-500/20 transition-colors cursor-pointer">
+                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-bold rounded-xl hover:bg-emerald-500/20 transition-colors cursor-pointer">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Resolve
                     </button>
                   )}
                   <button onClick={() => handleArchive(selected._id)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-100 text-slate-500 text-xs font-semibold rounded-xl hover:bg-white/8 transition-colors cursor-pointer">
+                    className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
                     <Archive className="w-3.5 h-3.5" /> Archive
+                  </button>
+                  <button onClick={() => handleDeleteFeedback(selected._id)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl hover:bg-red-100 transition-colors cursor-pointer" title="Delete Feedback">
+                    <Trash2 className="w-3.5 h-3.5" /> Delete
                   </button>
                 </div>
 

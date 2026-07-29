@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
@@ -17,12 +16,12 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
  *   pulse        boolean  — show pulsing indicator (for live/emergency stats)
  */
 const ACCENT_MAP = {
-  red:    { bg: 'bg-red-500/10',    icon: 'text-red-400',    border: 'border-red-500/20',    glow: 'shadow-red-500/10' },
-  green:  { bg: 'bg-emerald-500/10',icon: 'text-emerald-400',border: 'border-emerald-500/20',glow: 'shadow-emerald-500/10' },
-  amber:  { bg: 'bg-amber-500/10',  icon: 'text-amber-400',  border: 'border-amber-500/20',  glow: 'shadow-amber-500/10' },
-  blue:   { bg: 'bg-blue-500/10',   icon: 'text-blue-400',   border: 'border-blue-500/20',   glow: 'shadow-blue-500/10' },
-  purple: { bg: 'bg-purple-500/10', icon: 'text-purple-400', border: 'border-purple-500/20', glow: 'shadow-purple-500/10' },
-  indigo: { bg: 'bg-indigo-500/10', icon: 'text-indigo-400', border: 'border-indigo-500/20', glow: 'shadow-indigo-500/10' },
+  red:    { bg: 'bg-rose-50',    icon: 'text-rose-600',    border: 'border-rose-200/80', shadow: 'shadow-md shadow-rose-500/10' },
+  green:  { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-200/80', shadow: 'shadow-md shadow-emerald-500/10' },
+  amber:  { bg: 'bg-amber-50',   icon: 'text-amber-600',   border: 'border-amber-200/80', shadow: 'shadow-md shadow-amber-500/10' },
+  blue:   { bg: 'bg-blue-50',    icon: 'text-blue-600',    border: 'border-blue-200/80', shadow: 'shadow-md shadow-blue-500/10' },
+  purple: { bg: 'bg-purple-50',  icon: 'text-purple-600',  border: 'border-purple-200/80', shadow: 'shadow-md shadow-purple-500/10' },
+  indigo: { bg: 'bg-indigo-50',  icon: 'text-indigo-600',  border: 'border-indigo-200/80', shadow: 'shadow-md shadow-indigo-500/10' },
 };
 
 export default function AdminStatCard({
@@ -35,23 +34,23 @@ export default function AdminStatCard({
       initial={{ opacity: 0, y: 20, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.4, delay, ease: 'easeOut' }}
-      className={`relative bg-white border border-slate-100 rounded-2xl p-4 overflow-hidden hover:shadow-md shadow-sm transition-all duration-300 group`}
+      className="relative bg-white border border-slate-200/80 rounded-3xl p-5 overflow-hidden hover:shadow-md shadow-xs transition-all duration-300 group"
     >
       {/* Background glow */}
       <div className={`absolute top-0 right-0 w-24 h-24 ${a.bg} rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500`} />
 
       {/* Pulse indicator */}
       {pulse && (
-        <span className="absolute top-3 right-3 flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+        <span className="absolute top-4 right-4 flex h-2.5 w-2.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-600" />
         </span>
       )}
 
       <div className="relative z-10">
         {/* Icon + Trend row */}
         <div className="flex items-start justify-between mb-3">
-          <div className={`w-10 h-10 ${a.bg} border ${a.border} rounded-xl flex items-center justify-center`}>
+          <div className={`w-11 h-11 ${a.bg} border ${a.border} ${a.shadow} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
             <Icon className={`w-5 h-5 ${a.icon}`} />
           </div>
           {trend !== null && (

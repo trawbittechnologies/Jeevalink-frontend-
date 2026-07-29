@@ -67,26 +67,26 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 28px;
-  background: linear-gradient(135deg, var(--red-500) 0%, var(--red-700) 100%);
+  padding: 12px 24px;
+  background: #DC2626;
   color: #fff;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   border-radius: 12px;
   text-decoration: none;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 20px var(--red-glow), 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.2);
   white-space: nowrap;
-  letter-spacing: 0.01em;
 }
 
 .jl-btn-red:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 32px var(--red-glow), 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #B91C1C;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
 
 .jl-btn-sm {
-  padding: 11px 22px;
+  padding: 9px 18px;
   font-size: 13.5px;
 }
 
@@ -94,71 +94,70 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 26px;
+  padding: 11px 22px;
   background: var(--white);
-  border: 1.5px solid var(--border-mid);
+  border: 1px solid var(--gray-200);
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
   border-radius: 12px;
   text-decoration: none;
-  transition: all 0.22s;
+  transition: all 0.18s ease;
   white-space: nowrap;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .jl-btn-ghost:hover {
-  background: var(--gray-50);
-  border-color: var(--border-red);
-  color: var(--red-600);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+  color: #DC2626;
+  transform: translateY(-1px);
 }
 
 .jl-btn-outline-red {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 26px;
-  background: var(--red-soft);
-  border: 1.5px solid var(--border-red);
-  color: var(--red-600);
+  padding: 11px 22px;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #DC2626;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   border-radius: 12px;
   text-decoration: none;
-  transition: all 0.22s;
+  transition: all 0.18s ease;
   white-space: nowrap;
 }
 
 .jl-btn-outline-red:hover {
-  background: rgba(220, 38, 38, 0.15);
-  border-color: var(--red-500);
-  transform: translateY(-2px);
+  background: #FEE2E2;
+  border-color: #F87171;
+  transform: translateY(-1px);
 }
 
 .jl-btn-outline-dark {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 26px;
+  padding: 11px 22px;
   background: var(--white);
-  border: 1.5px solid var(--border-mid);
+  border: 1px solid var(--gray-200);
   color: var(--text-secondary);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   border-radius: 12px;
   text-decoration: none;
-  transition: all 0.22s;
+  transition: all 0.18s ease;
   white-space: nowrap;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .jl-btn-outline-dark:hover {
   background: var(--gray-50);
-  border-color: var(--border-red);
-  color: var(--red-600);
-  transform: translateY(-2px);
+  border-color: var(--gray-300);
+  color: var(--text-primary);
+  transform: translateY(-1px);
 }
 
 /* ── Section shared ─────────────────────────────────────── */

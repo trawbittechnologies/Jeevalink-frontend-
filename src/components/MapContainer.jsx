@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MapPin, Siren, Heart, Navigation, Plus, Minus } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Minus, Building2, Siren, Heart } from 'lucide-react';
 
 export default function MapContainer({ donors = [], requests = [], center = { lat: 12.9716, lng: 77.5946 }, radius = 15 }) {
   const [selectedPoint, setSelectedPoint] = useState(null);
@@ -223,8 +223,8 @@ export default function MapContainer({ donors = [], requests = [], center = { la
             {/* Render based on point type */}
             {selectedPoint.type === 'hospital' ? (
               <>
-                <h4 className="text-xs font-bold text-blue-500 dark:text-blue-400 flex items-center gap-1 leading-none">
-                  🏥 Medical Center
+                <h4 className="text-xs font-bold text-blue-500 dark:text-blue-400 flex items-center gap-1.5 leading-none">
+                  <Building2 className="w-3.5 h-3.5" /> Medical Center
                 </h4>
                 <p className="text-sm font-semibold truncate mt-1">{selectedPoint.name}</p>
                 <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">Primary emergency hospital partner</p>
@@ -232,8 +232,8 @@ export default function MapContainer({ donors = [], requests = [], center = { la
             ) : selectedPoint.patientName ? (
               // Active request
               <>
-                <h4 className="text-xs font-bold text-primary flex items-center gap-1 leading-none">
-                  🚨 {selectedPoint.urgencyLevel} Alert • {selectedPoint.bloodGroup}
+                <h4 className="text-xs font-bold text-primary flex items-center gap-1.5 leading-none">
+                  <Siren className="w-3.5 h-3.5 animate-pulse" /> {selectedPoint.urgencyLevel} Alert • {selectedPoint.bloodGroup}
                 </h4>
                 <p className="text-sm font-semibold truncate mt-1">Patient: {selectedPoint.patientName}</p>
                 <p className="text-[10px] text-slate-500 dark:text-zinc-550 truncate mt-0.5">Location: {selectedPoint.hospitalName || selectedPoint.location}</p>
@@ -241,8 +241,8 @@ export default function MapContainer({ donors = [], requests = [], center = { la
             ) : (
               // Available donor
               <>
-                <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 leading-none">
-                  💚 Donor Match • {selectedPoint.bloodGroup}
+                <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 leading-none">
+                  <Heart className="w-3.5 h-3.5 fill-current text-emerald-500" /> Donor Match • {selectedPoint.bloodGroup}
                 </h4>
                 <p className="text-sm font-semibold truncate mt-1">{selectedPoint.fullName}</p>
                 <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5 flex items-center gap-2">

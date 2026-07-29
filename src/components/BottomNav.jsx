@@ -1,4 +1,3 @@
-import React from 'react';
 import { Home, Users, HeartPulse, Bell, User } from 'lucide-react';
 import { useAppStore } from '../store/appStore.js';
 

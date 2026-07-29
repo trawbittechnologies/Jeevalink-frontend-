@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore.js';
 import { useAppStore } from '../../store/appStore.js';
-import { motion } from 'framer-motion';
 import {
-  Settings, User, Lock, Mail, Globe, Bell, Database,
-  Save, Eye, EyeOff, CheckCircle2, Shield, Phone, MapPin,
-  Download, AlertTriangle, ChevronRight
+  User, Lock, Globe, Bell, Database,
+  Save, Eye, EyeOff, CheckCircle2,
+  Download, AlertTriangle
 } from 'lucide-react';
 
 const Section = ({ title, icon: Icon, children }) => (
@@ -20,7 +19,7 @@ const Section = ({ title, icon: Icon, children }) => (
   </div>
 );
 
-const InputField = ({ label, type = 'text', value, onChange, placeholder, readOnly, append }) => {
+const InputField = ({ label, type = 'text', value, onChange, placeholder, readOnly }) => {
   const [show, setShow] = useState(false);
   const isPassword = type === 'password';
   return (
@@ -82,7 +81,7 @@ export default function SystemSettings() {
     setTimeout(() => setSavedSection(''), 2000);
   };
 
-  const SaveBtn = ({ section }) => (
+  const renderSaveBtn = (section) => (
     <button
       onClick={() => save(section)}
       disabled={saving}
@@ -117,7 +116,7 @@ export default function SystemSettings() {
           <InputField label="Display Name" value={profile.displayName} onChange={e => setProfile(p => ({ ...p, displayName: e.target.value }))} placeholder="Administrator Name" />
           <InputField label="Admin Username / Email" type="email" value={profile.username} onChange={e => setProfile(p => ({ ...p, username: e.target.value }))} placeholder="admin@jeevalink.org" />
         </div>
-        <SaveBtn section="Profile" />
+        {renderSaveBtn("Profile")}
       </Section>
 
       {/* Change Password */}
@@ -133,7 +132,7 @@ export default function SystemSettings() {
         <div className="mt-3 p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl text-amber-400 text-[10px]">
           🔐 Password must be at least 8 characters and contain uppercase, lowercase, and a number.
         </div>
-        <SaveBtn section="Password" />
+        {renderSaveBtn("Password")}
       </Section>
 
       {/* Contact Info */}
@@ -148,7 +147,7 @@ export default function SystemSettings() {
             <InputField label="Website URL" value={contact.website} onChange={e => setContact(c => ({ ...c, website: e.target.value }))} placeholder="https://" />
           </div>
         </div>
-        <SaveBtn section="Contact" />
+        {renderSaveBtn("Contact")}
       </Section>
 
       {/* Notification Settings */}
@@ -165,7 +164,7 @@ export default function SystemSettings() {
             <Toggle key={key} label={label} sub={sub} checked={notifSettings[key]} onChange={v => setNotifSettings(s => ({ ...s, [key]: v }))} />
           ))}
         </div>
-        <SaveBtn section="Notifications" />
+        {renderSaveBtn("Notifications")}
       </Section>
 
       {/* Backup Management */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,69 +7,69 @@ import confetti from 'canvas-confetti';
 import {
   Heart, ShieldCheck, ShieldAlert, Calendar,
   ChevronLeft, ChevronRight, RefreshCw, CheckCircle2,
-  AlertCircle, Info, Scale, Clock, Sparkles
+  AlertCircle, Info, Scale, Clock, Sparkles, ArrowLeft
 } from 'lucide-react';
 
 const QUESTIONS = [
   {
     id: 'age',
-    title: 'Age Eligibility',
+    title: 'Age Check',
     question: 'Are you between 18 and 65 years old?',
-    description: 'Blood donation is safe and medically approved for individuals within this age bracket.',
+    description: 'Blood donation is medically safe and gentle on your body when you are between 18 and 65 years of age.',
     icon: Calendar,
-    color: 'text-indigo-600 bg-indigo-50 border-indigo-150',
+    color: 'text-indigo-600 bg-indigo-50 border-indigo-200/80',
     expected: 'yes',
-    failMessage: 'You must be between 18 and 65 years of age to donate blood.'
+    failMessage: 'Donors must be between 18 and 65 years old to ensure a safe, comfortable donation.'
   },
   {
     id: 'weight',
     title: 'Body Weight',
     question: 'Do you weigh at least 50 kg (110 lbs)?',
-    description: 'Weighing at least 50 kg ensures your body has sufficient blood volume for a safe donation and quick recovery.',
+    description: 'Weighing 50+ kg ensures your body has plenty of blood volume so you stay healthy and recover quickly.',
     icon: Scale,
-    color: 'text-blue-600 bg-blue-50 border-blue-150',
+    color: 'text-blue-600 bg-blue-50 border-blue-200/80',
     expected: 'yes',
-    failMessage: 'Your weight must be at least 50 kg to ensure a safe donation process.'
+    failMessage: 'A minimum weight of 50 kg is required to protect your health during and after donation.'
   },
   {
     id: 'cooldown',
-    title: 'Recent Donation',
+    title: 'Donation Cooldown',
     question: 'Have you donated blood in the last 90 days (3 months)?',
-    description: 'A 90-day cooldown interval is required to allow your body time to replenish its red blood cells and iron levels.',
+    description: 'Your body needs about 90 days to rest and naturally rebuild its red blood cells and iron levels.',
     icon: Clock,
-    color: 'text-amber-600 bg-amber-50 border-amber-150',
+    color: 'text-amber-600 bg-amber-50 border-amber-200/80',
     expected: 'no',
-    failMessage: 'A minimum cooldown of 90 days is required between donations.'
+    failMessage: 'A 90-day rest period is required between donations to keep your hemoglobin strong.'
   },
   {
     id: 'tattoos',
     title: 'Tattoos & Piercings',
-    question: 'Have you received a tattoo, acupuncture, or body piercing in the last 6 months?',
-    description: 'This standard precaution helps eliminate any risk of blood-borne infections during the healing period.',
+    question: 'Have you received a tattoo or body piercing in the last 6 months?',
+    description: 'A 6-month wait allows any fresh skin marks to heal completely, keeping both you and blood recipients safe.',
     icon: Info,
-    color: 'text-purple-600 bg-purple-50 border-purple-150',
+    color: 'text-purple-600 bg-purple-50 border-purple-200/80',
     expected: 'no',
-    failMessage: 'Please wait at least 6 months after receiving a tattoo or piercing before donating.'
+    failMessage: 'Please allow 6 months for any new tattoo or piercing to heal before donating.'
   },
   {
     id: 'illness',
-    title: 'Active Health Conditions',
-    question: 'Are you currently taking antibiotics, fighting an infection, or dealing with chronic illness?',
-    description: 'Active infections or certain medications can affect recipient safety. Your system needs to be completely healthy.',
+    title: 'Current Health',
+    question: 'Are you currently feeling well, free from fever, infections, or antibiotics?',
+    description: 'To protect your immune system and the patient receiving blood, you should feel 100% healthy on donation day.',
     icon: AlertCircle,
-    color: 'text-rose-600 bg-rose-50 border-rose-150',
+    color: 'text-rose-600 bg-rose-50 border-rose-200/80',
     expected: 'no',
-    failMessage: 'You must be in good health and not currently taking antibiotics to donate.'
+    failMessage: 'You should be completely free of infection and off antibiotics before donating.'
   },
   {
     id: 'pregnancy',
-    title: 'Pregnancy & Lactation',
-    question: 'If applicable, are you currently pregnant or breastfeeding?',
-    description: 'Donation is temporarily restricted during pregnancy and breastfeeding to safeguard the mother\'s nutritional resources.',
+    title: 'Pregnancy & Nursing',
+    question: 'If applicable, are you currently pregnant or nursing a baby?',
+    description: 'Mothers need all their nourishment and iron for themselves and their little ones, so we recommend waiting.',
     icon: Heart,
-    color: 'text-pink-600 bg-pink-50 border-pink-150',
+    color: 'text-pink-600 bg-pink-50 border-pink-200/80',
     expected: 'no',
-    failMessage: 'Blood donation is deferred during pregnancy and lactation for your safety.'
+    failMessage: 'Blood donation is deferred during pregnancy and nursing for maternal & infant safety.'
   }
 ];
 
@@ -182,12 +183,41 @@ export default function DonorEligibility() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Page Title */}
-      <div className="text-left space-y-1">
-        <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-          <ShieldCheck className="w-7 h-7 text-primary" /> Health & Donation Eligibility
-        </h1>
-        <p className="text-sm text-gray-500">Ensure your safety and check if you are eligible to donate blood today.</p>
+      {/* Top Navbar Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4.5 rounded-3xl border border-slate-200/80 shadow-xs text-left">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/donor/dashboard"
+            className="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-700 flex items-center justify-center transition-all cursor-pointer shrink-0"
+            title="Back to Dashboard"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Donor Portal</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-[10px] font-bold text-rose-600">Health Check</span>
+            </div>
+            <h1 className="text-lg font-black text-slate-900 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-rose-600" /> Health & Donation Eligibility
+            </h1>
+          </div>
+        </div>
+
+        {/* Quick Status Pill */}
+        <div className="flex items-center gap-2 self-start sm:self-auto bg-slate-50 px-3.5 py-2 rounded-2xl border border-slate-200/60 shrink-0">
+          <span className="text-xs font-bold text-slate-500">Status:</span>
+          <span className={`text-xs font-black px-2.5 py-0.5 rounded-full ${
+            user?.eligibilityStatus === 'Eligible'
+              ? 'bg-emerald-100 text-emerald-800'
+              : user?.eligibilityStatus === 'Ineligible'
+              ? 'bg-rose-100 text-rose-800'
+              : 'bg-amber-100 text-amber-800'
+          }`}>
+            {user?.eligibilityStatus || 'Pending Check'}
+          </span>
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
@@ -370,7 +400,7 @@ export default function DonorEligibility() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="btn-secondary py-3 px-5 border border-slate-200 shrink-0"
+                  className="py-3 px-5 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
@@ -381,56 +411,56 @@ export default function DonorEligibility() {
                 <>
                   <button
                     onClick={() => handleAnswer('yes')}
-                    className={`flex-1 py-3 font-bold rounded-xl text-sm transition-all text-center cursor-pointer ${
+                    className={`flex-1 py-3.5 px-4 font-bold rounded-2xl text-xs transition-all text-center cursor-pointer flex items-center justify-center gap-1.5 ${
                       answers.pregnancy === 'yes'
-                        ? 'bg-red-150 border-2 border-primary text-primary shadow-sm'
-                        : 'bg-red-50/50 border border-red-200 hover:bg-red-100 text-primary'
+                        ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+                        : 'bg-rose-50/70 border border-rose-200/80 hover:bg-rose-100 text-rose-700'
                     }`}
                   >
-                    Yes
+                    Yes (Currently Pregnant / Nursing)
                   </button>
                   <button
                     onClick={() => handleAnswer('no')}
-                    className={`flex-1 py-3 font-bold rounded-xl text-sm transition-all text-center cursor-pointer ${
+                    className={`flex-1 py-3.5 px-4 font-bold rounded-2xl text-xs transition-all text-center cursor-pointer flex items-center justify-center gap-1.5 ${
                       answers.pregnancy === 'no'
-                        ? 'bg-emerald-100 border-2 border-emerald-500 text-emerald-700 shadow-sm'
-                        : 'bg-emerald-50/50 border border-emerald-250 hover:bg-emerald-100 text-emerald-700'
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                        : 'bg-emerald-50/70 border border-emerald-200/80 hover:bg-emerald-100 text-emerald-700'
                     }`}
                   >
-                    No
+                    No (Not Pregnant / Nursing)
                   </button>
                   <button
                     onClick={() => handleAnswer('na')}
-                    className={`flex-1 py-3 font-bold rounded-xl text-sm transition-all text-center cursor-pointer ${
+                    className={`flex-1 py-3.5 px-4 font-bold rounded-2xl text-xs transition-all text-center cursor-pointer ${
                       answers.pregnancy === 'na'
-                        ? 'bg-slate-200 border-2 border-slate-400 text-gray-800 shadow-sm'
-                        : 'bg-slate-50 border border-slate-200 hover:bg-slate-100 text-gray-600'
+                        ? 'bg-slate-800 text-white shadow-md'
+                        : 'bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700'
                     }`}
                   >
-                    Not Applicable / Male
+                    Not Applicable (Male Donor)
                   </button>
                 </>
               ) : (
                 <>
                   <button
                     onClick={() => handleAnswer('yes')}
-                    className={`flex-1 py-3 font-bold rounded-xl text-sm transition-all text-center cursor-pointer ${
+                    className={`flex-1 py-3.5 px-4 font-bold rounded-2xl text-xs transition-all text-center cursor-pointer flex items-center justify-center gap-1.5 ${
                       answers[currentQuestion.id] === 'yes'
-                        ? 'bg-red-100 border-2 border-primary text-primary shadow-sm'
-                        : 'bg-slate-50 border border-slate-200 hover:bg-slate-100 text-gray-900'
+                        ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+                        : 'bg-slate-50 border border-slate-200/80 hover:bg-slate-100 text-slate-800'
                     }`}
                   >
-                    Yes
+                    {currentQuestion.expected === 'yes' ? '✓ Yes, I meet this' : '⚠️ Yes, applies to me'}
                   </button>
                   <button
                     onClick={() => handleAnswer('no')}
-                    className={`flex-1 py-3 font-bold rounded-xl text-sm transition-all text-center cursor-pointer ${
+                    className={`flex-1 py-3.5 px-4 font-bold rounded-2xl text-xs transition-all text-center cursor-pointer flex items-center justify-center gap-1.5 ${
                       answers[currentQuestion.id] === 'no'
-                        ? 'bg-emerald-100 border-2 border-emerald-500 text-emerald-700 shadow-sm'
-                        : 'bg-slate-50 border border-slate-200 hover:bg-slate-100 text-gray-900'
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                        : 'bg-slate-50 border border-slate-200/80 hover:bg-slate-100 text-slate-800'
                     }`}
                   >
-                    No
+                    {currentQuestion.expected === 'no' ? '✓ No, does not apply' : '✕ No, I do not'}
                   </button>
                 </>
               )}

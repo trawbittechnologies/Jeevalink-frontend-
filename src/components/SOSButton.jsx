@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Siren, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/appStore.js';
@@ -22,23 +22,36 @@ export default function SOSButton() {
   const gainRef = useRef(null);
   const sirenIntervalRef = useRef(null);
 
-  // Sync wailing siren audio with store state
-  useEffect(() => {
-    if (sirenPlaying) {
-      startSirenSound();
-    } else {
-      stopSirenSound();
+  const stopSirenSound = useCallback(() => {
+    try {
+      if (sirenIntervalRef.current) {
+        clearInterval(sirenIntervalRef.current);
+        sirenIntervalRef.current = null;
+      }
+      if (oscRef1.current) {
+        try { oscRef1.current.stop(); } catch { /* ignore */ }
+        oscRef1.current.disconnect();
+        oscRef1.current = null;
+      }
+      if (oscRef2.current) {
+        try { oscRef2.current.stop(); } catch { /* ignore */ }
+        oscRef2.current.disconnect();
+        oscRef2.current = null;
+      }
+      if (gainRef.current) {
+        gainRef.current.disconnect();
+        gainRef.current = null;
+      }
+      if (audioCtxRef.current) {
+        try { audioCtxRef.current.close(); } catch { /* ignore */ }
+        audioCtxRef.current = null;
+      }
+    } catch (e) {
+      console.error('Failed to stop audio context', e);
     }
-  }, [sirenPlaying]);
-
-  // Stop sound and interval on component unmount
-  useEffect(() => {
-    return () => {
-      stopSirenSound();
-    };
   }, []);
 
-  const startSirenSound = () => {
+  const startSirenSound = useCallback(() => {
     try {
       if (audioCtxRef.current) return; // already playing
 
@@ -92,36 +105,23 @@ export default function SOSButton() {
     } catch (e) {
       console.warn('Web Audio API not supported or user gesture blocked:', e);
     }
-  };
+  }, []);
 
-  const stopSirenSound = () => {
-    try {
-      if (sirenIntervalRef.current) {
-        clearInterval(sirenIntervalRef.current);
-        sirenIntervalRef.current = null;
-      }
-      if (oscRef1.current) {
-        try { oscRef1.current.stop(); } catch {}
-        oscRef1.current.disconnect();
-        oscRef1.current = null;
-      }
-      if (oscRef2.current) {
-        try { oscRef2.current.stop(); } catch {}
-        oscRef2.current.disconnect();
-        oscRef2.current = null;
-      }
-      if (gainRef.current) {
-        gainRef.current.disconnect();
-        gainRef.current = null;
-      }
-      if (audioCtxRef.current) {
-        try { audioCtxRef.current.close(); } catch {}
-        audioCtxRef.current = null;
-      }
-    } catch (e) {
-      console.error('Failed to stop audio context', e);
+  // Sync wailing siren audio with store state
+  useEffect(() => {
+    if (sirenPlaying) {
+      startSirenSound();
+    } else {
+      stopSirenSound();
     }
-  };
+  }, [sirenPlaying, startSirenSound, stopSirenSound]);
+
+  // Stop sound and interval on component unmount
+  useEffect(() => {
+    return () => {
+      stopSirenSound();
+    };
+  }, [stopSirenSound]);
 
   const handleSOSClick = () => {
     if (sirenPlaying) {

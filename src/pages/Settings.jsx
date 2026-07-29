@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, BellRing, Smartphone, ShieldCheck, Heart, Info, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, BellRing, Smartphone, ShieldCheck, Info } from 'lucide-react';
 
 export default function Settings() {
   const navigate = useNavigate();

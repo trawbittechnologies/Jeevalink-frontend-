@@ -1,34 +1,46 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { Camera, RotateCcw, Check, AlertCircle } from 'lucide-react';
 
 export default function CameraCapture({ onCapture, value }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [isActive, setIsActive] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState(null);
+  const [capturedPhotoUrl, setCapturedPhotoUrl] = useState(null);
   const [error, setError] = useState(null);
 
-  // If a value (File) is passed and we have no photoUrl, create a local preview URL
-  useEffect(() => {
+  const filePreviewUrl = useMemo(() => {
     if (value && value instanceof File) {
-      const url = URL.createObjectURL(value);
-      setPhotoUrl(url);
-      return () => URL.revokeObjectURL(url);
-    } else if (!value) {
-      setPhotoUrl(null);
+      return URL.createObjectURL(value);
     }
+    return null;
   }, [value]);
+
+  useEffect(() => {
+    if (filePreviewUrl) {
+      return () => URL.revokeObjectURL(filePreviewUrl);
+    }
+  }, [filePreviewUrl]);
+
+  const photoUrl = capturedPhotoUrl || filePreviewUrl;
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setIsActive(false);
+  }, []);
 
   // Clean up stream on unmount
   useEffect(() => {
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [stopCamera]);
 
   const startCamera = async () => {
     setError(null);
-    setPhotoUrl(null);
+    setCapturedPhotoUrl(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 640 } },
@@ -43,14 +55,6 @@ export default function CameraCapture({ onCapture, value }) {
       console.error("Camera access error:", err);
       setError("Unable to access camera. Please check your browser permissions.");
     }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    setIsActive(false);
   };
 
   const capturePhoto = () => {
@@ -83,7 +87,7 @@ export default function CameraCapture({ onCapture, value }) {
       if (blob) {
         const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
         const localUrl = URL.createObjectURL(blob);
-        setPhotoUrl(localUrl);
+        setCapturedPhotoUrl(localUrl);
         stopCamera();
         onCapture(file);
       }
@@ -91,7 +95,7 @@ export default function CameraCapture({ onCapture, value }) {
   };
 
   const handleRetake = () => {
-    setPhotoUrl(null);
+    setCapturedPhotoUrl(null);
     onCapture(null);
     startCamera();
   };

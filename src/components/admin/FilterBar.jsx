@@ -1,5 +1,4 @@
-import React from 'react';
-import { Search, SlidersHorizontal, X, Calendar } from 'lucide-react';
+import { Search, X, Calendar } from 'lucide-react';
 
 /**
  * FilterBar — Reusable admin filter row with search, dropdowns, and optional date range.

@@ -1,10 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import RequestCard from '../components/RequestCard.jsx';
 import Modal from '../components/Modal.jsx';
-import { Plus, SlidersHorizontal, Siren, Filter } from 'lucide-react';
+import { Plus, SlidersHorizontal, Siren, Filter, MapPin, Search, Loader2, Navigation, X as XIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import PosterModal from '../components/PosterModal.jsx';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    return await res.json();
+  } catch { return null; }
+}
+
+async function forwardGeocode(query) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    return await res.json();
+  } catch { return []; }
+}
+
+function FlyTo({ position }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) map.flyTo([position.lat, position.lng], 16, { animate: true, duration: 1 });
+  }, [position, map]);
+  return null;
+}
+
+function ClickMarker({ position, setPosition, onPicked }) {
+  useMapEvents({
+    async click(e) {
+      const latlng = e.latlng;
+      setPosition(latlng);
+      const geo = await reverseGeocode(latlng.lat, latlng.lng);
+      if (geo && onPicked) onPicked(geo);
+    },
+  });
+  return position ? <Marker position={position} /> : null;
+}
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const URGENCIES = ['Immediate', 'Critical', 'Moderate'];
@@ -16,6 +70,12 @@ export default function BloodRequests() {
   const [filterUrgency, setFilterUrgency] = useState('');
   const [filterStatus, setFilterStatus] = useState('Pending');
   const [showModal, setShowModal] = useState(false);
+  const [mapPos, setMapPos] = useState(null);
+  const [mapPickedAddress, setMapPickedAddress] = useState('');
+  const [mapSearch, setMapSearch] = useState('');
+  const [mapSearchResults, setMapSearchResults] = useState([]);
+  const [mapSearchLoading, setMapSearchLoading] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [form, setForm] = useState({
     patientName: '',
     bloodGroup: 'B+',
@@ -27,7 +87,7 @@ export default function BloodRequests() {
     contactNumber: user?.mobile || '',
   });
 
-  useEffect(() => { fetchRequests(); }, []);
+  useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = requests.filter((r) => {
     return (
@@ -37,16 +97,68 @@ export default function BloodRequests() {
     );
   });
 
+  const [posterReq, setPosterReq] = useState(null);
+
+  const handleMapPicked = useCallback((geo) => {
+    const addr = geo.address || {};
+    const placeName =
+      addr.amenity || addr.hospital || addr.clinic ||
+      addr.building || geo.name || '';
+    const city = addr.city || addr.town || addr.county || '';
+    const road = addr.road || addr.street || '';
+    const suburb = addr.suburb || addr.village || addr.town || addr.city_district || '';
+    const fullAddr = [road, suburb, city, addr.state].filter(Boolean).join(', ');
+    setMapPickedAddress(geo.display_name || fullAddr);
+    if (placeName) setForm(f => ({ ...f, hospitalName: placeName }));
+    if (city) setForm(f => ({ ...f, city }));
+  }, []);
+
+  const handleMapSearch = useCallback(async (q) => {
+    if (!q || q.length < 3) { setMapSearchResults([]); return; }
+    setMapSearchLoading(true);
+    setMapSearchResults(await forwardGeocode(q));
+    setMapSearchLoading(false);
+    setShowSearchDropdown(true);
+  }, []);
+
+  const selectResult = useCallback(async (r) => {
+    const lat = parseFloat(r.lat), lng = parseFloat(r.lon);
+    setMapPos({ lat, lng });
+    setMapSearch(r.display_name);
+    setShowSearchDropdown(false);
+    setMapSearchResults([]);
+    const geo = await reverseGeocode(lat, lng);
+    if (geo) handleMapPicked(geo);
+  }, [handleMapPicked]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.patientName || !form.hospitalName) {
       triggerToast('Please fill all required fields.', 'warning');
       return;
     }
-    const res = await createRequest({ ...form, unitsRequired: Number(form.unitsRequired) });
+    const payload = { ...form, unitsRequired: Number(form.unitsRequired) };
+    if (mapPos) { payload.latitude = mapPos.lat; payload.longitude = mapPos.lng; }
+    const res = await createRequest(payload);
     if (res.success) {
       setShowModal(false);
+      setMapPos(null);
+      setMapPickedAddress('');
+      setMapSearch('');
+      const newReq = {
+        patient_name: form.patientName,
+        blood_group: form.bloodGroup,
+        units_required: form.unitsRequired,
+        hospital_name: form.hospitalName,
+        venue: form.hospitalName,
+        location: form.city || form.district || 'Kerala',
+        contact_phone: form.contactNumber,
+        urgency_level: form.urgencyLevel,
+        request_id: res.data?.id || res.data?._id || `JL-${Date.now().toString().slice(-4)}`
+      };
+      setPosterReq(newReq);
       setForm({ ...form, patientName: '', hospitalName: '', city: '', district: '' });
+      triggerToast('Blood request posted successfully! Download poster below.', 'success');
     }
   };
 
@@ -79,7 +191,9 @@ export default function BloodRequests() {
             <Siren className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-widest text-red-200">🚨 Emergency Alert</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-red-200 flex items-center gap-1">
+              <Siren className="w-3.5 h-3.5 animate-pulse text-red-200" /> Emergency Alert
+            </p>
             <p className="font-bold">{sosCount} immediate SOS request{sosCount > 1 ? 's' : ''} need urgent response!</p>
           </div>
         </motion.div>
@@ -171,6 +285,69 @@ export default function BloodRequests() {
             <input type="text" value={form.hospitalName} onChange={(e) => setForm({ ...form, hospitalName: e.target.value })}
               className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" placeholder="Apollo Hospital, Bengaluru" />
           </div>
+
+          {/* Map Location Picker */}
+          <div className="border border-slate-200 rounded-xl overflow-hidden">
+            <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-red-500" />
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick Hospital on Map</span>
+              </div>
+              {mapPos && (
+                <button type="button" onClick={() => { setMapPos(null); setMapPickedAddress(''); setMapSearch(''); }}
+                  className="text-[9px] font-bold text-red-500 hover:text-red-700 flex items-center gap-0.5 cursor-pointer">
+                  <XIcon className="w-3 h-3" /> Clear
+                </button>
+              )}
+            </div>
+            {/* Search */}
+            <div className="relative px-2 pt-2 pb-1 bg-white">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  value={mapSearch}
+                  onChange={(e) => { setMapSearch(e.target.value); handleMapSearch(e.target.value); }}
+                  onFocus={() => mapSearchResults.length > 0 && setShowSearchDropdown(true)}
+                  placeholder="Search hospital or place..."
+                  className="w-full pl-8 pr-8 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-gray-900 outline-none focus:border-red-400"
+                />
+                {mapSearchLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 animate-spin" />}
+              </div>
+              {showSearchDropdown && mapSearchResults.length > 0 && (
+                <div className="absolute left-2 right-2 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-[9999] max-h-44 overflow-y-auto">
+                  {mapSearchResults.map((r, i) => (
+                    <button key={i} type="button" onClick={() => selectResult(r)}
+                      className="w-full text-left px-3 py-2.5 text-[11px] text-slate-700 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-start gap-2">
+                      <MapPin className="w-3 h-3 text-red-400 mt-0.5 shrink-0" />
+                      <span className="line-clamp-2">{r.display_name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Map */}
+            <div className="h-[180px] w-full relative z-0">
+              <MapContainer center={[11.2588, 75.7804]} zoom={10} scrollWheelZoom={true} className="h-full w-full">
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <ClickMarker position={mapPos} setPosition={setMapPos} onPicked={handleMapPicked} />
+                <FlyTo position={mapPos} />
+              </MapContainer>
+            </div>
+            {mapPickedAddress ? (
+              <div className="px-3 py-2 bg-emerald-50 border-t border-emerald-200 flex items-start gap-2">
+                <Navigation className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                <p className="text-[10px] text-emerald-700 font-semibold leading-snug line-clamp-2">{mapPickedAddress}</p>
+              </div>
+            ) : (
+              <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100">
+                <p className="text-[10px] text-slate-400 font-medium">📍 Click map or search to auto-fill hospital & city</p>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1">City</label>
@@ -209,6 +386,14 @@ export default function BloodRequests() {
           </div>
         </form>
       </Modal>
+
+      {/* Render Poster Modal right after posting request */}
+      <PosterModal
+        isOpen={!!posterReq}
+        onClose={() => setPosterReq(null)}
+        data={posterReq}
+        type="request"
+      />
     </div>
   );
 }

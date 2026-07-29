@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
+import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, Plus, Eye, Edit2, Trash2, UserCheck, UserX, Lock, Download,
-  CheckCircle2, XCircle, Clock, ChevronDown, X, Save, Phone, Mail,
-  MapPin, Building2, Hash, StickyNote, Loader2
+  Plus, Eye, Edit2, Trash2, UserCheck, UserX, Lock,
+  CheckCircle2, XCircle, Clock, X, Save, Phone, Mail,
+  MapPin, Building2, Loader2, Download
 } from 'lucide-react';
 import AdminTable from '../../components/admin/AdminTable.jsx';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
 
 const DISTRICTS = ['Ernakulam', 'Thrissur', 'Thiruvananthapuram', 'Kozhikode', 'Bengaluru Urban', 'Chennai', 'Mumbai', 'Delhi', 'Kottayam', 'Palakkad'];
-const VOLUNTEER_TYPES = ['Medical', 'Transport', 'Blood Bank', 'Community', 'Emergency Response', 'Administrative'];
 const STATUS_OPTIONS = ['active', 'inactive', 'blocked', 'under_review'];
 
 const StatusBadge = ({ status }) => {
@@ -34,230 +34,368 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const emptyVolForm = {
-  fullName: '', email: '', mobile: '', secondaryPhone: '',
-  organizationName: '', volunteerType: 'Medical', pinCode: '',
-  address: '', district: 'Ernakulam', city: '', status: 'Active', remarks: ''
+const emptyVolunteerForm = {
+  meghalaName: '',
+  person1Name: '',
+  person1Contact: '',
+  person2Name: '',
+  person2Contact: '',
+  whatsapp: '',
+  email: ''
 };
 
 export default function VolunteerManagement() {
-  const { allUsers, fetchUsers, updateUserStatus, addVolunteer, deleteUser, triggerToast } = useAppStore();
+  const { user, addVolunteer, updateVolunteer } = useAuthStore();
+  const { allUsers, fetchUsers, updateUserStatus, deleteUser, triggerToast } = useAppStore();
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState({ status: 'all', district: 'all', type: 'all' });
+  const [filters, setFilters] = useState({ status: 'all', district: 'all' });
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedVol, setSelectedVol] = useState(null);
-  const [confirmModal, setConfirmModal] = useState({ open: false, action: null, vol: null });
-  const [form, setForm] = useState(emptyVolForm);
+  const [selectedVolunteer, setSelectedVolunteer] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ open: false, action: null, item: null });
+  const [form, setForm] = useState(emptyVolunteerForm);
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
   const [credentialsModal, setCredentialsModal] = useState({ open: false, email: '', password: '', emailSent: false });
 
+  const canAddVolunteer = user?.role === 'admin';
+
   useEffect(() => {
-    const initFetch = async () => {
-      setIsFetching(true);
-      await fetchUsers();
-      setIsFetching(false);
-    };
-    initFetch();
-  }, []);
+    fetchUsers();
+  }, [fetchUsers]);
 
   const volunteers = allUsers.filter(u => u.role === 'volunteer' || u.role === 'Volunteer');
 
   const filtered = volunteers.filter(v => {
     const q = search.toLowerCase();
-    const matchSearch = !q || [v.fullName, v.email, v.mobile, v.district, v.organizationName || '']
+    const secName = v.secondaryContactName || v.secondary_contact_name || v.person2Name || '';
+    const secNum = v.secondaryContactNumber || v.secondary_contact_number || v.secondaryContact || v.person2Contact || '';
+    const matchSearch = !q || [v.meghala, v.blockCommitteeName, v.blockName, v.fullName, v.name, v.email, v.mobile, secName, secNum, v.district]
       .some(f => String(f || '').toLowerCase().includes(q));
     const matchStatus = filters.status === 'all' || (v.status || '').toLowerCase() === filters.status;
     const matchDistrict = filters.district === 'all' || v.district === filters.district;
-    const matchType = filters.type === 'all' || v.volunteerType === filters.type;
-    return matchSearch && matchStatus && matchDistrict && matchType;
+    return matchSearch && matchStatus && matchDistrict;
   });
 
   const exportCSV = () => {
-    const headers = ['Name', 'Email', 'Phone', 'Organization', 'Type', 'District', 'City', 'PIN', 'Status', 'Registered'];
+    const headers = ['Meghala Name', 'Primary Volunteer Name', 'Primary Phone', 'Secondary Volunteer Name', 'Secondary Volunteer Phone', 'Email', 'District', 'Status', 'Registered'];
     const rows = filtered.map(v => [
-      v.fullName, v.email, v.mobile, v.organizationName || '', v.volunteerType || '',
-      v.district, v.city, v.pinCode || '', v.status, v.joinedAt || v.created_at || ''
+      v.meghala || v.blockCommitteeName || v.blockName || '',
+      v.fullName || v.name || '',
+      v.mobile || '',
+      v.secondaryContactName || v.secondary_contact_name || v.person2Name || '',
+      v.secondaryContactNumber || v.secondary_contact_number || v.secondaryContact || '',
+      v.email || '',
+      v.district || '',
+      v.status || '',
+      v.joinedAt || v.created_at || ''
     ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `volunteers_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+    a.download = `volunteers_meghala_${new Date().toISOString().split('T')[0]}.csv`; a.click();
     triggerToast('CSV exported successfully!', 'success');
   };
 
-  const handleStatusAction = async (vol, newStatus) => {
+  const handleStatusAction = async (item, newStatus) => {
     setLoading(true);
-    await updateUserStatus(vol._id, newStatus);
+    await updateUserStatus(item._id || item.id, newStatus);
     setLoading(false);
-    setConfirmModal({ open: false, action: null, vol: null });
+    setConfirmModal({ open: false, action: null, item: null });
   };
 
-  const handleDeleteAction = async (vol) => {
+  const handleDeleteAction = async (item) => {
     setLoading(true);
-    await deleteUser(vol._id);
+    await deleteUser(item._id || item.id);
     setLoading(false);
-    setConfirmModal({ open: false, action: null, vol: null });
+    setConfirmModal({ open: false, action: null, item: null });
   };
 
   const handleBulkAction = async (ids) => {
     for (const id of ids) await updateUserStatus(id, 'Inactive');
-    triggerToast(`${ids.length} volunteers deactivated.`, 'warning');
+    triggerToast(`${ids.length} Volunteers deactivated.`, 'warning');
   };
 
   const columns = [
-    { key: 'fullName', label: 'Name', sortable: true, render: (val, row) => (
-      <div>
-        <p className="text-slate-900 text-xs font-semibold">{val}</p>
-        <p className="text-slate-600 text-[10px]">{row.email}</p>
-      </div>
+    { key: 'meghala', label: 'Meghala / Zone Name', sortable: true, render: (val, row) => (
+      <span className="text-slate-900 text-xs font-bold">{row.meghala || row.blockCommitteeName || row.blockName || val || '—'}</span>
     )},
-    { key: 'mobile', label: 'Phone', render: (val) => <span className="text-slate-500 text-xs font-mono">{val || '—'}</span> },
-    { key: 'organizationName', label: 'Organization', render: (val) => <span className="text-slate-500 text-xs">{val || '—'}</span> },
-    { key: 'volunteerType', label: 'Type', render: (val) => (
-      <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full">{val || 'General'}</span>
-    )},
-    { key: 'district', label: 'District', sortable: true, render: (val) => <span className="text-slate-500 text-xs">{val}</span> },
+    { key: 'fullName', label: 'Primary Volunteer (Person 1)', sortable: true, render: (val, row) => {
+      const full = row.fullName || row.name || '';
+      const p1 = full.includes(' & ') ? full.split(' & ')[0] : full;
+      return (
+        <div>
+          <p className="text-slate-900 text-xs font-semibold">{p1 || '—'}</p>
+          <p className="text-slate-600 text-[10px] truncate max-w-[150px]">{row.email}</p>
+        </div>
+      );
+    }},
+    { key: 'mobile', label: 'Contact 1', render: (val) => <span className="text-slate-500 text-xs font-mono">{val || '—'}</span> },
+    { key: 'secondaryContact', label: 'Secondary Volunteer (Person 2)', render: (val, row) => {
+      const secName = row.secondaryContactName || row.secondary_contact_name || row.person2Name || (row.fullName && row.fullName.includes(' & ') ? row.fullName.split(' & ')[1] : '');
+      const secNum = row.secondaryContactNumber || row.secondary_contact_number || row.secondaryContact || row.person2Contact || '';
+      return (
+        <div>
+          <p className="text-slate-900 text-xs font-semibold">{secName || '—'}</p>
+          <p className="text-slate-500 text-[10px] font-mono">{secNum || '—'}</p>
+        </div>
+      );
+    }},
+    { key: 'whatsappNumber', label: 'WhatsApp', render: (val, row) => <span className="text-slate-500 text-xs font-mono">{val || row.whatsapp_number || '—'}</span> },
     { key: 'status', label: 'Status', sortable: true, render: (val) => <StatusBadge status={val} /> },
     { key: 'joinedAt', label: 'Registered', sortable: true, render: (val, row) => (
-      <span className="text-slate-600 text-[10px]">{new Date(val || row.created_at || Date.now()).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}</span>
+      <span className="text-slate-600 text-[10px]">{(val || row.createdAt || row.created_at) ? new Date(val || row.createdAt || row.created_at).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—'}</span>
     )},
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
         <div>
-          <h1 className="text-slate-900 text-xl font-black">Volunteer Management</h1>
-          <p className="text-slate-500 text-xs mt-0.5">{volunteers.length} total volunteers registered</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-slate-900 text-xl font-black tracking-tight">Volunteer Management (Meghala Committee)</h1>
+            <span className="px-2.5 py-0.5 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
+              {volunteers.length} Total
+            </span>
+          </div>
+          <p className="text-slate-500 text-xs mt-1">
+            Manage Meghala Committee primary and secondary volunteers, access credentials, and account statuses.
+          </p>
         </div>
-        <button
-          onClick={() => { setForm(emptyVolForm); setFormError(''); setShowAddModal(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-slate-900 text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-lg shadow-red-500/20"
-        >
-          <Plus className="w-4 h-4" /> Add Volunteer
-        </button>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" /> Export CSV
+          </button>
+
+          {canAddVolunteer ? (
+            <button
+              onClick={() => { setForm(emptyVolunteerForm); setFormError(''); setShowAddModal(true); }}
+              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md shadow-red-600/20"
+            >
+              <Plus className="w-4 h-4" /> Add Volunteer (Meghala)
+            </button>
+          ) : (
+            <span className="text-xs text-slate-500 font-medium bg-slate-100 px-3.5 py-2.5 rounded-xl border border-slate-200">
+              District Overview (Managed by Block Admins)
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Table Card */}
-      <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
-        {/* Filter Bar */}
+      {/* Main Content Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+        {/* Filter Toolbar */}
         <FilterBar
           search={search} onSearch={setSearch}
-          searchPlaceholder="Search by name, email, phone, organization..."
+          searchPlaceholder="Search by Meghala Name, Volunteer Name, Email, Phone..."
           filters={[
             { key: 'status', label: 'Status', options: STATUS_OPTIONS.map(s => ({ value: s, label: s.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) })) },
             { key: 'district', label: 'District', options: DISTRICTS.map(d => ({ value: d, label: d })) },
-            { key: 'type', label: 'Type', options: VOLUNTEER_TYPES.map(t => ({ value: t, label: t })) },
           ]}
           filterValues={filters}
           onFilterChange={(k, v) => setFilters(f => ({ ...f, [k]: v }))}
           dateFrom={dateFrom} dateTo={dateTo}
           onDateFrom={setDateFrom} onDateTo={setDateTo}
-          onReset={() => { setSearch(''); setFilters({ status: 'all', district: 'all', type: 'all' }); setDateFrom(''); setDateTo(''); }}
+          onReset={() => { setSearch(''); setFilters({ status: 'all', district: 'all' }); setDateFrom(''); setDateTo(''); }}
         />
 
-        {/* Table */}
-        <AdminTable
-          columns={columns}
-          data={filtered}
-          pageSize={25}
-          onExport={exportCSV}
-          searchKeys={['fullName', 'email', 'mobile', 'district', 'organizationName']}
-          emptyMessage="No volunteers found matching the selected filters."
-          selectable
-          bulkLabel="Deactivate Selected"
-          onBulkAction={handleBulkAction}
-          rowActions={(row) => (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => { setSelectedVol(row); setShowViewModal(true); }}
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 transition-colors cursor-pointer"
-                title="View Details"
-              >
-                <Eye className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => { setSelectedVol(row); setForm({ ...emptyVolForm, ...row }); setShowEditModal(true); }}
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
-                title="Edit"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-              </button>
-              {row.status === 'Active' ? (
-                <button
-                  onClick={() => setConfirmModal({ open: true, action: 'deactivate', vol: row })}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
-                  title="Deactivate"
-                >
-                  <UserX className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setConfirmModal({ open: true, action: 'activate', vol: row })}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors cursor-pointer"
-                  title="Activate"
-                >
-                  <UserCheck className="w-3.5 h-3.5" />
-                </button>
-              )}
-              <button
-                onClick={() => setConfirmModal({ open: true, action: 'block', vol: row })}
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-                title="Block"
-              >
-                <Lock className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => setConfirmModal({ open: true, action: 'delete', vol: row })}
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-600/10 transition-colors cursor-pointer"
-                title="Delete"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+        {/* Minimal Modern Table */}
+        <div className="overflow-x-auto">
+          {filtered.length === 0 ? (
+            <div className="py-16 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <p className="text-slate-700 font-bold text-sm">No Volunteers Found</p>
+              <p className="text-slate-400 text-xs mt-1">Try adjusting your search terms or filters.</p>
             </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-4 px-6">Meghala / Zone</th>
+                  <th className="py-4 px-6">Primary Volunteer (Person 1)</th>
+                  <th className="py-4 px-6">Secondary Volunteer (Person 2)</th>
+                  <th className="py-4 px-6">Login Email ID</th>
+                  <th className="py-4 px-6 text-center">Status & Toggle</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs">
+                {filtered.map((vol) => {
+                  const full = vol.fullName || vol.name || vol.full_name || '';
+                  const nameParts = Array.from(new Set(full.split(/[&,]+/).map(s => s.trim()).filter(Boolean)));
+                  const p1Name = vol.person1Name || nameParts[0] || '—';
+                  const p1Mobile = vol.mobile || '—';
+
+                  const p2Name = vol.secondaryContactName || vol.secondary_contact_name || vol.person2Name || (nameParts.length > 1 ? nameParts[1] : '—');
+                  const p2Mobile = vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || '—';
+
+                  return (
+                    <motion.tr
+                      key={vol._id || vol.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="hover:bg-red-50/20 transition"
+                    >
+                      {/* Meghala Badge */}
+                      <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 rounded-xl font-bold">
+                          <Building2 className="w-3.5 h-3.5 text-red-600" />
+                          {vol.meghala || vol.blockCommitteeName || vol.blockName || 'Unassigned'}
+                        </span>
+                      </td>
+
+                      {/* Primary Contact (Person 1) */}
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <div className="font-bold text-slate-900 text-sm">{p1Name || '—'}</div>
+                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-mono">
+                          <Phone className="w-3 h-3 text-slate-400" />
+                          <span>{p1Mobile}</span>
+                        </div>
+                      </td>
+
+                      {/* Secondary Contact (Person 2) */}
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <div className="font-bold text-slate-900 text-sm">{p2Name || '—'}</div>
+                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-mono">
+                          <Phone className="w-3 h-3 text-slate-400" />
+                          <span>{p2Mobile}</span>
+                        </div>
+                      </td>
+
+                      {/* Email */}
+                      <td className="py-4 px-6 text-slate-700 font-medium whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="font-mono text-xs">{vol.email}</span>
+                        </div>
+                      </td>
+
+                      {/* Status & Active/Deactive Toggle */}
+                      <td className="py-4 px-6 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            vol.status === 'Active'
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                              : 'bg-amber-50 border-amber-200 text-amber-700'
+                          }`}>
+                            {vol.status || 'Active'}
+                          </span>
+
+                          <button
+                            onClick={() => setConfirmModal({
+                              open: true,
+                              action: vol.status === 'Active' ? 'deactivate' : 'activate',
+                              item: vol
+                            })}
+                            className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition flex items-center gap-1 cursor-pointer ${
+                              vol.status === 'Active'
+                                ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-800'
+                                : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-800'
+                            }`}
+                            title={vol.status === 'Active' ? 'Deactivate Volunteer' : 'Activate Volunteer'}
+                          >
+                            {vol.status === 'Active' ? (
+                              <UserX className="w-3 h-3 text-amber-600" />
+                            ) : (
+                              <UserCheck className="w-3 h-3 text-emerald-600" />
+                            )}
+                            {vol.status === 'Active' ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-4 px-6 text-right space-x-1.5 whitespace-nowrap">
+                        {/* View Details Button */}
+                        <button
+                          onClick={() => { setSelectedVolunteer(vol); setShowViewModal(true); }}
+                          className="px-2.5 py-1.5 text-slate-600 hover:text-blue-600 border border-slate-200 hover:border-blue-200 rounded-xl hover:bg-blue-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
+                          title="View Details"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-blue-600" /> View
+                        </button>
+
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => { 
+                            setSelectedVolunteer(vol); 
+                            setForm({
+                              meghalaName: vol.meghala || vol.blockCommitteeName || vol.blockName || '',
+                              person1Name: p1Name,
+                              person1Contact: p1Mobile,
+                              person2Name: p2Name === '—' ? '' : p2Name,
+                              person2Contact: p2Mobile === '—' ? '' : p2Mobile,
+                              whatsapp: vol.whatsappNumber || vol.whatsapp_number || vol.mobile || '',
+                              email: vol.email || ''
+                            }); 
+                            setShowEditModal(true); 
+                          }}
+                          className="px-2.5 py-1.5 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
+                          title="Edit Volunteer"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" /> Edit
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => setConfirmModal({ open: true, action: 'delete', item: vol })}
+                          className="px-2.5 py-1.5 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
+                          title="Delete Volunteer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </button>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </tbody>
+            </table>
           )}
-        />
+        </div>
       </div>
 
       {/* View Details Modal */}
       <AnimatePresence>
-        {showViewModal && selectedVol && (
+        {showViewModal && selectedVolunteer && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50" onClick={() => setShowViewModal(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4">
-              <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-md">
+              <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xl">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-white font-black">Volunteer Details</h3>
-                  <button onClick={() => setShowViewModal(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-slate-50 transition-colors cursor-pointer"><X className="w-4 h-4" /></button>
+                  <h3 className="text-slate-900 text-lg font-black">Volunteer (Meghala) Details</h3>
+                  <button onClick={() => setShowViewModal(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"><X className="w-4 h-4" /></button>
                 </div>
-                {/* Avatar row */}
+                
                 <div className="flex items-center gap-4 mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-black text-xl">
-                    {selectedVol.fullName?.[0] || 'V'}
+                  <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 font-black text-xl">
+                    <Building2 className="w-7 h-7 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-white font-black text-base">{selectedVol.fullName}</p>
-                    <StatusBadge status={selectedVol.status} />
-                    <p className="text-slate-500 text-[10px] mt-0.5">ID: {selectedVol._id}</p>
+                    <p className="text-slate-900 font-black text-base">{selectedVolunteer.meghala || selectedVolunteer.blockCommitteeName || selectedVolunteer.fullName}</p>
+                    <StatusBadge status={selectedVolunteer.status} />
+                    <p className="text-slate-500 text-[10px] mt-0.5">ID: {selectedVolunteer._id || selectedVolunteer.id}</p>
                   </div>
                 </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { icon: Mail, label: 'Email', val: selectedVol.email },
-                    { icon: Phone, label: 'Phone', val: selectedVol.mobile || '—' },
-                    { icon: Building2, label: 'Organization', val: selectedVol.organizationName || '—' },
-                    { icon: Users, label: 'Type', val: selectedVol.volunteerType || '—' },
-                    { icon: MapPin, label: 'District', val: selectedVol.district },
-                    { icon: Hash, label: 'PIN Code', val: selectedVol.pinCode || '—' },
-                    { icon: MapPin, label: 'City', val: selectedVol.city || '—' },
-                    { icon: Clock, label: 'Registered', val: new Date(selectedVol.joinedAt || selectedVol.created_at || Date.now()).toLocaleDateString('en-IN') },
+                    { icon: Building2, label: 'Meghala Name', val: selectedVolunteer.meghala || selectedVolunteer.blockCommitteeName || '—' },
+                    { icon: Mail, label: 'Email', val: selectedVolunteer.email },
+                    { icon: Phone, label: 'Primary Contact', val: selectedVolunteer.mobile || '—' },
+                    { icon: Phone, label: 'Secondary Contact', val: selectedVolunteer.secondaryContact || selectedVolunteer.secondaryContactNumber || '—' },
+                    { icon: Phone, label: 'WhatsApp', val: selectedVolunteer.whatsappNumber || selectedVolunteer.whatsapp_number || '—' },
+                    { icon: MapPin, label: 'District', val: selectedVolunteer.district || '—' },
+                    { icon: Clock, label: 'Registered', val: new Date(selectedVolunteer.joinedAt || selectedVolunteer.createdAt || selectedVolunteer.created_at || new Date().toISOString()).toLocaleDateString('en-IN') },
                   ].map(({ icon: Icon, label, val }) => (
                     <div key={label} className="bg-slate-50 border border-slate-100 rounded-xl p-3">
                       <div className="flex items-center gap-1.5 mb-0.5">
@@ -268,40 +406,33 @@ export default function VolunteerManagement() {
                     </div>
                   ))}
                 </div>
-                {selectedVol.remarks && (
-                  <div className="mt-3 bg-amber-500/5 border border-amber-500/10 rounded-xl p-3">
-                    <p className="text-amber-400 text-[10px] font-bold mb-1 flex items-center gap-1"><StickyNote className="w-3 h-3" /> Remarks</p>
-                    <p className="text-slate-500 text-xs">{selectedVol.remarks}</p>
-                  </div>
-                )}
-                <button onClick={() => setShowViewModal(false)} className="w-full mt-4 py-2.5 bg-slate-50 border border-slate-100 text-slate-900 text-xs font-bold rounded-xl hover:bg-white/8 transition-colors cursor-pointer">Close</button>
+
+                <button onClick={() => setShowViewModal(false)} className="w-full mt-4 py-2.5 bg-slate-50 border border-slate-100 text-slate-900 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">Close</button>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Add/Edit Modal */}
+      {/* Add/Edit Volunteer Modal */}
       <AnimatePresence>
         {(showAddModal || showEditModal) && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" onClick={() => { setShowAddModal(false); setShowEditModal(false); }} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-red-100">
-                <div className="bg-gradient-to-r from-red-600 to-red-500 p-6 relative overflow-hidden">
-                  {/* Decorative Background Pattern */}
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,white_1px,transparent_1px)] bg-[length:16px_16px]"></div>
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+                <div className="bg-red-600 p-6 relative overflow-hidden">
                   <div className="relative z-10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-xl backdrop-blur-md flex items-center justify-center text-white border border-white/30 shadow-inner">
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
                         {showAddModal ? <Plus className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
                       </div>
                       <div>
-                        <h3 className="text-white text-lg font-black tracking-tight">{showAddModal ? 'Add New Volunteer' : 'Edit Volunteer Details'}</h3>
-                        <p className="text-red-100 text-[10px] font-medium">{showAddModal ? 'Automatically generates password & sends invite email' : 'Update volunteer information in the system'}</p>
+                        <h3 className="text-white text-lg font-black tracking-tight">{showAddModal ? 'Add New Volunteer (Meghala)' : 'Edit Volunteer Details'}</h3>
+                        <p className="text-red-100 text-[10px] font-medium">{showAddModal ? 'Automatically generates password & dispatches login credentials' : 'Update Volunteer information in system'}</p>
                       </div>
                     </div>
-                    <button onClick={() => { setShowAddModal(false); setShowEditModal(false); }} className="w-8 h-8 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer border border-transparent hover:border-white/30 backdrop-blur-sm"><X className="w-4 h-4" /></button>
+                    <button onClick={() => { setShowAddModal(false); setShowEditModal(false); }} className="w-8 h-8 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"><X className="w-4 h-4" /></button>
                   </div>
                 </div>
                 
@@ -313,100 +444,101 @@ export default function VolunteerManagement() {
                   )}
                   <form onSubmit={async (e) => {
                     e.preventDefault();
-                    if (!form.fullName || !form.email || !form.mobile) { setFormError('Name, email, and phone are required.'); return; }
+                    if (!form.meghalaName || !form.email || !form.person1Name || !form.person1Contact || !form.person2Name || !form.person2Contact || !form.whatsapp) { setFormError('All fields are required.'); return; }
                     setLoading(true);
                     setFormError('');
                     
                     if (showAddModal) {
-                      const res = await addVolunteer(form);
+                      const res = await addVolunteer({
+                        meghalaName: form.meghalaName,
+                        person1Name: form.person1Name,
+                        person1Contact: form.person1Contact,
+                        person2Name: form.person2Name,
+                        person2Contact: form.person2Contact,
+                        whatsapp: form.whatsapp,
+                        email: form.email
+                      });
                       if (res.success) {
                         setShowAddModal(false);
-                        setForm(emptyVolForm);
+                        setForm(emptyVolunteerForm);
                         setFormError('');
-                        // Always show credentials popup so admin has a record of the password
                         setCredentialsModal({ open: true, email: form.email, password: res.generatedPassword, emailSent: res.emailSent });
                       } else {
-                        // Show error inside the form so user knows what went wrong
-                        setFormError(res.error || 'Failed to add volunteer. Please try again.');
+                        setFormError(res.error || 'Failed to add Volunteer. Please try again.');
                       }
                     } else {
-                      await new Promise(r => setTimeout(r, 600));
-                      triggerToast('Volunteer updated!', 'success');
-                      setShowEditModal(false);
+                      const res = await updateVolunteer(selectedVolunteer._id || selectedVolunteer.id, {
+                        meghalaName: form.meghalaName,
+                        person1Name: form.person1Name,
+                        person1Contact: form.person1Contact,
+                        person2Name: form.person2Name,
+                        person2Contact: form.person2Contact,
+                        whatsapp: form.whatsapp,
+                        email: form.email
+                      });
+                      if (res.success) {
+                        triggerToast('Volunteer details updated!', 'success');
+                        setShowEditModal(false);
+                      } else {
+                        setFormError(res.error || 'Failed to update Volunteer. Please try again.');
+                      }
                     }
                     
                     setLoading(false);
                   }} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      {[
-                        { key: 'fullName', label: 'Full Name', type: 'text', placeholder: 'e.g. Sreejith Nair' },
-                        { key: 'email', label: 'Email Address', type: 'email', placeholder: 'volunteer@example.com' },
-                        { key: 'mobile', label: 'Phone Number', type: 'tel', placeholder: '9876543210' },
-                        { key: 'secondaryPhone', label: 'Secondary Phone', type: 'tel', placeholder: 'Optional' },
-                        { key: 'organizationName', label: 'Organization', type: 'text', placeholder: 'e.g. Red Cross' },
-                        { key: 'pinCode', label: 'PIN Code', type: 'text', placeholder: '682001' },
-                      ].map(({ key, label, type, placeholder }) => (
-                        <div key={key} className="relative group">
-                          <label className="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5 transition-colors group-focus-within:text-red-500">{label}</label>
-                          <input type={type} value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder={placeholder}
-                            className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all shadow-sm" />
+                    <div className="space-y-4 text-xs">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">MEGHALA / ZONE NAME *</label>
+                        <input type="text" value={form.meghalaName} onChange={e => setForm(f => ({ ...f, meghalaName: e.target.value }))} required placeholder="e.g. Kozhikode City, West Hill, Medical College..."
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">PRIMARY VOLUNTEER (PERSON 1) *</label>
+                          <input type="text" value={form.person1Name} onChange={e => setForm(f => ({ ...f, person1Name: e.target.value }))} required placeholder="Full Name"
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
                         </div>
-                      ))}
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="relative group">
-                        <label className="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5 transition-colors group-focus-within:text-red-500">Volunteer Type</label>
-                        <select value={form.volunteerType} onChange={e => setForm(f => ({ ...f, volunteerType: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all cursor-pointer shadow-sm appearance-none">
-                          {VOLUNTEER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                        <div className="absolute right-3 top-[28px] pointer-events-none text-slate-400 group-focus-within:text-red-500"><ChevronDown className="w-4 h-4" /></div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">CONTACT NUMBER (PERSON 1) *</label>
+                          <input type="text" value={form.person1Contact} onChange={e => setForm(f => ({ ...f, person1Contact: e.target.value }))} required placeholder="Phone Number"
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
+                        </div>
                       </div>
-                      <div className="relative group">
-                        <label className="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5 transition-colors group-focus-within:text-red-500">District</label>
-                        <select value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all cursor-pointer shadow-sm appearance-none">
-                          {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
-                        <div className="absolute right-3 top-[28px] pointer-events-none text-slate-400 group-focus-within:text-red-500"><ChevronDown className="w-4 h-4" /></div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">SECONDARY VOLUNTEER (PERSON 2) *</label>
+                          <input type="text" value={form.person2Name} onChange={e => setForm(f => ({ ...f, person2Name: e.target.value }))} required placeholder="Full Name"
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">CONTACT NUMBER (PERSON 2) *</label>
+                          <input type="text" value={form.person2Contact} onChange={e => setForm(f => ({ ...f, person2Contact: e.target.value }))} required placeholder="Phone Number"
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
+                        </div>
                       </div>
-                      <div className="relative group">
-                        <label className="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5 transition-colors group-focus-within:text-red-500">City</label>
-                        <input value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="e.g. Kochi"
-                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all shadow-sm" />
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WHATSAPP NUMBER *</label>
+                        <input type="text" value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} required placeholder="WhatsApp Number"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
                       </div>
-                      <div className="relative group">
-                        <label className="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5 transition-colors group-focus-within:text-red-500">Status</label>
-                        <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all cursor-pointer shadow-sm appearance-none">
-                          <option value="Active">🟢 Active</option>
-                          <option value="Inactive">⚪ Inactive</option>
-                          <option value="Suspended">🔴 Suspended</option>
-                        </select>
-                        <div className="absolute right-3 top-[28px] pointer-events-none text-slate-400 group-focus-within:text-red-500"><ChevronDown className="w-4 h-4" /></div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">PRIMARY VOLUNTEER EMAIL *</label>
+                        <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required placeholder="volunteer@jeevalink.org"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
                       </div>
-                    </div>
-                    
-                    <div className="relative group">
-                      <label className="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5 transition-colors group-focus-within:text-red-500">Full Address</label>
-                      <input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Enter complete residential or office address"
-                        className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all shadow-sm" />
-                    </div>
-                    <div className="relative group">
-                      <label className="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5 transition-colors group-focus-within:text-red-500">Remarks / Internal Notes</label>
-                      <textarea value={form.remarks} onChange={e => setForm(f => ({ ...f, remarks: e.target.value }))} placeholder="Any specific skills, availability notes, etc."
-                        rows={2}
-                        className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none shadow-sm" />
                     </div>
                     
                     <div className="flex gap-3 pt-3 mt-4 border-t border-slate-100">
                       <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(false); }}
-                        className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer shadow-sm">
+                        className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer shadow-sm">
                         Cancel
                       </button>
                       <button type="submit" disabled={loading}
-                        className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30 hover:shadow-red-500/40 border border-red-500/50">
+                        className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 
                         {showAddModal ? 'Create Volunteer' : 'Save Changes'}
                       </button>
@@ -422,21 +554,20 @@ export default function VolunteerManagement() {
       {/* Confirm Modal */}
       <ConfirmModal
         isOpen={confirmModal.open}
-        onClose={() => setConfirmModal({ open: false, action: null, vol: null })}
+        onClose={() => setConfirmModal({ open: false, action: null, item: null })}
         loading={loading}
         onConfirm={() => {
           if (confirmModal.action === 'delete') {
-            handleDeleteAction(confirmModal.vol);
+            handleDeleteAction(confirmModal.item);
           } else {
             const statusMap = { activate: 'Active', deactivate: 'Inactive', block: 'Suspended' };
-            handleStatusAction(confirmModal.vol, statusMap[confirmModal.action]);
+            handleStatusAction(confirmModal.item, statusMap[confirmModal.action]);
           }
         }}
-        title={confirmModal.action === 'delete' ? 'Delete Volunteer' : confirmModal.action === 'block' ? 'Block Volunteer' : confirmModal.action === 'activate' ? 'Activate Volunteer' : 'Deactivate Volunteer'}
-        message={confirmModal.action === 'delete' ? `Are you sure you want to permanently delete ${confirmModal.vol?.fullName}? This action cannot be undone.` : `Are you sure you want to ${confirmModal.action} ${confirmModal.vol?.fullName}? This will ${confirmModal.action === 'activate' ? 'restore their access' : confirmModal.action === 'block' ? 'revoke all access immediately' : 'suspend their operational access'}.`}
-        confirmLabel={confirmModal.action === 'delete' ? 'Delete Permanently' : confirmModal.action === 'block' ? 'Block User' : confirmModal.action === 'activate' ? 'Activate' : 'Deactivate'}
+        title={confirmModal.action === 'delete' ? 'Delete Volunteer' : confirmModal.action === 'block' ? 'Block Volunteer Account' : confirmModal.action === 'activate' ? 'Activate Volunteer' : 'Deactivate Volunteer'}
+        message={confirmModal.action === 'delete' ? `Are you sure you want to permanently delete Volunteer "${confirmModal.item?.meghala || confirmModal.item?.fullName}"? This action cannot be undone.` : `Are you sure you want to ${confirmModal.action} Volunteer "${confirmModal.item?.meghala || confirmModal.item?.fullName}"?`}
+        confirmLabel={confirmModal.action === 'delete' ? 'Delete Permanently' : confirmModal.action === 'block' ? 'Block Account' : confirmModal.action === 'activate' ? 'Activate' : 'Deactivate'}
         variant={confirmModal.action === 'delete' || confirmModal.action === 'block' ? 'danger' : confirmModal.action === 'activate' ? 'info' : 'warning'}
-
       />
 
       {/* Credentials Popup Modal */}
@@ -450,44 +581,27 @@ export default function VolunteerManagement() {
                     ? <Mail className="w-7 h-7 text-emerald-500" />
                     : <Lock className="w-7 h-7 text-amber-500" />}
                 </div>
-                <h3 className="text-lg font-black text-gray-900">Volunteer Login Credentials</h3>
+                <h3 className="text-lg font-black text-gray-900">
+                  {credentialsModal.emailSent ? 'Volunteer Added Successfully' : 'Volunteer Login Credentials'}
+                </h3>
                 {credentialsModal.emailSent ? (
-                  <div className="mt-2 flex items-center justify-center gap-1.5">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-full">
-                      <CheckCircle2 className="w-3 h-3" /> Sent to volunteer's email
-                    </span>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-full">
+                        <CheckCircle2 className="w-3 h-3" /> Credentials sent to Volunteer email
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">The Volunteer will receive login details via email.</p>
                   </div>
                 ) : (
-                  <p className="text-xs text-amber-600 font-semibold mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">⚠️ Email delivery failed. Share these credentials manually with the volunteer.</p>
+                  <p className="text-xs text-amber-600 font-semibold mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">⚠️ Email delivery failed. Share credentials manually.</p>
                 )}
               </div>
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 mb-5">
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Email</p>
-                  <p className="text-sm font-semibold text-gray-900 font-mono bg-white px-3 py-2 rounded-lg border border-slate-100">{credentialsModal.email}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Password</p>
-                  <p className="text-sm font-bold text-red-600 font-mono bg-white px-3 py-2 rounded-lg border border-red-100 tracking-wider">{credentialsModal.password}</p>
-                </div>
-              </div>
-              {credentialsModal.emailSent && (
-                <p className="text-[11px] text-gray-400 text-center mb-4">Keep this as your admin backup record. The volunteer received the credentials via email.</p>
-              )}
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    const text = `JeevaLink Login Credentials\nEmail: ${credentialsModal.email}\nPassword: ${credentialsModal.password}\nLogin: https://jeevalink.vercel.app/login`;
-                    navigator.clipboard.writeText(text);
-                    triggerToast('Credentials copied to clipboard!', 'success');
-                  }}
-                  className="flex-1 py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl text-sm transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                  📋 Copy All
-                </button>
+
+              <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
                 <button
                   onClick={() => setCredentialsModal({ open: false, email: '', password: '', emailSent: false })}
-                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-gray-700 font-bold rounded-xl text-sm transition-all cursor-pointer"
+                  className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs cursor-pointer"
                 >
                   Done
                 </button>
@@ -496,6 +610,7 @@ export default function VolunteerManagement() {
           </motion.div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

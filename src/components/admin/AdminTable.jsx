@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Search, Download } from 'lucide-react';
 
@@ -34,6 +34,11 @@ export default function AdminTable({
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set());
+
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setPage(1);
+  };
 
   const filtered = useMemo(() => {
     let d = data;
@@ -78,8 +83,6 @@ export default function AdminTable({
     });
   };
 
-  React.useEffect(() => { setPage(1); }, [search]);
-
   return (
     <div className="flex flex-col gap-0">
       {/* Toolbar */}
@@ -88,7 +91,7 @@ export default function AdminTable({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
           <input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="Search..."
             className="w-full pl-8 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-slate-200 text-xs placeholder:text-slate-600 focus:outline-none focus:border-red-500/50 transition-colors"
           />

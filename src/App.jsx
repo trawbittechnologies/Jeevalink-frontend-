@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore.js';
 import { useAppStore } from './store/appStore.js';
@@ -7,7 +7,6 @@ import Toast from './components/Toast.jsx';
 // Layouts
 import PublicLayout from './layouts/PublicLayout.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
-import AdminLayout from './layouts/AdminLayout.jsx';
 
 // Pages
 import Splash from './pages/Splash.jsx';
@@ -20,7 +19,6 @@ import DonorDashboard from './pages/DonorDashboard.jsx';
 import DonorEligibility from './pages/DonorEligibility.jsx';
 import VolunteerDashboard from './pages/VolunteerDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
-import HospitalDashboard from './pages/HospitalDashboard.jsx';
 import DonorSearch from './pages/DonorSearch.jsx';
 import BloodRequests from './pages/BloodRequests.jsx';
 import Profile from './pages/Profile.jsx';
@@ -34,6 +32,7 @@ import EmergencyDashboard from './pages/EmergencyDashboard.jsx';
 
 // Volunteer Module Pages
 import VolunteerUserManagement from './pages/volunteer/UserManagement.jsx';
+import UnitCommittee from './pages/volunteer/UnitCommittee.jsx';
 
 // Admin Module Pages
 import VolunteerManagement from './pages/admin/VolunteerManagement.jsx';
@@ -43,6 +42,17 @@ import ReportsAnalytics from './pages/admin/ReportsAnalytics.jsx';
 import ActivityLogs from './pages/admin/ActivityLogs.jsx';
 import SystemSettings from './pages/admin/SystemSettings.jsx';
 import PartnerManagement from './pages/admin/PartnerManagement.jsx';
+import TechnicalAdminDashboard from './pages/admin/TechnicalAdminDashboard.jsx';
+import SuperAdminDashboard from './pages/admin/SuperAdminDashboard.jsx';
+import SuperAdminManagement from './pages/admin/SuperAdminManagement.jsx';
+import BlockCommitteeManagement from './pages/admin/BlockCommitteeManagement.jsx';
+
+
+// V2 Common & Public Pages
+import Leaderboard from './pages/Leaderboard.jsx';
+import VolunteerDirectory from './pages/VolunteerDirectory.jsx';
+import TechnicalReports from './pages/TechnicalReports.jsx';
+import Campaigns from './pages/Campaigns.jsx';
 
 // Protected route — redirects to login if not authenticated
 function ProtectedRoute({ children, roles }) {
@@ -72,36 +82,30 @@ function ProtectedRoute({ children, roles }) {
   }
 
   // Check for profile completion
-  const isVolunteer = user.role === 'volunteer';
-  const isHospitalOrAdmin = ['hospital', 'admin'].includes(user.role);
-  const basicComplete = !!(user.city && user.district);
-  const isComplete = isVolunteer || isHospitalOrAdmin 
-    ? basicComplete 
-    : basicComplete && !!user.bloodGroup && user.bloodGroup !== 'N/A';
+  const isNonDonorRole = ['technical_admin', 'super_admin', 'admin', 'volunteer', 'unit_squad'].includes(user.role);
 
-  if (!isComplete && window.location.pathname !== '/complete-profile') {
-    return <Navigate to="/complete-profile" replace />;
+  if (!isNonDonorRole) {
+    const basicComplete = !!(user.city && user.district);
+    const isComplete = basicComplete && !!user.bloodGroup && user.bloodGroup !== 'N/A';
+    if (!isComplete && window.location.pathname !== '/complete-profile') {
+      return <Navigate to="/complete-profile" replace />;
+    }
   }
 
   if (roles && user && !roles.includes(user.role)) {
     // Redirect to correct dashboard
     const redirect =
+      user.role === 'technical_admin' ? '/technical-admin' :
+      user.role === 'super_admin' ? '/super-admin' :
       user.role === 'admin' ? '/admin/dashboard' :
       user.role === 'volunteer' ? '/volunteer/dashboard' :
-      user.role === 'hospital' ? '/hospital/dashboard' :
+      user.role === 'unit_squad' ? '/volunteer/users' :
       '/donor/dashboard';
     return <Navigate to={redirect} replace />;
   }
   return children;
 }
 
-// Admin-only protected route wrapper
-function AdminRoute({ children }) {
-  const { user, token } = useAuthStore();
-  if (!token) return <Navigate to="/login" replace />;
-  if (user?.role !== 'admin') return <Navigate to="/login" replace />;
-  return children;
-}
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -132,6 +136,8 @@ export default function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/volunteer-directory" element={<VolunteerDirectory />} />
             </Route>
 
             {/* Auth pages — no Navbar/Footer */}
@@ -140,35 +146,82 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/complete-profile" element={<CompleteProfile />} />
 
-            {/* ═══ Admin Panel Routes (Dark theme, AdminLayout) ═══ */}
-            <Route element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/volunteers" element={<VolunteerManagement />} />
-              <Route path="/admin/feedback" element={<FeedbackManagement />} />
-              <Route path="/admin/support" element={<SupportCenter />} />
-              <Route path="/admin/reports" element={<ReportsAnalytics />} />
-              <Route path="/admin/activity-logs" element={<ActivityLogs />} />
-              <Route path="/admin/settings" element={<SystemSettings />} />
-              <Route path="/admin/partners" element={<PartnerManagement />} />
-            </Route>
-
-            {/* Dashboard layout — Sidebar + top bar (non-admin users) */}
+            {/* Dashboard layout — Sidebar + top bar */}
             <Route element={
               <ProtectedRoute>
                 <DashboardLayout />
               </ProtectedRoute>
             }>
+              {/* Common Admin / Tech Admin / Super Admin routes */}
+              <Route path="/admin/dashboard" element={
+                <ProtectedRoute roles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/volunteers" element={
+                <ProtectedRoute roles={['admin']}>
+                  <VolunteerManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/feedback" element={
+                <ProtectedRoute roles={['admin', 'super_admin']}>
+                  <FeedbackManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/support" element={
+                <ProtectedRoute roles={['admin', 'super_admin', 'technical_admin']}>
+                  <SupportCenter />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/reports" element={
+                <ProtectedRoute roles={['admin', 'super_admin', 'technical_admin']}>
+                  <ReportsAnalytics />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/activity-logs" element={
+                <ProtectedRoute roles={['admin', 'super_admin', 'technical_admin']}>
+                  <ActivityLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/settings" element={
+                <ProtectedRoute roles={['admin', 'super_admin', 'technical_admin']}>
+                  <SystemSettings />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/partners" element={
+                <ProtectedRoute roles={['admin', 'super_admin', 'technical_admin']}>
+                  <PartnerManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/technical-admin" element={
+                <ProtectedRoute roles={['technical_admin']}>
+                  <TechnicalAdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/technical-admin/super-admins" element={
+                <ProtectedRoute roles={['technical_admin']}>
+                  <SuperAdminManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/super-admin" element={
+                <ProtectedRoute roles={['super_admin', 'technical_admin']}>
+                  <SuperAdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/super-admin/blocks" element={
+                <ProtectedRoute roles={['super_admin', 'technical_admin']}>
+                  <BlockCommitteeManagement />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/technical-reports" element={<TechnicalReports />} />
               <Route path="/donor/dashboard" element={
-                <ProtectedRoute roles={['donor']}>
+                <ProtectedRoute roles={['donor', 'user']}>
                   <DonorDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/donor/eligibility" element={
-                <ProtectedRoute roles={['donor']}>
+                <ProtectedRoute roles={['donor', 'user']}>
                   <DonorEligibility />
                 </ProtectedRoute>
               } />
@@ -178,22 +231,31 @@ export default function App() {
                 </ProtectedRoute>
               } />
               <Route path="/volunteer/users" element={
-                <ProtectedRoute roles={['volunteer']}>
+                <ProtectedRoute roles={['volunteer', 'unit_squad', 'admin', 'super_admin', 'technical_admin']}>
                   <VolunteerUserManagement />
                 </ProtectedRoute>
               } />
+              <Route path="/volunteer/unit-committee" element={
+                <ProtectedRoute roles={['volunteer', 'admin', 'super_admin', 'technical_admin']}>
+                  <UnitCommittee />
+                </ProtectedRoute>
+              } />
               <Route path="/admin/emergency" element={
-                <ProtectedRoute roles={['admin']}>
+                <ProtectedRoute roles={['admin', 'super_admin', 'technical_admin']}>
                   <EmergencyDashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/hospital/dashboard" element={
-                <ProtectedRoute roles={['hospital']}>
-                  <HospitalDashboard />
+              <Route path="/donor/search" element={
+                <ProtectedRoute roles={['donor', 'user', 'volunteer', 'admin', 'super_admin', 'technical_admin']}>
+                  <DonorSearch />
                 </ProtectedRoute>
               } />
-              <Route path="/donor/search" element={<DonorSearch />} />
-              <Route path="/requests" element={<BloodRequests />} />
+              <Route path="/requests" element={
+                <ProtectedRoute roles={['donor', 'user', 'volunteer', 'admin', 'super_admin', 'technical_admin']}>
+                  <BloodRequests />
+                </ProtectedRoute>
+              } />
+              <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/settings" element={<Settings />} />

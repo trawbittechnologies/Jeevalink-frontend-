@@ -21,20 +21,19 @@ export default function FindDonors() {
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
   const [selectedDonor, setSelectedDonor] = useState(null);
 
-  // Sync initial search parameters on mount
   useEffect(() => {
     fetchRequests();
     // Default search based on user's own blood group or B+
     const initialBg = user ? user.bloodGroup : 'O+';
     setSelectedBloodGroup(initialBg);
-  }, []);
+  }, [fetchRequests, setSelectedBloodGroup, user]);
 
   // Run search when variables change
   useEffect(() => {
     if (selectedBloodGroup) {
       searchDonors(selectedBloodGroup, searchRadius, user?._id);
     }
-  }, [selectedBloodGroup, searchRadius]);
+  }, [selectedBloodGroup, searchRadius, searchDonors, user]);
 
   const handleContactDonor = (donor) => {
     setSelectedDonor(donor);
