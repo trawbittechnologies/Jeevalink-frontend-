@@ -69,44 +69,17 @@ export function toSnake(obj) {
   return obj;
 }
 
-// The authoritative production backend URL.
-// This is the single source of truth — it matches Railway deployment.
-const DEFAULT_BACKEND_URL = 'https://jeevalink-backend-production.up.railway.app/api/v1';
+// ─── Authoritative Backend URL ───────────────────────────────────────────────
+// HARDCODED: This is the only API base URL. Do NOT use VITE_API_URL.
+// Root cause of production 404s: Vercel dashboard had VITE_API_URL set to
+// https://jeevalink-frontend.vercel.app/api/v1 (a leftover from the old
+// Vercel proxy pattern). The proxy was removed from vercel.json but the env
+// var was never updated, so ALL API calls hit the Vercel frontend → 404.
+// Fix: bypass env vars entirely and hardcode the Railway backend URL.
+const BASE_URL = 'https://jeevalink-backend-production.up.railway.app/api/v1';
 
-/**
- * Resolves the API base URL with the following priority:
- * 1. VITE_API_URL env var (if set to a valid absolute backend URL)
- * 2. DEFAULT_BACKEND_URL (hardcoded Railway fallback — always safe)
- *
- * Guards against:
- * - Relative paths (e.g. "/api/v1") — these would route to the frontend domain
- * - Vercel frontend domains — these are never backend URLs
- * - Non-HTTP values — invalid URLs are silently ignored
- */
-export const getBaseURL = () => {
-  const envApiUrl = import.meta.env.VITE_API_URL;
-  if (envApiUrl && typeof envApiUrl === 'string') {
-    const trimmed = envApiUrl.trim();
-    // Reject if not an absolute HTTP(S) URL
-    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
-      console.warn('[Jeevalink API] VITE_API_URL is not an absolute URL — using default backend.');
-      return DEFAULT_BACKEND_URL;
-    }
-    // Reject if it points to a Vercel frontend domain (never a valid backend)
-    if (trimmed.includes('.vercel.app') && !trimmed.includes('railway.app')) {
-      console.warn('[Jeevalink API] VITE_API_URL points to a Vercel frontend domain — using default backend.');
-      return DEFAULT_BACKEND_URL;
-    }
-    // Strip trailing slashes for consistent path joining
-    return trimmed.replace(/\/+$/, '');
-  }
-  return DEFAULT_BACKEND_URL;
-};
-
-const BASE_URL = getBaseURL();
-
-// Log the resolved API URL on startup (visible in browser DevTools console)
-console.info(`[Jeevalink API] 🔗 Base URL: ${BASE_URL} (mode: ${import.meta.env.MODE})`);
+// Confirm the resolved URL in browser DevTools (helpful for debugging)
+console.info(`[Jeevalink API] 🔗 Base URL: ${BASE_URL} (${import.meta.env.MODE})`);
 
 const api = axios.create({
   baseURL: BASE_URL,
