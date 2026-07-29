@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import "../jl-landing.css";
 import { useAppStore } from "../store/appStore.js";
+import { getStorageUrl } from "../store/api.js";
 import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
 import {
   Heart, Droplets, MapPin, ArrowRight, Shield, Users,
@@ -150,10 +151,7 @@ export default function Landing() {
 
   const getLogoSrc = (logoPath) => {
     if (!logoPath) return '';
-    if (logoPath.startsWith('http') || logoPath.startsWith('data:')) return logoPath;
-    const baseApi = import.meta.env.VITE_API_URL || 'https://jeevalink-backend-production.up.railway.app/api/v1';
-    const domain = baseApi.replace('/api/v1', '');
-    return `${domain}${logoPath}`;
+    return getStorageUrl(logoPath) || '';
   };
 
   const displayPartners = partners && partners.length > 0 ? partners : collaborators;

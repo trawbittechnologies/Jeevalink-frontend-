@@ -69,24 +69,18 @@ export function toSnake(obj) {
   return obj;
 }
 
-// Dynamically resolve the API base URL.
-// Priority:
-// 1. Environment variable VITE_API_URL (always used when set)
-// 2. Fallback to localhost for local development
-const getBaseURL = () => {
+const DEFAULT_BACKEND_URL = 'https://jeevalink-backend-production.up.railway.app/api/v1';
+
+export const getBaseURL = () => {
   const envApiUrl = import.meta.env.VITE_API_URL;
-  if (envApiUrl) {
-    return envApiUrl;
+  if (envApiUrl && typeof envApiUrl === 'string') {
+    const trimmed = envApiUrl.trim();
+    // Only use VITE_API_URL if it is an absolute URL not pointing to Vercel frontend host
+    if (trimmed.startsWith('http') && !trimmed.includes('vercel.app')) {
+      return trimmed.replace(/\/+$/, '');
+    }
   }
-  // Warn if running in production without VITE_API_URL set
-  if (import.meta.env.PROD) {
-    console.error(
-      '[Jeevalink API] ⚠️ VITE_API_URL is not set! ' +
-      'Set it in Vercel → Project Settings → Environment Variables. ' +
-      'Falling back to localhost which will NOT work in production.'
-    );
-  }
-  return 'https://jeevalink-backend-production.up.railway.app/api/v1';
+  return DEFAULT_BACKEND_URL;
 };
 
 const BASE_URL = getBaseURL();

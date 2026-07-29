@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
+import { getStorageUrl } from '../../store/api.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Handshake, Plus, Edit2, Trash2, Globe, Link as LinkIcon, Save, X, AlertTriangle,
@@ -172,10 +173,7 @@ export default function PartnerManagement() {
 
   const getFullLogoUrl = (path) => {
     if (!path) return '';
-    if (path.startsWith('http') || path.startsWith('data:')) return path;
-    const baseApi = import.meta.env.VITE_API_URL || 'https://jeevalink-backend-production.up.railway.app/api/v1';
-    const domain = baseApi.replace('/api/v1', '');
-    return `${domain}${path}`;
+    return getStorageUrl(path) || '';
   };
 
   const getSocialIcon = (platform) => {
