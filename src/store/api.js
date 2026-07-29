@@ -76,7 +76,9 @@ export const getBaseURL = () => {
   if (envApiUrl && typeof envApiUrl === 'string') {
     const trimmed = envApiUrl.trim();
     // Enforce backend URL. If the environment variable mistakenly points to the frontend domain or is a relative path, fallback to the actual backend.
-    if (trimmed.includes('jeevalink-frontend.vercel.app') || trimmed.includes('jeevalink.vercel.app') || trimmed === '/api/v1' || !trimmed.startsWith('http')) {
+    const isVercelFrontend = trimmed.includes('.vercel.app') && !trimmed.includes('railway.app');
+    const isRelativePath = !trimmed.startsWith('http');
+    if (isVercelFrontend || isRelativePath) {
       return DEFAULT_BACKEND_URL;
     }
     return trimmed.replace(/\/+$/, '');
