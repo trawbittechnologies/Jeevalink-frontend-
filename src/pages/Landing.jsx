@@ -151,7 +151,7 @@ export default function Landing() {
   const getLogoSrc = (logoPath) => {
     if (!logoPath) return '';
     if (logoPath.startsWith('http') || logoPath.startsWith('data:')) return logoPath;
-    const baseApi = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1';
+    const baseApi = import.meta.env.VITE_API_URL || 'https://jeevalink-backend-production.up.railway.app/api/v1';
     const domain = baseApi.replace('/api/v1', '');
     return `${domain}${logoPath}`;
   };

@@ -86,7 +86,7 @@ const getBaseURL = () => {
       'Falling back to localhost which will NOT work in production.'
     );
   }
-  return 'http://localhost:8000/api/v1';
+  return 'https://jeevalink-backend-production.up.railway.app/api/v1';
 };
 
 const BASE_URL = getBaseURL();
