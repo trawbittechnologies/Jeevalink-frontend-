@@ -69,20 +69,8 @@ export function toSnake(obj) {
   return obj;
 }
 
-// ─── Authoritative Backend URL ───────────────────────────────────────────────
-// HARDCODED: This is the only API base URL. Do NOT use VITE_API_URL.
-// Root cause of production 404s: Vercel dashboard had VITE_API_URL set to
-// https://jeevalink-frontend.vercel.app/api/v1 (a leftover from the old
-// Vercel proxy pattern). The proxy was removed from vercel.json but the env
-// var was never updated, so ALL API calls hit the Vercel frontend → 404.
-// Fix: bypass env vars entirely and hardcode the Railway backend URL.
-const BASE_URL = 'https://jeevalink-backend-production.up.railway.app/api/v1';
-
-// Confirm the resolved URL in browser DevTools (helpful for debugging)
-console.info(`[Jeevalink API] 🔗 Base URL: ${BASE_URL} (${import.meta.env.MODE})`);
-
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: import.meta.env.VITE_API_URL || 'https://jeevalink-backend-production.up.railway.app/api/v1',
   timeout: 30000,
   headers: {
     'Accept': 'application/json',
