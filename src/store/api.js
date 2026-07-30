@@ -75,21 +75,16 @@ const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
   let url = (envUrl && typeof envUrl === 'string' && envUrl.trim()) ? envUrl.trim() : DEFAULT_BACKEND_URL;
 
-  if (
-    url === 'https://jeevalink-backend.up.railway.app' ||
-    url === 'https://jeevalink-backend.up.railway.app/api/v1' ||
-    url.includes('vercel.app') ||
-    !url.startsWith('http')
-  ) {
-    url = DEFAULT_BACKEND_URL;
-  }
-
+  // Make sure it doesn't end with a slash
   url = url.replace(/\/+$/, '');
 
+  // Add /api/v1 if it's missing (and if it's not a root-relative path that implies it)
   if (!/\/api\/v1$/.test(url)) {
     if (/\/api$/.test(url)) {
       url = `${url}/v1`;
     } else {
+      // If it is just a domain or starts with http, add /api/v1
+      // Note: we leave relative paths like `/api/v1` intact
       url = `${url}/api/v1`;
     }
   }
