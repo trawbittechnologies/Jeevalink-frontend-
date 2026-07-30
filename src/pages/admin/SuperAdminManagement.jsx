@@ -13,9 +13,9 @@ const KERALA_DISTRICTS = [
 ];
 
 function parseSuperAdminContacts(sa) {
-  let admin1Name = sa.superAdmin1Name || sa.super_admin_1_name || '';
+  let admin1Name = sa.superAdmin_1Name || sa.superAdmin1Name || sa.super_admin_1_name || '';
   let admin2Name = sa.secondaryContactName || sa.secondary_contact_name || '';
-  let fullName = sa.full_name || sa.name || '';
+  let fullName = sa.fullName || sa.full_name || sa.name || '';
 
   if (!admin1Name && fullName.includes(' & ')) {
     const parts = fullName.split(' & ');
@@ -293,7 +293,7 @@ export default function SuperAdminManagement() {
     const parsed = parseSuperAdminContacts(sa);
     const matchesSearch =
       (sa.district || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sa.full_name || sa.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (sa.fullName || sa.full_name || sa.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sa.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sa.mobile || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       parsed.admin1Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -549,7 +549,7 @@ export default function SuperAdminManagement() {
 
                         {/* Delete Button */}
                         <button
-                          onClick={() => handleDeleteSuperAdmin(sa.id, sa.full_name || sa.name, sa.district)}
+                          onClick={() => handleDeleteSuperAdmin(sa.id, sa.fullName || sa.full_name || sa.name, sa.district)}
                           className="px-2.5 py-1.5 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
                           title="Delete Super Admin"
                         >

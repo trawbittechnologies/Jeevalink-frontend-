@@ -89,7 +89,7 @@ export default function TechnicalAdminDashboard() {
   const openEditSA = (sa) => {
     setEditingSA(sa);
     setEditDistrict(sa.district || 'Kozhikode');
-    setEditFullName(sa.full_name || sa.name || '');
+    setEditFullName(sa.fullName || sa.full_name || sa.name || '');
     setEditEmail(sa.email || '');
     setEditMobile(sa.mobile || '');
     setEditSecContact(sa.secondaryContactName || sa.secondary_contact_name || sa.secondary_contact || '');
@@ -408,7 +408,7 @@ export default function TechnicalAdminDashboard() {
                     </button>
                   </div>
                 </div>
-                <h4 className="font-bold text-slate-900 text-sm truncate">{sa.full_name || sa.name}</h4>
+                <h4 className="font-bold text-slate-900 text-sm truncate">{sa.fullName || sa.full_name || sa.name}</h4>
                 <div className="text-xs text-slate-600 space-y-0.5 font-medium">
                   <p className="truncate">Email: {sa.email}</p>
                   <p>Mobile: {sa.mobile}</p>
