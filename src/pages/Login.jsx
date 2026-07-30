@@ -27,12 +27,12 @@ export default function Login() {
   const navigate = useNavigate();
 
   const redirectByRole = (role) => {
-    if (role === 'technical_admin') navigate('/technical-admin');
-    else if (role === 'super_admin') navigate('/super-admin');
-    else if (role === 'admin') navigate('/admin/dashboard');
+    if (role === 'technical_admin') navigate('/technical-admin/dashboard');
+    else if (role === 'super_admin') navigate('/super-admin/dashboard');
+    else if (role === 'block_admin' || role === 'admin') navigate('/block-admin/dashboard');
     else if (role === 'volunteer') navigate('/volunteer/dashboard');
-    else if (role === 'unit_squad') navigate('/volunteer/users');
-    else navigate('/donor/dashboard');
+    else if (role === 'unit_squad') navigate('/unit-squad/dashboard');
+    else navigate('/dashboard');
   };
 
   const handleSubmit = async (e) => {

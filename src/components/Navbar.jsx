@@ -41,11 +41,12 @@ export default function Navbar() {
   };
 
   const dashboardLink =
-    user?.role === 'technical_admin' ? '/technical-admin' :
-    user?.role === 'super_admin' ? '/super-admin' :
-    user?.role === 'admin' ? '/admin/dashboard' :
+    user?.role === 'technical_admin' ? '/technical-admin/dashboard' :
+    user?.role === 'super_admin' ? '/super-admin/dashboard' :
+    (user?.role === 'block_admin' || user?.role === 'admin') ? '/block-admin/dashboard' :
     user?.role === 'volunteer' ? '/volunteer/dashboard' :
-    '/donor/dashboard';
+    user?.role === 'unit_squad' ? '/unit-squad/dashboard' :
+    '/dashboard';
 
   const isActive = (to) => location.pathname === to;
 

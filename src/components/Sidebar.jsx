@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
 const donorLinks = [
-  { to: '/donor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/donor/eligibility', label: 'Health Eligibility', icon: ShieldCheck },
   { to: '/donor/search', label: 'Find Donors', icon: Search },
@@ -20,10 +20,10 @@ const donorLinks = [
 ];
 
 const volunteerLinks = [
-  { to: '/volunteer/dashboard', label: 'Meghala Dashboard', icon: LayoutDashboard },
+  { to: '/volunteer/dashboard', label: 'Volunteer Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/volunteer/users', label: 'Manage Users & Donors', icon: Users },
-  { to: '/volunteer/unit-committee', label: 'DYFI Unit Squad', icon: ShieldCheck },
+  { to: '/volunteer/unit-committee', label: 'Unit Squad Committee', icon: ShieldCheck },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
   { to: '/donor/search', label: 'Find Donors', icon: Search },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
@@ -31,10 +31,10 @@ const volunteerLinks = [
 ];
 
 const adminLinks = [
-  { to: '/admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
+  { to: '/block-admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/admin/volunteers', label: 'Manage Volunteers', icon: Users },
-  { to: '/volunteer/unit-committee', label: 'DYFI Unit Squad', icon: ShieldCheck },
+  { to: '/volunteer/unit-committee', label: 'Unit Squad Committee', icon: ShieldCheck },
   { to: '/admin/feedback', label: 'Feedback & Complaints', icon: ClipboardList },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
   { to: '/donor/search', label: 'Find Donors', icon: Search },
@@ -43,6 +43,7 @@ const adminLinks = [
 ];
 
 const unitSquadLinks = [
+  { to: '/unit-squad/dashboard', label: 'Unit Squad Dashboard', icon: LayoutDashboard },
   { to: '/volunteer/users', label: 'Add & Manage Users', icon: Users },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
@@ -50,7 +51,7 @@ const unitSquadLinks = [
 ];
 
 const superAdminLinks = [
-  { to: '/super-admin', label: 'District Dashboard', icon: LayoutDashboard },
+  { to: '/super-admin/dashboard', label: 'District Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/super-admin/blocks', label: 'Manage Block Committees', icon: Building2 },
   { to: '/admin/feedback', label: 'Feedback & Complaints', icon: ClipboardList },
@@ -61,7 +62,7 @@ const superAdminLinks = [
 ];
 
 const technicalAdminLinks = [
-  { to: '/technical-admin', label: 'Technical Dashboard', icon: LayoutDashboard },
+  { to: '/technical-admin/dashboard', label: 'Technical Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/technical-reports', label: 'Tech Reports Queue', icon: ShieldAlert },
   { to: '/profile', label: 'My Profile', icon: User },

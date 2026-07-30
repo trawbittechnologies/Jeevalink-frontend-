@@ -25,7 +25,7 @@ export default function DashboardLayout() {
   }, [loadProfile]);
 
   const donorNav = [
-    { to: '/donor/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
     { to: '/donor/search', icon: Users, label: 'Donors' },
     { to: '/requests', icon: Droplets, label: 'Requests' },
@@ -39,28 +39,27 @@ export default function DashboardLayout() {
     { to: '/profile', icon: User, label: 'Profile' },
   ];
   const adminNav = [
-    { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/block-admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/role-management', icon: ShieldCheck, label: 'Roles' },
     { to: '/admin/volunteers', icon: Users, label: 'Volunteers' },
     { to: '/requests', icon: Droplets, label: 'Requests' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
   const superAdminNav = [
-    { to: '/super-admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/super-admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
     { to: '/super-admin/blocks', icon: Building2, label: 'Block Committees' },
     { to: '/requests', icon: Droplets, label: 'Requests' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
   const techAdminNav = [
-    { to: '/technical-admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/technical-admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/role-management', icon: ShieldCheck, label: 'Roles' },
     { to: '/technical-reports', icon: ClipboardList, label: 'Reports' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
   const unitSquadNav = [
+    { to: '/unit-squad/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/volunteer/users', icon: Users, label: 'Manage Users' },
     { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
     { to: '/technical-reports', icon: ClipboardList, label: 'Tech Report' },

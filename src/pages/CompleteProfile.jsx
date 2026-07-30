@@ -30,13 +30,12 @@ export default function CompleteProfile() {
   if (!user) return <Navigate to="/login" replace />;
   if (isComplete()) {
     const redirect =
-      user.role === 'technical_admin' ? '/technical-admin' :
-      user.role === 'super_admin' ? '/super-admin' :
-      user.role === 'admin' ? '/admin/dashboard' :
+      user.role === 'technical_admin' ? '/technical-admin/dashboard' :
+      user.role === 'super_admin' ? '/super-admin/dashboard' :
+      (user.role === 'block_admin' || user.role === 'admin') ? '/block-admin/dashboard' :
       user.role === 'volunteer' ? '/volunteer/dashboard' :
-      user.role === 'unit_squad' ? '/volunteer/users' :
-      user.role === 'hospital' ? '/hospital/dashboard' :
-      '/donor/dashboard';
+      user.role === 'unit_squad' ? '/unit-squad/dashboard' :
+      '/dashboard';
     return <Navigate to={redirect} replace />;
   }
 
@@ -65,10 +64,12 @@ export default function CompleteProfile() {
     if (res.success) {
       triggerToast('Profile completed successfully!', 'success');
       const redirect =
-        user.role === 'admin' ? '/admin/dashboard' :
+        user.role === 'technical_admin' ? '/technical-admin/dashboard' :
+        user.role === 'super_admin' ? '/super-admin/dashboard' :
+        (user.role === 'block_admin' || user.role === 'admin') ? '/block-admin/dashboard' :
         user.role === 'volunteer' ? '/volunteer/dashboard' :
-        user.role === 'hospital' ? '/hospital/dashboard' :
-        '/donor/dashboard';
+        user.role === 'unit_squad' ? '/unit-squad/dashboard' :
+        '/dashboard';
       navigate(redirect);
     } else {
       triggerToast(res.error || 'Failed to update profile.', 'error');
