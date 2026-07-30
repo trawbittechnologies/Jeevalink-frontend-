@@ -146,11 +146,11 @@ export default function SuperAdminManagement() {
     try {
       const res = await api.post('/technical-admin/super-admins', {
         district: targetDistrict,
-        full_name: `${fullName1} & ${fullName2}`,
+        full_name: fullName2.trim() ? `${fullName1} & ${fullName2}` : fullName1,
         email,
         mobile: mobile1,
-        secondaryContactName: fullName2,
-        secondaryContactNumber: mobile2,
+        secondaryContactName: fullName2 || null,
+        secondaryContactNumber: mobile2 || null,
         super_admin_1_name: fullName1,
         super_admin_1_mobile: mobile1,
         whatsapp_number: mobile1
@@ -161,7 +161,9 @@ export default function SuperAdminManagement() {
           type: 'success',
           msg: `Super Admin created for ${targetDistrict} District!`,
           password: res.data.data.generated_password,
-          email: email
+          email: email,
+          mailSent: res.data.mail_sent,
+          mailError: res.data.mail_error,
         });
         loadData();
       } else {
@@ -721,7 +723,12 @@ export default function SuperAdminManagement() {
                             {copiedId === 'modal_pw' ? 'Copied!' : 'Copy'}
                           </button>
                         </div>
-                        <p className="text-[10px] text-slate-500 italic">* Automated email credentials have been sent to {createdResult.email}.</p>
+                        <p className="text-[10px] text-slate-500 italic">
+                          {createdResult.mailSent
+                            ? `✅ Credentials email sent to ${createdResult.email}.`
+                            : `⚠️ Email delivery failed — share this password manually with ${createdResult.email}.`
+                          }
+                        </p>
                       </div>
                     )}
                   </div>
