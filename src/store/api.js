@@ -11,7 +11,7 @@ export function toCamel(obj) {
       const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
       result[camelKey] = toCamel(obj[key]);
     }
-    
+
     // Custom mappings for frontend compatibility
     if (result.id !== undefined && result._id === undefined) {
       result._id = String(result.id);
@@ -32,12 +32,12 @@ export function toCamel(obj) {
       result.matchScore = Math.floor(Math.random() * 25) + 75; // 75 - 99
       result.compatibilityScore = result.matchScore;
     }
-    
+
     // Assign mock distances if absent (since distance depends on live coordinates not in basic DB)
     if (result.distance === undefined && result.role === 'donor') {
       result.distance = Math.round((Math.random() * 5 + 0.5) * 10) / 10;
     }
-    
+
     return result;
   }
   return obj;
@@ -69,23 +69,32 @@ export function toSnake(obj) {
   return obj;
 }
 
-const DEFAULT_BACKEND_URL = 'https://jeevalink-backend-production.up.railway.app/api/v1';
+const DEFAULT_BACKEND_URL = 'https://jeevalink-backend-production.up.railway.app';
 
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  if (!envUrl || typeof envUrl !== 'string') {
-    return DEFAULT_BACKEND_URL;
-  }
-  const trimmed = envUrl.trim();
-  // Override invalid domain without '-production' or Vercel URLs or relative paths
+  let url = (envUrl && typeof envUrl === 'string' && envUrl.trim()) ? envUrl.trim() : DEFAULT_BACKEND_URL;
+
   if (
-    trimmed.includes('jeevalink-backend.up.railway.app') ||
-    trimmed.includes('vercel.app') ||
-    !trimmed.startsWith('http')
+    url === 'https://jeevalink-backend.up.railway.app' ||
+    url === 'https://jeevalink-backend.up.railway.app/api/v1' ||
+    url.includes('vercel.app') ||
+    !url.startsWith('http')
   ) {
-    return DEFAULT_BACKEND_URL;
+    url = DEFAULT_BACKEND_URL;
   }
-  return trimmed.replace(/\/+$/, '');
+
+  url = url.replace(/\/+$/, '');
+
+  if (!/\/api\/v1$/.test(url)) {
+    if (/\/api$/.test(url)) {
+      url = `${url}/v1`;
+    } else {
+      url = `${url}/api/v1`;
+    }
+  }
+
+  return url;
 };
 
 const BASE_URL = getApiBaseUrl();
@@ -114,12 +123,12 @@ api.interceptors.request.use(
         config.headers['Authorization'] = `Bearer ${token}`;
       }
     }
-    
+
     // Map outgoing data to snake_case
     if (config.data && !(config.data instanceof FormData)) {
       config.data = toSnake(config.data);
     }
-    
+
     return config;
   },
   (error) => Promise.reject(error)
