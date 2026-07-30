@@ -17,8 +17,9 @@ function parseSuperAdminContacts(sa) {
   let admin2Name = sa.secondaryContactName || sa.secondary_contact_name || '';
   let fullName = sa.fullName || sa.full_name || sa.name || '';
 
-  if (!admin1Name && fullName.includes(' & ')) {
-    const parts = fullName.split(' & ');
+  let nameToSplit = admin1Name.includes(' & ') ? admin1Name : (fullName.includes(' & ') ? fullName : null);
+  if (nameToSplit) {
+    const parts = nameToSplit.split(' & ');
     admin1Name = parts[0] ? parts[0].trim() : '';
     if (!admin2Name && parts[1]) {
       admin2Name = parts[1].trim();
