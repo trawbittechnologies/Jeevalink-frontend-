@@ -199,7 +199,7 @@ export default function Profile() {
     }
   };
 
-  const isUserRole = user?.role === 'user' || user?.role === 'donor';
+  const isUserRole = user?.role === 'user';
 
   const allTabs = [
     { id: 'edit', label: 'Edit Profile', icon: Edit3 },

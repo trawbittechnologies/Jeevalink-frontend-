@@ -576,7 +576,7 @@ export const useAppStore = create((set, get) => ({
         email: volunteerData.email,
         whatsapp_number: volunteerData.whatsapp,
       };
-      const res = await api.post('/admin/meghala-admins', payload);
+      const res = await api.post('/block-admin/volunteers', payload);
       if (res.data.success) {
         const newUser = res.data.data?.user;
         // api.js response interceptor auto-converts snake_case → camelCase
@@ -615,14 +615,14 @@ export const useAppStore = create((set, get) => ({
         role: user.role || 'donor',
         bloodGroup: user.bloodGroup || 'N/A',
         district: user.district || 'Bengaluru Urban',
+        role: user.role || 'user',
         status: user.status || 'Active',
-        joinedAt: user.joinedAt || new Date().toISOString().split('T')[0]
       };
       
       const updatedUsers = [...state.allUsers, newUser];
       let updatedDonors = state.donors;
       
-      if (newUser.role === 'donor') {
+      if (newUser.role === 'user') {
         const newDonor = {
           _id: user._id,
           fullName: user.fullName,

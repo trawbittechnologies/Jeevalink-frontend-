@@ -11,7 +11,7 @@ import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
 import { getStorageUrl } from '../../store/api.js';
 
 const STATUS_OPTIONS = ['Active', 'Inactive', 'Suspended', 'Pending Approval'];
-const ROLES = ['donor', 'member', 'user', 'patient', 'hospital'];
+const ROLES = ['user'];
 
 const getEighteenYearsAgoDate = () => {
   const today = new Date();
@@ -278,7 +278,7 @@ export default function UserManagement() {
           onClick={() => {
             const autoDistrict = currentUser?.district || 'Kozhikode';
             setForm({
-              role: 'donor',
+              role: 'user',
               blood_group: 'A+',
               sex: 'male',
               dob: '',

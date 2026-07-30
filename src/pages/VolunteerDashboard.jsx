@@ -91,7 +91,7 @@ export default function VolunteerDashboard() {
 
   const getCompatibleDonors = (bloodGroup) => {
     const groups = COMPATIBILITY_MAP[bloodGroup] || [];
-    const sourceList = (donors && donors.length > 0) ? donors : (allUsers || []).filter(u => u.role === 'user' || u.role === 'donor');
+    const sourceList = (donors && donors.length > 0) ? donors : (allUsers || []).filter(u => u.role === 'user');
     return sourceList.filter((d) => {
       const isAvail = d.availableForDonation ?? d.available_for_donation ?? true;
       const dGroup = d.bloodGroup || d.blood_group;

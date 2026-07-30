@@ -47,7 +47,6 @@ import SuperAdminDashboard from './pages/admin/SuperAdminDashboard.jsx';
 import SuperAdminManagement from './pages/admin/SuperAdminManagement.jsx';
 import BlockCommitteeManagement from './pages/admin/BlockCommitteeManagement.jsx';
 
-
 // V2 Common & Public Pages
 import Leaderboard from './pages/Leaderboard.jsx';
 import VolunteerDirectory from './pages/VolunteerDirectory.jsx';
@@ -82,9 +81,9 @@ function ProtectedRoute({ children, roles }) {
   }
 
   // Check for profile completion
-  const isNonDonorRole = ['technical_admin', 'super_admin', 'admin', 'volunteer', 'unit_squad'].includes(user.role);
+  const isNonDonorRole = ['technical_admin', 'super_admin', 'block_admin', 'volunteer', 'unit_squad'].includes(user?.role);
 
-  if (!isNonDonorRole) {
+  if (!isNonDonorRole && user) {
     const basicComplete = !!(user.city && user.district);
     const isComplete = basicComplete && !!user.bloodGroup && user.bloodGroup !== 'N/A';
     if (!isComplete && window.location.pathname !== '/complete-profile') {
@@ -97,7 +96,7 @@ function ProtectedRoute({ children, roles }) {
     const redirect =
       user.role === 'technical_admin' ? '/technical-admin/dashboard' :
       user.role === 'super_admin' ? '/super-admin/dashboard' :
-      (user.role === 'block_admin' || user.role === 'admin') ? '/block-admin/dashboard' :
+      user.role === 'block_admin' ? '/block-admin/dashboard' :
       user.role === 'volunteer' ? '/volunteer/dashboard' :
       user.role === 'unit_squad' ? '/unit-squad/dashboard' :
       '/dashboard';
@@ -105,7 +104,6 @@ function ProtectedRoute({ children, roles }) {
   }
   return children;
 }
-
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -123,7 +121,6 @@ export default function App() {
         <Splash onComplete={() => setShowSplash(false)} />
       ) : (
         <>
-
           <Toast />
           <Routes>
             {/* Splash screen route for manual/direct access */}
@@ -154,106 +151,106 @@ export default function App() {
             }>
               {/* Technical Admin Dashboard */}
               <Route path="/technical-admin/dashboard" element={
-                <ProtectedRoute roles={['technical_admin', 'admin']}>
+                <ProtectedRoute roles={['technical_admin']}>
                   <TechnicalAdminDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/technical-admin" element={<Navigate to="/technical-admin/dashboard" replace />} />
               <Route path="/technical-admin/super-admins" element={
-                <ProtectedRoute roles={['technical_admin', 'admin']}>
+                <ProtectedRoute roles={['technical_admin']}>
                   <SuperAdminManagement />
                 </ProtectedRoute>
               } />
 
               {/* Super Admin Dashboard */}
               <Route path="/super-admin/dashboard" element={
-                <ProtectedRoute roles={['super_admin', 'technical_admin', 'admin']}>
+                <ProtectedRoute roles={['super_admin', 'technical_admin']}>
                   <SuperAdminDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/super-admin" element={<Navigate to="/super-admin/dashboard" replace />} />
               <Route path="/super-admin/blocks" element={
-                <ProtectedRoute roles={['super_admin', 'technical_admin', 'admin']}>
+                <ProtectedRoute roles={['super_admin', 'technical_admin']}>
                   <BlockCommitteeManagement />
                 </ProtectedRoute>
               } />
 
               {/* Block Admin Dashboard */}
               <Route path="/block-admin/dashboard" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <AdminDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/admin/dashboard" element={<Navigate to="/block-admin/dashboard" replace />} />
               <Route path="/admin/volunteers" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <VolunteerManagement />
                 </ProtectedRoute>
               } />
               <Route path="/admin/feedback" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <FeedbackManagement />
                 </ProtectedRoute>
               } />
               <Route path="/admin/support" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <SupportCenter />
                 </ProtectedRoute>
               } />
               <Route path="/admin/reports" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <ReportsAnalytics />
                 </ProtectedRoute>
               } />
               <Route path="/admin/activity-logs" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <ActivityLogs />
                 </ProtectedRoute>
               } />
               <Route path="/admin/settings" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <SystemSettings />
                 </ProtectedRoute>
               } />
               <Route path="/admin/partners" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <PartnerManagement />
                 </ProtectedRoute>
               } />
 
               {/* Volunteer Dashboard */}
               <Route path="/volunteer/dashboard" element={
-                <ProtectedRoute roles={['volunteer', 'block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                   <VolunteerDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/volunteer/users" element={
-                <ProtectedRoute roles={['volunteer', 'unit_squad', 'block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['volunteer', 'unit_squad', 'block_admin', 'super_admin', 'technical_admin']}>
                   <VolunteerUserManagement />
                 </ProtectedRoute>
               } />
               <Route path="/volunteer/unit-committee" element={
-                <ProtectedRoute roles={['volunteer', 'block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                   <UnitCommittee />
                 </ProtectedRoute>
               } />
 
               {/* Unit Squad Dashboard */}
               <Route path="/unit-squad/dashboard" element={
-                <ProtectedRoute roles={['unit_squad', 'volunteer', 'block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['unit_squad', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                   <VolunteerUserManagement />
                 </ProtectedRoute>
               } />
 
-              {/* User / Donor Dashboard */}
+              {/* User Dashboard */}
               <Route path="/dashboard" element={
-                <ProtectedRoute roles={['user', 'donor', 'unit_squad', 'volunteer', 'block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['user', 'unit_squad', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                   <DonorDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/donor/dashboard" element={<Navigate to="/dashboard" replace />} />
               <Route path="/donor/eligibility" element={
-                <ProtectedRoute roles={['donor', 'user']}>
+                <ProtectedRoute roles={['user']}>
                   <DonorEligibility />
                 </ProtectedRoute>
               } />
@@ -261,17 +258,17 @@ export default function App() {
               {/* Common Features */}
               <Route path="/technical-reports" element={<TechnicalReports />} />
               <Route path="/admin/emergency" element={
-                <ProtectedRoute roles={['block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                   <EmergencyDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/donor/search" element={
-                <ProtectedRoute roles={['donor', 'user', 'volunteer', 'block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['user', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                   <DonorSearch />
                 </ProtectedRoute>
               } />
               <Route path="/requests" element={
-                <ProtectedRoute roles={['donor', 'user', 'volunteer', 'block_admin', 'admin', 'super_admin', 'technical_admin']}>
+                <ProtectedRoute roles={['user', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                   <BloodRequests />
                 </ProtectedRoute>
               } />

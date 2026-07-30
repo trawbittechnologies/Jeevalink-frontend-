@@ -54,22 +54,22 @@ export default function AdminDashboard() {
 
   const loadData = useCallback(async () => {
     try {
-      const [resDist, resAdmins] = await Promise.all([
-        api.get('/admin/block-data'),
-        api.get('/admin/meghala-admins')
+      const [resMetrics, resVolunteers] = await Promise.all([
+        api.get('/block-admin/metrics'),
+        api.get('/block-admin/volunteers')
       ]);
 
-      if (resDist.data?.success) {
+      if (resMetrics.data?.success) {
         setBlockData({
-          blockCommitteeName: resDist.data.blockCommitteeName || 'Central',
-          total_users: resDist.data.data?.total_users || 0,
-          total_volunteers: resDist.data.data?.total_volunteers || 0,
-          volunteers: resDist.data.data?.volunteers || [],
-          members: resDist.data.data?.members || [],
-          meghala_summary: resDist.data.data?.meghala_summary || []
+          blockCommitteeName: resMetrics.data.data?.city || 'Block Committee',
+          total_users: resMetrics.data.data?.total_users || 0,
+          total_volunteers: resMetrics.data.data?.total_volunteers || 0,
+          volunteers: resVolunteers.data?.data || [],
+          members: [],
+          meghala_summary: []
         });
       }
-      if (resAdmins.data?.success) setMeghalaAdmins(resAdmins.data.data || []);
+      if (resVolunteers.data?.success) setMeghalaAdmins(resVolunteers.data.data || []);
     } catch {
       // ignore
     } finally {
@@ -89,22 +89,18 @@ export default function AdminDashboard() {
     e.preventDefault();
     setCreatedResult(null);
     try {
-      const res = await api.post('/admin/meghala-admins', {
-        meghala: meghalaName,
-        meghala_admin_1_name: person1Name,
-        meghala_admin_1_mobile: person1Contact,
-        meghala_admin_2_name: person2Name,
-        meghala_admin_2_mobile: person2Contact,
+      const res = await api.post('/block-admin/volunteers', {
         full_name: person1Name,
-        mobile: person1Contact,
-        whatsapp_number: whatsapp,
         email: email,
+        mobile: person1Contact,
+        city: meghalaName || 'Local Unit',
+        district: 'Ernakulam',
       });
 
       if (res.data?.success) {
         setCreatedResult({
           type: 'success',
-          msg: `Meghala Committee created successfully! Login credentials sent to registered email.`
+          msg: `Volunteer Committee created successfully! Login credentials sent to registered email.`
         });
         setMeghalaName(''); setPerson1Name(''); setPerson1Contact('');
         setPerson2Name(''); setPerson2Contact('');
@@ -121,7 +117,7 @@ export default function AdminDashboard() {
   const handleTakeAction = async (userId, action, reason = null) => {
     if (!window.confirm(`Are you sure you want to mark user as ${action}?`)) return;
     try {
-      const res = await api.post(`/admin/action/${userId}`, { action, reason });
+      const res = await api.patch(`/admin/users/${userId}/status`, { status: action, reason });
       if (res.data?.success) {
         alert(`User status updated to ${action}`);
         loadData();
@@ -136,23 +132,23 @@ export default function AdminDashboard() {
     if (customPass === null) return;
 
     try {
-      const res = await api.post(`/admin/meghala-admins/${ba.id}/reset-password`, { password: customPass || undefined });
+      const res = await api.put(`/block-admin/volunteers/${ba.id}`, { password: customPass || undefined });
       if (res.data?.success) {
-        alert(`Password for ${ba.email} successfully updated to: ${res.data.new_password}`);
+        alert(`Password for ${ba.email} successfully updated.`);
         loadData();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to reset password');
+      alert(err.response?.data?.message || 'Failed to update password');
     }
   };
 
   const handleDeleteMeghalaAdmin = async (baId, baName) => {
-    if (!window.confirm(`Are you sure you want to delete Meghala Committee Admin "${baName}"? This action cannot be undone.`)) return;
+    if (!window.confirm(`Are you sure you want to delete Volunteer "${baName}"? This action cannot be undone.`)) return;
     try {
-      const res = await api.delete(`/admin/meghala-admins/${baId}`);
+      const res = await api.delete(`/block-admin/volunteers/${baId}`);
       if (res.data?.success) loadData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete Admin');
+      alert(err.response?.data?.message || 'Failed to delete Volunteer');
     }
   };
 

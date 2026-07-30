@@ -195,14 +195,9 @@ export default function Register() {
     const res = await registerUser(finalData);
     setSubmitting(false);
     if (res.success) {
-      if (role === "hospital") {
-        triggerToast("Registration submitted! Awaiting administrator approval.", "success");
-        navigate("/hospital/dashboard");
-      } else {
-        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ["#DC2626", "#B91C1C", "#ffffff"] });
-        triggerToast("Welcome to JeevaLink! 🎉", "success");
-        navigate("/donor/dashboard");
-      }
+      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ["#DC2626", "#B91C1C", "#ffffff"] });
+      triggerToast("Welcome to JeevaLink! 🎉", "success");
+      navigate("/dashboard");
     } else {
       triggerToast(res.message || "Registration failed. Try again.", "error");
     }

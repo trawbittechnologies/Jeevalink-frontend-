@@ -4,17 +4,25 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, PlusCircle, Megaphone
+  Building2, Megaphone
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
-const donorLinks = [
+const userLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/donor/eligibility', label: 'Health Eligibility', icon: ShieldCheck },
   { to: '/donor/search', label: 'Find Donors', icon: Search },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
+  { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
+  { to: '/profile', label: 'My Profile', icon: User },
+];
+
+const unitSquadLinks = [
+  { to: '/unit-squad/dashboard', label: 'Unit Squad Dashboard', icon: LayoutDashboard },
+  { to: '/volunteer/users', label: 'Add & Manage Users', icon: Users },
+  { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
   { to: '/profile', label: 'My Profile', icon: User },
 ];
@@ -30,7 +38,7 @@ const volunteerLinks = [
   { to: '/profile', label: 'My Profile', icon: User },
 ];
 
-const adminLinks = [
+const blockAdminLinks = [
   { to: '/block-admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/admin/volunteers', label: 'Manage Volunteers', icon: Users },
@@ -38,14 +46,6 @@ const adminLinks = [
   { to: '/admin/feedback', label: 'Feedback & Complaints', icon: ClipboardList },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
   { to: '/donor/search', label: 'Find Donors', icon: Search },
-  { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
-  { to: '/profile', label: 'My Profile', icon: User },
-];
-
-const unitSquadLinks = [
-  { to: '/unit-squad/dashboard', label: 'Unit Squad Dashboard', icon: LayoutDashboard },
-  { to: '/volunteer/users', label: 'Add & Manage Users', icon: Users },
-  { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
   { to: '/profile', label: 'My Profile', icon: User },
 ];
@@ -70,17 +70,17 @@ const technicalAdminLinks = [
 
 export default function Sidebar() {
   const { user, logout } = useAuthStore();
-  const { allUsers, complaints } = useAppStore();
+  const { complaints } = useAppStore();
   const navigate = useNavigate();
   const location = useLocation();
 
   let links =
     user?.role === 'technical_admin' ? technicalAdminLinks :
-      user?.role === 'super_admin' ? superAdminLinks :
-        user?.role === 'admin' ? adminLinks :
-          user?.role === 'volunteer' ? volunteerLinks :
-            user?.role === 'unit_squad' ? unitSquadLinks :
-              donorLinks;
+    user?.role === 'super_admin' ? superAdminLinks :
+    user?.role === 'block_admin' ? blockAdminLinks :
+    user?.role === 'volunteer' ? volunteerLinks :
+    user?.role === 'unit_squad' ? unitSquadLinks :
+    userLinks;
 
   const isActive = (to) => {
     try {
@@ -103,10 +103,6 @@ export default function Sidebar() {
     }
   };
 
-  const pendingHospitalsCount = allUsers.filter(
-    (u) => u.role === 'hospital' && u.status === 'Pending Approval'
-  ).length;
-
   const pendingComplaintsCount = complaints.filter(
     (c) => c.status === 'Pending'
   ).length;
@@ -124,7 +120,6 @@ export default function Sidebar() {
         <JeevaLinkLogo size={36} textClassName="text-[17px]" />
       </Link>
 
-
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {links.map((link) => {
@@ -132,7 +127,6 @@ export default function Sidebar() {
           const active = isActive(link.to);
 
           let badgeCount = 0;
-          if (link.badgeCountKey === 'hospitals') badgeCount = pendingHospitalsCount;
           if (link.badgeCountKey === 'complaints') badgeCount = pendingComplaintsCount;
 
           return (
@@ -171,7 +165,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Blood group badge - Only for user role */}
-      {(user?.role === 'user' || user?.role === 'donor') && user?.bloodGroup && user.bloodGroup !== 'N/A' && (
+      {user?.role === 'user' && user?.bloodGroup && user.bloodGroup !== 'N/A' && (
         <div className="px-4 mb-3">
           <div className="px-4 py-3 bg-gradient-to-br from-red-50 via-rose-50 to-red-50/50 rounded-2xl border border-red-100">
             <p className="text-[9px] font-black uppercase tracking-widest text-red-400 mb-1">Your Blood Group</p>

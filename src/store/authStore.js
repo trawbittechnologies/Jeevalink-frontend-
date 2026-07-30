@@ -77,7 +77,7 @@ export const useAuthStore = create((set, get) => ({
           email,
           mobile: 'G-' + Date.now().toString().slice(-8), // unique dummy mobile
           password: dummyPass,
-          role: 'donor',
+          role: 'user',
           city: 'Kochi',
           district: 'Ernakulam',
           bloodGroup: 'O+'
@@ -98,7 +98,6 @@ export const useAuthStore = create((set, get) => ({
   register: async (userData) => {
     set({ loading: true, error: null });
     try {
-      const isHospital = userData.role === 'hospital';
       const mobile = userData.mobileNumber || userData.mobile || '';
       const email = userData.email || (mobile ? `${mobile}@jeevalink.org` : '');
 
@@ -107,7 +106,7 @@ export const useAuthStore = create((set, get) => ({
       formData.append('mobile', mobile);
       formData.append('email', email);
       formData.append('password', userData.password || '');
-      formData.append('role', isHospital ? 'hospital' : 'donor');
+      formData.append('role', 'user');
       formData.append('district', userData.district || '');
       formData.append('city', userData.city || '');
       formData.append('blood_group', userData.bloodGroup || 'N/A');
@@ -186,7 +185,7 @@ export const useAuthStore = create((set, get) => ({
         whatsapp_number: volunteerData.whatsapp || p1Contact,
       };
 
-      const res = await api.post('/admin/volunteers', payload);
+      const res = await api.post('/block-admin/volunteers', payload);
       const user = res.data.data?.user || res.data.data;
       
       // Sync list in appStore
@@ -237,7 +236,7 @@ export const useAuthStore = create((set, get) => ({
         status: volunteerData.status || 'Active'
       };
 
-      const res = await api.put(`/admin/meghala-admins/${id}`, payload);
+      const res = await api.put(`/block-admin/volunteers/${id}`, payload);
       const updatedUser = res.data.data;
       
       // Sync list in appStore

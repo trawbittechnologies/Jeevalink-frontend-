@@ -218,7 +218,7 @@ export default function Navbar() {
                       <Link to={dashboardLink} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                         <User className="w-4 h-4" /> Dashboard
                       </Link>
-                      {(user?.role === 'donor' || user?.role === 'user') && (
+                      {(user?.role === 'user') && (
                         <Link to="/donor/eligibility" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                           <ShieldCheck className="w-4 h-4 text-emerald-600" /> Health Check
                         </Link>

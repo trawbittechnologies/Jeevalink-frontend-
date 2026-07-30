@@ -178,8 +178,8 @@ export default function EmergencyDashboard() {
   const criticalAlerts = emergencyRequests.filter(r => r.priority === 'critical' && (r.status || 'pending').toLowerCase() === 'pending').length;
   const completedAlerts = emergencyRequests.filter(r => (r.status || 'pending').toLowerCase() === 'fulfilled').length;
 
-  const totalDonorsCount = allUsers.filter(u => u.role === 'donor').length;
-  const availableDonorsCount = allUsers.filter(u => u.role === 'donor' && u.availableForDonation).length;
+  const totalDonorsCount = allUsers.filter(u => u.role === 'user').length;
+  const availableDonorsCount = allUsers.filter(u => u.role === 'user' && u.availableForDonation).length;
 
   // Pie chart donor status
   const donorStatusData = [
