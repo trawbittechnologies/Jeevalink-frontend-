@@ -250,7 +250,7 @@ export default function SuperAdminManagement() {
     try {
       const res = await api.put(`/technical-admin/super-admins/${editingSA.id}`, {
         district: editDistrict,
-        full_name: `${editFullName1} & ${editFullName2}`,
+        full_name: editFullName2.trim() ? `${editFullName1} & ${editFullName2}` : editFullName1,
         email: editEmail,
         mobile: editMobile1,
         secondaryContactName: editFullName2,

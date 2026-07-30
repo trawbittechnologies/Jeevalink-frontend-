@@ -86,6 +86,16 @@ export default function TechnicalAdminDashboard() {
     return () => { active = false; };
   }, [loadData]);
 
+  const openEditSA = (sa) => {
+    setEditingSA(sa);
+    setEditDistrict(sa.district || 'Kozhikode');
+    setEditFullName(sa.full_name || sa.name || '');
+    setEditEmail(sa.email || '');
+    setEditMobile(sa.mobile || '');
+    setEditSecContact(sa.secondaryContactName || sa.secondary_contact_name || sa.secondary_contact || '');
+    setEditStatus(sa.status || 'Active');
+  };
+
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!editingSA) return;
