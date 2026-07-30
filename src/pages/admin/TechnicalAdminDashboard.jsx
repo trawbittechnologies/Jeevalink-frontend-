@@ -106,7 +106,7 @@ export default function TechnicalAdminDashboard() {
         full_name: editFullName,
         email: editEmail,
         mobile: editMobile,
-        secondary_contact: editSecContact,
+        secondary_contact_name: editSecContact,
         status: editStatus
       });
       if (res.data?.success) {
@@ -412,7 +412,7 @@ export default function TechnicalAdminDashboard() {
                 <div className="text-xs text-slate-600 space-y-0.5 font-medium">
                   <p className="truncate">Email: {sa.email}</p>
                   <p>Mobile: {sa.mobile}</p>
-                  {sa.secondary_contact && <p>Sec: {sa.secondary_contact}</p>}
+                  {(sa.secondaryContactName || sa.secondary_contact_name || sa.secondary_contact) && <p>Sec: {sa.secondaryContactName || sa.secondary_contact_name || sa.secondary_contact}</p>}
                 </div>
               </div>
             ))}
