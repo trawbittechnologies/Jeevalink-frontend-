@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldAlert, Plus, RefreshCw, ExternalLink,
+  ShieldAlert, Plus, RefreshCw, ExternalLink, Edit,
   TrendingUp, Activity, ShieldCheck, BarChart3, PieChart as PieIcon
 } from 'lucide-react';
 import {
@@ -393,11 +393,20 @@ export default function TechnicalAdminDashboard() {
                   <span className="px-2.5 py-0.5 bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold rounded-full">
                     {sa.district || 'District'}
                   </span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                    sa.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
-                  }`}>
-                    {sa.status || 'Active'}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      sa.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
+                    }`}>
+                      {sa.status || 'Active'}
+                    </span>
+                    <button
+                      onClick={() => openEditSA(sa)}
+                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                      title="Edit Super Admin"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <h4 className="font-bold text-slate-900 text-sm truncate">{sa.full_name || sa.name}</h4>
                 <div className="text-xs text-slate-600 space-y-0.5 font-medium">
