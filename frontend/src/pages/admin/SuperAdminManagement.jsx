@@ -313,16 +313,21 @@ export default function SuperAdminManagement() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Top Banner - Minimal Red & White Theme */}
-      <div className="bg-gradient-to-r from-red-600 via-red-600 to-rose-700 rounded-3xl p-6 lg:p-8 text-white shadow-lg shadow-red-600/15 relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+      {/* Top Banner - Kerala Green Cover Image */}
+      <div className="relative rounded-3xl p-6 lg:p-8 text-white shadow-xl overflow-hidden border border-slate-200">
+        <img
+          src="/kasaragod_banner.png"
+          alt="Super Admin Directory Cover Image"
+          className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 border border-white/20 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm">
-              <ShieldAlert className="w-4 h-4 text-white" /> Technical Admin Module
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md shadow-sm">
+              <ShieldAlert className="w-4 h-4 text-emerald-300" /> Technical Admin Module
             </div>
-            <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-white">Super Admin Directory</h1>
-            <p className="text-red-100 text-sm mt-1 max-w-2xl font-medium">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-md">Super Admin Directory</h1>
+            <p className="text-slate-100 text-xs sm:text-sm mt-1 max-w-2xl font-medium drop-shadow-sm">
               View and manage District Super Admin accounts, toggle active status, send warnings or official notices, and generate credentials.
             </p>
           </div>
@@ -330,36 +335,32 @@ export default function SuperAdminManagement() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={openAddModal}
-              className="px-5 py-3 bg-white text-red-600 hover:bg-red-50 rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
+              className="px-4 sm:px-5 py-2.5 sm:py-3 bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
             >
               <Plus className="w-4 h-4 stroke-[3]" /> Add Super Admin
             </button>
             <button
               onClick={loadData}
-              className="px-4 py-3 bg-white/15 hover:bg-white/25 border border-white/20 rounded-2xl text-xs font-bold text-white transition flex items-center gap-2 cursor-pointer backdrop-blur-md"
+              className="px-4 py-2.5 sm:py-3 bg-black/30 hover:bg-black/50 border border-white/25 rounded-2xl text-xs font-bold text-white transition flex items-center gap-2 cursor-pointer backdrop-blur-md"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Data
             </button>
           </div>
         </div>
 
-        {/* Minimal Red Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 pt-6 border-t border-white/15">
-          <div className="bg-white/10 border border-white/15 rounded-2xl p-3.5 backdrop-blur-sm">
-            <p className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Total Super Admins</p>
-            <p className="text-2xl font-black text-white mt-0.5">{superAdmins.length}</p>
+        {/* Quick Stat Bar (Matching Tech Admin Banner Card Height & Grid Layout) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-white/20 relative z-10">
+          <div className="bg-black/35 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md shadow-xs">
+            <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Total Super Admins</p>
+            <p className="text-xl sm:text-2xl font-black text-white mt-0.5">{superAdmins.length}</p>
           </div>
-          <div className="bg-white/10 border border-white/15 rounded-2xl p-3.5 backdrop-blur-sm">
-            <p className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Active Accounts</p>
-            <p className="text-2xl font-black text-white mt-0.5">{activeCount}</p>
+          <div className="bg-black/35 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md shadow-xs">
+            <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Districts Covered</p>
+            <p className="text-xl sm:text-2xl font-black text-white mt-0.5">{totalDistrictsCount} / 14</p>
           </div>
-          <div className="bg-white/10 border border-white/15 rounded-2xl p-3.5 backdrop-blur-sm">
-            <p className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Districts Covered</p>
-            <p className="text-2xl font-black text-white mt-0.5">{totalDistrictsCount} / 14</p>
-          </div>
-          <div className="bg-white/10 border border-white/15 rounded-2xl p-3.5 backdrop-blur-sm">
-            <p className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Inactive Accounts</p>
-            <p className="text-2xl font-black text-white mt-0.5">{superAdmins.length - activeCount}</p>
+          <div className="bg-black/35 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md shadow-xs">
+            <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Inactive Accounts</p>
+            <p className="text-xl sm:text-2xl font-black text-white mt-0.5">{superAdmins.length - activeCount}</p>
           </div>
         </div>
       </div>

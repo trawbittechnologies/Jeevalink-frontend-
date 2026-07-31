@@ -1,0 +1,28 @@
+================================================================================
+JEEVALINK BLOOD DONATION MANAGEMENT SYSTEM - VERSION 1.0 OVERVIEW
+================================================================================
+
+1. PROJECT BACKGROUND
+----------------------
+JeevaLink V1 was launched as a basic blood donation registry aimed at connecting blood donors with patients in urgent need across local communities. The primary goal was to digitize paper-based blood donor directories and replace manual phone calls with a centralized search interface.
+
+2. CORE FEATURES IN V1
+----------------------
+- Basic User Registration & Login (Email & Password).
+- Static Donor Search Filter by Blood Group and District.
+- Simple Blood Request Postings.
+- Manual Phone Number Lookup for Donors.
+- Single Admin Role for basic user management.
+
+3. ARCHITECTURAL LIMITATIONS IN V1
+----------------------------------
+- Lack of Role-Based Access Control (RBAC): Only standard users and basic admin existed.
+- Direct Donor Calling: User privacy was compromised as contact numbers were exposed directly to any site visitor.
+- Monolithic Single Bundle Frontend: Large static JavaScript bundles causing slow initial page load times.
+- Inline Controller Logic: Monolithic controller methods mixing SQL queries, validation, and HTTP responses.
+- Missing Automated Verification: No OTP verification or volunteer approval pipeline for blood requests.
+- Limited Analytics & Logging: Absence of activity logging, technical reports, and reward systems.
+
+================================================================================
+End of V1 Overview Document
+================================================================================

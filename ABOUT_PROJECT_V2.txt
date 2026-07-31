@@ -1,0 +1,43 @@
+================================================================================
+JEEVALINK BLOOD DONATION MANAGEMENT SYSTEM - VERSION 2.0 ENTERPRISE OVERVIEW
+================================================================================
+
+1. EXECUTIVE SUMMARY
+---------------------
+JeevaLink V2 represents a complete architectural evolution into an enterprise-grade, multi-tiered Blood Donation Management System. Built with clean architecture, strict 6-tier Role-Based Access Control (RBAC), real-time emergency SOS dispatching, automated OTP verification, dynamic poster generation, and gamified donation reward systems.
+
+2. KEY ARCHITECTURAL UPGRADES IN V2
+-----------------------------------
+- 6-Tier Hierarchical RBAC:
+  * Technical Admin (Level 1): System configuration, Super Admin provisioning, global error tracking.
+  * Super Admin (Level 2): District-level oversight, Block Admin management, district analytics.
+  * Block Admin (Level 3): Block-level management, volunteer oversight, ticket & feedback handling.
+  * Volunteer (Level 4): Meghala-level scope, user verification, request approval, poster rendering.
+  * Unit Squad (Level 5): Unit committee management, local donor enrollment.
+  * User / Donor (Level 6): Blood request submission, availability toggle, complaints, points.
+
+- Privacy-Preserving Call System:
+  * Users cannot directly access donor phone numbers. Calls redirect strictly to the assigned Meghala Volunteer.
+
+- Automated OTP & Verification Pipeline:
+  * 1-minute OTP expiration, 10-minute cooldown rules, maximum 2 request limits to prevent spam.
+  * Age restriction validation (Minimum 18 years required for registration).
+
+- Gamified Rewards & Leaderboard System:
+  * Points awarded for every successful donation.
+  * Monthly leaderboards tracking Highest Donor, Highest Volunteer, and Highest Meghala.
+  * Honor Badges:
+    - 100 Points: First Drop
+    - 500 Points: Life Saver
+    - 1000 Points: Blood Hero
+    - 2500 Points: Red Guardian
+    - 5000 Points: Legend Donor
+
+- Technical Stack & Infrastructure:
+  * Frontend: React 19, Vite (with custom Rollup manual chunking & lazy route code splitting), Tailwind CSS.
+  * Backend: Laravel 12, MySQL, JWT Authentication, Repository & Service Pattern architecture.
+  * Security: Form Request input validation, parameter binding SQL injection protection, XSS sanitization.
+
+================================================================================
+End of V2 Enterprise Overview Document
+================================================================================

@@ -1,46 +1,14 @@
 {
-  "name": "jeevalink",
+  "name": "jeevalink-monorepo",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run client\" \"npm run server\"",
-    "client": "vite",
+    "dev": "npx --yes concurrently \"npm --prefix frontend run dev\" \"php -S 127.0.0.1:8000 -t backend/public\"",
+    "client": "npm --prefix frontend run dev",
     "server": "php -S 127.0.0.1:8000 -t backend/public",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@hookform/resolvers": "^5.4.0",
-    "@tailwindcss/vite": "^4.3.0",
-    "axios": "^1.17.0",
-    "canvas-confetti": "^1.9.4",
-    "concurrently": "^10.0.3",
-    "framer-motion": "^12.40.0",
-    "html-to-image": "^1.11.13",
-    "leaflet": "^1.9.4",
-    "lucide-react": "^1.17.0",
-    "qrcode.react": "^4.2.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-hook-form": "^7.78.0",
-    "react-leaflet": "^5.0.0",
-    "react-router-dom": "^7.17.0",
-    "recharts": "^3.8.1",
-    "tailwindcss": "^4.3.0",
-    "zod": "^4.4.3",
-    "zustand": "^5.0.14"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^10.3.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.6.0",
-    "vite": "^8.0.12"
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "preview": "npm --prefix frontend run preview"
   }
 }

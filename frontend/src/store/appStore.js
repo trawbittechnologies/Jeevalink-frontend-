@@ -1014,7 +1014,7 @@ export const useAppStore = create((set, get) => ({
   fetchCampaignPosts: async (category = 'all', search = '') => {
     try {
       const res = await api.get('/campaigns', { params: { category, search } });
-      if (res.data.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+      if (res.data.success && Array.isArray(res.data.data)) {
         set({ campaignPosts: res.data.data });
       }
     } catch (err) {
@@ -1097,6 +1097,21 @@ export const useAppStore = create((set, get) => ({
       await api.delete(`/campaigns/${postId}`);
     } catch (err) {
       console.warn('Delete state persisted locally.', err);
+    }
+  },
+
+  updateCampaignPost: async (postId, updatedData) => {
+    set((state) => ({
+      campaignPosts: state.campaignPosts.map((p) =>
+        p.id === postId ? { ...p, ...updatedData } : p
+      )
+    }));
+    get().triggerToast('Campaign updated successfully!', 'success');
+
+    try {
+      await api.put(`/campaigns/${postId}`, updatedData);
+    } catch (err) {
+      console.warn('Update state persisted locally.', err);
     }
   }
 

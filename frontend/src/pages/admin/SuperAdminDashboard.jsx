@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheck, Plus, RefreshCw, Eye, EyeOff, Edit3, Trash2, X, Building2,
+  ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
   Users, UserCheck, Activity, BarChart3, TrendingUp, Search, Phone, Mail
 } from 'lucide-react';
 import api from '../../store/api.js';
@@ -63,8 +63,6 @@ export default function SuperAdminDashboard() {
   const [blockAdmins, setBlockAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // New Block Admin Form state
-  const [hidePasswords, setHidePasswords] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Edit Block Admin Modal state
@@ -94,7 +92,7 @@ export default function SuperAdminDashboard() {
       if (resDist.data?.success) {
         const dData = resDist.data.data || resDist.data;
         setDistrictData({
-          district: dData.district || 'Kozhikode',
+          district: dData.district || 'Kasaragod',
           total_users: dData.total_users || 0,
           total_volunteers: dData.total_volunteers || 0,
           total_admins: dData.total_admins || 0,
@@ -222,36 +220,59 @@ export default function SuperAdminDashboard() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 select-none">
       
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 p-6 rounded-3xl shadow-sm">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 rounded-full text-red-700 dark:text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-4 h-4 text-red-600" /> District Super Admin Command Portal ({districtData.district || 'Kozhikode'})
+      {/* Header Banner with Kasaragod Banner Image (Matching Tech Admin Card Size) */}
+      <div className="relative rounded-3xl p-6 lg:p-8 text-white shadow-xl overflow-hidden border border-slate-200">
+        <img
+          src="/kasaragod_banner.png"
+          alt="Kasaragod Super Admin Banner"
+          className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25 pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md shadow-sm">
+              <ShieldCheck className="w-4 h-4 text-emerald-300" /> District Super Admin Command Portal ({districtData.district || 'Kasaragod'})
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-md">
+              Kasaragod District Administration & Analytics
+            </h1>
+            <p className="text-slate-100 text-xs sm:text-sm mt-1 max-w-2xl font-medium drop-shadow-sm">
+              Manage Block Committees, Oversee District Operations, and Track Real-Time Analytics
+            </p>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100">District Administration & Analytics</h1>
-          <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">Manage Block Committees, Oversee District Operations, and Track Analytics</p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link 
+              to="/super-admin/blocks" 
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
+            >
+              <Building2 className="w-4 h-4" /> Manage Block Committees
+            </Link>
+            <button 
+              onClick={loadData} 
+              className="px-4 py-2.5 bg-white text-slate-900 hover:bg-slate-100 rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Data
+            </button>
+          </div>
         </div>
-        
-        <div className="flex flex-wrap items-center gap-3">
-          <Link 
-            to="/super-admin/blocks" 
-            className="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-xs font-bold shadow-md shadow-red-200 transition flex items-center gap-2 cursor-pointer"
-          >
-            <Building2 className="w-4 h-4" /> Manage Block Committees
-          </Link>
-          <button 
-            onClick={() => setHidePasswords(!hidePasswords)} 
-            className="px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
-          >
-            {hidePasswords ? <EyeOff className="w-4 h-4 text-amber-600" /> : <Eye className="w-4 h-4 text-emerald-600" />}
-            {hidePasswords ? 'Hide Passwords' : 'Show Passwords'}
-          </button>
-          <button 
-            onClick={loadData} 
-            className="px-4 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 text-slate-700 dark:text-zinc-200 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Data
-          </button>
+
+        {/* District Live Stat Bar (Matching Tech Admin Banner Card Height & Grid Layout) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-white/20 relative z-10">
+          {[
+            { label: 'Total Donors', val: districtData.total_users || 0 },
+            { label: 'Volunteers', val: districtData.total_volunteers || 0 },
+            { label: 'Block Admins', val: districtData.total_admins || 0 },
+            { label: 'Active Blocks', val: availableBlocks.length || 0 }
+          ].map((m, idx) => (
+            <div key={idx} className="bg-black/35 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md shadow-xs">
+              <div className="flex items-center justify-between text-[10px] font-bold text-emerald-200 uppercase tracking-wider">
+                <span>{m.label}</span>
+                <span className="text-white/80 font-mono text-[9px]">District DB</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-black text-white mt-0.5 sm:mt-1">{m.val}</p>
+            </div>
+          ))}
         </div>
       </div>
 

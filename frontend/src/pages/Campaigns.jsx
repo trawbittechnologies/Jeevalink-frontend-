@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import {
   Heart, Share2, Download, Plus, Search, Calendar, MapPin,
-  ShieldCheck, X, Megaphone, Trash2, Activity, Stethoscope,
+  ShieldCheck, X, Megaphone, Trash2, Edit3, Activity, Stethoscope,
   Droplets, UserCheck, HeartHandshake, Smile, Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +14,7 @@ export default function Campaigns() {
     campaignPosts,
     fetchCampaignPosts,
     createCampaignPost,
+    updateCampaignPost,
     toggleLikeCampaignPost,
     incrementShareCampaignPost,
     deleteCampaignPost,
@@ -23,6 +24,7 @@ export default function Campaigns() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPostId, setEditingPostId] = useState(null);
   const [shareModalPost, setShareModalPost] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
@@ -102,7 +104,43 @@ export default function Campaigns() {
     reader.readAsDataURL(file);
   };
 
-  const handleCreateSubmit = async (e) => {
+  const handleOpenCreateModal = () => {
+    setEditingPostId(null);
+    setFormData({
+      title: '',
+      category: 'blood_donation',
+      description: '',
+      venue: '',
+      event_date: '',
+      event_time: '',
+      organizer_name: user?.full_name || 'JeevaLink Squad',
+      contact_phone: user?.phone_number || '',
+      image_url: presetImages.blood_donation,
+      district: user?.district || '',
+      block: user?.block || ''
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (post) => {
+    setEditingPostId(post.id);
+    setFormData({
+      title: post.title || '',
+      category: post.category || 'blood_donation',
+      description: post.description || '',
+      venue: post.venue || '',
+      event_date: post.event_date || '',
+      event_time: post.event_time || '',
+      organizer_name: post.organizer_name || user?.full_name || 'JeevaLink Squad',
+      contact_phone: post.contact_phone || user?.phone_number || '',
+      image_url: post.image_url || presetImages[post.category] || presetImages.blood_donation,
+      district: post.district || user?.district || '',
+      block: post.block || user?.block || ''
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.description) {
       triggerToast('Please fill out title and description.', 'error');
@@ -110,12 +148,17 @@ export default function Campaigns() {
     }
     setIsSubmitting(true);
     try {
-      await createCampaignPost({
-        ...formData,
-        author_name: user?.full_name || 'Volunteer Lead',
-        author_role: user?.role || 'volunteer'
-      });
+      if (editingPostId) {
+        await updateCampaignPost(editingPostId, { ...formData });
+      } else {
+        await createCampaignPost({
+          ...formData,
+          author_name: user?.full_name || 'Volunteer Lead',
+          author_role: user?.role || 'volunteer'
+        });
+      }
       setIsModalOpen(false);
+      setEditingPostId(null);
       setFormData({
         title: '',
         category: 'blood_donation',
@@ -130,7 +173,7 @@ export default function Campaigns() {
         block: user?.block || ''
       });
     } catch {
-      triggerToast('Failed to create campaign.', 'error');
+      triggerToast(editingPostId ? 'Failed to update campaign.' : 'Failed to create campaign.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -349,7 +392,7 @@ export default function Campaigns() {
 
             {canCreate && (
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleOpenCreateModal}
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white text-red-600 font-extrabold text-sm shadow-lg hover:bg-red-50 transition self-start md:self-center shrink-0 border border-white/20"
               >
                 <Plus className="w-5 h-5 stroke-[3]" />
@@ -421,7 +464,7 @@ export default function Campaigns() {
             <p className="text-slate-500 text-xs mt-1">There are no programs posted yet under this filter. Click below to publish your first campaign!</p>
             {canCreate && (
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleOpenCreateModal}
                 className="mt-5 px-5 py-2.5 bg-red-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-red-700 transition"
               >
                 Publish First Campaign
@@ -456,13 +499,22 @@ export default function Campaigns() {
                         </span>
 
                         {isOwnerOrAdmin && (
-                          <button
-                            onClick={() => deleteCampaignPost(post.id)}
-                            className="w-7 h-7 rounded-full bg-slate-900/70 hover:bg-red-600 text-white flex items-center justify-center backdrop-blur-sm transition"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleOpenEditModal(post)}
+                              className="w-7 h-7 rounded-full bg-slate-900/70 hover:bg-blue-600 text-white flex items-center justify-center backdrop-blur-sm transition"
+                              title="Edit Campaign"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => deleteCampaignPost(post.id)}
+                              className="w-7 h-7 rounded-full bg-slate-900/70 hover:bg-red-600 text-white flex items-center justify-center backdrop-blur-sm transition"
+                              title="Delete Campaign"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </div>
 
@@ -567,13 +619,15 @@ export default function Campaigns() {
               className="bg-white rounded-2xl shadow-2xl border border-red-100 w-full max-w-lg overflow-hidden"
             >
               <div className="bg-red-600 px-6 py-4 text-white flex items-center justify-between">
-                <h3 className="text-base font-extrabold text-white">Publish New Campaign</h3>
+                <h3 className="text-base font-extrabold text-white">
+                  {editingPostId ? 'Edit Campaign Program' : 'Publish New Campaign'}
+                </h3>
                 <button onClick={() => setIsModalOpen(false)} className="text-red-100 hover:text-white">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
+              <form onSubmit={handleFormSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
                 <div>
                   <label className="block font-extrabold text-slate-700 mb-1">Program Title *</label>
                   <input
@@ -710,7 +764,10 @@ export default function Campaigns() {
                     disabled={isSubmitting}
                     className="px-5 py-2 font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-md shadow-red-600/30"
                   >
-                    {isSubmitting ? 'Publishing...' : 'Publish Campaign'}
+                    {isSubmitting
+                      ? (editingPostId ? 'Saving...' : 'Publishing...')
+                      : (editingPostId ? 'Save Changes' : 'Publish Campaign')
+                    }
                   </button>
                 </div>
               </form>

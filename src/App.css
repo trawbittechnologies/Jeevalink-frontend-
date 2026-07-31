@@ -1,6 +1,0 @@
-/* App-level overrides — keep minimal, most styles live in index.css */
-
-/* Remove any lingering Vite defaults */
-#root {
-  min-height: 100vh;
-}
