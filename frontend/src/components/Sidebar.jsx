@@ -41,7 +41,7 @@ const volunteerLinks = [
 const blockAdminLinks = [
   { to: '/block-admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
-  { to: '/admin/volunteers', label: 'Manage Volunteers', icon: Users },
+  { to: '/admin/volunteers', label: 'Add & Manage Volunteers', icon: Users },
   { to: '/volunteer/unit-committee', label: 'Unit Squad Committee', icon: ShieldCheck },
   { to: '/admin/feedback', label: 'Feedback & Complaints', icon: ClipboardList },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },

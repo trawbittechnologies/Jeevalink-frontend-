@@ -85,7 +85,7 @@ export default function SuperAdminDashboard() {
   const loadData = useCallback(async () => {
     try {
       const [resDist, resAdmins] = await Promise.all([
-        api.get('/super-admin/district-data'),
+        api.get('/super-admin/metrics'),
         api.get('/super-admin/block-admins')
       ]);
 
@@ -95,7 +95,7 @@ export default function SuperAdminDashboard() {
           district: dData.district || 'Kasaragod',
           total_users: dData.total_users || 0,
           total_volunteers: dData.total_volunteers || 0,
-          total_admins: dData.total_admins || 0,
+          total_admins: dData.total_block_admins || 0,
           volunteers: dData.volunteers || [],
           admins: dData.admins || [],
           members: dData.members || [],

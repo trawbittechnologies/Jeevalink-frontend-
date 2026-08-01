@@ -3,7 +3,7 @@ import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, Eye, Edit2, Trash2, UserCheck, UserX, Lock,
+  Plus, Eye, Edit2, Trash2, User, UserCheck, UserX, Lock,
   CheckCircle2, XCircle, Clock, X, Save, Phone, Mail,
   MapPin, Building2, Loader2, Download
 } from 'lucide-react';
@@ -60,7 +60,7 @@ export default function VolunteerManagement() {
   const [loading, setLoading] = useState(false);
   const [credentialsModal, setCredentialsModal] = useState({ open: false, email: '', password: '', emailSent: false });
 
-  const canAddVolunteer = user?.role === 'admin';
+  const canAddVolunteer = ['admin', 'super_admin', 'block_admin'].includes(user?.role);
 
   useEffect(() => {
     fetchUsers();
@@ -72,7 +72,7 @@ export default function VolunteerManagement() {
     const q = search.toLowerCase();
     const secName = v.secondaryName || v.secondary_name || v.person2Name || '';
     const secNum = v.secondaryContactNumber || v.secondary_contact_number || v.secondaryContact || v.person2Contact || '';
-    const matchSearch = !q || [v.meghala, v.blockCommitteeName, v.blockName, v.primaryName, v.name, v.email, v.mobile, secName, secNum, v.district]
+    const matchSearch = !q || [v.meghala, v.city, v.blockCommitteeName, v.blockName, v.primaryName, v.name, v.email, v.mobile, secName, secNum, v.district]
       .some(f => String(f || '').toLowerCase().includes(q));
     const matchStatus = filters.status === 'all' || (v.status || '').toLowerCase() === filters.status;
     const matchDistrict = filters.district === 'all' || v.district === filters.district;
@@ -82,7 +82,7 @@ export default function VolunteerManagement() {
   const exportCSV = () => {
     const headers = ['Meghala Name', 'Primary Volunteer Name', 'Primary Phone', 'Secondary Volunteer Name', 'Secondary Volunteer Phone', 'Email', 'District', 'Status', 'Registered'];
     const rows = filtered.map(v => [
-      v.meghala || v.blockCommitteeName || v.blockName || '',
+      v.meghala || v.city || v.blockCommitteeName || v.blockName || '',
       v.primaryName || v.name || '',
       v.mobile || '',
       v.secondaryName || v.secondary_name || v.person2Name || '',
@@ -214,7 +214,7 @@ export default function VolunteerManagement() {
                       <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 rounded-xl font-bold">
                           <Building2 className="w-3.5 h-3.5 text-red-600" />
-                          {vol.meghala || vol.blockCommitteeName || vol.blockName || 'Unassigned'}
+                          {vol.meghala || vol.city || vol.blockCommitteeName || vol.blockName || 'Unassigned'}
                         </span>
                       </td>
 
@@ -294,7 +294,7 @@ export default function VolunteerManagement() {
                           onClick={() => { 
                             setSelectedVolunteer(vol); 
                             setForm({
-                              meghalaName: vol.meghala || vol.blockCommitteeName || vol.blockName || '',
+                              meghalaName: vol.meghala || vol.city || vol.blockCommitteeName || vol.blockName || '',
                               person1Name: p1Name,
                               person1Contact: p1Mobile,
                               person2Name: p2Name === '—' ? '' : p2Name,
@@ -330,33 +330,41 @@ export default function VolunteerManagement() {
 
       {/* View Details Modal */}
       <AnimatePresence>
-        {showViewModal && selectedVolunteer && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50" onClick={() => setShowViewModal(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4">
-              <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xl">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-slate-900 text-lg font-black">Volunteer (Meghala) Details</h3>
-                  <button onClick={() => setShowViewModal(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"><X className="w-4 h-4" /></button>
-                </div>
-                
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 font-black text-xl">
-                    <Building2 className="w-7 h-7 text-red-600" />
+        {showViewModal && selectedVolunteer && (() => {
+          const full = selectedVolunteer.primaryName || selectedVolunteer.primary_name || selectedVolunteer.name || '';
+          const nameParts = Array.from(new Set(full.split(/[&,]+/).map(s => s.trim()).filter(Boolean)));
+          const p1Name = selectedVolunteer.person1Name || nameParts[0] || '—';
+          const p2Name = selectedVolunteer.secondaryName || selectedVolunteer.secondary_name || selectedVolunteer.person2Name || (nameParts.length > 1 ? nameParts[1] : '—');
+          
+          return (
+            <>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50" onClick={() => setShowViewModal(false)} />
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4">
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xl">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-slate-900 text-lg font-black">Volunteer (Meghala) Details</h3>
+                    <button onClick={() => setShowViewModal(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"><X className="w-4 h-4" /></button>
                   </div>
-                  <div>
-                    <p className="text-slate-900 font-black text-base">{selectedVolunteer.meghala || selectedVolunteer.blockCommitteeName || selectedVolunteer.primaryName}</p>
-                    <StatusBadge status={selectedVolunteer.status} />
-                    <p className="text-slate-500 text-[10px] mt-0.5">ID: {selectedVolunteer._id || selectedVolunteer.id}</p>
+                  
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 font-black text-xl">
+                      <Building2 className="w-7 h-7 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-slate-900 font-black text-base">{selectedVolunteer.meghala || selectedVolunteer.city || selectedVolunteer.blockCommitteeName || p1Name}</p>
+                      <StatusBadge status={selectedVolunteer.status} />
+                      <p className="text-slate-500 text-[10px] mt-0.5">ID: {selectedVolunteer._id || selectedVolunteer.id}</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { icon: Building2, label: 'Meghala Name', val: selectedVolunteer.meghala || selectedVolunteer.blockCommitteeName || '—' },
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { icon: Building2, label: 'Meghala Name', val: selectedVolunteer.meghala || selectedVolunteer.city || selectedVolunteer.blockCommitteeName || '—' },
+                      { icon: User, label: 'Primary Volunteer', val: p1Name },
+                      { icon: Phone, label: 'Primary Contact', val: selectedVolunteer.mobile || '—' },
+                      { icon: User, label: 'Secondary Volunteer', val: p2Name },
+                    { icon: Phone, label: 'Secondary Contact', val: selectedVolunteer.secondaryContact || selectedVolunteer.secondaryContactNumber || selectedVolunteer.secondary_phone || '—' },
                     { icon: Mail, label: 'Email', val: selectedVolunteer.email },
-                    { icon: Phone, label: 'Primary Contact', val: selectedVolunteer.mobile || '—' },
-                    { icon: Phone, label: 'Secondary Contact', val: selectedVolunteer.secondaryContact || selectedVolunteer.secondaryContactNumber || '—' },
                     { icon: Phone, label: 'WhatsApp', val: selectedVolunteer.whatsappNumber || selectedVolunteer.whatsapp_number || '—' },
                     { icon: MapPin, label: 'District', val: selectedVolunteer.district || '—' },
                     { icon: Clock, label: 'Registered', val: new Date(selectedVolunteer.joinedAt || selectedVolunteer.createdAt || selectedVolunteer.created_at || new Date().toISOString()).toLocaleDateString('en-IN') },
@@ -375,7 +383,8 @@ export default function VolunteerManagement() {
               </div>
             </motion.div>
           </>
-        )}
+          );
+        })()}
       </AnimatePresence>
 
       {/* Add/Edit Volunteer Modal */}
@@ -529,7 +538,7 @@ export default function VolunteerManagement() {
           }
         }}
         title={confirmModal.action === 'delete' ? 'Delete Volunteer' : confirmModal.action === 'block' ? 'Block Volunteer Account' : confirmModal.action === 'activate' ? 'Activate Volunteer' : 'Deactivate Volunteer'}
-        message={confirmModal.action === 'delete' ? `Are you sure you want to permanently delete Volunteer "${confirmModal.item?.meghala || confirmModal.item?.primaryName}"? This action cannot be undone.` : `Are you sure you want to ${confirmModal.action} Volunteer "${confirmModal.item?.meghala || confirmModal.item?.primaryName}"?`}
+        message={confirmModal.action === 'delete' ? `Are you sure you want to permanently delete Volunteer "${confirmModal.item?.meghala || confirmModal.item?.city || confirmModal.item?.primaryName}"? This action cannot be undone.` : `Are you sure you want to ${confirmModal.action} Volunteer "${confirmModal.item?.meghala || confirmModal.item?.city || confirmModal.item?.primaryName}"?`}
         confirmLabel={confirmModal.action === 'delete' ? 'Delete Permanently' : confirmModal.action === 'block' ? 'Block Account' : confirmModal.action === 'activate' ? 'Activate' : 'Deactivate'}
         variant={confirmModal.action === 'delete' || confirmModal.action === 'block' ? 'danger' : confirmModal.action === 'activate' ? 'info' : 'warning'}
       />

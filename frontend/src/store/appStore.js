@@ -594,7 +594,10 @@ export const useAppStore = create((set, get) => ({
       get().triggerToast(failMsg, 'error');
       return { success: false, error: failMsg };
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Failed to add volunteer.';
+      let errMsg = err.response?.data?.message || 'Failed to add volunteer.';
+      if (err.response?.data?.errors) {
+        errMsg = Object.values(err.response.data.errors).flat().join(', ');
+      }
       get().triggerToast(errMsg, 'error');
       return { success: false, error: errMsg };
     }

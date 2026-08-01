@@ -22,8 +22,10 @@ export default function Profile() {
   const { register, handleSubmit } = useForm({
     defaultValues: {
       primaryName: user?.primaryName || '',
+      secondaryName: user?.secondaryName || '',
       email: user?.email || '',
       mobile: user?.mobile || '',
+      secondaryContactNumber: user?.secondaryContactNumber || '',
       district: user?.district || '',
       city: user?.city || '',
       bloodGroup: user?.bloodGroup || 'B+',
@@ -38,7 +40,12 @@ export default function Profile() {
 
   const onSubmit = async (data) => {
     setIsSaving(true);
-    const res = await updateProfile(data);
+    const payload = {
+      ...data,
+      secondary_name: data.secondaryName,
+      secondary_phone: data.secondaryContactNumber
+    };
+    const res = await updateProfile(payload);
     setIsSaving(false);
     if (res.success) triggerToast('Profile updated successfully!', 'success');
   };
@@ -258,7 +265,19 @@ export default function Profile() {
           />
         </div>
         <div className="min-w-0 flex-1 text-left">
-          <h3 className="text-lg font-black text-gray-900">{user?.primaryName}</h3>
+          <div className="mb-1">
+            <h3 className="text-lg font-black text-gray-900">
+              {user?.primaryName}
+              {user?.secondaryName && ` & ${user.secondaryName}`}
+            </h3>
+            <p className="text-sm font-semibold text-gray-500 mt-0.5">
+              {user?.mobile}
+              {user?.secondaryContactNumber && ` | ${user.secondaryContactNumber}`}
+            </p>
+          </div>
+          {user?.jeevalink_id && (
+            <p className="text-sm font-bold text-primary tracking-wide mb-0.5">{user.jeevalink_id}</p>
+          )}
           <p className="text-sm text-gray-500">{user?.city ? `${user.city}, ${user.district}` : user?.district || 'System Role'}</p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {isUserRole ? (
@@ -365,16 +384,30 @@ export default function Profile() {
                 <input type="text" {...register('primaryName', { required: true })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
+              {!isUserRole && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Secondary Name</label>
+                  <input type="text" {...register('secondaryName')}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Email Address</label>
                 <input type="email" {...register('email')}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Mobile Number</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Mobile Number (Primary)</label>
                 <input type="tel" {...register('mobile')}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
+              {!isUserRole && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Secondary Number</label>
+                  <input type="tel" {...register('secondaryContactNumber')}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
+                </div>
+              )}
               
               {isUserRole && (
                 <div>
@@ -461,6 +494,9 @@ export default function Profile() {
               <QRCodeSVG value={qrData} size={140} fgColor="#111111" bgColor="#ffffff" level="M" />
             </div>
             <h3 className="font-bold text-lg">{user?.primaryName}</h3>
+            {user?.jeevalink_id && (
+              <p className="text-sm font-black text-primary tracking-wider mt-0.5">{user.jeevalink_id}</p>
+            )}
             <p className="text-gray-400 text-xs mt-1">{user?.city}, {user?.district}</p>
             <div className="grid grid-cols-3 gap-3 mt-6 pt-5 border-t border-gray-800 text-left">
               <div>

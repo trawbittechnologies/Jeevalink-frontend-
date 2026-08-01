@@ -106,11 +106,12 @@ export default function AdminDashboard() {
         setPerson2Name(''); setPerson2Contact('');
         setWhatsapp(''); setEmail('');
         loadData();
-      } else {
-        setCreatedResult({ type: 'error', msg: res.data?.message || 'Creation failed' });
+    } catch (err) {
+      let errMsg = err.response?.data?.message || 'Network error while creating Committee.';
+      if (err.response?.data?.errors) {
+        errMsg = Object.values(err.response.data.errors).flat().join(', ');
       }
-    } catch {
-      setCreatedResult({ type: 'error', msg: 'Network error while creating Committee.' });
+      setCreatedResult({ type: 'error', msg: errMsg });
     }
   };
 
@@ -331,7 +332,7 @@ export default function AdminDashboard() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold rounded-full">
-                          Meghala: {ba.meghala || 'N/A'}
+                          Meghala: {ba.meghala || ba.city || 'N/A'}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${ba.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
                           {ba.status || 'Active'}
