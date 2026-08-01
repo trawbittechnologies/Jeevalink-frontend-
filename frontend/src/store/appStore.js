@@ -302,7 +302,7 @@ export const useAppStore = create((set, get) => ({
         const contactNumber = user ? user.mobile || '9999911111' : '9999911111';
 
         get().triggerSOS({
-          patientName: user ? `Emergency: ${user.fullName}` : 'Emergency Case',
+          patientName: user ? `Emergency: ${user.primaryName}` : 'Emergency Case',
           hospitalName: 'General Hospital',
           city: user ? (user.city || 'Bengaluru') : 'Bengaluru',
           district: user ? (user.district || 'Bengaluru Urban') : 'Bengaluru Urban',
@@ -569,7 +569,7 @@ export const useAppStore = create((set, get) => ({
         meghala_admin_1_mobile: volunteerData.person1Contact,
         meghala_admin_2_name: volunteerData.person2Name,
         meghala_admin_2_mobile: volunteerData.person2Contact,
-        full_name: volunteerData.person1Name,
+        primary_name: volunteerData.person1Name,
         mobile: volunteerData.person1Contact,
         email: volunteerData.email,
         whatsapp_number: volunteerData.whatsapp,
@@ -608,7 +608,7 @@ export const useAppStore = create((set, get) => ({
       }
       const newUser = {
         _id: user._id,
-        fullName: user.fullName,
+        primaryName: user.primaryName,
         email: user.email,
         bloodGroup: user.bloodGroup || 'N/A',
         district: user.district || 'Bengaluru Urban',
@@ -622,7 +622,7 @@ export const useAppStore = create((set, get) => ({
       if (newUser.role === 'user') {
         const newDonor = {
           _id: user._id,
-          fullName: user.fullName,
+          primaryName: user.primaryName,
           bloodGroup: user.bloodGroup,
           city: user.city || 'Bengaluru',
           district: user.district || 'Bengaluru Urban',
@@ -1009,13 +1009,50 @@ export const useAppStore = create((set, get) => ({
 
 
   // ─── Social Interaction & Campaign Hub State & Actions ───
-  campaignPosts: [],
+  campaignPosts: (() => {
+    try {
+      const saved = localStorage.getItem('jeevalink_campaign_posts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  })(),
 
   fetchCampaignPosts: async (category = 'all', search = '') => {
     try {
       const res = await api.get('/campaigns', { params: { category, search } });
       if (res.data.success && Array.isArray(res.data.data)) {
-        set({ campaignPosts: res.data.data });
+        const serverPosts = res.data.data;
+        const localPosts = (() => {
+          try {
+            const saved = localStorage.getItem('jeevalink_campaign_posts');
+            return saved ? JSON.parse(saved) : [];
+          } catch {
+            return [];
+          }
+        })();
+
+        const combinedMap = new Map();
+        serverPosts.forEach((p) => combinedMap.set(String(p.id), p));
+        localPosts.forEach((p) => {
+          if (!combinedMap.has(String(p.id))) {
+            combinedMap.set(String(p.id), p);
+          } else {
+            // Merge local details if server has empty fields
+            const s = combinedMap.get(String(p.id));
+            combinedMap.set(String(p.id), {
+              ...p,
+              ...s,
+              event_date: s.event_date || p.event_date || '',
+              contact_phone: s.contact_phone || p.contact_phone || '',
+              image_url: s.image_url || p.image_url || ''
+            });
+          }
+        });
+
+        const merged = Array.from(combinedMap.values());
+        set({ campaignPosts: merged });
+        try { localStorage.setItem('jeevalink_campaign_posts', JSON.stringify(merged)); } catch { /* ignore */ }
       }
     } catch (err) {
       console.warn('Backend API endpoint offline, using active campaign state.', err);
@@ -1023,35 +1060,41 @@ export const useAppStore = create((set, get) => ({
   },
 
   createCampaignPost: async (postData) => {
+    let createdPost = null;
     try {
       const res = await api.post('/campaigns', postData);
       if (res.data.success) {
-        const newPost = res.data.data;
-        set((state) => ({ campaignPosts: [newPost, ...state.campaignPosts] }));
-        get().triggerToast('Campaign published successfully!', 'success');
-        return { success: true, data: newPost };
+        createdPost = res.data.data;
       }
     } catch (err) {
       console.warn('Backend API post failed, applying state fallback.', err);
     }
-    // Client state fallback
-    const mockNewPost = {
-      id: Date.now(),
-      ...postData,
-      likes_count: 0,
-      shares_count: 0,
-      is_liked: false,
-      created_at: new Date().toISOString()
-    };
-    set((state) => ({ campaignPosts: [mockNewPost, ...state.campaignPosts] }));
-    get().triggerToast('Campaign post created!', 'success');
-    return { success: true, data: mockNewPost };
+
+    if (!createdPost) {
+      createdPost = {
+        id: Date.now(),
+        ...postData,
+        likes_count: 0,
+        shares_count: 0,
+        is_liked: false,
+        created_at: new Date().toISOString()
+      };
+    }
+
+    set((state) => {
+      const updated = [createdPost, ...state.campaignPosts.filter(p => String(p.id) !== String(createdPost.id))];
+      try { localStorage.setItem('jeevalink_campaign_posts', JSON.stringify(updated)); } catch { /* ignore */ }
+      return { campaignPosts: updated };
+    });
+
+    get().triggerToast('Campaign published successfully!', 'success');
+    return { success: true, data: createdPost };
   },
 
   toggleLikeCampaignPost: async (postId) => {
-    set((state) => ({
-      campaignPosts: state.campaignPosts.map((p) => {
-        if (p.id === postId) {
+    set((state) => {
+      const updated = state.campaignPosts.map((p) => {
+        if (String(p.id) === String(postId)) {
           const isLikedNow = !p.is_liked;
           return {
             ...p,
@@ -1060,8 +1103,10 @@ export const useAppStore = create((set, get) => ({
           };
         }
         return p;
-      })
-    }));
+      });
+      try { localStorage.setItem('jeevalink_campaign_posts', JSON.stringify(updated)); } catch { /* ignore */ }
+      return { campaignPosts: updated };
+    });
 
     try {
       await api.post(`/campaigns/${postId}/like`);
@@ -1071,14 +1116,16 @@ export const useAppStore = create((set, get) => ({
   },
 
   incrementShareCampaignPost: async (postId) => {
-    set((state) => ({
-      campaignPosts: state.campaignPosts.map((p) => {
-        if (p.id === postId) {
+    set((state) => {
+      const updated = state.campaignPosts.map((p) => {
+        if (String(p.id) === String(postId)) {
           return { ...p, shares_count: (p.shares_count || 0) + 1 };
         }
         return p;
-      })
-    }));
+      });
+      try { localStorage.setItem('jeevalink_campaign_posts', JSON.stringify(updated)); } catch { /* ignore */ }
+      return { campaignPosts: updated };
+    });
 
     try {
       await api.post(`/campaigns/${postId}/share`);
@@ -1088,9 +1135,11 @@ export const useAppStore = create((set, get) => ({
   },
 
   deleteCampaignPost: async (postId) => {
-    set((state) => ({
-      campaignPosts: state.campaignPosts.filter((p) => p.id !== postId)
-    }));
+    set((state) => {
+      const updated = state.campaignPosts.filter((p) => String(p.id) !== String(postId));
+      try { localStorage.setItem('jeevalink_campaign_posts', JSON.stringify(updated)); } catch { /* ignore */ }
+      return { campaignPosts: updated };
+    });
     get().triggerToast('Campaign post deleted.', 'info');
 
     try {
@@ -1101,11 +1150,13 @@ export const useAppStore = create((set, get) => ({
   },
 
   updateCampaignPost: async (postId, updatedData) => {
-    set((state) => ({
-      campaignPosts: state.campaignPosts.map((p) =>
-        p.id === postId ? { ...p, ...updatedData } : p
-      )
-    }));
+    set((state) => {
+      const updated = state.campaignPosts.map((p) =>
+        String(p.id) === String(postId) ? { ...p, ...updatedData } : p
+      );
+      try { localStorage.setItem('jeevalink_campaign_posts', JSON.stringify(updated)); } catch { /* ignore */ }
+      return { campaignPosts: updated };
+    });
     get().triggerToast('Campaign updated successfully!', 'success');
 
     try {

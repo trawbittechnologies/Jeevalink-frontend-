@@ -196,12 +196,12 @@ export default function Navbar() {
                       <img src={getStorageUrl(user.profilePicture || user.photo)} alt="Avatar" className="w-full h-full object-cover animate-fade-in" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary to-red-800 flex items-center justify-center text-white font-black text-xs">
-                        {user.fullName?.[0]}
+                        {user.primaryName?.[0]}
                       </div>
                     )}
                   </div>
                   <span className="hidden md:block text-sm font-semibold text-gray-700 max-w-[100px] truncate">
-                    {user.fullName?.split(' ')[0]}
+                    {user.primaryName?.split(' ')[0]}
                   </span>
                   <ChevronDown className={`hidden md:block w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>

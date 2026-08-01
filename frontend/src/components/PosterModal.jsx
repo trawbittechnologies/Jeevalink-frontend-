@@ -21,6 +21,34 @@ export default function PosterModal({ isOpen, onClose, data }) {
   const whatsapp = data.whatsapp_number || data.whatsapp || phone;
   const requestId = data.request_id || data.id || data._id || 'JL-REQ';
 
+  // Dynamic DYFI Committee Attribution
+  const getDyfiCommitteeTitle = (d) => {
+    if (!d) return 'DYFI Kasaragod District Committee';
+    const block = d.block || d.block_name;
+    const district = d.district || d.district_name;
+    const meghala = d.meghala || d.meghala_name || d.unit;
+    const organizer = d.organizer_name || d.author_name || d.created_by;
+
+    if (block) {
+      const cleanBlock = block.replace(/block|committee|dyfi/gi, '').trim();
+      return `DYFI ${cleanBlock} Block Committee`;
+    }
+    if (meghala) {
+      const cleanMeghala = meghala.replace(/meghala|unit|committee|dyfi/gi, '').trim();
+      return `DYFI ${cleanMeghala} Meghala Committee`;
+    }
+    if (district) {
+      const cleanDistrict = district.replace(/district|committee|dyfi/gi, '').trim();
+      return `DYFI ${cleanDistrict} District Committee`;
+    }
+    if (organizer && organizer.toLowerCase().includes('dyfi')) {
+      return organizer;
+    }
+    return 'DYFI Kasaragod District Committee';
+  };
+
+  const committeeTitle = getDyfiCommitteeTitle(data);
+
   // 100% DOM-to-PNG Pixel-Perfect Exporter
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
@@ -217,8 +245,8 @@ export default function PosterModal({ isOpen, onClose, data }) {
               <div className="flex items-center gap-3">
                 <div className="w-px h-8 bg-slate-300"></div>
                 <div className="text-right">
-                  <h3 className="text-base font-black text-slate-900 uppercase tracking-tight leading-none">DYFI Kasaragod</h3>
-                  <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Professional Committee</p>
+                  <h3 className="text-base font-black text-slate-900 uppercase tracking-tight leading-none">{committeeTitle}</h3>
+                  <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Official Volunteer Network</p>
                 </div>
               </div>
             </div>

@@ -65,7 +65,7 @@ export default function SystemSettings() {
   const { user } = useAuthStore();
   const { triggerToast } = useAppStore();
 
-  const [profile, setProfile] = useState({ username: user?.email || 'admin@jeevalink.org', displayName: user?.fullName || 'System Admin' });
+  const [profile, setProfile] = useState({ username: user?.email || 'admin@jeevalink.org', displayName: user?.primaryName || 'System Admin' });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [contact, setContact] = useState({ email: 'support@jeevalink.org', phone: '+91 98765 43210', address: 'JeevaLink HQ, Kochi, Kerala 682001', website: 'https://jeevalink.org' });
   const [notifSettings, setNotifSettings] = useState({ emailOnLogin: true, emailOnStatusChange: true, emailOnComplaint: true, pushNotifications: true, emergencyAlerts: true, weeklyReport: false });

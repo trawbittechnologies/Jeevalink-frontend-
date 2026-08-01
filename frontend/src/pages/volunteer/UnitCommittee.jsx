@@ -40,7 +40,7 @@ export default function UnitCommittee() {
   const [confirmModal, setConfirmModal] = useState({ open: false, item: null });
 
   const [selectedSquad, setSelectedSquad] = useState(null);
-  const [form, setForm] = useState({ unit: '', email: '', mobile: '', full_name: '', password: '' });
+  const [form, setForm] = useState({ unit: '', email: '', mobile: '', primary_name: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetPasswordModal, setResetPasswordModal] = useState({ open: false, squad: null, newPassword: '', showPass: false });
@@ -55,7 +55,7 @@ export default function UnitCommittee() {
 
   const filtered = unitSquads.filter(v => {
     const q = search.toLowerCase();
-    const matchSearch = !q || [v.meghala, v.unit, v.unit_name, v.fullName, v.name, v.email, v.mobile, v.city, v.district]
+    const matchSearch = !q || [v.meghala, v.unit, v.unit_name, v.primaryName, v.name, v.email, v.mobile, v.city, v.district]
       .some(f => String(f || '').toLowerCase().includes(q));
     const matchStatus = filters.status === 'all' || (v.status || '').toLowerCase() === filters.status.toLowerCase();
     return matchSearch && matchStatus;
@@ -63,7 +63,7 @@ export default function UnitCommittee() {
 
   const handleAddUnitSquadSubmit = async (e) => {
     e.preventDefault();
-    if (!form.unit || !form.full_name || !form.email || !form.password) {
+    if (!form.unit || !form.primary_name || !form.email || !form.password) {
       triggerToast('Please fill in Unit Name, Convener Name, Email, and Password.', 'warning');
       return;
     }
@@ -74,14 +74,14 @@ export default function UnitCommittee() {
     fd.append('unit', form.unit);
     fd.append('meghala', user?.meghala || form.unit);
     fd.append('district', user?.district || 'Kozhikode');
-    fd.append('full_name', form.full_name);
+    fd.append('primary_name', form.primary_name);
     fd.append('email', form.email);
     fd.append('password', form.password);
 
     const res = await volunteerAddUser(fd);
     if (res.success) {
       setShowAddModal(false);
-      setForm({ unit: '', email: '', mobile: '', full_name: '', password: '' });
+      setForm({ unit: '', email: '', mobile: '', primary_name: '', password: '' });
       await fetchUsers();
     }
     setLoading(false);
@@ -141,7 +141,7 @@ export default function UnitCommittee() {
 
         <button
           onClick={() => {
-            setForm({ unit: '', email: '', mobile: '', full_name: '', password: '' });
+            setForm({ unit: '', email: '', mobile: '', primary_name: '', password: '' });
             setShowAddModal(true);
           }}
           className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md shadow-red-600/20 self-start sm:self-auto"
@@ -212,8 +212,8 @@ export default function UnitCommittee() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {filtered.map((squad) => {
-                  const unitTitle = squad.unit || squad.meghala || squad.fullName || squad.name || 'Unit Squad';
-                  const contactPerson = squad.fullName || squad.name || 'Unit Committee';
+                  const unitTitle = squad.unit || squad.meghala || squad.primaryName || squad.name || 'Unit Squad';
+                  const contactPerson = squad.primaryName || squad.name || 'Unit Committee';
 
                   return (
                     <tr key={squad._id || squad.id} className="hover:bg-red-50/20 transition">
@@ -317,7 +317,7 @@ export default function UnitCommittee() {
                     Unit Squad Details
                   </span>
                   <h3 className="text-xl font-black text-white mt-1">
-                    {selectedSquad.unit || selectedSquad.meghala || selectedSquad.fullName || 'Unit Squad'}
+                    {selectedSquad.unit || selectedSquad.meghala || selectedSquad.primaryName || 'Unit Squad'}
                   </h3>
                 </div>
                 <button onClick={() => setShowViewModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer">
@@ -337,7 +337,7 @@ export default function UnitCommittee() {
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200/60">
                     <span className="font-bold text-slate-500">Convener Name:</span>
-                    <span className="font-semibold text-slate-900">{selectedSquad.fullName || selectedSquad.name || '—'}</span>
+                    <span className="font-semibold text-slate-900">{selectedSquad.primaryName || selectedSquad.name || '—'}</span>
                   </div>
                   <div className="flex justify-between py-1">
                     <span className="font-bold text-slate-500">Account Status:</span>
@@ -409,8 +409,8 @@ export default function UnitCommittee() {
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Convener / Contact Person *</label>
                     <input
                       type="text"
-                      value={form.full_name || ''}
-                      onChange={e => setForm({ ...form, full_name: e.target.value })}
+                      value={form.primary_name || ''}
+                      onChange={e => setForm({ ...form, primary_name: e.target.value })}
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-500 text-sm transition-all font-semibold"
                       placeholder="e.g. Rahul V."
                       required
@@ -569,7 +569,7 @@ export default function UnitCommittee() {
         onClose={() => setConfirmModal({ open: false, item: null })}
         onConfirm={() => handleDeleteSquad(confirmModal.item)}
         title="Delete Unit Squad Account"
-        message={`Are you sure you want to delete "${confirmModal.item?.unit || confirmModal.item?.meghala || confirmModal.item?.fullName || 'this squad'}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete "${confirmModal.item?.unit || confirmModal.item?.meghala || confirmModal.item?.primaryName || 'this squad'}"? This action cannot be undone.`}
         confirmLabel="Delete Account"
         variant="danger"
         loading={loading}

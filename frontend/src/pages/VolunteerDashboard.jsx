@@ -207,7 +207,7 @@ export default function VolunteerDashboard() {
             <p className="text-red-100 text-sm mt-1">
               Welcome, <span className="font-semibold text-white">
                 {(() => {
-                  const raw = user?.full_name || user?.name || 'Volunteer';
+                  const raw = user?.primary_name || user?.name || 'Volunteer';
                   const parts = raw.split(/[&,]+/).map(s => s.trim()).filter(Boolean);
                   return Array.from(new Set(parts)).join(' & ') || 'Volunteer';
                 })()}
@@ -480,7 +480,7 @@ export default function VolunteerDashboard() {
                                 <p className="text-xs text-slate-400 italic">No compatible donors found.</p>
                               ) : (
                                 getCompatibleDonors(bg).map((d) => {
-                                  const dName = d.full_name || d.fullName || d.name || 'Donor';
+                                  const dName = d.primary_name || d.primaryName || d.name || 'Donor';
                                   const dPhone = d.mobile || d.phone || '';
                                   return (
                                     <div key={d.id || d._id} className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 text-xs">
@@ -608,7 +608,7 @@ export default function VolunteerDashboard() {
                             #{i + 1}
                           </span>
                           <div>
-                            <p className="font-bold text-slate-900">{d.full_name || d.fullName || d.name}</p>
+                            <p className="font-bold text-slate-900">{d.primary_name || d.primaryName || d.name}</p>
                             <p className="text-[11px] text-slate-500"><strong className="text-red-600">{d.blood_group || d.bloodGroup}</strong> • Score: {d.priority_score ?? '—'}</p>
                           </div>
                         </div>

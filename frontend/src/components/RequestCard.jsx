@@ -164,11 +164,11 @@ export default function RequestCard({ request, showActions = true }) {
     e.preventDefault();
     if (!reportReason) return;
     const targetHospital = allUsers.find(
-      (u) => u.role === 'hospital' && u.fullName?.toLowerCase() === (request.hospitalName || request.hospital_name)?.toLowerCase()
+      (u) => u.role === 'hospital' && u.primaryName?.toLowerCase() === (request.hospitalName || request.hospital_name)?.toLowerCase()
     );
     const targetId = targetHospital ? targetHospital._id : 'unknown';
     const res = await fileComplaint({
-      reporterName: user?.fullName || 'Anonymous User',
+      reporterName: user?.primaryName || 'Anonymous User',
       reporterId: user?._id || 'guest',
       targetName: request.hospitalName || request.hospital_name || 'Unknown Hospital',
       targetId,

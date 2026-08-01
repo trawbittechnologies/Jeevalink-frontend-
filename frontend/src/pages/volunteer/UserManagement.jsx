@@ -114,7 +114,7 @@ export default function UserManagement() {
     if (activeTab === 'verified' && !isUserVerified) return false;
 
     const q = search.toLowerCase();
-    const matchSearch = !q || [v.fullName, v.name, v.email, v.mobile, v.city, v.district].some(f => String(f || '').toLowerCase().includes(q));
+    const matchSearch = !q || [v.primaryName, v.name, v.email, v.mobile, v.city, v.district].some(f => String(f || '').toLowerCase().includes(q));
     const matchStatus = filters.status === 'all' || (v.status || '').toLowerCase() === filters.status.toLowerCase();
     const matchRole = filters.role === 'all' || (v.role || '').toLowerCase() === filters.role.toLowerCase();
     return matchSearch && matchStatus && matchRole;
@@ -143,7 +143,7 @@ export default function UserManagement() {
       setOtpVerified(true);
       // Pre-fill form
       setForm({
-        full_name: selectedUser.fullName || selectedUser.name || '',
+        primary_name: selectedUser.primaryName || selectedUser.name || '',
         email: selectedUser.email || '',
         mobile: selectedUser.mobile || '',
         blood_group: selectedUser.bloodGroup || selectedUser.blood_group || 'N/A',
@@ -192,7 +192,7 @@ export default function UserManagement() {
       triggerToast('User must be at least 18 years old (DOB compare to current year and month).', 'warning');
       return;
     }
-    if (!form.full_name?.trim()) {
+    if (!form.primary_name?.trim()) {
       triggerToast('Full name is required.', 'warning');
       return;
     }
@@ -262,7 +262,7 @@ export default function UserManagement() {
               blood_group: 'A+',
               sex: 'male',
               dob: '',
-              full_name: '',
+              primary_name: '',
               mobile: '',
               email: '',
               place: currentUser?.city || '',
@@ -472,7 +472,7 @@ export default function UserManagement() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {filtered.map((u) => {
-                  const displayName = u.fullName || u.name || 'User';
+                  const displayName = u.primaryName || u.name || 'User';
                   const pic = u.profilePicture || u.profile_picture;
 
                   return (
@@ -641,7 +641,7 @@ export default function UserManagement() {
                 </div>
                 <div className="relative z-10">
                   <h3 className="text-xl font-black text-white mt-1.5 tracking-tight truncate max-w-[260px]">
-                    {selectedUser.fullName || selectedUser.name || 'User Profile'}
+                    {selectedUser.primaryName || selectedUser.name || 'User Profile'}
                   </h3>
                 </div>
                 <button
@@ -660,13 +660,13 @@ export default function UserManagement() {
                     {selectedUser.profilePicture || selectedUser.profile_picture ? (
                       <img
                         src={getStorageUrl(selectedUser.profilePicture || selectedUser.profile_picture)}
-                        alt={selectedUser.fullName}
-                        onError={(e) => { e.target.onerror = null; e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(selectedUser.fullName || 'User')}`; }}
+                        alt={selectedUser.primaryName}
+                        onError={(e) => { e.target.onerror = null; e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(selectedUser.primaryName || 'User')}`; }}
                         className="w-20 h-20 rounded-2xl object-cover border-4 border-white shadow-xl bg-white"
                       />
                     ) : (
                       <div className="w-20 h-20 bg-gradient-to-tr from-red-600 to-rose-600 text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl border-4 border-white">
-                        {(selectedUser.fullName || selectedUser.name || 'U')[0].toUpperCase()}
+                        {(selectedUser.primaryName || selectedUser.name || 'U')[0].toUpperCase()}
                       </div>
                     )}
                     <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${selectedUser.status === 'Active' || selectedUser.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
@@ -789,7 +789,7 @@ export default function UserManagement() {
                 <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
                   <ShieldCheck className="w-6 h-6 text-primary" /> Secure Profile Edit
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">Editing {selectedUser.fullName}'s profile</p>
+                <p className="text-xs text-gray-500 mt-1">Editing {selectedUser.primaryName}'s profile</p>
               </div>
 
               <div className="overflow-y-auto pr-2 flex-1 scrollbar-thin">
@@ -896,8 +896,8 @@ export default function UserManagement() {
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Full Name</label>
-                        <input type="text" value={form.full_name || ''} onChange={e => setForm({ ...form, full_name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required />
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Primary Name</label>
+                        <input type="text" value={form.primary_name || ''} onChange={e => setForm({ ...form, primary_name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Blood Group</label>
@@ -1032,8 +1032,8 @@ export default function UserManagement() {
                     <p className="text-[9px] text-slate-400 mt-0.5">Only 18+ years old allowed (Compared against current year & month)</p>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Full Name *</label>
-                    <input type="text" value={form.full_name || ''} onChange={e => setForm({ ...form, full_name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="Enter full name" />
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Primary Name *</label>
+                    <input type="text" value={form.primary_name || ''} onChange={e => setForm({ ...form, primary_name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="Enter primary name" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Mobile *</label>
@@ -1099,7 +1099,7 @@ export default function UserManagement() {
           setConfirmModal({ open: false, item: null });
         }}
         title="Delete User Account"
-        message={`Are you sure you want to permanently delete user "${confirmModal.item?.fullName || confirmModal.item?.name || 'this user'}"? This action cannot be undone.`}
+        message={`Are you sure you want to permanently delete user "${confirmModal.item?.primaryName || confirmModal.item?.name || 'this user'}"? This action cannot be undone.`}
         confirmLabel="Delete Permanently"
         variant="danger"
       />

@@ -235,7 +235,7 @@ export default function DonorDashboard() {
         hospitalName: req.hospitalName || req.hospital_name || 'Hospital',
         city: req.city || 'City',
         district: req.district || user?.district || 'District',
-        bystanderName: req.bystanderName || req.bystander_name || user?.fullName || 'Contact',
+        bystanderName: req.bystanderName || req.bystander_name || user?.primaryName || 'Contact',
         bystanderPhone: req.contactNumber || req.bystanderPhone || user?.mobile || '',
         urgencyLevel: req.urgencyLevel || req.urgency_level || 'Immediate',
         requiredDate: req.requiredDate || req.required_date || 'ASAP',
@@ -335,7 +335,7 @@ export default function DonorDashboard() {
             </div>
             <p className="text-red-100 text-sm">
               Welcome, <span className="font-semibold text-white">
-                {user?.fullName || user?.full_name || user?.name || 'Donor'}
+                {user?.primaryName || user?.primary_name || user?.name || 'Donor'}
               </span>
               {user?.bloodGroup || user?.blood_group ? ` — Blood Group ${user.bloodGroup || user.blood_group}` : ''}
             </p>

@@ -39,7 +39,8 @@ export default function Register() {
 
   // Form data state
   const [form, setForm] = useState({
-    fullName: "",
+    primaryName: "",
+    secondaryName: "",
     mobileNumber: "",
     email: "",
     password: "",
@@ -67,7 +68,7 @@ export default function Register() {
   // ── Validation ───────────────────────────────────────────────────────
   const validateStep1 = () => {
     const errs = {};
-    if (!form.fullName.trim() || form.fullName.trim().length < 2) errs.fullName = "Minimum 2 characters";
+    if (!form.primaryName.trim() || form.primaryName.trim().length < 2) errs.primaryName = "Minimum 2 characters";
     if (!/^[6-9]\d{9}$/.test(form.mobileNumber)) errs.mobileNumber = "Valid 10-digit Indian mobile required";
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = "Valid email required";
     if (!form.password || form.password.length < 6) errs.password = "Minimum 6 characters";
@@ -174,7 +175,8 @@ export default function Register() {
     if (!validateStep3()) return;
     setSubmitting(true);
     const finalData = {
-      full_name:    form.fullName,
+      primary_name:    form.primaryName,
+      secondary_name:  form.secondaryName,
       mobile:       form.mobileNumber,
       email:        form.email,
       password:     form.password,
@@ -275,11 +277,19 @@ export default function Register() {
                   <div>
                     <input
                       className={inputCls}
-                      placeholder="Full Name"
-                      value={form.fullName}
-                      onChange={(e) => { setField("fullName", e.target.value); clearError("fullName"); }}
+                      placeholder="Primary Name"
+                      value={form.primaryName}
+                      onChange={(e) => { setField("primaryName", e.target.value); clearError("primaryName"); }}
                     />
-                    {errors.fullName && <span className={errCls}>{errors.fullName}</span>}
+                    {errors.primaryName && <span className={errCls}>{errors.primaryName}</span>}
+                  </div>
+                  <div>
+                    <input
+                      className={inputCls}
+                      placeholder="Secondary Name (Optional)"
+                      value={form.secondaryName}
+                      onChange={(e) => { setField("secondaryName", e.target.value); }}
+                    />
                   </div>
                   <div>
                     <div className="relative">

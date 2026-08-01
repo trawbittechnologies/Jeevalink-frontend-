@@ -40,7 +40,7 @@ export default function FindDonors() {
   };
 
   const handleSendRequestAlert = (donor) => {
-    triggerToast(`Simulation: Emergency request notification sent to ${donor.fullName}!`, 'success');
+    triggerToast(`Simulation: Emergency request notification sent to ${donor.primaryName}!`, 'success');
     setSelectedDonor(null);
   };
 
@@ -140,7 +140,7 @@ export default function FindDonors() {
                     <div>
                       <div className="flex items-center justify-between gap-1.5">
                         <h4 className="text-sm font-bold text-slate-955 dark:text-zinc-100 truncate">
-                          {donor.fullName}
+                          {donor.primaryName}
                         </h4>
                         <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full shrink-0">
                           {donor.bloodGroup}
@@ -241,7 +241,7 @@ export default function FindDonors() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <h4 className="text-sm font-bold text-slate-955 dark:text-white truncate">
-                            {donor.fullName}
+                            {donor.primaryName}
                           </h4>
                           <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full shrink-0">
                             {donor.bloodGroup}
@@ -296,7 +296,7 @@ export default function FindDonors() {
               <span className="text-xl font-black text-primary">{selectedDonor.bloodGroup}</span>
             </div>
 
-            <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100">{selectedDonor.fullName}</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100">{selectedDonor.primaryName}</h3>
             <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1.5 justify-center">
               <span>📍 {selectedDonor.city}, {selectedDonor.district}</span>
               <span>•</span>

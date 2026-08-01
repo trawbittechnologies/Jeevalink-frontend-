@@ -8,7 +8,7 @@ import api from '../../store/api.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 
 function parseBlockAdminContacts(ba) {
-  let admin1Name = ba.full_name || ba.name || '';
+  let admin1Name = ba.primaryContactName || ba.primary_contact_name || ba.primaryName || ba.primary_name || ba.name || '';
   let admin2Name = '';
   if (admin1Name.includes(' & ')) {
     const parts = admin1Name.split(' & ');
@@ -156,7 +156,8 @@ export default function SuperAdminDashboard() {
         block_admin_1_mobile: editMobile1,
         block_admin_2_name: editFullName2,
         block_admin_2_mobile: editMobile2,
-        full_name: editFullName2 ? `${editFullName1} & ${editFullName2}` : editFullName1,
+        primary_contact_name: editFullName1,
+        primary_name: editFullName2 ? `${editFullName1} & ${editFullName2}` : editFullName1,
         email: editEmail,
         password: editPassword || undefined,
         mobile: editMobile1,
@@ -198,7 +199,7 @@ export default function SuperAdminDashboard() {
     const q = searchQuery.toLowerCase();
     return (
       (ba.blockCommitteeName || '').toLowerCase().includes(q) ||
-      (ba.full_name || ba.name || '').toLowerCase().includes(q) ||
+      (ba.primary_name || ba.name || '').toLowerCase().includes(q) ||
       (ba.email || '').toLowerCase().includes(q) ||
       (ba.mobile || '').toLowerCase().includes(q)
     );
@@ -523,7 +524,7 @@ export default function SuperAdminDashboard() {
                             <button 
                               onClick={() => {
                                 setDeletingAdminId(ba.id);
-                                setDeletingAdminName(ba.full_name || ba.name);
+                                setDeletingAdminName(ba.primary_name || ba.name);
                               }} 
                               className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
                               title="Delete Block Committee"

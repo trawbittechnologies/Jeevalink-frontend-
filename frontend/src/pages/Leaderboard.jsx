@@ -23,11 +23,11 @@ export default function Leaderboard() {
       // Fallback data if API returns empty
       setData({
         highest_donors: [
-          { id: 1, full_name: 'Rahul V', blood_group: 'O+', district: 'Kozhikode', meghala: 'Kozhikode North', reward_points: 1250, badge: 'Blood Hero' },
-          { id: 2, full_name: 'Anjali Nair', blood_group: 'A+', district: 'Malappuram', meghala: 'Tirur', reward_points: 980, badge: 'Life Saver' },
-          { id: 3, full_name: 'Muhammed Shafi', blood_group: 'B+', district: 'Wayanad', meghala: 'Kalpetta', reward_points: 850, badge: 'Life Saver' },
-          { id: 4, full_name: 'Deepa K', blood_group: 'AB+', district: 'Kannur', meghala: 'Thalassery', reward_points: 620, badge: 'Life Saver' },
-          { id: 5, full_name: 'Arun Kumar', blood_group: 'O-', district: 'Palakkad', meghala: 'Ottapalam', reward_points: 450, badge: 'First Drop' }
+          { id: 1, primary_name: 'Rahul V', blood_group: 'O+', district: 'Kozhikode', meghala: 'Kozhikode North', reward_points: 1250, badge: 'Blood Hero' },
+          { id: 2, primary_name: 'Anjali Nair', blood_group: 'A+', district: 'Malappuram', meghala: 'Tirur', reward_points: 980, badge: 'Life Saver' },
+          { id: 3, primary_name: 'Muhammed Shafi', blood_group: 'B+', district: 'Wayanad', meghala: 'Kalpetta', reward_points: 850, badge: 'Life Saver' },
+          { id: 4, primary_name: 'Deepa K', blood_group: 'AB+', district: 'Kannur', meghala: 'Thalassery', reward_points: 620, badge: 'Life Saver' },
+          { id: 5, primary_name: 'Arun Kumar', blood_group: 'O-', district: 'Palakkad', meghala: 'Ottapalam', reward_points: 450, badge: 'First Drop' }
         ],
         highest_block_committee: [
           { blockCommitteeName: 'Kozhikode North Block', district: 'Kozhikode', total_points: 8400, total_members: 62 },
@@ -173,7 +173,7 @@ export default function Leaderboard() {
                           {donor.blood_group || 'O+'}
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-900 text-base">{donor.full_name || donor.name}</h4>
+                          <h4 className="font-bold text-slate-900 text-base">{donor.primary_name || donor.name}</h4>
                           <p className="text-xs text-slate-500 flex items-center gap-2">
                             <span>District: {donor.district || 'Kerala'}</span>
                             {donor.meghala && <span>• {donor.meghala}</span>}

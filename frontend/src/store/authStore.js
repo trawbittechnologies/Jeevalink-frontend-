@@ -28,7 +28,7 @@ export const useAuthStore = create((set, get) => ({
         mockUser = {
           id: 1,
           name: 'Technical Admin',
-          fullName: 'System Technical Admin',
+          primaryName: 'System Technical Admin',
           email: 'techadmin@jeevalink.org',
           mobile: '9900000000',
           role: 'technical_admin',
@@ -73,7 +73,7 @@ export const useAuthStore = create((set, get) => ({
       try {
         const dummyPass = 'GoogleUserPassword123!';
         const regRes = await api.post('/auth/register', {
-          fullName: fullName || 'Google User',
+          primaryName: fullName || 'Google User',
           email,
           mobile: 'G-' + Date.now().toString().slice(-8), // unique dummy mobile
           password: dummyPass,
@@ -102,7 +102,7 @@ export const useAuthStore = create((set, get) => ({
       const email = userData.email || (mobile ? `${mobile}@jeevalink.org` : '');
 
       const formData = new FormData();
-      formData.append('full_name', userData.fullName || '');
+      formData.append('primary_name', userData.primaryName || '');
       formData.append('mobile', mobile);
       formData.append('email', email);
       formData.append('password', userData.password || '');
@@ -158,8 +158,8 @@ export const useAuthStore = create((set, get) => ({
   addVolunteer: async (volunteerData) => {
     set({ loading: true });
     try {
-      const rawP1 = volunteerData.person1Name || volunteerData.fullName || volunteerData.full_name || '';
-      const rawP2 = volunteerData.person2Name || volunteerData.secondaryContactName || volunteerData.secondary_contact_name || '';
+      const rawP1 = volunteerData.person1Name || volunteerData.primaryName || volunteerData.primary_name || '';
+      const rawP2 = volunteerData.person2Name || volunteerData.secondaryName || volunteerData.secondary_name || '';
       const p1Contact = volunteerData.person1Contact || volunteerData.mobile || '';
       const p2Contact = volunteerData.person2Contact || volunteerData.secondaryContactNumber || '';
 
@@ -177,9 +177,9 @@ export const useAuthStore = create((set, get) => ({
         person1Contact: p1Contact,
         person2Name: cleanP2,
         person2Contact: p2Contact,
-        full_name: cleanFullName,
+        primary_name: cleanFullName,
         mobile: p1Contact,
-        secondaryContactName: cleanP2,
+        secondaryName: cleanP2,
         secondaryContactNumber: p2Contact,
         email: volunteerData.email,
         whatsapp_number: volunteerData.whatsapp || p1Contact,
@@ -208,8 +208,8 @@ export const useAuthStore = create((set, get) => ({
   updateVolunteer: async (id, volunteerData) => {
     set({ loading: true });
     try {
-      const rawP1 = volunteerData.person1Name || volunteerData.fullName || volunteerData.full_name || '';
-      const rawP2 = volunteerData.person2Name || volunteerData.secondaryContactName || volunteerData.secondary_contact_name || '';
+      const rawP1 = volunteerData.person1Name || volunteerData.primaryName || volunteerData.primary_name || '';
+      const rawP2 = volunteerData.person2Name || volunteerData.secondaryName || volunteerData.secondary_name || '';
       const p1Contact = volunteerData.person1Contact || volunteerData.mobile || '';
       const p2Contact = volunteerData.person2Contact || volunteerData.secondaryContactNumber || '';
 
@@ -227,9 +227,9 @@ export const useAuthStore = create((set, get) => ({
         person1Contact: p1Contact,
         person2Name: cleanP2,
         person2Contact: p2Contact,
-        full_name: cleanFullName,
+        primary_name: cleanFullName,
         mobile: p1Contact,
-        secondaryContactName: cleanP2,
+        secondaryName: cleanP2,
         secondaryContactNumber: p2Contact,
         email: volunteerData.email,
         whatsapp_number: volunteerData.whatsapp || p1Contact,
@@ -271,6 +271,48 @@ export const useAuthStore = create((set, get) => ({
       return { success: true, message: res.data.message };
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Failed to reset password.';
+      set({ loading: false, error: errMsg });
+      return { success: false, error: errMsg };
+    }
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    set({ loading: true });
+    try {
+      const res = await api.post('/auth/change-password', {
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+      set({ loading: false });
+      return { success: true, message: res.data.message };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to change password.';
+      set({ loading: false, error: errMsg });
+      return { success: false, error: errMsg };
+    }
+  },
+
+  changeEmail: async (currentPassword, newEmail) => {
+    set({ loading: true });
+    try {
+      const res = await api.post('/auth/change-email', {
+        current_password: currentPassword,
+        new_email: newEmail,
+      });
+      if (res.data.success) {
+        const updatedUser = res.data.data?.user;
+        if (updatedUser) {
+          localStorage.setItem('jeevalink_user', JSON.stringify(updatedUser));
+          set({ user: updatedUser, loading: false });
+        } else {
+          set({ loading: false });
+        }
+        return { success: true, message: res.data.message };
+      }
+      set({ loading: false });
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to change email.';
       set({ loading: false, error: errMsg });
       return { success: false, error: errMsg };
     }

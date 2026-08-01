@@ -90,7 +90,7 @@ export default function AdminDashboard() {
     setCreatedResult(null);
     try {
       const res = await api.post('/block-admin/volunteers', {
-        full_name: person1Name,
+        primary_name: person1Name,
         email: email,
         mobile: person1Contact,
         city: meghalaName || 'Local Unit',
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
   };
 
   const handleResetPassword = async (ba) => {
-    const customPass = window.prompt(`Set new password for ${ba.full_name || ba.name} (${ba.email}):\n(Leave empty to auto-generate)`, 'admin123');
+    const customPass = window.prompt(`Set new password for ${ba.primary_name || ba.name} (${ba.email}):\n(Leave empty to auto-generate)`, 'admin123');
     if (customPass === null) return;
 
     try {
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                           {ba.status || 'Active'}
                         </span>
                       </div>
-                      <h4 className="text-base font-bold text-slate-900">{ba.full_name || ba.name}</h4>
+                      <h4 className="text-base font-bold text-slate-900">{ba.primary_name || ba.name}</h4>
                       <div className="text-xs text-slate-600 space-y-1 mt-1">
                         <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Contact 1:</span> <span>{ba.mobile || 'N/A'}</span></p>
                         {ba.secondaryContactNumber && <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Contact 2:</span> <span className="truncate max-w-[200px]">{ba.secondaryContactNumber}</span></p>}
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
                        <button onClick={() => handleTakeAction(ba.id, ba.status === 'Active' ? 'Suspended' : 'Active')} className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${ba.status === 'Active' ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'}`}>
                          {ba.status === 'Active' ? 'Suspend' : 'Activate'}
                        </button>
-                       <button onClick={() => handleDeleteMeghalaAdmin(ba.id, ba.full_name || ba.name)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 rounded-xl transition cursor-pointer">
+                       <button onClick={() => handleDeleteMeghalaAdmin(ba.id, ba.primary_name || ba.name)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 rounded-xl transition cursor-pointer">
                          <Trash2 className="w-4 h-4" />
                        </button>
                     </div>
@@ -375,7 +375,7 @@ export default function AdminDashboard() {
             </button>
             <h3 className="text-lg font-bold mb-4 text-slate-900">User Profile</h3>
             <div className="space-y-3 text-sm text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <p><strong>Name:</strong> {viewUser.full_name || viewUser.name}</p>
+              <p><strong>Name:</strong> {viewUser.primary_name || viewUser.name}</p>
               <p><strong>Email:</strong> {viewUser.email}</p>
               <p><strong>Mobile:</strong> {viewUser.mobile || 'N/A'}</p>
               <p><strong>Role:</strong> {viewUser.role}</p>

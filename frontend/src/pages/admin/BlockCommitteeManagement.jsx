@@ -7,17 +7,19 @@ import api from '../../store/api.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 
 function parseBlockAdminContacts(ba) {
-  let admin1Name = ba.full_name || ba.name || '';
-  let admin2Name = ba.secondaryContactName || ba.secondary_contact_name || '';
-  
-  if (!admin2Name && admin1Name.includes(' & ')) {
-    const parts = admin1Name.split(' & ');
-    admin1Name = parts[0] ? parts[0].trim() : '';
-    admin2Name = parts[1] ? parts[1].trim() : '';
-  }
+  let admin1Name = ba.primaryContactName || ba.primary_contact_name || ba.primaryName || ba.primary_name || ba.name || '';
+  let admin2Name = ba.secondaryName || ba.secondary_name || '';
 
   let admin1Mobile = ba.mobile || '';
   let admin2Mobile = ba.secondaryContactNumber || ba.secondary_contact_number || '';
+  if (admin2Mobile) {
+    const numMatch = admin2Mobile.match(/[\d+\-\s]{10,}/);
+    if (numMatch) {
+      admin2Mobile = numMatch[0].trim();
+    } else {
+      admin2Mobile = admin2Mobile.replace(/Admin 2:\s*/g, '').replace(/[()]/g, '').trim();
+    }
+  }
 
   return {
     admin1Name: admin1Name || 'N/A',
@@ -67,7 +69,7 @@ export default function BlockCommitteeManagement() {
     setLoading(true);
     try {
       const [resDist, resAdmins] = await Promise.all([
-        api.get('/super-admin/district-data'),
+        api.get('/super-admin/metrics'),
         api.get('/super-admin/block-admins')
       ]);
 
@@ -98,25 +100,18 @@ export default function BlockCommitteeManagement() {
     setSubmittingAdd(true);
     setAddMsg(null);
     try {
-      let secondaryContactVal = '';
-      if (secondaryContactName && secondaryContactMobile) {
-        secondaryContactVal = `Admin 2: ${secondaryContactName} (${secondaryContactMobile})`;
-      } else if (secondaryContactName) {
-        secondaryContactVal = `Admin 2: ${secondaryContactName}`;
-      } else if (secondaryContactMobile) {
-        secondaryContactVal = `Admin 2: (${secondaryContactMobile})`;
-      }
-
       const res = await api.post('/super-admin/block-admins', {
         blockCommitteeName: blockName,
         block_admin_1_name: primaryContactName,
         block_admin_1_mobile: primaryContactMobile,
-        secondaryContactName: secondaryContactName,
-        secondaryContactNumber: secondaryContactVal || secondaryContactMobile,
-        full_name: secondaryContactName ? `${primaryContactName} & ${secondaryContactName}` : primaryContactName,
+        secondaryName: secondaryContactName,
+        secondaryContactNumber: secondaryContactMobile,
+        primary_name: primaryContactName,
         mobile: primaryContactMobile,
         whatsapp_number: primaryContactMobile,
         email,
+        district,
+        city: blockName,
       });
 
       if (res.data?.success) {
@@ -127,12 +122,12 @@ export default function BlockCommitteeManagement() {
           password: genPassword,
           blockName
         });
-        setBlockName(''); 
-        setPrimaryContactName(''); 
-        setPrimaryContactMobile(''); 
-        setSecondaryContactName(''); 
+        setBlockName('');
+        setPrimaryContactName('');
+        setPrimaryContactMobile('');
+        setSecondaryContactName('');
         setSecondaryContactMobile('');
-        setEmail(''); 
+        setEmail('');
         setShowAddModal(false);
         loadData();
       } else {
@@ -147,7 +142,7 @@ export default function BlockCommitteeManagement() {
 
   const handleOpenEdit = (ba) => {
     setEditingAdmin(ba);
-    setEditBlockName(ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.block || ba.blockName || '');
+    setEditBlockName(ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.block || ba.blockName || ba.city || '');
     setEditEmail(ba.email || '');
     setEditPassword('');
     setEditStatus(ba.status || 'Active');
@@ -167,26 +162,19 @@ export default function BlockCommitteeManagement() {
     setSubmittingEdit(true);
     setEditMsg(null);
     try {
-      let secondaryContactVal = '';
-      if (editFullName2 && editMobile2) {
-        secondaryContactVal = `Admin 2: ${editFullName2} (${editMobile2})`;
-      } else if (editFullName2) {
-        secondaryContactVal = `Admin 2: ${editFullName2}`;
-      } else if (editMobile2) {
-        secondaryContactVal = `Admin 2: (${editMobile2})`;
-      }
-
       const res = await api.put(`/super-admin/block-admins/${editingAdmin.id}`, {
         blockCommitteeName: editBlockName,
         block_admin_1_name: editFullName1,
         block_admin_1_mobile: editMobile1,
-        secondaryContactName: editFullName2,
-        secondaryContactNumber: secondaryContactVal || editMobile2,
-        full_name: editFullName2 ? `${editFullName1} & ${editFullName2}` : editFullName1,
+        secondaryName: editFullName2,
+        secondaryContactNumber: editMobile2,
+        primary_name: editFullName1,
         email: editEmail,
         password: editPassword || undefined,
         mobile: editMobile1,
-        status: editStatus
+        status: editStatus,
+        district,
+        city: editBlockName,
       });
 
       if (res.data?.success) {
@@ -217,8 +205,8 @@ export default function BlockCommitteeManagement() {
   const filteredBlockAdmins = blockAdmins.filter(ba => {
     const q = searchQuery.toLowerCase();
     const matchQuery = (
-      (ba.blockCommitteeName || ba.block_committee_name || ba.block_name || '').toLowerCase().includes(q) ||
-      (ba.full_name || ba.name || '').toLowerCase().includes(q) ||
+      (ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '').toLowerCase().includes(q) ||
+      (ba.primary_name || ba.name || '').toLowerCase().includes(q) ||
       (ba.email || '').toLowerCase().includes(q) ||
       (ba.mobile || '').toLowerCase().includes(q)
     );
@@ -229,8 +217,8 @@ export default function BlockCommitteeManagement() {
   const exportCSV = () => {
     const headers = ['Block Name', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Status'];
     const rows = filteredBlockAdmins.map(ba => [
-      ba.blockCommitteeName || ba.block_committee_name || ba.block_name || '',
-      ba.full_name || ba.name || '',
+      ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '',
+      ba.primary_name || ba.name || '',
       ba.email || '',
       ba.mobile || '',
       ba.secondaryContactNumber || ba.secondary_contact_number || ba.secondary_contact || '',
@@ -247,7 +235,7 @@ export default function BlockCommitteeManagement() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 select-none">
-      
+
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 p-6 rounded-3xl shadow-sm">
         <div>
@@ -259,20 +247,20 @@ export default function BlockCommitteeManagement() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button 
-            onClick={() => setShowAddModal(true)} 
+          <button
+            onClick={() => setShowAddModal(true)}
             className="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-xs font-bold shadow-md shadow-red-200 transition flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Add Block Committee
           </button>
-          <button 
-            onClick={exportCSV} 
+          <button
+            onClick={exportCSV}
             className="px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <Download className="w-4 h-4 text-blue-600" /> Export CSV
           </button>
-          <button 
-            onClick={loadData} 
+          <button
+            onClick={loadData}
             className="px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
@@ -321,37 +309,34 @@ export default function BlockCommitteeManagement() {
 
       {/* Main List Section */}
       <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 rounded-3xl p-6 space-y-6 shadow-sm">
-        
+
         {/* Filters & Search Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-zinc-800/60 pb-4">
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                statusFilter === 'all' 
-                  ? 'bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900' 
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'all'
+                  ? 'bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                   : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200'
-              }`}
+                }`}
             >
               All ({blockAdmins.length})
             </button>
-            <button 
+            <button
               onClick={() => setStatusFilter('Active')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                statusFilter === 'Active' 
-                  ? 'bg-emerald-600 text-white' 
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'Active'
+                  ? 'bg-emerald-600 text-white'
                   : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200'
-              }`}
+                }`}
             >
               Active ({activeCount})
             </button>
-            <button 
+            <button
               onClick={() => setStatusFilter('Suspended')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                statusFilter === 'Suspended' 
-                  ? 'bg-red-600 text-white' 
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'Suspended'
+                  ? 'bg-red-600 text-white'
                   : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200'
-              }`}
+                }`}
             >
               Suspended ({suspendedCount})
             </button>
@@ -399,7 +384,7 @@ export default function BlockCommitteeManagement() {
                           <span className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100 dark:border-red-900/40">
                             <Building2 className="w-4 h-4" />
                           </span>
-                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{ba.blockCommitteeName || ba.block_committee_name || ba.block_name || 'N/A'}</span>
+                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || 'N/A'}</span>
                         </div>
                       </td>
 
@@ -435,11 +420,10 @@ export default function BlockCommitteeManagement() {
                       </td>
 
                       <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                          ba.status === 'Active' 
-                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400' 
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${ba.status === 'Active'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
                             : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
-                        }`}>
+                          }`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                           {ba.status}
                         </span>
@@ -447,18 +431,18 @@ export default function BlockCommitteeManagement() {
 
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => handleOpenEdit(ba)} 
+                          <button
+                            onClick={() => handleOpenEdit(ba)}
                             className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
                             title="Edit Block Committee"
                           >
                             <Edit3 className="w-3.5 h-3.5" /> Edit
                           </button>
-                          <button 
+                          <button
                             onClick={() => {
                               setDeletingAdminId(ba.id);
-                              setDeletingAdminName(ba.full_name || ba.name);
-                            }} 
+                              setDeletingAdminName(ba.primary_name || ba.name);
+                            }}
                             className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
                             title="Delete Block Committee"
                           >
@@ -491,8 +475,8 @@ export default function BlockCommitteeManagement() {
                     <p className="text-red-100 text-[10px] font-medium">Register Block Admin account for {district} District</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setShowAddModal(false)} 
+                <button
+                  onClick={() => setShowAddModal(false)}
                   className="w-8 h-8 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/20 transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
@@ -502,9 +486,8 @@ export default function BlockCommitteeManagement() {
 
             <div className="p-6 space-y-4">
               {addMsg && (
-                <div className={`p-3 rounded-2xl text-xs font-bold ${
-                  addMsg.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                }`}>
+                <div className={`p-3 rounded-2xl text-xs font-bold ${addMsg.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                  }`}>
                   {addMsg.msg}
                 </div>
               )}
@@ -513,13 +496,13 @@ export default function BlockCommitteeManagement() {
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Block Committee Name *</label>
                   <div className="relative">
-                    <input 
-                      type="text" 
-                      value={blockName} 
-                      onChange={(e) => setBlockName(e.target.value)} 
-                      required 
+                    <input
+                      type="text"
+                      value={blockName}
+                      onChange={(e) => setBlockName(e.target.value)}
+                      required
                       placeholder="e.g. Kozhikode North"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                     <Building2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
@@ -528,26 +511,26 @@ export default function BlockCommitteeManagement() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Primary Contact Name *</label>
-                    <input 
-                      type="text" 
-                      value={primaryContactName} 
-                      onChange={(e) => setPrimaryContactName(e.target.value)} 
-                      required 
+                    <input
+                      type="text"
+                      value={primaryContactName}
+                      onChange={(e) => setPrimaryContactName(e.target.value)}
+                      required
                       placeholder="e.g. Rahul V"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Primary Phone Number *</label>
                     <div className="relative">
-                      <input 
-                        type="tel" 
-                        value={primaryContactMobile} 
-                        onChange={(e) => setPrimaryContactMobile(e.target.value)} 
-                        required 
+                      <input
+                        type="tel"
+                        value={primaryContactMobile}
+                        onChange={(e) => setPrimaryContactMobile(e.target.value)}
+                        required
                         placeholder="9876543210"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                       />
                       <Phone className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -557,26 +540,26 @@ export default function BlockCommitteeManagement() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Contact Name *</label>
-                    <input 
-                      type="text" 
-                      value={secondaryContactName} 
-                      onChange={(e) => setSecondaryContactName(e.target.value)} 
-                      required 
+                    <input
+                      type="text"
+                      value={secondaryContactName}
+                      onChange={(e) => setSecondaryContactName(e.target.value)}
+                      required
                       placeholder="e.g. Anjali M"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Phone Number *</label>
                     <div className="relative">
-                      <input 
-                        type="tel" 
-                        value={secondaryContactMobile} 
-                        onChange={(e) => setSecondaryContactMobile(e.target.value)} 
-                        required 
+                      <input
+                        type="tel"
+                        value={secondaryContactMobile}
+                        onChange={(e) => setSecondaryContactMobile(e.target.value)}
+                        required
                         placeholder="9876543210"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                       />
                       <Phone className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -586,29 +569,29 @@ export default function BlockCommitteeManagement() {
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Email Address *</label>
                   <div className="relative">
-                    <input 
-                      type="email" 
-                      value={email} 
-                      onChange={(e) => setEmail(e.target.value)} 
-                      required 
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
                       placeholder="kozhikode.north@jeevalink.org"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                     <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-zinc-800/60 mt-4">
-                  <button 
-                    type="button" 
-                    onClick={() => setShowAddModal(false)} 
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
                     className="flex-1 py-3 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-2xl text-xs hover:bg-slate-50 cursor-pointer"
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    disabled={submittingAdd} 
+                  <button
+                    type="submit"
+                    disabled={submittingAdd}
                     className="flex-1 py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-2xl text-xs shadow-md cursor-pointer disabled:opacity-50"
                   >
                     {submittingAdd ? 'Creating...' : 'Create Committee'}
@@ -635,8 +618,8 @@ export default function BlockCommitteeManagement() {
                     <p className="text-red-100 text-[10px] font-medium">Update Block Committee information & credentials</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setEditingAdmin(null)} 
+                <button
+                  onClick={() => setEditingAdmin(null)}
                   className="w-8 h-8 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/20 transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
@@ -646,9 +629,8 @@ export default function BlockCommitteeManagement() {
 
             <div className="p-6 space-y-4">
               {editMsg && (
-                <div className={`p-3 rounded-2xl text-xs font-bold ${
-                  editMsg.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                }`}>
+                <div className={`p-3 rounded-2xl text-xs font-bold ${editMsg.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                  }`}>
                   {editMsg.msg}
                 </div>
               )}
@@ -657,13 +639,13 @@ export default function BlockCommitteeManagement() {
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Block Committee Name *</label>
                   <div className="relative">
-                    <input 
-                      type="text" 
-                      value={editBlockName} 
-                      onChange={(e) => setEditBlockName(e.target.value)} 
-                      required 
+                    <input
+                      type="text"
+                      value={editBlockName}
+                      onChange={(e) => setEditBlockName(e.target.value)}
+                      required
                       placeholder="e.g. Kozhikode North"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                     <Building2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
@@ -672,26 +654,26 @@ export default function BlockCommitteeManagement() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Primary Contact Name *</label>
-                    <input 
-                      type="text" 
-                      value={editFullName1} 
-                      onChange={(e) => setEditFullName1(e.target.value)} 
-                      required 
+                    <input
+                      type="text"
+                      value={editFullName1}
+                      onChange={(e) => setEditFullName1(e.target.value)}
+                      required
                       placeholder="e.g. Rahul V"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Primary Phone Number *</label>
                     <div className="relative">
-                      <input 
-                        type="tel" 
-                        value={editMobile1} 
-                        onChange={(e) => setEditMobile1(e.target.value)} 
-                        required 
+                      <input
+                        type="tel"
+                        value={editMobile1}
+                        onChange={(e) => setEditMobile1(e.target.value)}
+                        required
                         placeholder="9876543210"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                       />
                       <Phone className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -701,24 +683,24 @@ export default function BlockCommitteeManagement() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Contact Name</label>
-                    <input 
-                      type="text" 
-                      value={editFullName2} 
-                      onChange={(e) => setEditFullName2(e.target.value)} 
+                    <input
+                      type="text"
+                      value={editFullName2}
+                      onChange={(e) => setEditFullName2(e.target.value)}
                       placeholder="e.g. Anjali M"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Phone Number</label>
                     <div className="relative">
-                      <input 
-                        type="tel" 
-                        value={editMobile2} 
-                        onChange={(e) => setEditMobile2(e.target.value)} 
+                      <input
+                        type="tel"
+                        value={editMobile2}
+                        onChange={(e) => setEditMobile2(e.target.value)}
                         placeholder="9876543210"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                       />
                       <Phone className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -729,13 +711,13 @@ export default function BlockCommitteeManagement() {
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Email Address *</label>
                     <div className="relative">
-                      <input 
-                        type="email" 
-                        value={editEmail} 
-                        onChange={(e) => setEditEmail(e.target.value)} 
-                        required 
+                      <input
+                        type="email"
+                        value={editEmail}
+                        onChange={(e) => setEditEmail(e.target.value)}
+                        required
                         placeholder="kozhikode.north@jeevalink.org"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                       />
                       <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -743,9 +725,9 @@ export default function BlockCommitteeManagement() {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Account Status</label>
-                    <select 
-                      value={editStatus} 
-                      onChange={(e) => setEditStatus(e.target.value)} 
+                    <select
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value)}
                       className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl px-3.5 py-2.5 text-slate-900 dark:text-zinc-100 font-bold cursor-pointer"
                     >
                       <option value="Active">🟢 Active</option>
@@ -755,16 +737,16 @@ export default function BlockCommitteeManagement() {
                 </div>
 
                 <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-zinc-800/60 mt-4">
-                  <button 
-                    type="button" 
-                    onClick={() => setEditingAdmin(null)} 
+                  <button
+                    type="button"
+                    onClick={() => setEditingAdmin(null)}
                     className="flex-1 py-3 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-2xl text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 cursor-pointer"
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    disabled={submittingEdit} 
+                  <button
+                    type="submit"
+                    disabled={submittingEdit}
                     className="flex-1 py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-2xl text-xs shadow-md cursor-pointer disabled:opacity-50"
                   >
                     {submittingEdit ? 'Saving...' : 'Save Changes'}
@@ -793,7 +775,7 @@ export default function BlockCommitteeManagement() {
               <div><span className="text-slate-400">Password:</span> <strong>{credentialsModal.password}</strong></div>
             </div>
 
-            <button 
+            <button
               onClick={() => setCredentialsModal({ open: false, email: '', password: '', blockName: '' })}
               className="w-full py-3 bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-bold rounded-2xl text-xs cursor-pointer hover:opacity-90"
             >

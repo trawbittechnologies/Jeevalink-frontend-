@@ -118,7 +118,7 @@ export default function Header() {
           <div className="bg-slate-50 dark:bg-rose-50/10 border border-slate-150/70 dark:border-rose-100/30 rounded-2xl p-3 flex items-center justify-between gap-2.5">
             <div className="min-w-0">
               <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-900 truncate">
-                {user ? user.fullName.split(' ')[0] : 'Guest'}
+                {user ? user.primaryName.split(' ')[0] : 'Guest'}
               </h4>
               <p className="text-[9px] font-black text-primary uppercase tracking-wider mt-0.5">
                 Group: {user ? user.bloodGroup : 'O-'}
@@ -161,7 +161,7 @@ export default function Header() {
           <div className="flex items-center gap-2.5">
             <div className="flex flex-col text-right">
               <span className="text-[10px] font-black text-slate-800 dark:text-slate-800 leading-none">
-                {user ? user.fullName.split(' ')[0] : 'Guest'}
+                {user ? user.primaryName.split(' ')[0] : 'Guest'}
               </span>
               <span className="text-[8px] font-black text-primary uppercase tracking-widest mt-0.5 leading-none">
                 {user ? user.bloodGroup : 'O-'}

@@ -244,7 +244,7 @@ export default function MapContainer({ donors = [], requests = [], center = { la
                 <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 leading-none">
                   <Heart className="w-3.5 h-3.5 fill-current text-emerald-500" /> Donor Match • {selectedPoint.bloodGroup}
                 </h4>
-                <p className="text-sm font-semibold truncate mt-1">{selectedPoint.fullName}</p>
+                <p className="text-sm font-semibold truncate mt-1">{selectedPoint.primaryName}</p>
                 <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5 flex items-center gap-2">
                   <span>Dist: {selectedPoint.distance} km</span>
                   {selectedPoint.matchScore && <span>Match: {selectedPoint.matchScore}%</span>}

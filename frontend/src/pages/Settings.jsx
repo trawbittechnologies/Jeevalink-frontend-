@@ -1,18 +1,66 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, BellRing, Smartphone, ShieldCheck, Info } from 'lucide-react';
+import { useAuthStore } from '../store/authStore.js';
+import {
+  Moon, Sun, BellRing, Smartphone, KeyRound, Mail, ChevronRight, Settings as SettingsIcon
+} from 'lucide-react';
+import AccountSecurityModal from '../components/AccountSecurityModal.jsx';
+
+// Reusable toggle switch
+function Toggle({ enabled, onToggle, id }) {
+  return (
+    <button
+      id={id}
+      onClick={onToggle}
+      role="switch"
+      aria-checked={enabled}
+      className={`relative w-11 h-6 rounded-full p-0.5 transition-colors duration-300 cursor-pointer shrink-0 ${
+        enabled ? 'bg-primary' : 'bg-slate-200'
+      }`}
+    >
+      <div
+        className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-300 ${
+          enabled ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  );
+}
+
+// Reusable section card row
+function SettingRow({ icon: Icon, iconBg, title, subtitle, right, onClick, id }) {
+  const Wrapper = onClick ? 'button' : 'div';
+  return (
+    <Wrapper
+      id={id}
+      onClick={onClick}
+      className={`w-full flex items-center gap-4 py-3 ${onClick ? 'cursor-pointer group' : ''}`}
+    >
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="flex-1 text-left min-w-0">
+        <p className="text-sm font-semibold text-gray-900 leading-tight">{title}</p>
+        <p className="text-xs text-gray-400 mt-0.5 truncate">{subtitle}</p>
+      </div>
+      {right}
+    </Wrapper>
+  );
+}
 
 export default function Settings() {
-  const navigate = useNavigate();
   const { triggerToast } = useAppStore();
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return document.documentElement.classList.contains('dark');
-  });
+  const { user } = useAuthStore();
+
+  const [isDarkMode, setIsDarkMode] = useState(() =>
+    document.documentElement.classList.contains('dark')
+  );
   const [pushEnabled, setPushEnabled] = useState(true);
   const [smsEnabled, setSmsEnabled] = useState(false);
+  const [securityModal, setSecurityModal] = useState(null); // 'password' | 'email' | null
 
-  // Sync theme to document element
+  const showAccountSecurity = user?.role !== 'unit_squad';
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -21,170 +69,111 @@ export default function Settings() {
     }
   }, [isDarkMode]);
 
-  const handleThemeToggle = () => {
-    setIsDarkMode(!isDarkMode);
-    triggerToast(
-      !isDarkMode ? 'Dark mode enabled!' : 'Light mode enabled!',
-      'info'
-    );
+  const toggleDark = () => {
+    setIsDarkMode(v => !v);
+    triggerToast(!isDarkMode ? 'Dark mode enabled!' : 'Light mode enabled!', 'info');
   };
-
-  const handleTogglePush = () => {
-    setPushEnabled(!pushEnabled);
-    triggerToast(
-      !pushEnabled ? 'Push notifications activated!' : 'Push notifications silenced.',
-      'info'
-    );
+  const togglePush = () => {
+    setPushEnabled(v => !v);
+    triggerToast(!pushEnabled ? 'Push notifications enabled!' : 'Push notifications disabled.', 'info');
   };
-
-  const handleToggleSms = () => {
-    setSmsEnabled(!smsEnabled);
-    triggerToast(
-      !smsEnabled ? 'Emergency SMS dispatch activated!' : 'Emergency SMS dispatch muted.',
-      'info'
-    );
+  const toggleSms = () => {
+    setSmsEnabled(v => !v);
+    triggerToast(!smsEnabled ? 'SMS alerts enabled!' : 'SMS alerts disabled.', 'info');
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 px-6 pt-6 pb-24 select-none">
-      <div className="max-w-2xl mx-auto">
-        {/* Settings Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-10 h-10 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-sm text-slate-800 dark:text-zinc-100"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-zinc-100">Settings</h2>
-          <p className="text-xs text-slate-400 dark:text-zinc-550">Configure application configurations</p>
+    <>
+      <div className="max-w-2xl mx-auto space-y-6">
+
+        {/* Page header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900">Settings</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage preferences and account security</p>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center">
+            <SettingsIcon className="w-5 h-5 text-primary" />
+          </div>
         </div>
+
+        {/* ── Appearance ─────────────────────────────────── */}
+        <div className="card p-5 space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Appearance</p>
+
+          <SettingRow
+            id="dark-mode-row"
+            icon={isDarkMode ? Moon : Sun}
+            iconBg="bg-slate-100 text-slate-600"
+            title="Dark Mode"
+            subtitle={isDarkMode ? 'Dark theme is active' : 'Light theme is active'}
+            right={<Toggle enabled={isDarkMode} onToggle={toggleDark} id="dark-mode-toggle" />}
+          />
+        </div>
+
+        {/* ── Notifications ──────────────────────────────── */}
+        <div className="card p-5 space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Notifications</p>
+
+          <SettingRow
+            id="push-notifications-row"
+            icon={BellRing}
+            iconBg="bg-blue-50 text-blue-600"
+            title="Push Notifications"
+            subtitle="Receive nearby blood request alerts"
+            right={<Toggle enabled={pushEnabled} onToggle={togglePush} id="push-toggle" />}
+          />
+
+          <div className="border-t border-slate-100 my-1" />
+
+          <SettingRow
+            id="sms-alerts-row"
+            icon={Smartphone}
+            iconBg="bg-emerald-50 text-emerald-600"
+            title="SMS Alerts"
+            subtitle="Emergency SMS broadcast dispatch"
+            right={<Toggle enabled={smsEnabled} onToggle={toggleSms} id="sms-toggle" />}
+          />
+        </div>
+
+        {/* ── Account Security — not for unit_squad ─────── */}
+        {showAccountSecurity && (
+          <div className="card p-5 space-y-1">
+            <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Account Security</p>
+
+            <SettingRow
+              id="change-password-btn"
+              icon={KeyRound}
+              iconBg="bg-red-50 text-primary"
+              title="Change Password"
+              subtitle="Update your account login password"
+              onClick={() => setSecurityModal('password')}
+              right={<ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-primary transition-colors shrink-0" />}
+            />
+
+            <div className="border-t border-slate-100 my-1" />
+
+            <SettingRow
+              id="change-email-btn"
+              icon={Mail}
+              iconBg="bg-rose-50 text-rose-500"
+              title="Change Email"
+              subtitle={user?.email || 'Update your email address'}
+              onClick={() => setSecurityModal('email')}
+              right={<ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-rose-500 transition-colors shrink-0" />}
+            />
+          </div>
+        )}
+
       </div>
 
-      {/* Settings List */}
-      <div className="space-y-4">
-        {/* Visual Settings */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm">
-          <h3 className="text-[10px] uppercase font-black tracking-widest text-slate-400 dark:text-zinc-500 mb-4 pl-0.5">Appearance</h3>
-          
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-100 flex items-center justify-center">
-                {isDarkMode ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">Dark Theme Override</h4>
-                <p className="text-[9px] text-slate-400 dark:text-zinc-500">Toggle dark mode visual system</p>
-              </div>
-            </div>
-            {/* Toggle Switch */}
-            <button
-              onClick={handleThemeToggle}
-              className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-300 cursor-pointer ${
-                isDarkMode ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-800'
-              }`}
-            >
-              <div 
-                className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
-                  isDarkMode ? 'translate-x-4' : ''
-                }`} 
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Notifications & Alert Settings */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm space-y-4">
-          <h3 className="text-[10px] uppercase font-black tracking-widest text-slate-400 dark:text-zinc-500 pl-0.5">Alert Dispatch Settings</h3>
-          
-          {/* Push alert toggle */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-100 flex items-center justify-center">
-                <BellRing className="w-4.5 h-4.5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">Push Notifications</h4>
-                <p className="text-[9px] text-slate-400 dark:text-zinc-500">Receive nearby blood requests</p>
-              </div>
-            </div>
-            <button
-              onClick={handleTogglePush}
-              className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-300 cursor-pointer ${
-                pushEnabled ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-800'
-              }`}
-            >
-              <div 
-                className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
-                  pushEnabled ? 'translate-x-4' : ''
-                }`} 
-              />
-            </button>
-          </div>
-
-          {/* SMS Alert toggle */}
-          <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-zinc-800">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-100 flex items-center justify-center">
-                <Smartphone className="w-4.5 h-4.5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">SMS Broadcasts</h4>
-                <p className="text-[9px] text-slate-400 dark:text-zinc-500">Dispatch local SMS alerts (simulated)</p>
-              </div>
-            </div>
-            <button
-              onClick={handleToggleSms}
-              className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-300 cursor-pointer ${
-                smsEnabled ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-800'
-              }`}
-            >
-              <div 
-                className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
-                  smsEnabled ? 'translate-x-4' : ''
-                }`} 
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Security & Health Standards */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm space-y-3">
-          <h3 className="text-[10px] uppercase font-black tracking-widest text-slate-400 dark:text-zinc-500 pl-0.5">Health Standards</h3>
-          
-          <div className="flex items-start gap-3 text-xs leading-relaxed text-slate-550 dark:text-zinc-400">
-            <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-            <p>
-              JeevaLink complies with regional health donation timelines. Donors must weigh at least 45kg and allow a 90-day cooldown interval between blood donations.
-            </p>
-          </div>
-        </div>
-
-        {/* About App metadata */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm space-y-4">
-          <h3 className="text-[10px] uppercase font-black tracking-widest text-slate-400 dark:text-zinc-500 pl-0.5">Build Information</h3>
-          
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-100 flex items-center justify-center shrink-0">
-              <Info className="w-4.5 h-4.5" />
-            </div>
-            <div className="text-xs space-y-1">
-              <p className="font-bold text-slate-900 dark:text-zinc-100">JeevaLink Core (v2.0.26)</p>
-              <p className="text-[10px] text-slate-400 dark:text-zinc-500">React 19, Vite, Tailwind CSS v4, Zustand</p>
-              <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Developed by Advanced Agentic Coding</p>
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400">
-            <span>Server connection</span>
-            <span className="text-emerald-500 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Active
-            </span>
-          </div>
-        </div>
-      </div>
-      </div>
-    </div>
+      {/* Account Security Modal */}
+      {securityModal && (
+        <AccountSecurityModal
+          mode={securityModal}
+          onClose={() => setSecurityModal(null)}
+        />
+      )}
+    </>
   );
 }

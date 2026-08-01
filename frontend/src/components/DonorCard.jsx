@@ -26,9 +26,9 @@ export default function DonorCard({ donor }) {
     e.preventDefault();
     if (!reportReason) return;
     const res = await fileComplaint({
-      reporterName: user?.fullName || 'Anonymous User',
+      reporterName: user?.primaryName || 'Anonymous User',
       reporterId: user?._id || 'guest',
-      targetName: donor.fullName,
+      targetName: donor.primaryName,
       targetId: donor._id,
       reason: reportReason,
     });
@@ -48,12 +48,12 @@ export default function DonorCard({ donor }) {
               <img src={getStorageUrl(donor.profilePicture || donor.photo)} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-black text-base">
-                {donor.fullName?.[0]}
+                {donor.primaryName?.[0]}
               </div>
             )}
           </div>
           <div className="min-w-0">
-            <h4 className="text-sm font-bold text-gray-900 truncate">{donor.fullName}</h4>
+            <h4 className="text-sm font-bold text-gray-900 truncate">{donor.primaryName}</h4>
             <div className="flex items-center gap-1.5 mt-0.5">
               <MapPin className="w-3 h-3 text-gray-400" />
               <span className="text-xs text-gray-550">{donor.city}</span>
@@ -120,7 +120,7 @@ export default function DonorCard({ donor }) {
       )}
 
       {/* Report Modal */}
-      <Modal isOpen={showReportModal} onClose={() => setShowReportModal(false)} title={`Report Donor: ${donor.fullName}`}>
+      <Modal isOpen={showReportModal} onClose={() => setShowReportModal(false)} title={`Report Donor: ${donor.primaryName}`}>
         <form onSubmit={handleReportSubmit} className="space-y-4">
           <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-[11px] text-primary font-semibold flex gap-2">
             <AlertTriangle className="w-4.5 h-4.5 shrink-0 mt-0.5" />

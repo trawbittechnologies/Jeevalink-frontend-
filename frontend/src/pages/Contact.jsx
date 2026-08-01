@@ -81,14 +81,14 @@ export default function Contact() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                      Full Name *
+                      Primary Name *
                     </label>
                     <input
                       type="text"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       className="input-base"
-                      placeholder="Your full name"
+                      placeholder="Your primary name"
                     />
                   </div>
                   <div>

@@ -14,8 +14,8 @@ const KERALA_DISTRICTS = [
 
 function parseSuperAdminContacts(sa) {
   let admin1Name = sa.superAdmin_1Name || sa.superAdmin1Name || sa.super_admin_1_name || '';
-  let admin2Name = sa.secondaryContactName || sa.secondary_contact_name || '';
-  let fullName = sa.fullName || sa.full_name || sa.name || '';
+  let admin2Name = sa.secondaryName || sa.secondary_name || '';
+  let fullName = sa.primaryName || sa.primary_name || sa.name || '';
 
   let nameToSplit = admin1Name.includes(' & ') ? admin1Name : (fullName.includes(' & ') ? fullName : null);
   if (nameToSplit) {
@@ -147,10 +147,10 @@ export default function SuperAdminManagement() {
     try {
       const res = await api.post('/technical-admin/super-admins', {
         district: targetDistrict,
-        full_name: fullName2.trim() ? `${fullName1} & ${fullName2}` : fullName1,
+        primary_name: fullName1,
         email,
         mobile: mobile1,
-        secondaryContactName: fullName2 || null,
+        secondaryName: fullName2 || null,
         secondaryContactNumber: mobile2 || null,
         super_admin_1_name: fullName1,
         super_admin_1_mobile: mobile1,
@@ -251,10 +251,10 @@ export default function SuperAdminManagement() {
     try {
       const res = await api.put(`/technical-admin/super-admins/${editingSA.id}`, {
         district: editDistrict,
-        full_name: editFullName2.trim() ? `${editFullName1} & ${editFullName2}` : editFullName1,
+        primary_name: editFullName1,
         email: editEmail,
         mobile: editMobile1,
-        secondaryContactName: editFullName2,
+        secondaryName: editFullName2,
         secondaryContactNumber: editMobile2,
         super_admin_1_name: editFullName1,
         super_admin_1_mobile: editMobile1,
@@ -294,7 +294,7 @@ export default function SuperAdminManagement() {
     const parsed = parseSuperAdminContacts(sa);
     const matchesSearch =
       (sa.district || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sa.fullName || sa.full_name || sa.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (sa.primaryName || sa.primary_name || sa.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sa.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sa.mobile || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       parsed.admin1Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -551,7 +551,7 @@ export default function SuperAdminManagement() {
 
                         {/* Delete Button */}
                         <button
-                          onClick={() => handleDeleteSuperAdmin(sa.id, sa.fullName || sa.full_name || sa.name, sa.district)}
+                          onClick={() => handleDeleteSuperAdmin(sa.id, sa.primaryName || sa.primary_name || sa.name, sa.district)}
                           className="px-2.5 py-1.5 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
                           title="Delete Super Admin"
                         >
@@ -791,7 +791,7 @@ export default function SuperAdminManagement() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Full Name *</label>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Primary Name *</label>
                       <input
                         type="text"
                         placeholder="e.g. Rahul V."
@@ -822,7 +822,7 @@ export default function SuperAdminManagement() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Full Name *</label>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Primary Name *</label>
                       <input
                         type="text"
                         placeholder="e.g. Anjali Nair"
@@ -942,7 +942,7 @@ export default function SuperAdminManagement() {
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-600 mb-1">Full Name *</label>
+                    <label className="block font-bold text-slate-600 mb-1">Primary Name *</label>
                     <input
                       type="text"
                       value={editFullName1}
@@ -971,7 +971,7 @@ export default function SuperAdminManagement() {
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-600 mb-1">Full Name *</label>
+                    <label className="block font-bold text-slate-600 mb-1">Primary Name *</label>
                     <input
                       type="text"
                       value={editFullName2}

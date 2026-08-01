@@ -70,9 +70,9 @@ export default function VolunteerManagement() {
 
   const filtered = volunteers.filter(v => {
     const q = search.toLowerCase();
-    const secName = v.secondaryContactName || v.secondary_contact_name || v.person2Name || '';
+    const secName = v.secondaryName || v.secondary_name || v.person2Name || '';
     const secNum = v.secondaryContactNumber || v.secondary_contact_number || v.secondaryContact || v.person2Contact || '';
-    const matchSearch = !q || [v.meghala, v.blockCommitteeName, v.blockName, v.fullName, v.name, v.email, v.mobile, secName, secNum, v.district]
+    const matchSearch = !q || [v.meghala, v.blockCommitteeName, v.blockName, v.primaryName, v.name, v.email, v.mobile, secName, secNum, v.district]
       .some(f => String(f || '').toLowerCase().includes(q));
     const matchStatus = filters.status === 'all' || (v.status || '').toLowerCase() === filters.status;
     const matchDistrict = filters.district === 'all' || v.district === filters.district;
@@ -83,9 +83,9 @@ export default function VolunteerManagement() {
     const headers = ['Meghala Name', 'Primary Volunteer Name', 'Primary Phone', 'Secondary Volunteer Name', 'Secondary Volunteer Phone', 'Email', 'District', 'Status', 'Registered'];
     const rows = filtered.map(v => [
       v.meghala || v.blockCommitteeName || v.blockName || '',
-      v.fullName || v.name || '',
+      v.primaryName || v.name || '',
       v.mobile || '',
-      v.secondaryContactName || v.secondary_contact_name || v.person2Name || '',
+      v.secondaryName || v.secondary_name || v.person2Name || '',
       v.secondaryContactNumber || v.secondary_contact_number || v.secondaryContact || '',
       v.email || '',
       v.district || '',
@@ -195,12 +195,12 @@ export default function VolunteerManagement() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {filtered.map((vol) => {
-                  const full = vol.fullName || vol.name || vol.full_name || '';
+                  const full = vol.primaryName || vol.name || vol.primary_name || '';
                   const nameParts = Array.from(new Set(full.split(/[&,]+/).map(s => s.trim()).filter(Boolean)));
                   const p1Name = vol.person1Name || nameParts[0] || '—';
                   const p1Mobile = vol.mobile || '—';
 
-                  const p2Name = vol.secondaryContactName || vol.secondary_contact_name || vol.person2Name || (nameParts.length > 1 ? nameParts[1] : '—');
+                  const p2Name = vol.secondaryName || vol.secondary_name || vol.person2Name || (nameParts.length > 1 ? nameParts[1] : '—');
                   const p2Mobile = vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || '—';
 
                   return (
@@ -345,7 +345,7 @@ export default function VolunteerManagement() {
                     <Building2 className="w-7 h-7 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-slate-900 font-black text-base">{selectedVolunteer.meghala || selectedVolunteer.blockCommitteeName || selectedVolunteer.fullName}</p>
+                    <p className="text-slate-900 font-black text-base">{selectedVolunteer.meghala || selectedVolunteer.blockCommitteeName || selectedVolunteer.primaryName}</p>
                     <StatusBadge status={selectedVolunteer.status} />
                     <p className="text-slate-500 text-[10px] mt-0.5">ID: {selectedVolunteer._id || selectedVolunteer.id}</p>
                   </div>
@@ -460,7 +460,7 @@ export default function VolunteerManagement() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">PRIMARY VOLUNTEER (PERSON 1) *</label>
-                          <input type="text" value={form.person1Name} onChange={e => setForm(f => ({ ...f, person1Name: e.target.value }))} required placeholder="Full Name"
+                          <input type="text" value={form.person1Name} onChange={e => setForm(f => ({ ...f, person1Name: e.target.value }))} required placeholder="Primary Name"
                             className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
                         </div>
                         <div>
@@ -473,7 +473,7 @@ export default function VolunteerManagement() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">SECONDARY VOLUNTEER (PERSON 2) *</label>
-                          <input type="text" value={form.person2Name} onChange={e => setForm(f => ({ ...f, person2Name: e.target.value }))} required placeholder="Full Name"
+                          <input type="text" value={form.person2Name} onChange={e => setForm(f => ({ ...f, person2Name: e.target.value }))} required placeholder="Primary Name"
                             className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
                         </div>
                         <div>
@@ -529,7 +529,7 @@ export default function VolunteerManagement() {
           }
         }}
         title={confirmModal.action === 'delete' ? 'Delete Volunteer' : confirmModal.action === 'block' ? 'Block Volunteer Account' : confirmModal.action === 'activate' ? 'Activate Volunteer' : 'Deactivate Volunteer'}
-        message={confirmModal.action === 'delete' ? `Are you sure you want to permanently delete Volunteer "${confirmModal.item?.meghala || confirmModal.item?.fullName}"? This action cannot be undone.` : `Are you sure you want to ${confirmModal.action} Volunteer "${confirmModal.item?.meghala || confirmModal.item?.fullName}"?`}
+        message={confirmModal.action === 'delete' ? `Are you sure you want to permanently delete Volunteer "${confirmModal.item?.meghala || confirmModal.item?.primaryName}"? This action cannot be undone.` : `Are you sure you want to ${confirmModal.action} Volunteer "${confirmModal.item?.meghala || confirmModal.item?.primaryName}"?`}
         confirmLabel={confirmModal.action === 'delete' ? 'Delete Permanently' : confirmModal.action === 'block' ? 'Block Account' : confirmModal.action === 'activate' ? 'Activate' : 'Deactivate'}
         variant={confirmModal.action === 'delete' || confirmModal.action === 'block' ? 'danger' : confirmModal.action === 'activate' ? 'info' : 'warning'}
       />

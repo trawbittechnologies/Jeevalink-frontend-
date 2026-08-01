@@ -26,7 +26,7 @@ export default function DonorSearch() {
     const matchDist = district === 'All' || d.district === district;
     const matchAvail = !availOnly || d.availableForDonation;
     const matchSearch = !searchQuery || 
-      d.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      d.primaryName.toLowerCase().includes(searchQuery.toLowerCase()) || 
       d.city.toLowerCase().includes(searchQuery.toLowerCase());
     const matchDistance = d.distance <= maxDistance;
     return matchBG && matchDist && matchAvail && matchSearch && matchDistance;

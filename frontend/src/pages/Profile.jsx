@@ -21,7 +21,7 @@ export default function Profile() {
 
   const { register, handleSubmit } = useForm({
     defaultValues: {
-      fullName: user?.fullName || '',
+      primaryName: user?.primaryName || '',
       email: user?.email || '',
       mobile: user?.mobile || '',
       district: user?.district || '',
@@ -77,7 +77,7 @@ export default function Profile() {
     navigate('/login');
   };
 
-  const qrData = JSON.stringify({ n: user?.fullName, b: user?.bloodGroup, p: user?.mobile, c: user?.city, v: 'JeevaLink' });
+  const qrData = JSON.stringify({ n: user?.primaryName, b: user?.bloodGroup, p: user?.mobile, c: user?.city, v: 'JeevaLink' });
 
   const handleDownload = () => {
     const svgEl = document.querySelector('.qr-container svg');
@@ -136,7 +136,7 @@ export default function Profile() {
         // Draw User Details
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 20px system-ui, sans-serif';
-        ctx.fillText(user?.fullName || 'Blood Donor', 190, 305);
+        ctx.fillText(user?.primaryName || 'Blood Donor', 190, 305);
 
         ctx.fillStyle = '#9ca3af';
         ctx.font = '500 13px system-ui, sans-serif';
@@ -185,7 +185,7 @@ export default function Profile() {
         const dataURL = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
         downloadLink.href = dataURL;
-        downloadLink.download = `${(user?.fullName || 'donor').toLowerCase().replace(/\s+/g, '_')}_passport.png`;
+        downloadLink.download = `${(user?.primaryName || 'donor').toLowerCase().replace(/\s+/g, '_')}_passport.png`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
@@ -242,7 +242,7 @@ export default function Profile() {
             <img src={getStorageUrl(user.profilePicture)} alt="Avatar" className={`w-full h-full object-cover ${isUploadingPhoto ? 'opacity-50' : ''}`} />
           ) : (
             <div className={`w-full h-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-black text-2xl ${isUploadingPhoto ? 'opacity-50' : ''}`}>
-              {user?.fullName?.[0]}
+              {user?.primaryName?.[0]}
             </div>
           )}
           <label htmlFor="avatar-file-top" className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white text-[10px] font-black uppercase z-20">
@@ -258,7 +258,7 @@ export default function Profile() {
           />
         </div>
         <div className="min-w-0 flex-1 text-left">
-          <h3 className="text-lg font-black text-gray-900">{user?.fullName}</h3>
+          <h3 className="text-lg font-black text-gray-900">{user?.primaryName}</h3>
           <p className="text-sm text-gray-500">{user?.city ? `${user.city}, ${user.district}` : user?.district || 'System Role'}</p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {isUserRole ? (
@@ -327,7 +327,7 @@ export default function Profile() {
                   <img src={getStorageUrl(user.profilePicture)} alt="Avatar" className={`w-full h-full object-cover ${isUploadingPhoto ? 'opacity-50' : ''}`} />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-black text-2xl ${isUploadingPhoto ? 'opacity-50' : ''}`}>
-                    {user?.fullName?.[0]}
+                    {user?.primaryName?.[0]}
                   </div>
                 )}
                 <label htmlFor="avatar-file-form" className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white text-[9px] font-bold uppercase z-20">
@@ -361,8 +361,8 @@ export default function Profile() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Full Name</label>
-                <input type="text" {...register('fullName', { required: true })}
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Primary Name</label>
+                <input type="text" {...register('primaryName', { required: true })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900" />
               </div>
               <div>
@@ -460,7 +460,7 @@ export default function Profile() {
             <div className="bg-white p-4 rounded-2xl inline-block mt-6 mb-4 shadow-lg qr-container">
               <QRCodeSVG value={qrData} size={140} fgColor="#111111" bgColor="#ffffff" level="M" />
             </div>
-            <h3 className="font-bold text-lg">{user?.fullName}</h3>
+            <h3 className="font-bold text-lg">{user?.primaryName}</h3>
             <p className="text-gray-400 text-xs mt-1">{user?.city}, {user?.district}</p>
             <div className="grid grid-cols-3 gap-3 mt-6 pt-5 border-t border-gray-800 text-left">
               <div>

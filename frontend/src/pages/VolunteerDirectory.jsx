@@ -34,7 +34,7 @@ export default function VolunteerDirectory() {
         setVolunteers([
           {
             id: 101,
-            full_name: 'DYFI Meghala Helpline - ' + (meghala || 'Central'),
+            primary_name: 'DYFI Meghala Helpline - ' + (meghala || 'Central'),
             mobile: '9847001122',
             secondaryContactNumber: '9447112233',
             whatsapp_number: '9847001122',
@@ -48,7 +48,7 @@ export default function VolunteerDirectory() {
       setVolunteers([
         {
           id: 101,
-          full_name: 'DYFI Volunteer Coordinator',
+          primary_name: 'DYFI Volunteer Coordinator',
           mobile: '+91 98470 12345',
           district: district,
           blockCommitteeName: blockName || 'District Unit',
@@ -157,7 +157,7 @@ export default function VolunteerDirectory() {
                         <span className="inline-block px-2.5 py-0.5 bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-semibold rounded-full mb-1">
                           DYFI Volunteer
                         </span>
-                        <h4 className="text-lg font-bold text-white">{vol.full_name || vol.name}</h4>
+                        <h4 className="text-lg font-bold text-white">{vol.primary_name || vol.name}</h4>
                         <p className="text-xs text-slate-400">
                           {vol.meghala ? `Meghala: ${vol.meghala}` : ''} {vol.blockCommitteeName ? `(${vol.blockCommitteeName})` : ''}
                         </p>

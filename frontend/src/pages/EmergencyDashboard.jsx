@@ -233,7 +233,7 @@ export default function EmergencyDashboard() {
           <div className="flex flex-wrap items-center gap-2.5">
             {user && (
               <span className="px-3 py-1.5 bg-white/15 border border-white/25 text-white text-xs font-bold rounded-xl backdrop-blur-sm">
-                {user.fullName}
+                {user.primaryName}
               </span>
             )}
 
@@ -880,7 +880,7 @@ export default function EmergencyDashboard() {
                             className="p-3 bg-white dark:bg-zinc-950 border border-slate-150 dark:border-zinc-850 rounded-2xl flex items-center justify-between text-xs"
                           >
                             <div className="text-left">
-                              <p className="font-bold text-slate-800 dark:text-white">{resp.donor?.fullName || 'Anonymous Donor'}</p>
+                              <p className="font-bold text-slate-800 dark:text-white">{resp.donor?.primaryName || 'Anonymous Donor'}</p>
                               <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">{resp.donor?.bloodGroup || 'O+'} • {resp.donor?.mobile || '999'}</p>
                             </div>
                             

@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import {
-  Heart, Share2, Download, Plus, Search, Calendar, MapPin,
+  Heart, Share2, Plus, Search, Calendar, MapPin,
   ShieldCheck, X, Megaphone, Trash2, Edit3, Activity, Stethoscope,
-  Droplets, UserCheck, HeartHandshake, Smile, Upload
+  Droplets, UserCheck, HeartHandshake, Smile, Upload, Eye, Phone, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
 
 export default function Campaigns() {
   const { user } = useAuthStore();
@@ -26,9 +27,9 @@ export default function Campaigns() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPostId, setEditingPostId] = useState(null);
   const [shareModalPost, setShareModalPost] = useState(null);
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [downloadingId, setDownloadingId] = useState(null);
+  const [viewModalPost, setViewModalPost] = useState(null);
   const [attendingPosts, setAttendingPosts] = useState({});
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -38,7 +39,7 @@ export default function Campaigns() {
     venue: '',
     event_date: '',
     event_time: '',
-    organizer_name: user?.full_name || 'JeevaLink Squad',
+    organizer_name: user?.primary_name || 'JeevaLink Squad',
     contact_phone: user?.phone_number || '',
     image_url: 'https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000',
     district: user?.district || '',
@@ -71,14 +72,17 @@ export default function Campaigns() {
   };
 
   const handleCategoryChangeInForm = (cat) => {
-    setFormData((prev) => ({
-      ...prev,
-      category: cat,
-      image_url: presetImages[cat] || prev.image_url
-    }));
+    setFormData((prev) => {
+      const isUsingPreset = !prev.image_url || Object.values(presetImages).includes(prev.image_url);
+      return {
+        ...prev,
+        category: cat,
+        image_url: isUsingPreset ? (presetImages[cat] || prev.image_url) : prev.image_url
+      };
+    });
   };
 
-  // Image File Upload Handler (Base64 conversion)
+  // Image File Upload Handler with Canvas Compression
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -88,18 +92,43 @@ export default function Campaigns() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      triggerToast('Image size should be less than 5MB.', 'error');
+    if (file.size > 10 * 1024 * 1024) {
+      triggerToast('Image size should be less than 10MB.', 'error');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      setFormData((prev) => ({
-        ...prev,
-        image_url: event.target?.result
-      }));
-      triggerToast('Poster image uploaded successfully!', 'success');
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        setFormData((prev) => ({
+          ...prev,
+          image_url: compressedDataUrl
+        }));
+        triggerToast('Poster image uploaded successfully!', 'success');
+      };
+      img.src = event.target?.result;
     };
     reader.readAsDataURL(file);
   };
@@ -113,7 +142,7 @@ export default function Campaigns() {
       venue: '',
       event_date: '',
       event_time: '',
-      organizer_name: user?.full_name || 'JeevaLink Squad',
+      organizer_name: user?.primary_name || 'JeevaLink Squad',
       contact_phone: user?.phone_number || '',
       image_url: presetImages.blood_donation,
       district: user?.district || '',
@@ -131,7 +160,7 @@ export default function Campaigns() {
       venue: post.venue || '',
       event_date: post.event_date || '',
       event_time: post.event_time || '',
-      organizer_name: post.organizer_name || user?.full_name || 'JeevaLink Squad',
+      organizer_name: post.organizer_name || user?.primary_name || 'JeevaLink Squad',
       contact_phone: post.contact_phone || user?.phone_number || '',
       image_url: post.image_url || presetImages[post.category] || presetImages.blood_donation,
       district: post.district || user?.district || '',
@@ -153,7 +182,7 @@ export default function Campaigns() {
       } else {
         await createCampaignPost({
           ...formData,
-          author_name: user?.full_name || 'Volunteer Lead',
+          author_name: user?.primary_name || 'Volunteer Lead',
           author_role: user?.role || 'volunteer'
         });
       }
@@ -166,7 +195,7 @@ export default function Campaigns() {
         venue: '',
         event_date: '',
         event_time: '',
-        organizer_name: user?.full_name || 'JeevaLink Squad',
+        organizer_name: user?.primary_name || 'JeevaLink Squad',
         contact_phone: user?.phone_number || '',
         image_url: presetImages.blood_donation,
         district: user?.district || '',
@@ -179,162 +208,8 @@ export default function Campaigns() {
     }
   };
 
-  // Red & White Poster Canvas Downloader
-  const downloadPoster = (post) => {
-    setDownloadingId(post.id);
-
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1350;
-      const ctx = canvas.getContext('2d');
-
-      // Crisp White Canvas
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, 1080, 1350);
-
-      // Top Red Banner Section
-      ctx.fillStyle = '#DC2626';
-      ctx.fillRect(0, 0, 1080, 240);
-
-      // Header Text
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'extrabold 40px Inter, sans-serif';
-      ctx.fillText('JEEVALINK BLOOD & HEALTH HUB', 70, 100);
-
-      ctx.fillStyle = '#FEE2E2';
-      ctx.font = '500 22px Inter, sans-serif';
-      ctx.fillText('Official Community Health Campaign & Blood Donation Drive', 70, 145);
-
-      // Category Pill
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.roundRect(70, 175, 280, 44, 22);
-      ctx.fill();
-
-      ctx.fillStyle = '#DC2626';
-      ctx.font = 'bold 18px Inter, sans-serif';
-      const catText = post.category === 'blood_donation' ? 'BLOOD DONATION' :
-                      post.category === 'health_checkup' ? 'HEALTH CHECKUP' : 'AWARENESS DRIVE';
-      ctx.fillText(catText, 95, 203);
-
-      // Main Title
-      ctx.fillStyle = '#0F172A';
-      ctx.font = 'bold 44px Inter, sans-serif';
-      const words = post.title.split(' ');
-      let line = '';
-      let y = 330;
-      for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > 920 && n > 0) {
-          ctx.fillText(line, 70, y);
-          line = words[n] + ' ';
-          y += 54;
-        } else {
-          line = testLine;
-        }
-      }
-      ctx.fillText(line, 70, y);
-
-      // Divider Line
-      y += 30;
-      ctx.strokeStyle = '#FCA5A5';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(70, y);
-      ctx.lineTo(1010, y);
-      ctx.stroke();
-
-      // Details Red & White Box
-      y += 40;
-      ctx.fillStyle = '#FEF2F2';
-      ctx.beginPath();
-      ctx.roundRect(70, y, 940, 340, 24);
-      ctx.fill();
-      ctx.strokeStyle = '#FECDD3';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.fillStyle = '#DC2626';
-      ctx.font = 'bold 26px Inter, sans-serif';
-      ctx.fillText('EVENT DETAILS', 110, y + 55);
-
-      ctx.fillStyle = '#1E293B';
-      ctx.font = 'bold 22px Inter, sans-serif';
-      ctx.fillText('📅 Date:', 110, y + 115);
-      ctx.font = '500 22px Inter, sans-serif';
-      ctx.fillText(post.event_date || 'Date Announced Soon', 250, y + 115);
-
-      ctx.font = 'bold 22px Inter, sans-serif';
-      ctx.fillText('⏰ Time:', 110, y + 165);
-      ctx.font = '500 22px Inter, sans-serif';
-      ctx.fillText(post.event_time || '09:00 AM onwards', 250, y + 165);
-
-      ctx.font = 'bold 22px Inter, sans-serif';
-      ctx.fillText('📍 Venue:', 110, y + 215);
-      ctx.font = '500 22px Inter, sans-serif';
-      ctx.fillText(post.venue || 'Local Community Auditorium', 250, y + 215);
-
-      ctx.font = 'bold 22px Inter, sans-serif';
-      ctx.fillText('📞 Contact:', 110, y + 265);
-      ctx.font = '500 22px Inter, sans-serif';
-      ctx.fillText(post.contact_phone || '+91 JeevaLink Care Team', 250, y + 265);
-
-      // Description Box
-      y += 390;
-      ctx.fillStyle = '#0F172A';
-      ctx.font = 'bold 24px Inter, sans-serif';
-      ctx.fillText('About This Program:', 70, y);
-
-      ctx.fillStyle = '#475569';
-      ctx.font = '400 21px Inter, sans-serif';
-      const descWords = (post.description || '').split(' ');
-      let descLine = '';
-      let descY = y + 36;
-      for (let n = 0; n < descWords.length; n++) {
-        const testLine = descLine + descWords[n] + ' ';
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > 920 && n > 0) {
-          ctx.fillText(descLine, 70, descY);
-          descLine = descWords[n] + ' ';
-          descY += 32;
-          if (descY > y + 140) break;
-        } else {
-          descLine = testLine;
-        }
-      }
-      if (descY <= y + 140) {
-        ctx.fillText(descLine, 70, descY);
-      }
-
-      // Footer Banner
-      const footerY = 1200;
-      ctx.fillStyle = '#DC2626';
-      ctx.beginPath();
-      ctx.roundRect(70, footerY, 940, 90, 20);
-      ctx.fill();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 24px Inter, sans-serif';
-      ctx.fillText(`Organized by: ${post.organizer_name || 'JeevaLink Team'}`, 110, footerY + 52);
-      ctx.font = '500 20px Inter, sans-serif';
-      ctx.fillText('JeevaLink • Save Lives Together', 600, footerY + 52);
-
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `JeevaLink-Campaign-${post.id}.png`;
-      link.href = dataUrl;
-      link.click();
-
-      triggerToast('Flyer poster downloaded!', 'success');
-    } catch (err) {
-      console.error('Failed poster generation', err);
-      triggerToast('Failed to generate poster.', 'error');
-    } finally {
-      setDownloadingId(null);
-    }
-  };
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Professional JeevaLink Template Poster Generator Ã¢â€â‚¬Ã¢â€â‚¬
+  // Replicates the reference design: Landscape 1920Ãƒâ€”1080, Red+White, Blood Bag artwork
 
   const openShareModal = (post) => {
     setShareModalPost(post);
@@ -350,8 +225,35 @@ export default function Campaigns() {
     setTimeout(() => setCopiedLink(false), 3000);
   };
 
-  const handleWhatsAppShare = (post) => {
+  const handleShare = async (post) => {
     const text = `🩸 *${post.title}* 🩸\n\n📌 *Category:* ${post.category.replace('_', ' ').toUpperCase()}\n📅 *Date:* ${post.event_date || 'TBA'}\n📍 *Venue:* ${post.venue}\n📞 *Contact:* ${post.contact_phone}\n\n${post.description}\n\n*Organized by:* ${post.organizer_name}\n\nJoin us on JeevaLink: ${window.location.origin}/campaigns`;
+    
+    // Attempt native share to include the image
+    try {
+      const imageUrl = post.image_url || presetImages[post.category] || presetImages.blood_donation;
+      if (imageUrl && navigator.canShare) {
+        try {
+          const res = await fetch(imageUrl);
+          const blob = await res.blob();
+          const file = new File([blob], 'poster.jpg', { type: blob.type });
+          if (navigator.canShare({ files: [file], text })) {
+            await navigator.share({
+              files: [file],
+              text: text
+            });
+            incrementShareCampaignPost(post.id);
+            setShareModalPost(null);
+            return; // Successfully shared via native sheet
+          }
+        } catch (e) {
+          console.warn("Could not attach image to share", e);
+        }
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return; // User cancelled the native share sheet
+    }
+
+    // Fallback: Web/URL scheme WhatsApp sharing (text only)
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     incrementShareCampaignPost(post.id);
   };
@@ -475,7 +377,7 @@ export default function Campaigns() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPosts.map((post) => {
               const isOwnerOrAdmin =
-                user && (user.role === 'super_admin' || user.role === 'technical_admin' || user.role === 'admin' || post.author_name === user.full_name);
+                user && (user.role === 'super_admin' || user.role === 'technical_admin' || user.role === 'admin' || post.user_id === user.id || post.user_id === user._id);
               const isAttending = !!attendingPosts[post.id];
 
               return (
@@ -539,13 +441,19 @@ export default function Campaigns() {
                         {post.event_date && (
                           <div className="flex items-center gap-2 text-red-700 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 font-bold">
                             <Calendar className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                            <span>{post.event_date} {post.event_time ? `• ${post.event_time}` : ''}</span>
+                            <span>{post.event_date} {post.event_time ? `Ã¢â‚¬Â¢ ${post.event_time}` : ''}</span>
                           </div>
                         )}
                         {post.venue && (
                           <div className="flex items-center gap-2 text-slate-700 px-3 py-1.5 rounded-lg bg-slate-50">
                             <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0" />
                             <span className="truncate">{post.venue}</span>
+                          </div>
+                        )}
+                        {post.contact_phone && (
+                          <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50/80 border border-emerald-100 px-3 py-1.5 rounded-lg font-bold">
+                            <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span className="truncate">Helpline: {post.contact_phone}</span>
                           </div>
                         )}
                         {post.organizer_name && (
@@ -555,6 +463,14 @@ export default function Campaigns() {
                           </div>
                         )}
                       </div>
+
+                      <button
+                        onClick={() => setViewModalPost(post)}
+                        className="mt-4 flex items-center justify-center gap-1.5 w-full py-2 bg-slate-50 hover:bg-red-50 text-slate-700 hover:text-red-700 font-bold text-xs rounded-xl border border-slate-100 hover:border-red-200 transition"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>View Full Details</span>
+                      </button>
                     </div>
                   </div>
 
@@ -590,15 +506,7 @@ export default function Campaigns() {
                       <span>Share</span>
                     </button>
 
-                    {/* Download Poster */}
-                    <button
-                      disabled={downloadingId === post.id}
-                      onClick={() => downloadPoster(post)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-white bg-red-600 hover:bg-red-700 shadow-sm transition"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>{downloadingId === post.id ? '...' : 'Flyer'}</span>
-                    </button>
+
 
                   </div>
                 </article>
@@ -791,10 +699,10 @@ export default function Campaigns() {
 
               <div className="mt-5 space-y-2">
                 <button
-                  onClick={() => handleWhatsAppShare(shareModalPost)}
-                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition"
+                  onClick={() => handleShare(shareModalPost)}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition"
                 >
-                  Share via WhatsApp
+                  Share
                 </button>
                 <button
                   onClick={() => handleCopyLink(shareModalPost)}
@@ -814,6 +722,112 @@ export default function Campaigns() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* View Details Modal */}
+      <AnimatePresence>
+        {viewModalPost && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]"
+            >
+              <button 
+                onClick={() => setViewModalPost(null)}
+                className="absolute top-4 right-4 z-10 w-8 h-8 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center backdrop-blur-md transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="overflow-y-auto overflow-x-hidden scrollbar-none">
+                <div className="relative h-64 sm:h-80 w-full bg-slate-900">
+                  <img
+                    src={viewModalPost.image_url || presetImages[viewModalPost.category] || presetImages.blood_donation}
+                    alt={viewModalPost.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <span className="inline-block px-3 py-1 mb-3 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-red-600 text-white shadow-lg">
+                      {viewModalPost.category.replace('_', ' ')}
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+                      {viewModalPost.title}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8">
+                  <div className="flex flex-wrap gap-4 mb-8">
+                    {viewModalPost.event_date && (
+                      <div className="flex items-center gap-2.5 text-red-700 bg-red-50 px-4 py-2 rounded-xl font-bold text-sm">
+                        <Calendar className="w-4 h-4 text-red-600" />
+                        <span>{viewModalPost.event_date} {viewModalPost.event_time ? `• ${viewModalPost.event_time}` : ''}</span>
+                      </div>
+                    )}
+                    {viewModalPost.venue && (
+                      <div className="flex items-center gap-2.5 text-slate-700 bg-slate-100 px-4 py-2 rounded-xl font-bold text-sm">
+                        <MapPin className="w-4 h-4 text-slate-500" />
+                        <span>{viewModalPost.venue}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="prose prose-sm sm:prose-base prose-slate max-w-none">
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-red-500" /> About this Program
+                    </h3>
+                    <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
+                      {viewModalPost.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {viewModalPost.organizer_name && (
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Organized By</span>
+                        <div className="flex items-center gap-2 text-slate-800 font-bold">
+                          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                          {viewModalPost.organizer_name}
+                        </div>
+                      </div>
+                    )}
+                    {viewModalPost.contact_phone && (
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Contact Details</span>
+                        <div className="flex items-center gap-2 text-slate-800 font-bold">
+                          <Phone className="w-4 h-4 text-blue-500" />
+                          {viewModalPost.contact_phone}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setViewModalPost(null);
+                    handleShare(viewModalPost);
+                  }}
+                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Share2 className="w-4 h-4" /> Share Program
+                </button>
+                <button
+                  onClick={() => setViewModalPost(null)}
+                  className="px-6 py-3 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-sm rounded-xl transition"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

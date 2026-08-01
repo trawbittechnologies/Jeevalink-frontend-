@@ -89,10 +89,10 @@ export default function TechnicalAdminDashboard() {
   const openEditSA = (sa) => {
     setEditingSA(sa);
     setEditDistrict(sa.district || 'Kozhikode');
-    setEditFullName(sa.fullName || sa.full_name || sa.name || '');
+    setEditFullName(sa.primaryName || sa.primary_name || sa.name || '');
     setEditEmail(sa.email || '');
     setEditMobile(sa.mobile || '');
-    setEditSecContact(sa.secondaryContactName || sa.secondary_contact_name || sa.secondary_contact || '');
+    setEditSecContact(sa.secondaryName || sa.secondary_name || sa.secondary_contact || '');
     setEditStatus(sa.status || 'Active');
   };
 
@@ -103,10 +103,10 @@ export default function TechnicalAdminDashboard() {
     try {
       const res = await api.put(`/technical-admin/super-admins/${editingSA.id}`, {
         district: editDistrict,
-        full_name: editFullName,
+        primary_name: editFullName,
         email: editEmail,
         mobile: editMobile,
-        secondary_contact_name: editSecContact,
+        secondary_name: editSecContact,
         status: editStatus
       });
       if (res.data?.success) {
@@ -419,11 +419,11 @@ export default function TechnicalAdminDashboard() {
                     </button>
                   </div>
                 </div>
-                <h4 className="font-bold text-slate-900 text-sm truncate">{sa.fullName || sa.full_name || sa.name}</h4>
+                <h4 className="font-bold text-slate-900 text-sm truncate">{sa.primaryName || sa.primary_name || sa.name}</h4>
                 <div className="text-xs text-slate-600 space-y-0.5 font-medium">
                   <p className="truncate">Email: {sa.email}</p>
                   <p>Mobile: {sa.mobile}</p>
-                  {(sa.secondaryContactName || sa.secondary_contact_name || sa.secondary_contact) && <p>Sec: {sa.secondaryContactName || sa.secondary_contact_name || sa.secondary_contact}</p>}
+                  {(sa.secondaryName || sa.secondary_name || sa.secondary_contact) && <p>Sec: {sa.secondaryName || sa.secondary_name || sa.secondary_contact}</p>}
                 </div>
               </div>
             ))}
@@ -438,7 +438,7 @@ export default function TechnicalAdminDashboard() {
             <h3 className="text-lg font-bold mb-4">Edit Super Admin</h3>
             <form onSubmit={handleSaveEdit} className="space-y-3 text-xs">
               <input type="text" value={editDistrict} onChange={e => setEditDistrict(e.target.value)} placeholder="District" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />
-              <input type="text" value={editFullName} onChange={e => setEditFullName(e.target.value)} placeholder="Full Name" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />
+              <input type="text" value={editFullName} onChange={e => setEditFullName(e.target.value)} placeholder="Primary Name" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />
               <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="Email" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />
               <input type="text" value={editMobile} onChange={e => setEditMobile(e.target.value)} placeholder="Mobile" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />
               <input type="text" value={editSecContact} onChange={e => setEditSecContact(e.target.value)} placeholder="Secondary Contact" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />

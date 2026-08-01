@@ -151,7 +151,7 @@ export default function DashboardLayout() {
                 <img src={user.photo} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary to-red-800 flex items-center justify-center text-white font-black text-xs">
-                  {user?.fullName?.[0]}
+                  {user?.primaryName?.[0]}
                 </div>
               )}
             </Link>
