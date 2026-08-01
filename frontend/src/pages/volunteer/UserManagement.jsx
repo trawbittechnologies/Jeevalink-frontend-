@@ -10,7 +10,7 @@ import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
 import { getStorageUrl } from '../../store/api.js';
 
 const STATUS_OPTIONS = ['Active', 'Inactive', 'Suspended', 'Pending Approval'];
-const ROLES = ['user'];
+const ROLES = ['user', 'donor', 'receiver'];
 
 const getEighteenYearsAgoDate = () => {
   const today = new Date();
@@ -100,7 +100,7 @@ export default function UserManagement() {
     setVerifyingUserId(null);
   };
 
-  const users = allUsers.filter(u => !['admin', 'volunteer', 'super_admin', 'technical_admin', 'unit_squad'].includes((u.role || '').toLowerCase()));
+  const users = allUsers.filter(u => ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase()));
 
   const pendingUsers = users.filter(u => !u.is_verified && !u.isVerified && (u.status || '').toLowerCase() !== 'active');
   const verifiedUsers = users.filter(u => u.is_verified || u.isVerified || (u.status || '').toLowerCase() === 'active');
@@ -173,6 +173,14 @@ export default function UserManagement() {
     e.preventDefault();
     if (!form.profile_picture) {
       triggerToast('Profile picture / image is required. Please upload an image file.', 'warning');
+      return;
+    }
+    if (form.profile_picture.size > 2 * 1024 * 1024) {
+      triggerToast('Profile picture must be less than 2MB.', 'warning');
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(form.profile_picture.type)) {
+      triggerToast('Profile picture must be a JPEG, PNG, or WEBP image.', 'warning');
       return;
     }
     if (!form.blood_group || form.blood_group === 'N/A') {

@@ -106,6 +106,7 @@ export default function AdminDashboard() {
         setPerson2Name(''); setPerson2Contact('');
         setWhatsapp(''); setEmail('');
         loadData();
+      }
     } catch (err) {
       let errMsg = err.response?.data?.message || 'Network error while creating Committee.';
       if (err.response?.data?.errors) {

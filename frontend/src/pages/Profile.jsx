@@ -268,7 +268,7 @@ export default function Profile() {
           <div className="mb-1">
             <h3 className="text-lg font-black text-gray-900">
               {user?.primaryName}
-              {user?.secondaryName && ` & ${user.secondaryName}`}
+              {user?.secondaryName && (!user?.primaryName || !user.primaryName.toLowerCase().includes(user.secondaryName.toLowerCase())) && ` & ${user.secondaryName}`}
             </h3>
             <p className="text-sm font-semibold text-gray-500 mt-0.5">
               {user?.mobile}

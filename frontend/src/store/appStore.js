@@ -928,7 +928,30 @@ export const useAppStore = create((set, get) => ({
       }
       return { success: false };
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Failed to add user.';
+      const errDetails = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join(', ') : '';
+      const errMsg = errDetails || err.response?.data?.message || 'Failed to add user.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  volunteerAddUnitSquad: async (data) => {
+    try {
+      const res = await api.post('/volunteer/unit-squads', data);
+      if (res.data.success) {
+        const newUser = res.data.data.user || res.data.data;
+        const generatedPassword = res.data.data.generated_password;
+        set((state) => ({
+          unitSquads: [newUser, ...state.unitSquads],
+          allUsers: [newUser, ...state.allUsers]
+        }));
+        get().triggerToast(res.data.message || 'Unit Squad added successfully!', 'success');
+        return { success: true, generatedPassword, user: newUser };
+      }
+      return { success: false };
+    } catch (err) {
+      const errDetails = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join(', ') : '';
+      const errMsg = errDetails || err.response?.data?.message || 'Failed to add Unit Squad.';
       get().triggerToast(errMsg, 'error');
       return { success: false, error: errMsg };
     }

@@ -158,7 +158,7 @@ export function getStorageUrl(path) {
   }
   const apiBase = api.defaults.baseURL || '';
   const rootUrl = apiBase.replace(/\/api\/v1\/?$/, '').replace(/\/v1\/?$/, '');
-  return `${rootUrl}/storage/${cleanPath}`;
+  return `${rootUrl}/storage/${cleanPath}?v=2`;
 }
 
 export default api;

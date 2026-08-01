@@ -30,7 +30,7 @@ const StatusBadge = ({ status }) => {
 };
 
 export default function UnitCommittee() {
-  const { allUsers, fetchUsers, volunteerAddUser, updateUnitSquadStatus, deleteUser, triggerToast } = useAppStore();
+  const { allUsers, fetchUsers, volunteerAddUnitSquad, updateUnitSquadStatus, deleteUser, triggerToast } = useAppStore();
   const { user } = useAuthStore();
 
   const [search, setSearch] = useState('');
@@ -69,19 +69,24 @@ export default function UnitCommittee() {
     }
     setLoading(true);
 
-    const fd = new FormData();
-    fd.append('role', 'unit_squad');
-    fd.append('unit', form.unit);
-    fd.append('meghala', user?.meghala || form.unit);
-    fd.append('district', user?.district || 'Kozhikode');
-    fd.append('primary_name', form.primary_name);
-    fd.append('email', form.email);
-    fd.append('password', form.password);
+    const dummyMobile = '999' + Math.floor(1000000 + Math.random() * 9000000).toString(); // 10-digit unique dummy number
 
-    const res = await volunteerAddUser(fd);
+    const payload = {
+      role: 'unit_squad',
+      unit: form.unit,
+      city: user?.meghala || user?.city || 'Local Unit',
+      district: user?.district || 'Kozhikode',
+      primary_name: form.primary_name,
+      email: form.email,
+      mobile: dummyMobile,
+      password: form.password
+    };
+
+    const res = await volunteerAddUnitSquad(payload);
     if (res.success) {
       setShowAddModal(false);
       setForm({ unit: '', email: '', mobile: '', primary_name: '', password: '' });
+      setCredentialsModal({ open: true, email: form.email, password: form.password || res.generatedPassword });
       await fetchUsers();
     }
     setLoading(false);

@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
-import { LogOut, User, Bell, ChevronDown, Settings, Siren, Award, CheckCircle2, MapPin, ShieldCheck } from 'lucide-react';
+import { LogOut, User, Bell, ChevronDown, Settings, Siren, Award, CheckCircle2, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getStorageUrl } from '../store/api.js';
+import CommunityChoiceModal from './CommunityChoiceModal.jsx';
 
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
@@ -23,8 +24,10 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [communityModalOpen, setCommunityModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
 
   const unread = notifications.filter((n) => !n.read).length;
 
@@ -240,6 +243,15 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <button
+                type="button"
+                onClick={() => setCommunityModalOpen(true)}
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                <span>Enter Community</span>
+              </button>
+
               <Link to="/login" className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors rounded-xl hover:bg-gray-100">
                 Sign In
               </Link>
@@ -251,6 +263,12 @@ export default function Navbar() {
         </div>
 
       </div>
+
+      <CommunityChoiceModal
+        isOpen={communityModalOpen}
+        onClose={() => setCommunityModalOpen(false)}
+      />
     </header>
+
   );
 }

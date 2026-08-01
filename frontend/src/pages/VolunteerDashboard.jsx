@@ -565,16 +565,16 @@ export default function VolunteerDashboard() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Jurisdiction Details</h3>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between py-1 border-b border-slate-800">
-                <span className="text-slate-400">Meghala</span>
-                <span className="font-bold">{user?.meghala || 'All Meghalas'}</span>
+                <span className="text-slate-400">District</span>
+                <span className="font-bold">{user?.district || user?.district_name || 'Kasaragod'}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800">
                 <span className="text-slate-400">Block Committee</span>
-                <span className="font-bold">{user?.blockCommitteeName || user?.block_committee_name || 'Central'}</span>
+                <span className="font-bold">{user?.blockCommitteeName || user?.block_committee_name || user?.block_committee || user?.block || 'Central'}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-slate-400">District</span>
-                <span className="font-bold">{user?.district || 'Kasaragod'}</span>
+                <span className="text-slate-400">Meghala</span>
+                <span className="font-bold">{user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || 'All Meghalas'}</span>
               </div>
             </div>
           </div>
