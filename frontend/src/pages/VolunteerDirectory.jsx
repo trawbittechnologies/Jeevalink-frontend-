@@ -26,7 +26,7 @@ export default function VolunteerDirectory() {
   // Initialize to first Kerala district so the select always has a valid value
   const [selectedDistrict, setSelectedDistrict] = useState(KERALA_DISTRICTS[0]);
   const [selectedBlock,    setSelectedBlock]    = useState('');
-  const [selectedMeghala,  setSelectedMeghala]  = useState('All Meghala Units');
+  const [selectedMeghala,  setSelectedMeghala]  = useState('All Meghalas');
   const [searchFilter,     setSearchFilter]     = useState('');
 
   // --- Results ---
@@ -95,21 +95,21 @@ export default function VolunteerDirectory() {
     const blocks = dbBlocksByDistrict[d] || [];
     setSelectedDistrict(d);
     setSelectedBlock(blocks[0] || '');
-    setSelectedMeghala('All Meghala Units');
+    setSelectedMeghala('All Meghalas');
   };
 
   // 4. Available Meghala Units for the selected block (DB only)
   const availableMeghalas = useMemo(() => {
-    if (!selectedBlock) return ['All Meghala Units'];
+    if (!selectedBlock) return ['All Meghalas'];
     const dbMeghalas = dbMeghalasByBlock[selectedBlock] || [];
-    return ['All Meghala Units', ...dbMeghalas];
+    return ['All Meghalas', ...dbMeghalas];
   }, [selectedBlock, dbMeghalasByBlock]);
 
 
   // Handle Block change
   const handleBlockChange = (b) => {
     setSelectedBlock(b);
-    setSelectedMeghala('All Meghala Units');
+    setSelectedMeghala('All Meghalas');
   };
 
 
@@ -126,7 +126,7 @@ export default function VolunteerDirectory() {
       if (selectedBlock) {
         params.set('blockCommitteeName', selectedBlock);
       }
-      if (selectedMeghala && selectedMeghala !== 'All Meghala Units') {
+      if (selectedMeghala && selectedMeghala !== 'All Meghalas' && selectedMeghala !== 'All Meghala / Units' && selectedMeghala !== 'All Meghala Units') {
         params.set('meghala', selectedMeghala);
       }
 
@@ -171,11 +171,10 @@ export default function VolunteerDirectory() {
     switch (role) {
       case 'block_admin':
         return 'Block Committee Admin';
-      case 'unit_squad':
-        return 'Unit Squad Leader';
       case 'volunteer':
+      case 'unit_squad':
       default:
-        return 'DYFI Regional Volunteer';
+        return 'Meghala Admin';
     }
   };
 
@@ -194,9 +193,6 @@ export default function VolunteerDirectory() {
             Contact Your Area <span className="text-red-600">Volunteer</span>
           </h1>
 
-          <p className="text-slate-500 text-sm leading-relaxed font-medium">
-            District fixed (14) &bull; Block Committees & Meghalas strictly from database.
-          </p>
         </div>
 
         {/* ── 3 Step Cards ──────────────────────────────────────────── */}
@@ -218,8 +214,8 @@ export default function VolunteerDirectory() {
               2
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 2: Added DB Block</p>
-              <p className="text-xs font-bold text-slate-900 truncate">{selectedBlock || 'No DB Block Added'}</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 2: Block Committee</p>
+              <p className="text-xs font-bold text-slate-900 truncate">{selectedBlock || 'Not Selected'}</p>
             </div>
           </div>
 
@@ -229,7 +225,7 @@ export default function VolunteerDirectory() {
               3
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 3: Added DB Meghala</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 3: Meghala</p>
               <p className="text-xs font-bold text-slate-900 truncate">{selectedMeghala}</p>
             </div>
           </div>
@@ -243,7 +239,7 @@ export default function VolunteerDirectory() {
             <div className="space-y-2">
               <label htmlFor="district-select" className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-red-600" />
-                1. Select District (Fixed 14) *
+                1. Select District *
               </label>
               <select
                 id="district-select"
@@ -261,7 +257,7 @@ export default function VolunteerDirectory() {
             <div className="space-y-2">
               <label htmlFor="block-select" className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <Building2 className="w-4 h-4 text-red-600" />
-                2. Select Block Committee (DB Added Only) *
+                2. Select Block Committee *
               </label>
               <select
                 id="block-select"
@@ -271,7 +267,7 @@ export default function VolunteerDirectory() {
                 className="w-full bg-slate-50 border border-slate-200 hover:border-red-400 rounded-xl px-3.5 py-3 text-slate-900 text-xs font-bold focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 transition cursor-pointer shadow-xs disabled:opacity-60"
               >
                 {availableBlocks.length === 0 ? (
-                  <option value="">No Blocks Added in DB for {selectedDistrict}</option>
+                  <option value="">No Block Committees for {selectedDistrict}</option>
                 ) : (
                   availableBlocks.map((b) => (
                     <option key={b} value={b}>{b}</option>
@@ -280,11 +276,11 @@ export default function VolunteerDirectory() {
               </select>
             </div>
 
-            {/* Select Box 3: Meghala Unit (Strictly DB Added Names Only) */}
+            {/* Select Box 3: Meghala (Strictly DB Added Names Only) */}
             <div className="space-y-2">
               <label htmlFor="meghala-select" className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <User className="w-4 h-4 text-red-600" />
-                3. Select Meghala / Unit (DB Added Only) *
+                3. Select Meghala *
               </label>
               <select
                 id="meghala-select"
@@ -361,9 +357,10 @@ export default function VolunteerDirectory() {
             /* Real Volunteer Cards Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredVolunteers.map((vol, idx) => {
-                const phone = vol.mobile || vol.phone || vol.secondary_phone || '';
-                const altPhone = vol.secondary_phone && vol.secondary_phone !== phone ? vol.secondary_phone : null;
-                const name = vol.name || vol.primary_name || vol.full_name || 'DYFI Volunteer';
+                const primaryPhone = vol.mobile || vol.phone || vol.primaryPhone || '';
+                const secondaryPhone = vol.secondary_phone || vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || vol.secondaryPhone || '';
+                const primaryName = vol.primary_name || vol.primaryName || vol.name || vol.person1Name || 'DYFI Volunteer';
+                const secondaryName = vol.secondary_name || vol.secondaryName || vol.secondary_contact_name || vol.person2Name || '';
                 const roleText = getRoleLabel(vol.role);
 
                 return (
@@ -374,13 +371,13 @@ export default function VolunteerDirectory() {
                     transition={{ delay: idx * 0.05 }}
                     className="bg-white border border-slate-200/80 hover:border-red-300 rounded-2xl p-5 shadow-xs transition space-y-4"
                   >
-                    {/* Header */}
+                    {/* Card Header */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1 min-w-0">
                         <span className="px-2.5 py-0.5 bg-red-50 border border-red-100 text-red-700 text-[10px] font-bold rounded-md uppercase">
                           {roleText}
                         </span>
-                        <h3 className="text-base font-bold text-slate-900 truncate">{name}</h3>
+                        <h3 className="text-base font-bold text-slate-900 truncate">{primaryName}</h3>
                         <p className="text-xs text-slate-500 font-medium">
                           {selectedDistrict} &bull; {vol.city || selectedBlock}
                         </p>
@@ -391,66 +388,104 @@ export default function VolunteerDirectory() {
                       </div>
                     </div>
 
-                    {/* Contact detail box */}
-                    <div className="bg-slate-50 rounded-xl p-3 space-y-2 text-xs">
-                      {phone ? (
+                    {/* Primary & Secondary Contact Details Box */}
+                    <div className="bg-slate-50 rounded-xl p-3.5 space-y-3 text-xs border border-slate-100">
+                      
+                      {/* Primary Contact Row */}
+                      <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-red-600" /> Contact Number:
+                          <span className="text-slate-500 font-semibold flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-red-600" /> Primary Contact Name:
                           </span>
-                          <span className="font-bold text-slate-900">{phone}</span>
+                          <span className="font-bold text-slate-900">{primaryName}</span>
                         </div>
-                      ) : (
-                        <div className="text-slate-400 text-[11px] italic">No contact number listed</div>
-                      )}
-
-                      {altPhone && (
-                        <div className="flex items-center justify-between border-t border-slate-200/60 pt-1.5">
-                          <span className="text-slate-500 font-medium">Alternate:</span>
-                          <span className="font-semibold text-slate-800">{altPhone}</span>
+                        <div className="flex items-center justify-between pl-5">
+                          <span className="text-slate-500 font-medium">Phone Number:</span>
+                          <span className="font-bold text-slate-900">{primaryPhone || 'N/A'}</span>
                         </div>
-                      )}
+                      </div>
 
+                      {/* Secondary Contact Row */}
+                      <div className="border-t border-slate-200/60 pt-2 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 font-semibold flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-slate-500" /> Secondary Contact Name:
+                          </span>
+                          <span className="font-bold text-slate-800">
+                            {secondaryName || (secondaryPhone ? 'Alternate Contact' : 'N/A')}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between pl-5">
+                          <span className="text-slate-500 font-medium">Phone Number:</span>
+                          <span className="font-semibold text-slate-800">{secondaryPhone || 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      {/* Meghala / Unit info */}
                       {(vol.city || vol.meghala || vol.remarks) && (
-                        <div className="flex items-center justify-between border-t border-slate-200/60 pt-1.5">
-                          <span className="text-slate-500 font-medium">Meghala / Unit:</span>
+                        <div className="flex items-center justify-between border-t border-slate-200/60 pt-2">
+                          <span className="text-slate-500 font-medium">Meghala:</span>
                           <span className="font-semibold text-slate-800">{vol.meghala || vol.remarks || vol.city}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Action buttons */}
-                    {phone && (
-                      <div className="flex items-center gap-2 pt-1">
-                        <a
-                          href={`tel:${phone.replace(/\s+/g, '')}`}
-                          className="flex-1 py-2.5 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
-                        >
-                          <PhoneCall className="w-3.5 h-3.5" />
-                          <span>Call</span>
-                        </a>
+                    <div className="space-y-2 pt-1">
+                      {primaryPhone && (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`tel:${primaryPhone.replace(/\s+/g, '')}`}
+                            className="flex-1 py-2.5 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                            <span>Call Primary</span>
+                          </a>
 
-                        <a
-                          href={`https://wa.me/${phone.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="py-2.5 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" />
-                          <span>WhatsApp</span>
-                        </a>
+                          <a
+                            href={`https://wa.me/${primaryPhone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="py-2.5 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>WhatsApp</span>
+                          </a>
 
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(phone, vol.id || idx)}
-                          className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition cursor-pointer"
-                          title="Copy phone number"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                          {copiedId === (vol.id || idx) ? <span className="text-emerald-600 font-bold">Copied!</span> : null}
-                        </button>
-                      </div>
-                    )}
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(primaryPhone, `p-${vol.id || idx}`)}
+                            className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition cursor-pointer"
+                            title="Copy primary phone number"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                            {copiedId === `p-${vol.id || idx}` ? <span className="text-emerald-600 font-bold">Copied!</span> : null}
+                          </button>
+                        </div>
+                      )}
+
+                      {secondaryPhone && (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`tel:${secondaryPhone.replace(/\s+/g, '')}`}
+                            className="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                            <span>Call Secondary ({secondaryName || secondaryPhone})</span>
+                          </a>
+
+                          <a
+                            href={`https://wa.me/${secondaryPhone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="py-2 px-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>WhatsApp</span>
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </motion.div>
                 );
               })}
