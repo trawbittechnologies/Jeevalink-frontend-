@@ -161,7 +161,7 @@ export default function SuperAdminManagement() {
         setCreatedResult({
           type: 'success',
           msg: `Super Admin created for ${targetDistrict} District!`,
-          password: res.data.data.generated_password,
+          password: res.data.data?.generatedPassword || res.data.data?.generated_password,
           email: email,
           mailSent: res.data.mail_sent,
           mailError: res.data.mail_error,
