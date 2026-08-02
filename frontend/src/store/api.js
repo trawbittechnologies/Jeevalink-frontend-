@@ -12,9 +12,25 @@ export function toCamel(obj) {
       result[camelKey] = toCamel(obj[key]);
     }
 
-    // Custom mappings for frontend compatibility
+    // Custom mappings for frontend compatibility & field aliases
     if (result.id !== undefined && result._id === undefined) {
       result._id = String(result.id);
+    }
+    if (result.primaryName !== undefined) {
+      result.name = result.name || result.primaryName;
+    } else if (result.name !== undefined) {
+      result.primaryName = result.name;
+    }
+    if (result.secondaryName !== undefined) {
+      result.secondaryContactName = result.secondaryName;
+    }
+    if (result.secondaryPhone !== undefined) {
+      result.secondaryContactNumber = result.secondaryPhone;
+    } else if (result.secondaryContactNumber !== undefined) {
+      result.secondaryPhone = result.secondaryContactNumber;
+    }
+    if (result.superAdmin1Name !== undefined) {
+      result.superAdmin_1Name = result.superAdmin1Name;
     }
     if (result.lastDonatedDate !== undefined) {
       result.lastDonated = result.lastDonatedDate;
@@ -28,12 +44,10 @@ export function toCamel(obj) {
     } else if (result.matchScore !== undefined) {
       result.compatibilityScore = result.matchScore;
     } else if (result.role === 'user') {
-      // Assign mock compatibility scores if absent
       result.matchScore = Math.floor(Math.random() * 25) + 75; // 75 - 99
       result.compatibilityScore = result.matchScore;
     }
 
-    // Assign mock distances if absent (since distance depends on live coordinates not in basic DB)
     if (result.distance === undefined && result.role === 'user') {
       result.distance = Math.round((Math.random() * 5 + 0.5) * 10) / 10;
     }
@@ -52,11 +66,16 @@ export function toSnake(obj) {
     const result = {};
     for (const key of Object.keys(obj)) {
       let snakeKey;
-      // Handle custom specific manual mappings
       if (key === 'lastDonated' || key === 'lastDonatedDate' || key === 'lastDonationDate') {
         snakeKey = 'last_donated_date';
       } else if (key === 'mobileNumber') {
         snakeKey = 'mobile';
+      } else if (key === 'secondaryContactName' || key === 'secondaryName') {
+        snakeKey = 'secondary_name';
+      } else if (key === 'secondaryContactNumber' || key === 'secondaryPhone') {
+        snakeKey = 'secondary_phone';
+      } else if (key === 'primaryName') {
+        snakeKey = 'primary_name';
       } else if (key === '_id') {
         snakeKey = 'id';
       } else {
@@ -83,8 +102,6 @@ const getApiBaseUrl = () => {
     if (/\/api$/.test(url)) {
       url = `${url}/v1`;
     } else {
-      // If it is just a domain or starts with http, add /api/v1
-      // Note: we leave relative paths like `/api/v1` intact
       url = `${url}/api/v1`;
     }
   }
@@ -99,11 +116,6 @@ const api = axios.create({
   timeout: 30000,
   headers: {
     'Accept': 'application/json',
-    // NOTE: Do NOT set Content-Type here.
-    // Axios auto-sets it per request:
-    //   - 'application/json'           for plain objects
-    //   - 'multipart/form-data; boundary=...' for FormData (file uploads)
-    // Setting it globally breaks multipart file uploads.
   },
 });
 
@@ -132,8 +144,8 @@ api.interceptors.request.use(
 // Response interceptor to convert incoming data to camelCase
 api.interceptors.response.use(
   (response) => {
-    if (response.data && response.data.data) {
-      response.data.data = toCamel(response.data.data);
+    if (response.data && typeof response.data === 'object') {
+      response.data = toCamel(response.data);
     }
     return response;
   },

@@ -12,9 +12,16 @@ export const useAuthStore = create((set, get) => ({
 
   login: async (credential, password) => {
     set({ loading: true, error: null });
+    const cleanCred = credential ? String(credential).trim() : '';
     try {
-      const res = await api.post('/auth/login', { credential, password });
-      const { token, user } = res.data.data;
+      const res = await api.post('/auth/login', { credential: cleanCred, password });
+      const token = res.data?.data?.token || res.data?.token;
+      const user = res.data?.data?.user || res.data?.user;
+
+      if (!token || !user) {
+        throw new Error('Invalid authentication response structure.');
+      }
+
       localStorage.setItem('jeevalink_token', token);
       localStorage.setItem('jeevalink_user', JSON.stringify(user));
       set({ token, user, loading: false });

@@ -147,7 +147,7 @@ export default function SuperAdminManagement() {
     setSubmittingCreate(true);
     const targetDistrict = district === 'Other' ? customDistrict : district;
 
-    if (!targetDistrict.trim()) {
+    if (!targetDistrict || !targetDistrict.trim()) {
       setCreatedResult({ type: 'error', msg: 'Please provide a valid District name.' });
       setSubmittingCreate(false);
       return;
@@ -156,27 +156,33 @@ export default function SuperAdminManagement() {
     try {
       const res = await api.post('/technical-admin/super-admins', {
         district: targetDistrict,
-        primary_name: fullName1,
+        primary_name: fullName1 ? fullName1.trim() : '',
         email: email ? email.trim() : '',
         mobile: mobile1 ? mobile1.trim() : '',
-        secondaryName: fullName2 || null,
-        secondaryContactNumber: mobile2 || null,
-        super_admin_1_name: fullName1,
-        super_admin_1_mobile: mobile1,
-        whatsapp_number: mobile1
+        secondaryName: fullName2 ? fullName2.trim() : null,
+        secondaryContactNumber: mobile2 ? mobile2.trim() : null,
+        super_admin_1_name: fullName1 ? fullName1.trim() : '',
+        super_admin_1_mobile: mobile1 ? mobile1.trim() : '',
+        whatsapp_number: mobile1 ? mobile1.trim() : ''
       });
 
       const isSuccess = res.data && (res.data.success === true || res.status === 201 || res.status === 200);
 
       if (isSuccess) {
-        const generatedPw = res.data?.data?.generatedPassword || res.data?.data?.generated_password || res.data?.generated_password || res.data?.generatedPassword;
+        const createdData = res.data?.data;
+        const generatedPw = createdData?.generatedPassword || createdData?.generated_password || res.data?.generatedPassword || res.data?.generated_password;
+        
+        if (createdData && createdData.id) {
+          setSuperAdmins(prev => [createdData, ...prev.filter(item => item.id !== createdData.id)]);
+        }
+
         setCreatedResult({
           type: 'success',
           msg: res.data?.message || `Super Admin created successfully for ${targetDistrict} District!`,
           password: generatedPw,
           email: email,
-          mailSent: res.data?.mail_sent ?? res.data?.mailSent ?? true,
-          mailError: res.data?.mail_error ?? res.data?.mailError ?? null,
+          mailSent: res.data?.mailSent ?? res.data?.mail_sent ?? true,
+          mailError: res.data?.mailError ?? res.data?.mail_error ?? null,
         });
         setSearchTerm('');
         setSelectedDistrictFilter('ALL');
