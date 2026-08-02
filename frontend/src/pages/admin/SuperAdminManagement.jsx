@@ -100,11 +100,19 @@ export default function SuperAdminManagement() {
   const [sendResultMsg, setSendResultMsg] = useState(null);
 
   const loadData = useCallback(async () => {
+    setLoading(true);
     try {
       const resSuperAdmins = await api.get('/technical-admin/super-admins');
-      if (resSuperAdmins.data?.success) {
-        setSuperAdmins(resSuperAdmins.data.data || []);
+      const raw = resSuperAdmins.data;
+      let list = [];
+      if (Array.isArray(raw)) {
+        list = raw;
+      } else if (Array.isArray(raw?.data)) {
+        list = raw.data;
+      } else if (raw?.success && Array.isArray(raw?.data)) {
+        list = raw.data;
       }
+      setSuperAdmins(list);
     } catch (err) {
       console.error("Super Admin Load error:", err);
     } finally {
@@ -170,6 +178,9 @@ export default function SuperAdminManagement() {
           mailSent: res.data?.mail_sent ?? res.data?.mailSent ?? true,
           mailError: res.data?.mail_error ?? res.data?.mailError ?? null,
         });
+        setSearchTerm('');
+        setSelectedDistrictFilter('ALL');
+        setStatusFilter('ALL');
         loadData();
       } else {
         setCreatedResult({ type: 'error', msg: res.data?.message || 'Creation failed' });
@@ -296,18 +307,19 @@ export default function SuperAdminManagement() {
   // Filtering
   const filteredSuperAdmins = superAdmins.filter(sa => {
     const parsed = parseSuperAdminContacts(sa);
-    const matchesSearch =
-      (sa.district || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sa.primaryName || sa.primary_name || sa.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sa.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sa.mobile || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      parsed.admin1Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      parsed.admin2Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      parsed.admin2Mobile.toLowerCase().includes(searchTerm.toLowerCase());
-      (sa.secondary_contact || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const term = (searchTerm || '').trim().toLowerCase();
+    const matchesSearch = !term ||
+      (sa.district || '').toLowerCase().includes(term) ||
+      (sa.primaryName || sa.primary_name || sa.name || '').toLowerCase().includes(term) ||
+      (sa.email || '').toLowerCase().includes(term) ||
+      (sa.mobile || '').toLowerCase().includes(term) ||
+      parsed.admin1Name.toLowerCase().includes(term) ||
+      parsed.admin2Name.toLowerCase().includes(term) ||
+      parsed.admin2Mobile.toLowerCase().includes(term) ||
+      (sa.secondary_contact || '').toLowerCase().includes(term);
 
-    const matchesDistrict = selectedDistrictFilter === 'ALL' || sa.district === selectedDistrictFilter;
-    const matchesStatus = statusFilter === 'ALL' || sa.status === statusFilter;
+    const matchesDistrict = selectedDistrictFilter === 'ALL' || (sa.district || '').toLowerCase() === (selectedDistrictFilter || '').toLowerCase();
+    const matchesStatus = statusFilter === 'ALL' || (sa.status || '').toLowerCase() === (statusFilter || '').toLowerCase();
 
     return matchesSearch && matchesDistrict && matchesStatus;
   });
