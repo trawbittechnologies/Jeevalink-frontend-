@@ -1,15 +1,10 @@
 {
+  "installCommand": "npm install --prefix frontend",
+  "buildCommand": "npm run build --prefix frontend",
+  "outputDirectory": "frontend/dist",
   "rewrites": [
     {
-      "source": "/api/v1/:path*",
-      "destination": "https://api.jeevelink.com/api/v1/:path*"
-    },
-    {
-      "source": "/storage/:path*",
-      "destination": "https://api.jeevelink.com/storage/:path*"
-    },
-    {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
