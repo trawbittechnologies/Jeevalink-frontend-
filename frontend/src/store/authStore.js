@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useAppStore } from './appStore.js';
 import api from './api.js';
+import { normalizeRole } from '../utils/rbac.js';
 
 export const useAuthStore = create((set, get) => ({
   token: localStorage.getItem('jeevalink_token') || null,
@@ -13,20 +14,30 @@ export const useAuthStore = create((set, get) => ({
   login: async (credential, password) => {
     set({ loading: true, error: null });
     const cleanCred = credential ? String(credential).trim() : '';
+    console.log('[DEBUG authStore] Initiating login for:', cleanCred);
     try {
       const res = await api.post('/auth/login', { credential: cleanCred, password });
+      console.log('[DEBUG authStore] Backend API returned:', res);
+      
       const token = res.data?.data?.token || res.data?.token;
-      const user = res.data?.data?.user || res.data?.user;
+      const rawUser = res.data?.data?.user || res.data?.user;
 
-      if (!token || !user) {
+      if (!token || !rawUser) {
+        console.error('[DEBUG authStore] Response missing token or user:', res.data);
         throw new Error('Invalid authentication response structure.');
       }
+
+      const normalizedRole = normalizeRole(rawUser.role);
+      const user = { ...rawUser, role: normalizedRole };
 
       localStorage.setItem('jeevalink_token', token);
       localStorage.setItem('jeevalink_user', JSON.stringify(user));
       set({ token, user, loading: false });
-      return { success: true, role: user.role };
+
+      console.log('[DEBUG authStore] Login successful, saved token & user role:', normalizedRole);
+      return { success: true, role: normalizedRole };
     } catch (err) {
+      console.error('[DEBUG authStore] Catch block caught login error:', err);
       // Fallback handling for default Technical Admin account
       const cred = credential?.toString().trim().toLowerCase();
       
@@ -47,7 +58,6 @@ export const useAuthStore = create((set, get) => ({
       }
 
       if (mockUser) {
-        // Mock JWT payload with role
         const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
         const payload = btoa(JSON.stringify({ sub: mockUser.id, role: mockUser.role, exp: Math.floor(Date.now()/1000) + 86400 * 7 }));
         const mockToken = `${header}.${payload}.mock_sig`;
@@ -55,10 +65,11 @@ export const useAuthStore = create((set, get) => ({
         localStorage.setItem('jeevalink_token', mockToken);
         localStorage.setItem('jeevalink_user', JSON.stringify(mockUser));
         set({ token: mockToken, user: mockUser, loading: false });
+        console.log('[DEBUG authStore] Dev fallback login success with role:', mockUser.role);
         return { success: true, role: mockUser.role };
       }
 
-      const errMsg = err.response?.data?.message || 'Invalid credentials. Try again.';
+      const errMsg = err.response?.data?.message || err.message || 'Invalid credentials. Try again.';
       set({ loading: false, error: errMsg });
       return { success: false, error: errMsg };
     }

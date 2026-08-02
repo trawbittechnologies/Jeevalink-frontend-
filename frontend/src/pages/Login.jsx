@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
+import { normalizeRole } from '../utils/rbac.js';
 import { LogIn, Phone, Mail, Eye, EyeOff, ArrowRight, Heart, Shield, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
@@ -27,34 +28,51 @@ export default function Login() {
   const navigate = useNavigate();
 
   const redirectByRole = (role) => {
-    if (role === 'technical_admin') navigate('/technical-admin/dashboard');
-    else if (role === 'super_admin') navigate('/super-admin/dashboard');
-    else if (role === 'block_admin' || role === 'admin') navigate('/block-admin/dashboard');
-    else if (role === 'volunteer') navigate('/volunteer/dashboard');
-    else if (role === 'unit_squad') navigate('/unit-squad/dashboard');
+    const norm = normalizeRole(role);
+    console.log('[DEBUG Login] redirectByRole:', { rawRole: role, normalizedRole: norm });
+    if (norm === 'technical_admin') navigate('/technical-admin/dashboard');
+    else if (norm === 'super_admin') navigate('/super-admin/dashboard');
+    else if (norm === 'block_admin') navigate('/block-admin/dashboard');
+    else if (norm === 'volunteer') navigate('/volunteer/dashboard');
+    else if (norm === 'unit_squad') navigate('/unit-squad/dashboard');
     else navigate('/dashboard');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('[DEBUG Login] Form submitted for:', credential);
     if (!credential || !password) { triggerToast('Please fill all fields.', 'warning'); return; }
-    const res = await login(credential, password);
-    if (res.success) {
-      triggerToast('Welcome back to JeevaLink!', 'success');
-      await fetchRequests();
-      await fetchNotifications();
-      if (['admin', 'volunteer', 'super_admin', 'technical_admin', 'unit_squad'].includes(res.role)) {
-        await fetchUsers();
+    
+    try {
+      const res = await login(credential, password);
+      console.log('[DEBUG Login] login result object:', res);
+      
+      if (res && res.success) {
+        triggerToast('Welcome back to JeevaLink!', 'success');
+        
+        // Execute background data loads asynchronously without blocking route navigation
+        Promise.allSettled([
+          fetchRequests(),
+          fetchNotifications(),
+          ['admin', 'volunteer', 'super_admin', 'technical_admin', 'unit_squad'].includes(res.role) ? fetchUsers() : Promise.resolve()
+        ]).catch(err => console.warn('[DEBUG Login] Background fetch warning:', err));
+
+        console.log('[DEBUG Login] Triggering navigation for role:', res.role);
+        redirectByRole(res.role);
+      } else {
+        const errorMsg = res?.error || 'Invalid credentials. Try again.';
+        console.error('[DEBUG Login] Login failed with error:', errorMsg);
+        triggerToast(errorMsg, 'error');
       }
-      redirectByRole(res.role);
-    } else {
-      triggerToast('Invalid credentials. Try again.', 'error');
+    } catch (err) {
+      console.error('[DEBUG Login] Exception in handleSubmit:', err);
+      triggerToast('Login failed: ' + (err.message || 'Server error'), 'error');
     }
   };
 
   const handleGoogle = async () => {
     const res = await googleLogin('demo@gmail.com', 'Google Demo User');
-    if (res.success) {
+    if (res && res.success) {
       triggerToast('Google sign-in successful!', 'success');
       redirectByRole(res.role);
     }

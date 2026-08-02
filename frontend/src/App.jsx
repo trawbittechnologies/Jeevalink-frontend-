@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore.js';
 import { useAppStore } from './store/appStore.js';
+import { normalizeRole } from './utils/rbac.js';
 import Toast from './components/Toast.jsx';
 import { Loader2 } from 'lucide-react';
 
@@ -85,12 +86,18 @@ function ProtectedRoute({ children, roles }) {
   const { user, token, logout } = useAuthStore();
   const { allUsers, triggerToast } = useAppStore();
 
-  if (!token) return <Navigate to="/login" replace />;
+  const userRole = normalizeRole(user?.role);
+  console.log('[DEBUG ProtectedRoute] Evaluating path:', window.location.pathname, { hasToken: !!token, rawRole: user?.role, normalizedRole: userRole, requiredRoles: roles });
+
+  if (!token) {
+    console.warn('[DEBUG ProtectedRoute] No token found, redirecting to /login');
+    return <Navigate to="/login" replace />;
+  }
 
   // Real-time check if user de-activated
-  const currentDbUser = allUsers.find(u => u._id === user?._id || u.email === user?.email);
+  const currentDbUser = allUsers.find(u => (u._id && user?._id && String(u._id) === String(user._id)) || (u.email && user?.email && u.email.toLowerCase() === user.email.toLowerCase()));
   
-  if (currentDbUser && currentDbUser.status !== user.status) {
+  if (currentDbUser && currentDbUser.status !== user.status && currentDbUser.status === 'Active') {
     setTimeout(() => {
       useAuthStore.setState({
         user: { ...user, status: currentDbUser.status }
@@ -100,6 +107,7 @@ function ProtectedRoute({ children, roles }) {
   }
 
   if (currentDbUser && (currentDbUser.status === 'Inactive' || currentDbUser.status === 'Suspended' || currentDbUser.status === 'Rejected')) {
+    console.warn('[DEBUG ProtectedRoute] User deactivated in allUsers list:', currentDbUser.status);
     setTimeout(() => {
       logout();
       triggerToast('Your account is deactivated or suspended.', 'error');
@@ -108,25 +116,30 @@ function ProtectedRoute({ children, roles }) {
   }
 
   // Check for profile completion
-  const isNonDonorRole = ['technical_admin', 'super_admin', 'block_admin', 'volunteer', 'unit_squad'].includes(user?.role);
+  const isNonDonorRole = ['technical_admin', 'super_admin', 'block_admin', 'volunteer', 'unit_squad'].includes(userRole);
 
   if (!isNonDonorRole && user) {
     const basicComplete = !!(user.city && user.district);
     const isComplete = basicComplete && !!user.bloodGroup && user.bloodGroup !== 'N/A';
     if (!isComplete && window.location.pathname !== '/complete-profile') {
+      console.log('[DEBUG ProtectedRoute] Profile incomplete, navigating to /complete-profile');
       return <Navigate to="/complete-profile" replace />;
     }
   }
 
-  if (roles && user && !roles.includes(user.role)) {
-    const redirect =
-      user.role === 'technical_admin' ? '/technical-admin/dashboard' :
-      user.role === 'super_admin' ? '/super-admin/dashboard' :
-      user.role === 'block_admin' ? '/block-admin/dashboard' :
-      user.role === 'volunteer' ? '/volunteer/dashboard' :
-      user.role === 'unit_squad' ? '/unit-squad/dashboard' :
-      '/dashboard';
-    return <Navigate to={redirect} replace />;
+  if (roles) {
+    const normalizedRequiredRoles = roles.map(r => normalizeRole(r));
+    if (!normalizedRequiredRoles.includes(userRole)) {
+      console.warn('[DEBUG ProtectedRoute] User role not permitted for route! Redirecting to user role dashboard.', { userRole, requiredRoles: normalizedRequiredRoles });
+      const redirect =
+        userRole === 'technical_admin' ? '/technical-admin/dashboard' :
+        userRole === 'super_admin' ? '/super-admin/dashboard' :
+        userRole === 'block_admin' ? '/block-admin/dashboard' :
+        userRole === 'volunteer' ? '/volunteer/dashboard' :
+        userRole === 'unit_squad' ? '/unit-squad/dashboard' :
+        '/dashboard';
+      return <Navigate to={redirect} replace />;
+    }
   }
   return children;
 }
