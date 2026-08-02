@@ -171,8 +171,9 @@ export default function VolunteerDirectory() {
     switch (role) {
       case 'block_admin':
         return 'Block Committee Admin';
-      case 'volunteer':
       case 'unit_squad':
+        return 'Unit Squad';
+      case 'volunteer':
       default:
         return 'Meghala Admin';
     }

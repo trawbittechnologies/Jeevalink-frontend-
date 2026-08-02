@@ -331,20 +331,20 @@ export const useAppStore = create((set, get) => ({
   stopSiren: () => set({ sirenPlaying: false }),
   setSirenPlaying: (playing) => set({ sirenPlaying: playing }),
 
-  searchDonors: async (bloodGroup, radius) => {
+  searchDonors: async (bloodGroup, radius, district) => {
     try {
       const params = {};
-      if (bloodGroup) params.bloodGroup = bloodGroup;
+      if (bloodGroup && bloodGroup !== 'All') params.bloodGroup = bloodGroup;
+      if (district && district !== 'All') params.district = district;
       
       const res = await api.get('/donors/search', { params });
       if (res.data.success) {
         let donorsList = res.data.data.donors || [];
-        // Apply client-side radius filter on simulated/returned distance
-        donorsList = donorsList.filter((d) => !radius || d.distance <= radius);
+        donorsList = donorsList.filter((d) => !radius || (d.distance ?? 0) <= radius);
         set({ donors: donorsList });
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Failed to search donors', err);
     }
   },
 
