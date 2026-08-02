@@ -166,7 +166,8 @@ api.interceptors.response.use(
   (response) => {
     if (typeof response.data === 'string') {
       try {
-        const parsed = JSON.parse(response.data);
+        const cleanData = response.data.replace(/^\uFEFF/, '').trim();
+        const parsed = JSON.parse(cleanData);
         if (parsed && typeof parsed === 'object') {
           response.data = parsed;
         }
@@ -182,7 +183,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && typeof error.response.data === 'string') {
       try {
-        const parsed = JSON.parse(error.response.data);
+        const cleanData = error.response.data.replace(/^\uFEFF/, '').trim();
+        const parsed = JSON.parse(cleanData);
         if (parsed && typeof parsed === 'object') {
           error.response.data = parsed;
         }

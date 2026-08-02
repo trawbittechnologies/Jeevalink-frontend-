@@ -22,7 +22,8 @@ export const useAuthStore = create((set, get) => ({
       let resData = res.data;
       if (typeof resData === 'string') {
         try {
-          resData = JSON.parse(resData);
+          const cleanStr = resData.replace(/^\uFEFF/, '').trim();
+          resData = JSON.parse(cleanStr);
         } catch (e) {
           console.error('[DEBUG authStore] Failed to parse resData JSON string:', e);
         }
