@@ -7,14 +7,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://api.jeevelink.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
       '/storage': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://api.jeevelink.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       }
     }
   },
