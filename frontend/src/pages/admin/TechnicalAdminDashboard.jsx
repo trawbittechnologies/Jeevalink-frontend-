@@ -59,6 +59,7 @@ export default function TechnicalAdminDashboard() {
   const [submittingEdit, setSubmittingEdit] = useState(false);
 
   const loadData = useCallback(async () => {
+    setLoading(true);
     try {
       const [resMetrics, resSuperAdmins] = await Promise.all([
         api.get('/technical-admin/metrics'),
@@ -68,9 +69,17 @@ export default function TechnicalAdminDashboard() {
       if (resMetrics.data?.success) {
         setMetrics(resMetrics.data.data);
       }
-      if (resSuperAdmins.data?.success) {
-        setSuperAdmins(resSuperAdmins.data.data || []);
+      
+      const rawSA = resSuperAdmins.data;
+      let saList = [];
+      if (Array.isArray(rawSA)) {
+        saList = rawSA;
+      } else if (Array.isArray(rawSA?.data)) {
+        saList = rawSA.data;
+      } else if (rawSA?.success && Array.isArray(rawSA?.data)) {
+        saList = rawSA.data;
       }
+      setSuperAdmins(saList);
     } catch {
       // error handling
     } finally {

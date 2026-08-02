@@ -9,50 +9,65 @@ import { Loader2 } from 'lucide-react';
 import PublicLayout from './layouts/PublicLayout.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 
+function safeLazy(importFn) {
+  return lazy(() =>
+    importFn().catch((error) => {
+      const pageRefreshed = sessionStorage.getItem('chunk_retry_refreshed');
+      if (!pageRefreshed) {
+        sessionStorage.setItem('chunk_retry_refreshed', 'true');
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      sessionStorage.removeItem('chunk_retry_refreshed');
+      throw error;
+    })
+  );
+}
+
 // Lazy-loaded Pages
-const Splash = lazy(() => import('./pages/Splash.jsx'));
-const Landing = lazy(() => import('./pages/Landing.jsx'));
-const Login = lazy(() => import('./pages/Login.jsx'));
-const Register = lazy(() => import('./pages/Register.jsx'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'));
-const CompleteProfile = lazy(() => import('./pages/CompleteProfile.jsx'));
-const DonorDashboard = lazy(() => import('./pages/DonorDashboard.jsx'));
-const DonorEligibility = lazy(() => import('./pages/DonorEligibility.jsx'));
-const VolunteerDashboard = lazy(() => import('./pages/VolunteerDashboard.jsx'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'));
-const DonorSearch = lazy(() => import('./pages/DonorSearch.jsx'));
-const BloodRequests = lazy(() => import('./pages/BloodRequests.jsx'));
-const Profile = lazy(() => import('./pages/Profile.jsx'));
-const About = lazy(() => import('./pages/About.jsx'));
-const Contact = lazy(() => import('./pages/Contact.jsx'));
-const Privacy = lazy(() => import('./pages/Privacy.jsx'));
-const Terms = lazy(() => import('./pages/Terms.jsx'));
-const Notifications = lazy(() => import('./pages/Notifications.jsx'));
-const Settings = lazy(() => import('./pages/Settings.jsx'));
-const EmergencyDashboard = lazy(() => import('./pages/EmergencyDashboard.jsx'));
+const Splash = safeLazy(() => import('./pages/Splash.jsx'));
+const Landing = safeLazy(() => import('./pages/Landing.jsx'));
+const Login = safeLazy(() => import('./pages/Login.jsx'));
+const Register = safeLazy(() => import('./pages/Register.jsx'));
+const ResetPassword = safeLazy(() => import('./pages/ResetPassword.jsx'));
+const CompleteProfile = safeLazy(() => import('./pages/CompleteProfile.jsx'));
+const DonorDashboard = safeLazy(() => import('./pages/DonorDashboard.jsx'));
+const DonorEligibility = safeLazy(() => import('./pages/DonorEligibility.jsx'));
+const VolunteerDashboard = safeLazy(() => import('./pages/VolunteerDashboard.jsx'));
+const AdminDashboard = safeLazy(() => import('./pages/AdminDashboard.jsx'));
+const DonorSearch = safeLazy(() => import('./pages/DonorSearch.jsx'));
+const BloodRequests = safeLazy(() => import('./pages/BloodRequests.jsx'));
+const Profile = safeLazy(() => import('./pages/Profile.jsx'));
+const About = safeLazy(() => import('./pages/About.jsx'));
+const Contact = safeLazy(() => import('./pages/Contact.jsx'));
+const Privacy = safeLazy(() => import('./pages/Privacy.jsx'));
+const Terms = safeLazy(() => import('./pages/Terms.jsx'));
+const Notifications = safeLazy(() => import('./pages/Notifications.jsx'));
+const Settings = safeLazy(() => import('./pages/Settings.jsx'));
+const EmergencyDashboard = safeLazy(() => import('./pages/EmergencyDashboard.jsx'));
 
 // Volunteer Module Pages
-const VolunteerUserManagement = lazy(() => import('./pages/volunteer/UserManagement.jsx'));
-const UnitCommittee = lazy(() => import('./pages/volunteer/UnitCommittee.jsx'));
+const VolunteerUserManagement = safeLazy(() => import('./pages/volunteer/UserManagement.jsx'));
+const UnitCommittee = safeLazy(() => import('./pages/volunteer/UnitCommittee.jsx'));
 
 // Admin Module Pages
-const VolunteerManagement = lazy(() => import('./pages/admin/VolunteerManagement.jsx'));
-const FeedbackManagement = lazy(() => import('./pages/admin/FeedbackManagement.jsx'));
-const SupportCenter = lazy(() => import('./pages/admin/SupportCenter.jsx'));
-const ReportsAnalytics = lazy(() => import('./pages/admin/ReportsAnalytics.jsx'));
-const ActivityLogs = lazy(() => import('./pages/admin/ActivityLogs.jsx'));
-const SystemSettings = lazy(() => import('./pages/admin/SystemSettings.jsx'));
-const PartnerManagement = lazy(() => import('./pages/admin/PartnerManagement.jsx'));
-const TechnicalAdminDashboard = lazy(() => import('./pages/admin/TechnicalAdminDashboard.jsx'));
-const SuperAdminDashboard = lazy(() => import('./pages/admin/SuperAdminDashboard.jsx'));
-const SuperAdminManagement = lazy(() => import('./pages/admin/SuperAdminManagement.jsx'));
-const BlockCommitteeManagement = lazy(() => import('./pages/admin/BlockCommitteeManagement.jsx'));
+const VolunteerManagement = safeLazy(() => import('./pages/admin/VolunteerManagement.jsx'));
+const FeedbackManagement = safeLazy(() => import('./pages/admin/FeedbackManagement.jsx'));
+const SupportCenter = safeLazy(() => import('./pages/admin/SupportCenter.jsx'));
+const ReportsAnalytics = safeLazy(() => import('./pages/admin/ReportsAnalytics.jsx'));
+const ActivityLogs = safeLazy(() => import('./pages/admin/ActivityLogs.jsx'));
+const SystemSettings = safeLazy(() => import('./pages/admin/SystemSettings.jsx'));
+const PartnerManagement = safeLazy(() => import('./pages/admin/PartnerManagement.jsx'));
+const TechnicalAdminDashboard = safeLazy(() => import('./pages/admin/TechnicalAdminDashboard.jsx'));
+const SuperAdminDashboard = safeLazy(() => import('./pages/admin/SuperAdminDashboard.jsx'));
+const SuperAdminManagement = safeLazy(() => import('./pages/admin/SuperAdminManagement.jsx'));
+const BlockCommitteeManagement = safeLazy(() => import('./pages/admin/BlockCommitteeManagement.jsx'));
 
 // V2 Common & Public Pages
-const Leaderboard = lazy(() => import('./pages/Leaderboard.jsx'));
-const VolunteerDirectory = lazy(() => import('./pages/VolunteerDirectory.jsx'));
-const TechnicalReports = lazy(() => import('./pages/TechnicalReports.jsx'));
-const Campaigns = lazy(() => import('./pages/Campaigns.jsx'));
+const Leaderboard = safeLazy(() => import('./pages/Leaderboard.jsx'));
+const VolunteerDirectory = safeLazy(() => import('./pages/VolunteerDirectory.jsx'));
+const TechnicalReports = safeLazy(() => import('./pages/TechnicalReports.jsx'));
+const Campaigns = safeLazy(() => import('./pages/Campaigns.jsx'));
 
 function PageLoader() {
   return (
