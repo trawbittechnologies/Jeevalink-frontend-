@@ -18,7 +18,7 @@ export function toCamel(obj) {
 
     const result = {};
     for (const key of Object.keys(obj)) {
-      const camelKey = key.replace(/_([a-z0-9])/gi, (_, match) => match.charAt(1).toUpperCase());
+      const camelKey = key.replace(/_([a-z0-9])/gi, (_, match) => match.toUpperCase());
       result[camelKey] = toCamel(obj[key]);
     }
 
