@@ -19,11 +19,20 @@ export const useAuthStore = create((set, get) => ({
       const res = await api.post('/auth/login', { credential: cleanCred, password });
       console.log('[DEBUG authStore] Backend API returned:', res);
       
-      const token = res.data?.data?.token || res.data?.token;
-      const rawUser = res.data?.data?.user || res.data?.user;
+      let resData = res.data;
+      if (typeof resData === 'string') {
+        try {
+          resData = JSON.parse(resData);
+        } catch (e) {
+          console.error('[DEBUG authStore] Failed to parse resData JSON string:', e);
+        }
+      }
+
+      const token = resData?.data?.token || resData?.token;
+      const rawUser = resData?.data?.user || resData?.user;
 
       if (!token || !rawUser) {
-        console.error('[DEBUG authStore] Response missing token or user:', res.data);
+        console.error('[DEBUG authStore] Response missing token or user:', resData);
         throw new Error('Invalid authentication response structure.');
       }
 

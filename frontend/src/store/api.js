@@ -6,9 +6,19 @@ export function toCamel(obj) {
     return obj.map(toCamel);
   }
   if (obj !== null && typeof obj === 'object') {
+    if (
+      obj instanceof Blob ||
+      obj instanceof ArrayBuffer ||
+      obj instanceof FormData ||
+      obj instanceof Date ||
+      obj instanceof RegExp
+    ) {
+      return obj;
+    }
+
     const result = {};
     for (const key of Object.keys(obj)) {
-      const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+      const camelKey = key.replace(/_([a-z0-9])/gi, (_, match) => match.charAt(1).toUpperCase());
       result[camelKey] = toCamel(obj[key]);
     }
 
@@ -63,6 +73,16 @@ export function toSnake(obj) {
     return obj.map(toSnake);
   }
   if (obj !== null && typeof obj === 'object') {
+    if (
+      obj instanceof Blob ||
+      obj instanceof ArrayBuffer ||
+      obj instanceof FormData ||
+      obj instanceof Date ||
+      obj instanceof RegExp
+    ) {
+      return obj;
+    }
+
     const result = {};
     for (const key of Object.keys(obj)) {
       let snakeKey;
@@ -144,12 +164,36 @@ api.interceptors.request.use(
 // Response interceptor to convert incoming data to camelCase
 api.interceptors.response.use(
   (response) => {
+    if (typeof response.data === 'string') {
+      try {
+        const parsed = JSON.parse(response.data);
+        if (parsed && typeof parsed === 'object') {
+          response.data = parsed;
+        }
+      } catch {
+        // Not a JSON string
+      }
+    }
     if (response.data && typeof response.data === 'object') {
       response.data = toCamel(response.data);
     }
     return response;
   },
   (error) => {
+    if (error.response && typeof error.response.data === 'string') {
+      try {
+        const parsed = JSON.parse(error.response.data);
+        if (parsed && typeof parsed === 'object') {
+          error.response.data = parsed;
+        }
+      } catch {
+        // Not a JSON string
+      }
+    }
+    if (error.response?.data && typeof error.response.data === 'object') {
+      error.response.data = toCamel(error.response.data);
+    }
+
     // If we get an authentication error, clean up token
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('jeevalink_token');
