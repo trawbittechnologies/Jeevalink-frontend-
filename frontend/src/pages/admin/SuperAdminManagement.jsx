@@ -134,6 +134,7 @@ export default function SuperAdminManagement() {
 
   const handleCreateSuperAdmin = async (e) => {
     e.preventDefault();
+    if (submittingCreate) return;
     setCreatedResult(null);
     setSubmittingCreate(true);
     const targetDistrict = district === 'Other' ? customDistrict : district;
@@ -148,8 +149,8 @@ export default function SuperAdminManagement() {
       const res = await api.post('/technical-admin/super-admins', {
         district: targetDistrict,
         primary_name: fullName1,
-        email,
-        mobile: mobile1,
+        email: email ? email.trim() : '',
+        mobile: mobile1 ? mobile1.trim() : '',
         secondaryName: fullName2 || null,
         secondaryContactNumber: mobile2 || null,
         super_admin_1_name: fullName1,
@@ -157,21 +158,24 @@ export default function SuperAdminManagement() {
         whatsapp_number: mobile1
       });
 
-      if (res.data?.success) {
+      const isSuccess = res.data && (res.data.success === true || res.status === 201 || res.status === 200);
+
+      if (isSuccess) {
+        const generatedPw = res.data?.data?.generatedPassword || res.data?.data?.generated_password || res.data?.generated_password || res.data?.generatedPassword;
         setCreatedResult({
           type: 'success',
-          msg: `Super Admin created for ${targetDistrict} District!`,
-          password: res.data.data?.generatedPassword || res.data.data?.generated_password,
+          msg: res.data?.message || `Super Admin created successfully for ${targetDistrict} District!`,
+          password: generatedPw,
           email: email,
-          mailSent: res.data.mail_sent,
-          mailError: res.data.mail_error,
+          mailSent: res.data?.mail_sent ?? res.data?.mailSent ?? true,
+          mailError: res.data?.mail_error ?? res.data?.mailError ?? null,
         });
         loadData();
       } else {
         setCreatedResult({ type: 'error', msg: res.data?.message || 'Creation failed' });
       }
     } catch (err) {
-      setCreatedResult({ type: 'error', msg: err.response?.data?.message || 'Error creating super admin.' });
+      setCreatedResult({ type: 'error', msg: err.response?.data?.message || err.message || 'Error creating super admin.' });
     } finally {
       setSubmittingCreate(false);
     }
@@ -818,28 +822,26 @@ export default function SuperAdminManagement() {
                 {/* Admin 2 Details */}
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
                   <p className="font-bold text-slate-700 text-xs flex items-center gap-1.5 uppercase tracking-wider">
-                    <span className="w-2 h-2 rounded-full bg-slate-400" /> District Super Admin 2 (Secondary)
+                    <span className="w-2 h-2 rounded-full bg-slate-400" /> District Super Admin 2 (Secondary - Optional)
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Primary Name *</label>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Secondary Name (Optional)</label>
                       <input
                         type="text"
-                        placeholder="e.g. Anjali Nair"
+                        placeholder="e.g. Anjali Nair (Optional)"
                         value={fullName2}
                         onChange={(e) => setFullName2(e.target.value)}
-                        required
                         className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Mobile Number *</label>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Mobile Number (Optional)</label>
                       <input
                         type="text"
-                        placeholder="9876543211"
+                        placeholder="9876543211 (Optional)"
                         value={mobile2}
                         onChange={(e) => setMobile2(e.target.value)}
-                        required
                         className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
