@@ -69,7 +69,7 @@ export function toSnake(obj) {
   return obj;
 }
 
-const DEFAULT_BACKEND_URL = 'http://localhost:8000';
+const DEFAULT_BACKEND_URL = 'https://api.jeevelink.com';
 
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
