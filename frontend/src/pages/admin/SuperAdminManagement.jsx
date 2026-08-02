@@ -109,8 +109,8 @@ export default function SuperAdminManagement() {
         list = raw;
       } else if (Array.isArray(raw?.data)) {
         list = raw.data;
-      } else if (raw?.success && Array.isArray(raw?.data)) {
-        list = raw.data;
+      } else if (Array.isArray(raw?.data?.data)) {
+        list = raw.data.data;
       }
       setSuperAdmins(list);
     } catch (err) {
