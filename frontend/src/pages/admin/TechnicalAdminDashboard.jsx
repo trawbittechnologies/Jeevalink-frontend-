@@ -76,8 +76,8 @@ export default function TechnicalAdminDashboard() {
         saList = rawSA;
       } else if (Array.isArray(rawSA?.data)) {
         saList = rawSA.data;
-      } else if (rawSA?.success && Array.isArray(rawSA?.data)) {
-        saList = rawSA.data;
+      } else if (Array.isArray(rawSA?.data?.data)) {
+        saList = rawSA.data.data;
       }
       setSuperAdmins(saList);
     } catch {
