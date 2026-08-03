@@ -530,13 +530,16 @@ export default function SuperAdminDashboard() {
                   return (
                     <tr key={ba.id} className="hover:bg-red-50/20 transition-colors">
                       <td className="py-3 px-4 whitespace-nowrap">
-                        {(ba.jeevalink_id || ba.employee_id) ? (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2 py-0.5 rounded-lg">
-                            {ba.jeevalink_id || ba.employee_id}
-                          </span>
-                        ) : (
-                          <span className="text-slate-300 text-[10px] italic">—</span>
-                        )}
+                        {(() => {
+                          const bId = ba.jeevalink_id || ba.employee_id || ba.jeevalinkId || (ba.id || ba._id ? `JL-BA-${String(ba.id || ba._id).padStart(4, '0')}` : null);
+                          return bId ? (
+                            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2 py-0.5 rounded-lg">
+                              {bId}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300 text-[10px] italic">—</span>
+                          );
+                        })()}
                       </td>
                       <td className="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">
                         {ba.blockCommitteeName || ba.city || ba.block || 'N/A'}

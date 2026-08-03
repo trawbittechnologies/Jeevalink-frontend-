@@ -49,6 +49,7 @@ export default function DonorCard({ donor }) {
   const livesSaved = donor.livesSaved ?? donor.lives_saved ?? (donations * 3);
   const isAvailable = donor.availableForDonation !== undefined ? donor.availableForDonation : (donor.available_for_donation !== undefined ? donor.available_for_donation : true);
   const donorId = donor._id || donor.id;
+  const donorJeevalinkId = donor.jeevalink_id || donor.employee_id || donor.jeevalinkId || donor.employeeId || (donorId ? `JL-UR-${String(donorId).padStart(4, '0')}` : null);
   const userId = user?._id || user?.id;
   const sex = donor.sex || donor.gender || '';
   const dob = donor.dob || donor.date_of_birth || '';
@@ -129,9 +130,14 @@ export default function DonorCard({ donor }) {
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <h4 className="text-base font-extrabold text-slate-900 dark:text-zinc-100 truncate tracking-tight">{donorName}</h4>
                 <ShieldCheck className="w-4 h-4 text-sky-500 shrink-0" title="Verified Donor" />
+                {donorJeevalinkId && (
+                  <span className="text-[10px] font-mono font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 border border-red-100 dark:border-red-900/50 px-1.5 py-0.5 rounded-md shrink-0">
+                    {donorJeevalinkId}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400 mt-0.5 font-medium">
                 <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />

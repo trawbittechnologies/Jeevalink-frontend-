@@ -362,7 +362,7 @@ export default function VolunteerDirectory() {
                 const secondaryPhone = vol.secondary_phone || vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || vol.secondaryPhone || '';
                 const primaryName = vol.primary_name || vol.primaryName || vol.name || vol.person1Name || 'DYFI Volunteer';
                 const secondaryName = vol.secondary_name || vol.secondaryName || vol.secondary_contact_name || vol.person2Name || '';
-                const roleText = getRoleLabel(vol.role);
+                const volJeevalinkId = vol.jeevalink_id || vol.employee_id || vol.jeevalinkId || (vol.id || vol._id ? `JL-VO-${String(vol.id || vol._id).padStart(4, '0')}` : null);
 
                 return (
                   <motion.div
@@ -375,9 +375,16 @@ export default function VolunteerDirectory() {
                     {/* Card Header */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1 min-w-0">
-                        <span className="px-2.5 py-0.5 bg-red-50 border border-red-100 text-red-700 text-[10px] font-bold rounded-md uppercase">
-                          {roleText}
-                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="px-2.5 py-0.5 bg-red-50 border border-red-100 text-red-700 text-[10px] font-bold rounded-md uppercase">
+                            {roleText}
+                          </span>
+                          {volJeevalinkId && (
+                            <span className="px-2 py-0.5 bg-red-50 border border-red-100 text-primary text-[10px] font-mono font-black rounded-md">
+                              {volJeevalinkId}
+                            </span>
+                          )}
+                        </div>
                         <h3 className="text-base font-bold text-slate-900 truncate">{primaryName}</h3>
                         <p className="text-xs text-slate-500 font-medium">
                           {selectedDistrict} &bull; {vol.city || selectedBlock}

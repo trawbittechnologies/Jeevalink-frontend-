@@ -213,13 +213,16 @@ export default function VolunteerManagement() {
                     >
                       {/* JeevaLink Employee ID */}
                       <td className="py-4 px-6 whitespace-nowrap">
-                        {(vol.jeevalink_id || vol.employee_id) ? (
-                          <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
-                            {vol.jeevalink_id || vol.employee_id}
-                          </span>
-                        ) : (
-                          <span className="text-slate-300 text-[10px] italic">—</span>
-                        )}
+                        {(() => {
+                          const vId = vol.jeevalink_id || vol.employee_id || vol.jeevalinkId || (vol.id || vol._id ? `JL-VO-${String(vol.id || vol._id).padStart(4, '0')}` : null);
+                          return vId ? (
+                            <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
+                              {vId}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300 text-[10px] italic">—</span>
+                          );
+                        })()}
                       </td>
                       {/* Meghala Badge */}
                       <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">

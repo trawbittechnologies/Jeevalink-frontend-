@@ -55,6 +55,8 @@ export const useAuthStore = create((set, get) => ({
       if ((cred === 'techadmin@jeevalink.org' || cred === '9900000000') && (password === 'TechAdmin@2026' || password === 'admin123')) {
         mockUser = {
           id: 1,
+          jeevalink_id: 'JL-TA-0001',
+          employee_id: 'JL-TA-0001',
           name: 'Technical Admin',
           primaryName: 'System Technical Admin',
           email: 'techadmin@jeevalink.org',

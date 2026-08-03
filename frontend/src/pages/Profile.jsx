@@ -20,8 +20,10 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [idCopied, setIdCopied] = useState(false);
 
+  const displayJeevalinkId = user?.jeevalink_id || user?.employee_id || user?.jeevalinkId || user?.employeeId || (user?.id || user?._id ? `JL-${(user?.role || 'UR').slice(0, 2).toUpperCase()}-${String(user.id || user._id).padStart(4, '0')}` : null);
+
   const handleCopyEmployeeId = () => {
-    const id = user?.jeevalink_id;
+    const id = displayJeevalinkId;
     if (!id) return;
     navigator.clipboard.writeText(id).then(() => {
       setIdCopied(true);
@@ -163,11 +165,17 @@ export default function Profile() {
         // Draw User Details
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 20px system-ui, sans-serif';
-        ctx.fillText(user?.primaryName || 'Blood Donor', 190, 305);
+        ctx.fillText(user?.primaryName || 'Blood Donor', 190, 295);
+
+        if (displayJeevalinkId) {
+          ctx.fillStyle = '#f87171';
+          ctx.font = '900 13px system-ui, monospace';
+          ctx.fillText(displayJeevalinkId, 190, 316);
+        }
 
         ctx.fillStyle = '#9ca3af';
         ctx.font = '500 13px system-ui, sans-serif';
-        ctx.fillText(`${user?.city || 'Bengaluru'}, ${user?.district || 'Bengaluru Urban'}`, 190, 328);
+        ctx.fillText(`${user?.city || 'Bengaluru'}, ${user?.district || 'Bengaluru Urban'}`, 190, 335);
 
         // Draw bottom stats separator
         ctx.strokeStyle = '#1f2937';
@@ -295,17 +303,17 @@ export default function Profile() {
               {user?.secondaryContactNumber && ` | ${user.secondaryContactNumber}`}
             </p>
           </div>
-          {(user?.jeevalink_id || user?.employee_id) && (
+          {displayJeevalinkId && (
             <div className="flex items-center gap-2 mt-1 mb-0.5">
               <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-100 rounded-lg px-2.5 py-1">
                 <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />
                 <span className="text-xs font-black text-primary tracking-wide font-mono">
-                  {user.jeevalink_id || user.employee_id}
+                  {displayJeevalinkId}
                 </span>
               </div>
               <button
                 onClick={handleCopyEmployeeId}
-                title="Copy Employee ID"
+                title="Copy JeevaLink ID"
                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer border"
                 style={idCopied
                   ? { color: '#059669', background: '#ecfdf5', borderColor: '#a7f3d0' }
@@ -533,8 +541,8 @@ export default function Profile() {
               <QRCodeSVG value={qrData} size={140} fgColor="#111111" bgColor="#ffffff" level="M" />
             </div>
             <h3 className="font-bold text-lg">{user?.primaryName}</h3>
-            {user?.jeevalink_id && (
-              <p className="text-sm font-black text-primary tracking-wider mt-0.5">{user.jeevalink_id}</p>
+            {displayJeevalinkId && (
+              <p className="text-sm font-black text-primary tracking-wider mt-0.5">{displayJeevalinkId}</p>
             )}
             <p className="text-gray-400 text-xs mt-1">{user?.city}, {user?.district}</p>
             <div className="grid grid-cols-3 gap-3 mt-6 pt-5 border-t border-gray-800 text-left">

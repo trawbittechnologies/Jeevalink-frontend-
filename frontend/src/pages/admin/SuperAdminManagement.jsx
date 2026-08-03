@@ -512,13 +512,16 @@ export default function SuperAdminManagement() {
                       <tr key={sa.id} className="hover:bg-red-50/30 transition">
                         {/* JeevaLink Employee ID */}
                         <td className="py-4 px-6 whitespace-nowrap">
-                          {(sa.jeevalink_id || sa.employee_id) ? (
-                            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
-                              {sa.jeevalink_id || sa.employee_id}
-                            </span>
-                          ) : (
-                            <span className="text-slate-300 text-[10px] italic">—</span>
-                          )}
+                          {(() => {
+                            const sId = sa.jeevalink_id || sa.employee_id || sa.jeevalinkId || (sa.id || sa._id ? `JL-SA-${String(sa.id || sa._id).padStart(4, '0')}` : null);
+                            return sId ? (
+                              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
+                                {sId}
+                              </span>
+                            ) : (
+                              <span className="text-slate-300 text-[10px] italic">—</span>
+                            );
+                          })()}
                         </td>
                         {/* District Badge */}
                         <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
