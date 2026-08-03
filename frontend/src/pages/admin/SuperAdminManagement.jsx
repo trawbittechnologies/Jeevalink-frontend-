@@ -161,6 +161,12 @@ export default function SuperAdminManagement() {
       return;
     }
 
+    if (!fullName2 || !fullName2.trim() || !mobile2 || !mobile2.trim()) {
+      setCreatedResult({ type: 'error', msg: 'Secondary Super Admin Name and Mobile Number are required.' });
+      setSubmittingCreate(false);
+      return;
+    }
+
     try {
       const res = await api.post('/technical-admin/super-admins', {
         district: targetDistrict,
@@ -869,28 +875,30 @@ export default function SuperAdminManagement() {
                 </div>
 
                 {/* Admin 2 Details */}
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
-                  <p className="font-bold text-slate-700 text-xs flex items-center gap-1.5 uppercase tracking-wider">
-                    <span className="w-2 h-2 rounded-full bg-slate-400" /> District Super Admin 2 (Secondary - Optional)
+                <div className="bg-red-50/40 border border-red-100 rounded-2xl p-4 space-y-3">
+                  <p className="font-bold text-red-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-red-600" /> District Super Admin 2 (Secondary) *
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Secondary Name (Optional)</label>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Secondary Name *</label>
                       <input
                         type="text"
-                        placeholder="e.g. Anjali Nair (Optional)"
+                        placeholder="e.g. Anjali Nair"
                         value={fullName2}
                         onChange={(e) => setFullName2(e.target.value)}
+                        required
                         className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Mobile Number (Optional)</label>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Mobile Number *</label>
                       <input
                         type="text"
-                        placeholder="9876543211 (Optional)"
+                        placeholder="9876543211"
                         value={mobile2}
                         onChange={(e) => setMobile2(e.target.value)}
+                        required
                         className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
