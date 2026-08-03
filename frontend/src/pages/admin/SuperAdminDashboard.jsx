@@ -238,7 +238,8 @@ export default function SuperAdminDashboard() {
       parsed.admin1Name.toLowerCase().includes(q) ||
       parsed.admin2Name.toLowerCase().includes(q) ||
       (ba.email || '').toLowerCase().includes(q) ||
-      (ba.mobile || '').toLowerCase().includes(q)
+      (ba.mobile || '').toLowerCase().includes(q) ||
+      (ba.jeevalink_id || ba.employee_id || '').toLowerCase().includes(q)
     );
   });
 
@@ -489,7 +490,7 @@ export default function SuperAdminDashboard() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search blocks..."
+                placeholder="Search by name, email, phone, or JL-ID…"
                 className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 pr-7 focus:outline-none focus:border-red-500"
               />
               <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
@@ -513,6 +514,7 @@ export default function SuperAdminDashboard() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+                  <th className="py-3 px-4">JL Employee ID</th>
                   <th className="py-3 px-4">Block Committee</th>
                   <th className="py-3 px-4">Primary Contact</th>
                   <th className="py-3 px-4">Secondary Contact</th>
@@ -527,6 +529,15 @@ export default function SuperAdminDashboard() {
 
                   return (
                     <tr key={ba.id} className="hover:bg-red-50/20 transition-colors">
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        {(ba.jeevalink_id || ba.employee_id) ? (
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2 py-0.5 rounded-lg">
+                            {ba.jeevalink_id || ba.employee_id}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 text-[10px] italic">—</span>
+                        )}
+                      </td>
                       <td className="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">
                         {ba.blockCommitteeName || ba.city || ba.block || 'N/A'}
                       </td>

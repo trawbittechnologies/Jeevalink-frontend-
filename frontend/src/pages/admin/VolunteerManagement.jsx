@@ -72,7 +72,7 @@ export default function VolunteerManagement() {
     const q = search.toLowerCase();
     const secName = v.secondaryName || v.secondary_name || v.person2Name || '';
     const secNum = v.secondaryContactNumber || v.secondary_contact_number || v.secondaryContact || v.person2Contact || '';
-    const matchSearch = !q || [v.meghala, v.city, v.blockCommitteeName, v.blockName, v.primaryName, v.name, v.email, v.mobile, secName, secNum, v.district]
+    const matchSearch = !q || [v.meghala, v.city, v.blockCommitteeName, v.blockName, v.primaryName, v.name, v.email, v.mobile, secName, secNum, v.district, v.jeevalink_id, v.employee_id]
       .some(f => String(f || '').toLowerCase().includes(q));
     const matchStatus = filters.status === 'all' || (v.status || '').toLowerCase() === filters.status;
     const matchDistrict = filters.district === 'all' || v.district === filters.district;
@@ -185,6 +185,7 @@ export default function VolunteerManagement() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-4 px-6">JL Employee ID</th>
                   <th className="py-4 px-6">Meghala / Zone</th>
                   <th className="py-4 px-6">Primary Volunteer (Person 1)</th>
                   <th className="py-4 px-6">Secondary Volunteer (Person 2)</th>
@@ -210,6 +211,16 @@ export default function VolunteerManagement() {
                       animate={{ opacity: 1 }}
                       className="hover:bg-red-50/20 transition"
                     >
+                      {/* JeevaLink Employee ID */}
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        {(vol.jeevalink_id || vol.employee_id) ? (
+                          <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
+                            {vol.jeevalink_id || vol.employee_id}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 text-[10px] italic">—</span>
+                        )}
+                      </td>
                       {/* Meghala Badge */}
                       <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 rounded-xl font-bold">

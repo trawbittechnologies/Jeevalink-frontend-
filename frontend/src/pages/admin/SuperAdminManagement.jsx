@@ -346,7 +346,8 @@ export default function SuperAdminManagement() {
       parsed.admin1Name.toLowerCase().includes(term) ||
       parsed.admin2Name.toLowerCase().includes(term) ||
       parsed.admin2Mobile.toLowerCase().includes(term) ||
-      (sa.secondary_contact || '').toLowerCase().includes(term);
+      (sa.secondary_contact || '').toLowerCase().includes(term) ||
+      (sa.jeevalink_id || sa.employee_id || '').toLowerCase().includes(term);
 
     const matchesDistrict = selectedDistrictFilter === 'ALL' || (sa.district || '').toLowerCase() === (selectedDistrictFilter || '').toLowerCase();
     const matchesStatus = statusFilter === 'ALL' || (sa.status || '').toLowerCase() === (statusFilter || '').toLowerCase();
@@ -494,6 +495,7 @@ export default function SuperAdminManagement() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                   <tr>
+                    <th className="py-4 px-6">JL Employee ID</th>
                     <th className="py-4 px-6">District</th>
                     <th className="py-4 px-6">Primary Contact (Admin 1)</th>
                     <th className="py-4 px-6">Secondary Contact (Admin 2)</th>
@@ -508,6 +510,16 @@ export default function SuperAdminManagement() {
 
                     return (
                       <tr key={sa.id} className="hover:bg-red-50/30 transition">
+                        {/* JeevaLink Employee ID */}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          {(sa.jeevalink_id || sa.employee_id) ? (
+                            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
+                              {sa.jeevalink_id || sa.employee_id}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300 text-[10px] italic">—</span>
+                          )}
+                        </td>
                         {/* District Badge */}
                         <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 rounded-xl font-bold">

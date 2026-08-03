@@ -154,7 +154,7 @@ export default function Login() {
 
           {/* Method Toggle */}
           <div className="flex bg-slate-100 rounded-xl p-1 mb-6">
-            {[['mobile', Phone, 'Mobile'], ['email', Mail, 'Email']].map(([val, Icon, label]) => (
+            {[['mobile', Phone, 'Mobile'], ['email', Mail, 'Email / JL-ID']].map(([val, Icon, label]) => (
               <button
                 key={val}
                 onClick={() => { setMethod(val); setCredential(''); }}
@@ -174,14 +174,15 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                {method === 'mobile' ? 'Mobile Number' : 'Email Address'}
+                {method === 'mobile' ? 'Mobile Number' : 'Email or JeevaLink ID'}
               </label>
               <input
-                type={method === 'mobile' ? 'tel' : 'email'}
+                type="text"
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
-                placeholder={method === 'mobile' ? '9876543210' : 'you@example.com'}
+                placeholder={method === 'mobile' ? '9876543210' : 'you@example.com or JL-SA-KSD-0001'}
                 className="input-base"
+                autoComplete={method === 'mobile' ? 'tel' : 'username'}
               />
             </div>
 

@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Edit3, History, QrCode, LogOut, Calendar, Award, Scale, Loader2 } from 'lucide-react';
+import { Edit3, History, QrCode, LogOut, Calendar, Award, Scale, Loader2, Copy, CheckCheck, BadgeCheck } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { getStorageUrl } from '../store/api.js';
 
@@ -18,6 +18,26 @@ export default function Profile() {
   const [tab, setTab] = useState('edit');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [idCopied, setIdCopied] = useState(false);
+
+  const handleCopyEmployeeId = () => {
+    const id = user?.jeevalink_id;
+    if (!id) return;
+    navigator.clipboard.writeText(id).then(() => {
+      setIdCopied(true);
+      setTimeout(() => setIdCopied(false), 2000);
+    }).catch(() => {
+      // Fallback for environments without clipboard API
+      const el = document.createElement('textarea');
+      el.value = id;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setIdCopied(true);
+      setTimeout(() => setIdCopied(false), 2000);
+    });
+  };
 
   const { register, handleSubmit } = useForm({
     defaultValues: {
@@ -275,8 +295,27 @@ export default function Profile() {
               {user?.secondaryContactNumber && ` | ${user.secondaryContactNumber}`}
             </p>
           </div>
-          {user?.jeevalink_id && (
-            <p className="text-sm font-bold text-primary tracking-wide mb-0.5">{user.jeevalink_id}</p>
+          {(user?.jeevalink_id || user?.employee_id) && (
+            <div className="flex items-center gap-2 mt-1 mb-0.5">
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-100 rounded-lg px-2.5 py-1">
+                <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span className="text-xs font-black text-primary tracking-wide font-mono">
+                  {user.jeevalink_id || user.employee_id}
+                </span>
+              </div>
+              <button
+                onClick={handleCopyEmployeeId}
+                title="Copy Employee ID"
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer border"
+                style={idCopied
+                  ? { color: '#059669', background: '#ecfdf5', borderColor: '#a7f3d0' }
+                  : { color: '#64748b', background: '#f8fafc', borderColor: '#e2e8f0' }}
+              >
+                {idCopied
+                  ? <><CheckCheck className="w-3 h-3" /> Copied!</>
+                  : <><Copy className="w-3 h-3" /> Copy</>}
+              </button>
+            </div>
           )}
           <p className="text-sm text-gray-500">{user?.city ? `${user.city}, ${user.district}` : user?.district || 'System Role'}</p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">

@@ -429,6 +429,11 @@ export default function TechnicalAdminDashboard() {
                   </div>
                 </div>
                 <h4 className="font-bold text-slate-900 text-sm truncate">{sa.primaryName || sa.primary_name || sa.name}</h4>
+                {(sa.jeevalink_id || sa.employee_id) && (
+                  <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2 py-0.5 rounded-lg">
+                    {sa.jeevalink_id || sa.employee_id}
+                  </span>
+                )}
                 <div className="text-xs text-slate-600 space-y-0.5 font-medium">
                   <p className="truncate">Email: {sa.email}</p>
                   <p>Mobile: {sa.mobile}</p>
