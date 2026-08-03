@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
-  Users, UserCheck, Activity, BarChart3, TrendingUp, Search, Phone, Mail,
-  Droplets, Flame, Heart, AlertTriangle, Clock, CheckCircle2, Award, ArrowUpRight
+  UserCheck, BarChart3, TrendingUp, Search, Phone,
+  Droplets, Flame, CheckCircle2, Award, ArrowUpRight
 } from 'lucide-react';
 import api from '../../store/api.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
