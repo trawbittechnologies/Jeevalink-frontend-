@@ -99,6 +99,11 @@ export default function SuperAdminManagement() {
   const [sendingMsg, setSendingMsg] = useState(false);
   const [sendResultMsg, setSendResultMsg] = useState(null);
 
+  // Delete Confirmation Modal State
+  const [deletingSA, setDeletingSA] = useState(null);
+  const [submittingDelete, setSubmittingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -294,13 +299,23 @@ export default function SuperAdminManagement() {
     }
   };
 
-  const handleDeleteSuperAdmin = async (id, name, dist) => {
-    if (!window.confirm(`Are you sure you want to delete Super Admin "${name}" (${dist} District)? This action cannot be undone.`)) return;
+  const openDeleteModal = (sa) => {
+    setDeletingSA(sa);
+    setDeleteError(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingSA) return;
+    setSubmittingDelete(true);
+    setDeleteError(null);
     try {
-      await api.delete(`/technical-admin/super-admins/${id}`);
+      await api.delete(`/technical-admin/super-admins/${deletingSA.id}`);
+      setDeletingSA(null);
       loadData();
     } catch (err) {
-      alert("Failed to delete super admin: " + (err.response?.data?.message || err.message));
+      setDeleteError(err.response?.data?.message || err.message || 'Failed to delete super admin.');
+    } finally {
+      setSubmittingDelete(false);
     }
   };
 
@@ -573,7 +588,7 @@ export default function SuperAdminManagement() {
 
                         {/* Delete Button */}
                         <button
-                          onClick={() => handleDeleteSuperAdmin(sa.id, sa.primaryName || sa.primary_name || sa.name, sa.district)}
+                          onClick={() => openDeleteModal(sa)}
                           className="px-2.5 py-1.5 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
                           title="Delete Super Admin"
                         >
@@ -1043,6 +1058,98 @@ export default function SuperAdminManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* POPUP MODAL: DELETE CONFIRMATION */}
+      {deletingSA && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-6 lg:p-8 w-full max-w-md shadow-2xl relative border border-red-100 overflow-hidden">
+            <div className="flex items-center justify-between border-b border-red-50 pb-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 border border-red-200 flex items-center justify-center text-red-600 font-bold shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Confirm Deletion</h3>
+                  <p className="text-xs text-slate-500">Super Admin Account Removal</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDeletingSA(null)}
+                disabled={submittingDelete}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer disabled:opacity-50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {deleteError && (
+              <div className="p-3.5 rounded-2xl text-xs mb-4 bg-red-50 border border-red-200 text-red-800 font-bold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                Are you sure you want to delete the Super Admin account for <strong className="text-slate-900 font-bold">{deletingSA.district || 'Unassigned'} District</strong>?
+              </p>
+
+              {/* Target Details Card */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">District</span>
+                  <span className="font-bold text-red-700 bg-red-50 px-2.5 py-0.5 rounded-lg border border-red-200">
+                    {deletingSA.district || 'N/A'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Primary Admin</span>
+                  <span className="font-semibold text-slate-800">
+                    {parseSuperAdminContacts(deletingSA).admin1Name}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Login Email</span>
+                  <span className="font-mono text-slate-700 text-[11px]">
+                    {deletingSA.email || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-[11px] text-amber-900 font-medium">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Warning:</strong> Deleting this Super Admin will permanently remove login credentials and district management permissions. This action cannot be undone.
+                </span>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeletingSA(null)}
+                  disabled={submittingDelete}
+                  className="flex-1 py-2.5 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 cursor-pointer text-xs disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={submittingDelete}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md shadow-red-600/20 transition cursor-pointer flex items-center justify-center gap-2 text-xs disabled:opacity-50"
+                >
+                  {submittingDelete ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  {submittingDelete ? 'Deleting...' : 'Delete Super Admin'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
