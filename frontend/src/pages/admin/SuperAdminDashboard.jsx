@@ -2,24 +2,28 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
-  Users, UserCheck, Activity, BarChart3, TrendingUp, Search, Phone, Mail
+  Users, UserCheck, Activity, BarChart3, TrendingUp, Search, Phone, Mail,
+  Droplets, Flame, Heart, AlertTriangle, Clock, CheckCircle2, Award, ArrowUpRight
 } from 'lucide-react';
 import api from '../../store/api.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 
+const ALL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
 function parseBlockAdminContacts(ba) {
   let admin1Name = ba.primaryContactName || ba.primary_contact_name || ba.primaryName || ba.primary_name || ba.name || '';
-  let admin2Name = '';
-  if (admin1Name.includes(' & ')) {
+  let admin2Name = ba.secondary_name || ba.secondaryName || ba.secondaryContactName || '';
+  
+  if (!admin2Name && admin1Name.includes(' & ')) {
     const parts = admin1Name.split(' & ');
     admin1Name = parts[0] ? parts[0].trim() : '';
     admin2Name = parts[1] ? parts[1].trim() : '';
   }
 
   let admin1Mobile = ba.mobile || '';
-  let admin2Mobile = '';
+  let admin2Mobile = ba.secondary_phone || ba.secondaryContactNumber || ba.secondary_contact_number || '';
 
-  if (ba.secondaryContactNumber) {
+  if (!admin2Mobile && ba.secondaryContactNumber) {
     const sec = ba.secondaryContactNumber.replace(/^Admin 2:\s*/i, '').trim();
     const parenMatch = sec.match(/^(.*?)\s*\(([^)]+)\)$/);
     if (parenMatch) {
@@ -42,27 +46,30 @@ function parseBlockAdminContacts(ba) {
   return {
     admin1Name: admin1Name || 'N/A',
     admin1Mobile: admin1Mobile || 'N/A',
-    admin2Name,
-    admin2Mobile,
+    admin2Name: admin2Name || '',
+    admin2Mobile: admin2Mobile || '',
   };
 }
 
 export default function SuperAdminDashboard() {
-
   const [districtData, setDistrictData] = useState({
-    district: 'Kozhikode',
+    district: 'Kasaragod',
     total_users: 0,
     total_volunteers: 0,
     total_admins: 0,
-    volunteers: [],
-    admins: [],
-    members: [],
+    total_requests: 0,
+    fulfilled_requests: 0,
+    pending_requests: 0,
+    fulfillment_rate: 100,
+    blood_group_distribution: [],
+    urgency_emergency: 0,
+    urgency_normal: 0,
+    recent_requests: [],
     block_summary: []
   });
 
   const [blockAdmins, setBlockAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [searchQuery, setSearchQuery] = useState('');
 
   // Edit Block Admin Modal state
@@ -83,6 +90,7 @@ export default function SuperAdminDashboard() {
   const [deletingAdminName, setDeletingAdminName] = useState('');
 
   const loadData = useCallback(async () => {
+    setLoading(true);
     try {
       const [resDist, resAdmins] = await Promise.all([
         api.get('/super-admin/metrics'),
@@ -96,13 +104,26 @@ export default function SuperAdminDashboard() {
           total_users: dData.total_users || 0,
           total_volunteers: dData.total_volunteers || 0,
           total_admins: dData.total_block_admins || 0,
-          volunteers: dData.volunteers || [],
-          admins: dData.admins || [],
-          members: dData.members || [],
+          total_requests: dData.total_requests || 0,
+          fulfilled_requests: dData.fulfilled_requests || 0,
+          pending_requests: dData.pending_requests || 0,
+          fulfillment_rate: dData.fulfillment_rate ?? 100,
+          blood_group_distribution: dData.blood_group_distribution || [],
+          urgency_emergency: dData.urgency_emergency || 0,
+          urgency_normal: dData.urgency_normal || 0,
+          recent_requests: dData.recent_requests || [],
           block_summary: dData.block_summary || []
         });
       }
-      if (resAdmins.data?.success) setBlockAdmins(resAdmins.data.data || []);
+
+      if (resAdmins.data?.success) {
+        const raw = resAdmins.data;
+        let list = [];
+        if (Array.isArray(raw)) list = raw;
+        else if (Array.isArray(raw?.data)) list = raw.data;
+        else if (Array.isArray(raw?.data?.data)) list = raw.data.data;
+        setBlockAdmins(list);
+      }
     } catch (err) {
       console.error("Super Admin Load error:", err);
     } finally {
@@ -118,16 +139,14 @@ export default function SuperAdminDashboard() {
     return () => { active = false; };
   }, [loadData]);
 
-
   const handleOpenEdit = (ba) => {
     setEditingAdmin(ba);
-    setEditBlockName(ba.blockCommitteeName || ba.block || ba.blockName || '');
+    setEditBlockName(ba.blockCommitteeName || ba.block || ba.blockName || ba.city || '');
     setEditEmail(ba.email || '');
     setEditPassword('');
     setEditStatus(ba.status || 'Active');
 
     const parsed = parseBlockAdminContacts(ba);
-
     setEditFullName1(parsed.admin1Name === 'N/A' ? '' : parsed.admin1Name);
     setEditMobile1(parsed.admin1Mobile === 'N/A' ? '' : parsed.admin1Mobile);
     setEditFullName2(parsed.admin2Name);
@@ -141,15 +160,6 @@ export default function SuperAdminDashboard() {
     setSubmittingEdit(true);
     setEditMsg(null);
     try {
-      let secondaryContactVal = '';
-      if (editFullName2 && editMobile2) {
-        secondaryContactVal = `Admin 2: ${editFullName2} (${editMobile2})`;
-      } else if (editFullName2) {
-        secondaryContactVal = `Admin 2: ${editFullName2}`;
-      } else if (editMobile2) {
-        secondaryContactVal = `Admin 2: (${editMobile2})`;
-      }
-
       const res = await api.put(`/super-admin/block-admins/${editingAdmin.id}`, {
         blockCommitteeName: editBlockName,
         block_admin_1_name: editFullName1,
@@ -161,7 +171,9 @@ export default function SuperAdminDashboard() {
         email: editEmail,
         password: editPassword || undefined,
         mobile: editMobile1,
-        secondaryContactNumber: secondaryContactVal,
+        secondary_name: editFullName2,
+        secondary_phone: editMobile2,
+        secondaryContactNumber: editMobile2 ? `Admin 2: ${editFullName2} (${editMobile2})` : '',
         status: editStatus
       });
 
@@ -190,213 +202,381 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const availableBlocks = Array.from(new Set([
-    ...(districtData.members || []).map(m => m.blockCommitteeName).filter(Boolean),
-    ...blockAdmins.map(ba => ba.blockCommitteeName).filter(Boolean)
-  ]));
+  // Combine block analytics from backend + local blockAdmins list
+  const availableBlocksMap = new Map();
+
+  (districtData.block_summary || []).forEach(b => {
+    if (b.block) {
+      availableBlocksMap.set(b.block, {
+        block: b.block,
+        users: b.users || 0,
+        volunteers: b.volunteers || 0
+      });
+    }
+  });
+
+  blockAdmins.forEach(ba => {
+    const bName = ba.blockCommitteeName || ba.city || ba.block;
+    if (bName && !availableBlocksMap.has(bName)) {
+      availableBlocksMap.set(bName, {
+        block: bName,
+        users: 0,
+        volunteers: 0
+      });
+    }
+  });
+
+  const realBlockAnalytics = Array.from(availableBlocksMap.values());
+  const maxUsersInBlock = Math.max(1, ...realBlockAnalytics.map(b => b.users));
 
   const filteredBlockAdmins = blockAdmins.filter(ba => {
     const q = searchQuery.toLowerCase();
+    const parsed = parseBlockAdminContacts(ba);
     return (
-      (ba.blockCommitteeName || '').toLowerCase().includes(q) ||
+      (ba.blockCommitteeName || ba.city || ba.block || '').toLowerCase().includes(q) ||
       (ba.primary_name || ba.name || '').toLowerCase().includes(q) ||
+      parsed.admin1Name.toLowerCase().includes(q) ||
+      parsed.admin2Name.toLowerCase().includes(q) ||
       (ba.email || '').toLowerCase().includes(q) ||
       (ba.mobile || '').toLowerCase().includes(q)
     );
   });
 
-  // Real dynamic block analytics computed from actual districtData & blockAdmins
-  const realBlockAnalytics = availableBlocks.map(block => {
-    const blockUsers = (districtData.members || []).filter(m => (m.blockCommitteeName || m.block) === block).length;
-    const blockVolunteers = (districtData.volunteers || []).filter(v => (v.blockCommitteeName || v.block) === block).length;
-    return {
-      block,
-      users: blockUsers,
-      volunteers: blockVolunteers,
-    };
+  // Map real blood group distribution
+  const bgCountMap = new Map();
+  (districtData.blood_group_distribution || []).forEach(item => {
+    if (item.blood_group) {
+      bgCountMap.set(item.blood_group.toUpperCase(), item.count || 0);
+    }
   });
 
-  const maxUsersInBlock = Math.max(1, ...realBlockAnalytics.map(b => b.users));
+  const totalDonorsCount = districtData.total_users || 1;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 select-none">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
       
-      {/* Header Banner with Kasaragod Banner Image (Matching Tech Admin Card Size) */}
-      <div className="relative rounded-3xl p-6 lg:p-8 text-white shadow-xl overflow-hidden border border-slate-200">
+      {/* Header Hero Banner - Kerala Green & Emergency Red Command Portal */}
+      <div className="relative rounded-3xl p-6 lg:p-8 text-white shadow-xl overflow-hidden border border-red-900/30">
         <img
           src="/kasaragod_banner.png"
-          alt="Kasaragod Super Admin Banner"
+          alt="District Blood Command Portal Banner"
           className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-red-950/90 via-black/75 to-red-950/40 pointer-events-none" />
+        
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md shadow-sm">
-              <ShieldCheck className="w-4 h-4 text-emerald-300" /> District Super Admin Command Portal ({districtData.district || 'Kasaragod'})
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/30 border border-red-400/40 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+              <ShieldCheck className="w-4 h-4 text-red-300" />
+              {districtData.district} District Blood Command Center
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-md">
-              Kasaragod District Administration & Analytics
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-md flex items-center gap-3">
+              {districtData.district} District Emergency & Donors
             </h1>
-            <p className="text-slate-100 text-xs sm:text-sm mt-1 max-w-2xl font-medium drop-shadow-sm">
-              Manage Block Committees, Oversee District Operations, and Track Real-Time Analytics
+            <p className="text-red-100/90 text-xs sm:text-sm mt-1 max-w-2xl font-medium drop-shadow-sm">
+              Real-time donor directory, active emergency requests tracker, blood inventory analytics, and Block Committee command.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <Link 
               to="/super-admin/blocks" 
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
+              className="px-4.5 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-red-600/30 transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
             >
               <Building2 className="w-4 h-4" /> Manage Block Committees
             </Link>
             <button 
               onClick={loadData} 
-              className="px-4 py-2.5 bg-white text-slate-900 hover:bg-slate-100 rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
+              className="px-4 py-3 bg-black/40 hover:bg-black/60 border border-white/25 rounded-2xl text-xs font-bold text-white transition flex items-center gap-2 cursor-pointer backdrop-blur-md"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Data
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Live Data
             </button>
           </div>
         </div>
 
-        {/* District Live Stat Bar (Matching Tech Admin Banner Card Height & Grid Layout) */}
+        {/* Live District Stat Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-white/20 relative z-10">
-          {[
-            { label: 'Total Donors', val: districtData.total_users || 0 },
-            { label: 'Volunteers', val: districtData.total_volunteers || 0 },
-            { label: 'Block Admins', val: districtData.total_admins || 0 },
-            { label: 'Active Blocks', val: availableBlocks.length || 0 }
-          ].map((m, idx) => (
-            <div key={idx} className="bg-black/35 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md shadow-xs">
-              <div className="flex items-center justify-between text-[10px] font-bold text-emerald-200 uppercase tracking-wider">
-                <span>{m.label}</span>
-                <span className="text-white/80 font-mono text-[9px]">District DB</span>
-              </div>
-              <p className="text-xl sm:text-2xl font-black text-white mt-0.5 sm:mt-1">{m.val}</p>
-            </div>
-          ))}
+          <div className="bg-black/40 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md">
+            <p className="text-[10px] font-bold text-red-200 uppercase tracking-wider">Registered Donors</p>
+            <p className="text-xl sm:text-2xl font-black text-white mt-0.5">{districtData.total_users}</p>
+          </div>
+          <div className="bg-black/40 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md">
+            <p className="text-[10px] font-bold text-red-200 uppercase tracking-wider">Active Volunteers</p>
+            <p className="text-xl sm:text-2xl font-black text-emerald-300 mt-0.5">{districtData.total_volunteers}</p>
+          </div>
+          <div className="bg-black/40 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md">
+            <p className="text-[10px] font-bold text-red-200 uppercase tracking-wider">Blood Requests</p>
+            <p className="text-xl sm:text-2xl font-black text-amber-300 mt-0.5">{districtData.total_requests}</p>
+          </div>
+          <div className="bg-black/40 border border-white/20 rounded-2xl p-3 sm:p-3.5 backdrop-blur-md">
+            <p className="text-[10px] font-bold text-red-200 uppercase tracking-wider">Fulfilled Requests</p>
+            <p className="text-xl sm:text-2xl font-black text-white mt-0.5">{districtData.fulfilled_requests}</p>
+          </div>
         </div>
       </div>
 
-      {/* District KPI Analytics Cards */}
+      {/* Modern Blood Donor KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* KPI 1: Total Users */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 p-5 rounded-3xl shadow-sm hover:border-red-500/30 transition-all">
+        {/* KPI 1: Donors */}
+        <div className="bg-white border border-red-100 p-5 rounded-3xl shadow-sm hover:shadow-md hover:border-red-300 transition space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total District Donors</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">
-                {districtData.total_users || 0}
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Registered Donors</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1 flex items-baseline gap-2">
+                {districtData.total_users}
+                <span className="text-xs font-bold text-slate-500 font-mono">Donors</span>
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-rose-600 flex items-center justify-center">
-              <Users className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center font-bold">
+              <Droplets className="w-5 h-5 text-red-600 fill-red-100" />
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60 flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-            <span className="text-emerald-600 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> System Verified
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+            <span className="text-emerald-700 font-bold flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-600" /> Verified Donors
             </span>
-            <span>Registered Donors</span>
+            <span>District Database</span>
           </div>
         </div>
 
-        {/* KPI 2: District Volunteers */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 p-5 rounded-3xl shadow-sm hover:border-emerald-500/30 transition-all">
+        {/* KPI 2: Volunteers */}
+        <div className="bg-white border border-emerald-100 p-5 rounded-3xl shadow-sm hover:shadow-md hover:border-emerald-300 transition space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Active Volunteers</p>
-              <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-500 mt-1">
-                {districtData.total_volunteers || 0}
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Volunteers</p>
+              <h3 className="text-2xl font-black text-emerald-700 mt-1 flex items-baseline gap-2">
+                {districtData.total_volunteers}
+                <span className="text-xs font-bold text-emerald-600 font-mono">Coordinators</span>
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-emerald-600 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center">
               <UserCheck className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60 flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-            <span className="text-slate-600 dark:text-zinc-300">Meghala Coordinators</span>
-            <span className="text-emerald-600">Active Duty</span>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+            <span className="text-emerald-700 font-bold">Meghala Squads</span>
+            <span className="text-emerald-600 font-bold">Active Duty</span>
           </div>
         </div>
 
-        {/* KPI 3: Block Committees */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 p-5 rounded-3xl shadow-sm hover:border-amber-500/30 transition-all">
+        {/* KPI 3: Blood Requests */}
+        <div className="bg-white border border-amber-100 p-5 rounded-3xl shadow-sm hover:shadow-md hover:border-amber-300 transition space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Block Committees</p>
-              <h3 className="text-2xl font-black text-amber-600 dark:text-amber-500 mt-1">
-                {blockAdmins.length || districtData.total_admins || 0}
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Emergency Requests</p>
+              <h3 className="text-2xl font-black text-amber-700 mt-1 flex items-baseline gap-2">
+                {districtData.total_requests}
+                <span className="text-xs font-bold text-amber-600 font-mono">({districtData.pending_requests} Active)</span>
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 text-amber-600 flex items-center justify-center">
-              <Building2 className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center">
+              <Flame className="w-5 h-5 text-amber-600 fill-amber-100" />
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60 flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-            <span>District Admin Hubs</span>
-            <span className="text-amber-600">Active Hubs</span>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+            <span className="text-red-600 font-bold flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-600" /> {districtData.urgency_emergency} Urgent
+            </span>
+            <span>Hospital Feed</span>
           </div>
         </div>
 
-        {/* KPI 4: Active Blocks */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 p-5 rounded-3xl shadow-sm hover:border-purple-500/30 transition-all">
+        {/* KPI 4: Fulfillment Rate */}
+        <div className="bg-white border border-purple-100 p-5 rounded-3xl shadow-sm hover:shadow-md hover:border-purple-300 transition space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Active Blocks</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">
-                {availableBlocks.length} <span className="text-xs font-bold text-slate-400">Blocks</span>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fulfillment Rate</p>
+              <h3 className="text-2xl font-black text-purple-700 mt-1 flex items-baseline gap-2">
+                {districtData.fulfillment_rate}%
+                <span className="text-xs font-bold text-slate-500 font-mono">Success</span>
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/40 text-purple-600 flex items-center justify-center">
-              <Activity className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center">
+              <Award className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60 flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-            <span className="text-slate-600 dark:text-zinc-300">Registered Operational Blocks</span>
-            <span className="text-emerald-600">Live</span>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+            <span className="text-purple-700 font-bold flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" /> {districtData.fulfilled_requests} Fulfilled
+            </span>
+            <span>Live Response</span>
           </div>
         </div>
-
       </div>
 
-      {/* District Operations Analytics Breakdown Chart */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 p-6 rounded-3xl shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-zinc-800/60 pb-3">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-extrabold text-slate-900 dark:text-zinc-100">Block Operations & Member Metrics Index</h3>
+      {/* Creative Blood Group Availability Inventory Grid */}
+      <div className="bg-white border border-red-100 rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-red-50 pb-4">
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-red-600 fill-red-100" />
+              District Blood Group Inventory & Availability Matrix
+            </h2>
+            <p className="text-xs text-slate-500">Real-time counts of verified donors across all 8 major blood types in {districtData.district}</p>
           </div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">System Live Data</span>
+          <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full text-xs font-bold">
+            8 Blood Groups Logged
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          {ALL_BLOOD_GROUPS.map((bg) => {
+            const count = bgCountMap.get(bg) || 0;
+            const percentage = Math.min(100, Math.round((count / totalDonorsCount) * 100));
+
+            let statusTag = 'Available';
+            let tagBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            if (count === 0) {
+              statusTag = 'Critical Shortage';
+              tagBg = 'bg-red-50 text-red-700 border-red-200';
+            } else if (count < 3) {
+              statusTag = 'Low Stock';
+              tagBg = 'bg-amber-50 text-amber-700 border-amber-200';
+            }
+
+            return (
+              <div 
+                key={bg} 
+                className="bg-slate-50/80 border border-slate-200/80 hover:border-red-300 hover:bg-red-50/20 rounded-2xl p-3.5 text-center transition space-y-2.5 flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="w-8 h-8 rounded-xl bg-red-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
+                    {bg}
+                  </span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${tagBg}`}>
+                    {statusTag}
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-xl font-black text-slate-900">{count}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Donors</p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-red-600 h-full rounded-full transition-all duration-500" 
+                      style={{ width: `${Math.max(8, percentage)}%` }} 
+                    />
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-400">{percentage}% of district</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Dynamic Activity: Recent Emergency Blood Requests Feed */}
+      <div className="bg-white border border-red-100 rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-red-50 pb-4">
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <Flame className="w-5 h-5 text-red-600 fill-red-100" />
+              Live District Emergency Blood Requests Feed
+            </h2>
+            <p className="text-xs text-slate-500">Active and recent patient requests requiring urgent donor response</p>
+          </div>
+          <Link
+            to="/donor/emergency"
+            className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1"
+          >
+            View All Requests <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {(!districtData.recent_requests || districtData.recent_requests.length === 0) ? (
+          <div className="p-8 text-center text-slate-400 space-y-2 bg-slate-50/50 rounded-2xl border border-slate-100">
+            <Heart className="w-8 h-8 text-red-300 mx-auto" />
+            <p className="text-sm font-bold text-slate-700">No Active Emergency Requests</p>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              All blood requests in {districtData.district} are currently fulfilled or standby. New emergency patient requests will stream live here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {districtData.recent_requests.map((req) => (
+              <div 
+                key={req.id} 
+                className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3 hover:border-red-300 transition"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-9 h-9 rounded-xl bg-red-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
+                      {req.blood_group}
+                    </span>
+                    <div>
+                      <p className="font-bold text-xs text-slate-900 truncate max-w-[140px]">
+                        {req.patient_name || 'Emergency Patient'}
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        {req.units_required || 1} Unit(s) Required
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                    req.urgency_level === 'Emergency' || req.urgency_level === 'Critical'
+                      ? 'bg-red-100 text-red-800 border-red-300'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                  }`}>
+                    {req.urgency_level || 'Urgent'}
+                  </span>
+                </div>
+
+                <div className="space-y-1 text-[11px] text-slate-600 border-t border-slate-200/60 pt-2 font-medium">
+                  <p className="truncate"><strong>Hospital:</strong> {req.hospital_name || 'District General Hospital'}</p>
+                  <p className="flex items-center gap-1 text-slate-400 text-[10px]">
+                    <Clock className="w-3 h-3 text-slate-400" />
+                    <span>{req.created_at ? new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently'}</span>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Block Operations Analytics Breakdown Card */}
+      <div className="bg-white border border-red-100 rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-red-50 pb-3">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-red-600" />
+            <h3 className="text-sm font-extrabold text-slate-900">Block Operations & Donor Density Index</h3>
+          </div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live District Analytics</span>
         </div>
 
         {realBlockAnalytics.length === 0 ? (
-          <div className="p-6 text-center text-slate-400 dark:text-zinc-500 text-xs font-semibold">
+          <div className="p-6 text-center text-slate-400 text-xs font-semibold">
             No registered block operations found. Navigate to Manage Block Committees to register new blocks.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
             {realBlockAnalytics.map((ba) => (
-              <div key={ba.block} className="bg-slate-50 dark:bg-zinc-950 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/60 space-y-2">
+              <div key={ba.block} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900 dark:text-zinc-100 truncate max-w-[110px]">{ba.block}</span>
-                  <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[9px] font-black rounded-full border border-emerald-200 dark:border-emerald-900/40">
+                  <span className="text-xs font-black text-slate-900 truncate max-w-[120px]">{ba.block}</span>
+                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-full border border-emerald-200">
                     Active
                   </span>
                 </div>
                 
                 <div className="space-y-1 pt-1">
-                  <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                  <div className="flex justify-between text-[10px] font-bold text-slate-500">
                     <span>Registered Donors</span>
-                    <span className="text-slate-900 dark:text-zinc-100 font-extrabold">{ba.users}</span>
+                    <span className="text-slate-900 font-extrabold">{ba.users}</span>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div style={{ width: `${Math.max(5, (ba.users / maxUsersInBlock) * 100)}%` }} className="h-full bg-primary rounded-full" />
+                  <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div style={{ width: `${Math.max(8, (ba.users / maxUsersInBlock) * 100)}%` }} className="h-full bg-red-600 rounded-full" />
                   </div>
                 </div>
 
                 <div className="flex justify-between text-[10px] font-semibold text-slate-400 pt-1">
-                  <span>Volunteers: <strong className="text-slate-800 dark:text-zinc-200">{ba.volunteers}</strong></span>
+                  <span>Volunteers: <strong className="text-slate-800">{ba.volunteers}</strong></span>
                   <span className="text-emerald-600 font-bold">Operational</span>
                 </div>
               </div>
@@ -409,7 +589,8 @@ export default function SuperAdminDashboard() {
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-zinc-100">
+            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-red-600" />
               Registered Block Committees ({filteredBlockAdmins.length})
             </h3>
             <p className="text-xs text-slate-400">Overview of active district block committees. Click "Manage Block Committees" above to add or edit.</p>
@@ -422,8 +603,8 @@ export default function SuperAdminDashboard() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by block, name..."
-                className="w-full px-3.5 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs text-slate-900 dark:text-zinc-100 pr-8"
+                placeholder="Search by block, admin name..."
+                className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 pr-8 focus:outline-none focus:border-red-500"
               />
               <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             </div>
@@ -437,115 +618,116 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
 
-          {filteredBlockAdmins.length === 0 ? (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-8 text-center text-slate-400 shadow-sm text-xs">
-              <Building2 className="w-8 h-8 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
-              No Block Committees found matching your search.
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-zinc-800/80 shadow-xs">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-200/80 dark:border-zinc-800/80 text-slate-500 dark:text-zinc-400 font-extrabold uppercase tracking-wider text-[11px]">
-                    <th className="py-3.5 px-4">Block Committee</th>
-                    <th className="py-3.5 px-4">Primary Contact (Admin 1)</th>
-                    <th className="py-3.5 px-4">Secondary Contact (Admin 2)</th>
-                    <th className="py-3.5 px-4">Email</th>
-                    <th className="py-3.5 px-4 text-center">Status</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60 bg-white dark:bg-zinc-900">
-                  {filteredBlockAdmins.map((ba) => {
-                    const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = parseBlockAdminContacts(ba);
+        {filteredBlockAdmins.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center text-slate-400 shadow-sm text-xs space-y-2">
+            <Building2 className="w-8 h-8 mx-auto text-slate-300" />
+            <p className="font-bold text-slate-700">No Block Committees Found</p>
+            <p className="text-slate-400 text-xs">No block committee matches your search query.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-3xl border border-red-100 shadow-sm bg-white">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-extrabold uppercase tracking-wider text-[11px]">
+                  <th className="py-3.5 px-4">Block Committee</th>
+                  <th className="py-3.5 px-4">Primary Contact (Admin 1)</th>
+                  <th className="py-3.5 px-4">Secondary Contact (Admin 2)</th>
+                  <th className="py-3.5 px-4">Email ID</th>
+                  <th className="py-3.5 px-4 text-center">Status</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {filteredBlockAdmins.map((ba) => {
+                  const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = parseBlockAdminContacts(ba);
 
-                    return (
-                      <tr key={ba.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-850/50 transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-zinc-100 whitespace-nowrap">
-                          <div className="flex items-center gap-2.5">
-                            <span className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100 dark:border-red-900/40">
-                              <Building2 className="w-4 h-4" />
-                            </span>
-                            <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{ba.blockCommitteeName || 'N/A'}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <div className="font-bold text-slate-900 dark:text-zinc-100">{admin1Name}</div>
-                          <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
-                            <Phone className="w-3 h-3 text-slate-400" />
-                            <span>{admin1Mobile}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          {admin2Name || admin2Mobile ? (
-                            <>
-                              <div className="font-bold text-slate-900 dark:text-zinc-100">{admin2Name || 'Admin 2'}</div>
-                              {admin2Mobile && (
-                                <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
-                                  <Phone className="w-3 h-3 text-slate-400" />
-                                  <span>{admin2Mobile}</span>
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <span className="text-slate-400 dark:text-zinc-600 italic">Not set</span>
-                          )}
-                        </td>
-
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300 font-mono text-xs">
-                            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>{ba.email}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                            ba.status === 'Active' 
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400' 
-                              : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                            {ba.status}
+                  return (
+                    <tr key={ba.id} className="hover:bg-red-50/20 transition-colors">
+                      <td className="py-3.5 px-4 font-bold text-slate-900 whitespace-nowrap">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100">
+                            <Building2 className="w-4 h-4" />
                           </span>
-                        </td>
+                          <span className="font-extrabold text-sm text-slate-900">{ba.blockCommitteeName || ba.city || ba.block || 'N/A'}</span>
+                        </div>
+                      </td>
 
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
-                            <button 
-                              onClick={() => handleOpenEdit(ba)} 
-                              className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
-                              title="Edit Block Committee"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" /> Edit
-                            </button>
-                            <button 
-                              onClick={() => {
-                                setDeletingAdminId(ba.id);
-                                setDeletingAdminName(ba.primary_name || ba.name);
-                              }} 
-                              className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
-                              title="Delete Block Committee"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" /> Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="font-bold text-slate-900">{admin1Name}</div>
+                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                          <Phone className="w-3 h-3 text-slate-400" />
+                          <span>{admin1Mobile}</span>
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {admin2Name || admin2Mobile ? (
+                          <>
+                            <div className="font-bold text-slate-900">{admin2Name || 'Admin 2'}</div>
+                            {admin2Mobile && (
+                              <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                <Phone className="w-3 h-3 text-slate-400" />
+                                <span>{admin2Mobile}</span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-slate-400 italic">Not set</span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 text-slate-700 font-mono text-xs">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{ba.email}</span>
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                          ba.status === 'Active' 
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+                            : 'bg-red-50 border-red-200 text-red-700'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                          {ba.status || 'Active'}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-2">
+                          <button 
+                            onClick={() => handleOpenEdit(ba)} 
+                            className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-red-600 bg-slate-50 hover:bg-red-50 border border-slate-200 hover:border-red-200 rounded-xl transition cursor-pointer flex items-center gap-1"
+                            title="Edit Block Committee"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" /> Edit
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setDeletingAdminId(ba.id);
+                              setDeletingAdminName(ba.primary_name || ba.name);
+                            }} 
+                            className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition cursor-pointer flex items-center gap-1"
+                            title="Delete Block Committee"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Edit Block Admin Modal */}
       {editingAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm select-none animate-fade-in">
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl w-full max-w-lg shadow-xl overflow-hidden border border-slate-100 dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs select-none animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-red-100 max-h-[90vh] overflow-y-auto">
             {/* Modal Header Red Banner */}
             <div className="bg-red-600 p-6 relative overflow-hidden">
               <div className="relative z-10 flex items-center justify-between">
@@ -586,7 +768,7 @@ export default function SuperAdminDashboard() {
                       onChange={(e) => setEditBlockName(e.target.value)} 
                       required 
                       placeholder="e.g. Kozhikode North"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
                     />
                     <Building2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
@@ -601,7 +783,7 @@ export default function SuperAdminDashboard() {
                       onChange={(e) => setEditFullName1(e.target.value)} 
                       required 
                       placeholder="e.g. Rahul V"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
                     />
                   </div>
 
@@ -614,7 +796,7 @@ export default function SuperAdminDashboard() {
                         onChange={(e) => setEditMobile1(e.target.value)} 
                         required 
                         placeholder="9876543210"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
                       />
                       <Phone className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -623,25 +805,27 @@ export default function SuperAdminDashboard() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Contact Name</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Contact Name *</label>
                     <input 
                       type="text" 
                       value={editFullName2} 
                       onChange={(e) => setEditFullName2(e.target.value)} 
+                      required
                       placeholder="e.g. Anjali M"
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Phone Number</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Secondary Phone Number *</label>
                     <div className="relative">
                       <input 
                         type="tel" 
                         value={editMobile2} 
                         onChange={(e) => setEditMobile2(e.target.value)} 
+                        required
                         placeholder="9876543210"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
                       />
                       <Phone className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -658,7 +842,7 @@ export default function SuperAdminDashboard() {
                         onChange={(e) => setEditEmail(e.target.value)} 
                         required 
                         placeholder="kozhikode.north@jeevalink.org"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold" 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
                       />
                       <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
@@ -669,7 +853,7 @@ export default function SuperAdminDashboard() {
                     <select 
                       value={editStatus} 
                       onChange={(e) => setEditStatus(e.target.value)} 
-                      className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl px-3.5 py-2.5 text-slate-900 dark:text-zinc-100 font-bold cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-900 font-bold cursor-pointer focus:outline-none focus:border-red-500"
                     >
                       <option value="Active">🟢 Active</option>
                       <option value="Suspended">🔴 Suspended</option>
@@ -677,18 +861,18 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-zinc-800/60 mt-4">
+                <div className="flex gap-3 pt-4 border-t border-slate-100 mt-4">
                   <button 
                     type="button" 
                     onClick={() => setEditingAdmin(null)} 
-                    className="flex-1 py-3 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-2xl text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 cursor-pointer"
+                    className="flex-1 py-3 border border-slate-200 text-slate-700 font-bold rounded-2xl text-xs hover:bg-slate-50 cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     disabled={submittingEdit} 
-                    className="flex-1 py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-2xl text-xs shadow-md cursor-pointer disabled:opacity-50"
+                    className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-xs shadow-md cursor-pointer disabled:opacity-50"
                   >
                     {submittingEdit ? 'Saving...' : 'Save Changes'}
                   </button>
