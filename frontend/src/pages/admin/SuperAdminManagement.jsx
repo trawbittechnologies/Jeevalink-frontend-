@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   ShieldAlert, Plus, Key, RefreshCw, Edit, Trash2, Search,
   Building2, UserCheck, Mail, Phone, Copy, Check, AlertCircle,
-  UserPlus, X, Send, AlertTriangle, BellRing, Power, CheckCircle2
+  UserPlus, X, Send, AlertTriangle, BellRing, Power, CheckCircle2,
+  Eye, EyeOff
 } from 'lucide-react';
 import api from '../../store/api.js';
 
@@ -79,6 +80,7 @@ export default function SuperAdminManagement() {
   const [email, setEmail] = useState('');
   const [submittingCreate, setSubmittingCreate] = useState(false);
   const [createdResult, setCreatedResult] = useState(null);
+  const [showCreatedPassword, setShowCreatedPassword] = useState(false);
 
   // Edit Super Admin Modal State
   const [editingSA, setEditingSA] = useState(null);
@@ -135,6 +137,7 @@ export default function SuperAdminManagement() {
 
   const openAddModal = () => {
     setCreatedResult(null);
+    setShowCreatedPassword(false);
     setDistrict('Kozhikode');
     setCustomDistrict('');
     setFullName1('');
@@ -752,15 +755,28 @@ export default function SuperAdminManagement() {
                         <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Generated Credentials</p>
                         <p><strong>Login Email:</strong> {createdResult.email}</p>
                         <div className="flex items-center justify-between font-mono bg-emerald-50 px-3 py-2 rounded-xl text-emerald-950 font-bold text-sm border border-emerald-200">
-                          <span>Password: {createdResult.password}</span>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(createdResult.password, 'modal_pw')}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"
-                          >
-                            {copiedId === 'modal_pw' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                            {copiedId === 'modal_pw' ? 'Copied!' : 'Copy'}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <span>Password:</span>
+                            <span className="font-mono tracking-wider">{showCreatedPassword ? createdResult.password : '••••••••••••'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setShowCreatedPassword(prev => !prev)}
+                              className="p-1 text-emerald-800 hover:text-emerald-950 hover:bg-emerald-100 rounded-lg transition cursor-pointer"
+                              title={showCreatedPassword ? "Hide password" : "Show password"}
+                            >
+                              {showCreatedPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(createdResult.password, 'modal_pw')}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                            >
+                              {copiedId === 'modal_pw' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copiedId === 'modal_pw' ? 'Copied!' : 'Copy'}
+                            </button>
+                          </div>
                         </div>
                         <p className="text-[10px] text-slate-500 italic">
                           {createdResult.mailSent
