@@ -1,23 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
 
-const DURATION = 3400;
-
-const QUOTES = [
-  "“Every drop counts, every donor is a hero.”",
-  "“Connecting hearts, saving lives across Kerala.”",
-  "“Be the reason for someone's heartbeat today.”",
-  "“Your blood donation can save up to 3 lives.”"
-];
+const DURATION = 3000;
 
 export default function Splash({ onComplete }) {
   const { token } = useAuthStore();
   const timerRef = useRef(null);
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
-  const [quoteIndex, setQuoteIndex] = useState(0);
 
   // Smooth real-time progress calculation
   useEffect(() => {
@@ -30,14 +22,6 @@ export default function Splash({ onComplete }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
-
-  // Cycle through quotes smoothly
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
-    }, 1500);
-    return () => clearInterval(interval);
   }, []);
 
   // Navigate on timer completion
@@ -53,117 +37,75 @@ export default function Splash({ onComplete }) {
   }, [navigate, token, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-gradient-to-b from-slate-50 via-white to-red-50/20 select-none overflow-hidden py-10 px-4">
-      {/* Soft ambient background backlight */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-red-500/5 blur-3xl pointer-events-none" />
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white text-slate-900 select-none overflow-hidden py-12 px-6">
+      {/* Top spacer */}
+      <div className="w-full" />
 
-      <div className="w-full h-4" />
-
-      {/* Center content: Logo, Animated "JeevaLink", Quotes & Progress */}
-      <div className="flex flex-col items-center gap-7 relative z-10 my-auto max-w-sm w-full">
-        {/* Minimal Animated Logo */}
+      {/* Main Content: Clean, Human, Handcrafted & Minimal */}
+      <div className="flex flex-col items-center gap-8 text-center my-auto max-w-sm w-full">
+        {/* Logo Container */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="relative flex items-center justify-center"
         >
-          {/* Subtle Ambient Pulse Glow */}
-          <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.25, 0.05, 0.25] }}
-            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            className="absolute w-44 h-44 rounded-full bg-red-500/10 blur-xl pointer-events-none"
-          />
-
           <img
             src="/logo.png"
-            alt="JeevaLink Logo"
-            className="w-32 h-36 object-contain drop-shadow-xl filter transition-transform duration-500 hover:scale-105"
+            alt="JeevaLink"
+            className="w-28 h-32 sm:w-32 sm:h-36 object-contain drop-shadow-md"
           />
         </motion.div>
 
-        {/* Animated Brand Name "JeevaLink" */}
+        {/* Brand Title & Human Copy */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex flex-col items-center gap-2 text-center"
+          transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
+          className="flex flex-col items-center gap-2"
         >
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 flex items-center justify-center gap-0.5">
-            <span className="text-slate-900">Jeeva</span>
-            <motion.span
-              animate={{ opacity: [0.85, 1, 0.85] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 bg-clip-text text-transparent"
-            >
-              Link
-            </motion.span>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            Jeeva<span className="text-red-600">Link</span>
           </h1>
-
-          {/* Animated Quotes Carousel */}
-          <div className="h-10 flex items-center justify-center px-4">
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={quoteIndex}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.4 }}
-                className="text-xs font-semibold text-slate-500 italic text-center tracking-wide line-clamp-1 max-w-xs"
-              >
-                {QUOTES[quoteIndex]}
-              </motion.p>
-            </AnimatePresence>
-          </div>
+          <p className="text-sm font-normal text-slate-500 max-w-[260px] leading-relaxed">
+            Connecting voluntary blood donors with patients across Kerala.
+          </p>
         </motion.div>
 
-        {/* Minimal Line Progress Bar */}
+        {/* Humanized Minimal Progress Line */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-          className="w-48 flex flex-col items-center gap-2"
+          transition={{ delay: 0.25, duration: 0.5 }}
+          className="w-40 flex flex-col items-center gap-2 mt-2"
         >
-          <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden border border-slate-200/50">
+          <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-red-600 to-rose-500 transition-all duration-75 ease-out shadow-sm"
+              className="h-full bg-red-600 rounded-full transition-all duration-100 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-            {Math.round(progress)}%
+          <span className="text-[11px] font-medium text-slate-400">
+            Loading...
           </span>
         </motion.div>
       </div>
 
-      {/* Credits Branding Section */}
+      {/* Humanized Clean Credits Footer */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
-        className="relative z-10 mt-auto"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.35, duration: 0.5 }}
+        className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center text-xs text-slate-500 pt-4 border-t border-slate-100 sm:border-0 w-full sm:w-auto"
       >
-        <div className="bg-white/80 backdrop-blur-md border border-slate-200/90 shadow-md shadow-slate-200/40 px-6 sm:px-8 py-3 rounded-full flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-              Powered by
-            </span>
-            <span className="text-sm font-extrabold text-slate-900 tracking-tight">
-              Trawbit Technologies
-            </span>
-          </div>
-
-          <div className="hidden sm:block h-4 w-[1.5px] bg-slate-300/80 rounded-full" />
-          <div className="sm:hidden w-12 h-[1.5px] bg-slate-200 rounded-full" />
-
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-              Co-powered by
-            </span>
-            <span className="text-sm font-extrabold text-red-600 tracking-tight">
-              DYFI Kasaragod
-            </span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <span className="font-normal text-slate-400 text-xs">Powered by</span>
+          <span className="font-bold text-slate-800 text-sm">Trawbit Technologies</span>
+        </div>
+        <span className="hidden sm:inline text-slate-300">•</span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-normal text-slate-400 text-xs">Co-powered by</span>
+          <span className="font-bold text-red-600 text-sm">DYFI Kasaragod</span>
         </div>
       </motion.div>
     </div>
