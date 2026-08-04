@@ -46,33 +46,38 @@ export async function queryJeevaLinkAI(userQuery, history = []) {
   } catch (error) {
     console.error('[AI Frontend Service] Request failed:', error);
 
-    if (error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.includes('timeout'))) {
+    if (error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.toLowerCase().includes('timeout'))) {
       throw new Error('Gemini API request timed out after 15 seconds. Please try again.');
     }
 
     const data = error.response?.data;
     let backendErr = null;
 
-    if (typeof data === 'string' && data.trim()) {
-      backendErr = data.trim();
-    } else if (data && typeof data === 'object') {
-      backendErr = data.error || data.message;
-      if (typeof backendErr === 'object') {
-        try {
-          backendErr = JSON.stringify(backendErr);
-        } catch {
-          backendErr = null;
+    if (data) {
+      if (typeof data === 'object') {
+        backendErr = data.error || data.message;
+        if (typeof backendErr === 'object') {
+          try {
+            backendErr = JSON.stringify(backendErr);
+          } catch {
+            backendErr = null;
+          }
+        }
+      } else if (typeof data === 'string') {
+        const stripped = data.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (stripped && !stripped.toLowerCase().startsWith('<!doctype')) {
+          backendErr = stripped.length > 200 ? stripped.substring(0, 200) + '...' : stripped;
         }
       }
     }
 
-    if (!backendErr && typeof error.message === 'string') {
-      backendErr = error.message;
+    if (!backendErr && typeof error.message === 'string' && error.message.trim()) {
+      backendErr = error.message.trim();
     }
 
-    const finalMessage = (typeof backendErr === 'string' && backendErr.trim())
+    const finalMessage = (typeof backendErr === 'string' && backendErr)
       ? backendErr
-      : 'Failed to connect to AI companion.';
+      : 'Failed to connect to AI companion. Please ensure backend server is online.';
 
     throw new Error(finalMessage);
   }
