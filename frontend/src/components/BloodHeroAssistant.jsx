@@ -65,7 +65,7 @@ export default function BloodHeroAssistant() {
         onClose={() => setIsCommunityModalOpen(false)}
       />
 
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9990] flex flex-col items-end pointer-events-none select-none">
+      <div className="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 z-[9990] flex flex-col items-end pointer-events-none select-none">
         <AnimatePresence>
           {/* Expanded Assistant Chatbox Dialog */}
           {isOpen && (
@@ -74,13 +74,13 @@ export default function BloodHeroAssistant() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.85, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="pointer-events-auto mb-4 w-80 sm:w-96 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-2xl shadow-slate-900/15 overflow-hidden flex flex-col h-[500px]"
+              className="pointer-events-auto mb-4 w-80 sm:w-96 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-2xl shadow-slate-900/15 overflow-hidden flex flex-col h-[520px]"
             >
               {/* Card Header */}
               <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                   {/* Cutout Mascot Avatar */}
-                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                  <div className="w-14 h-14 flex items-center justify-center shrink-0">
                     <MascotVideo className="w-full h-full object-contain mix-blend-multiply drop-shadow-md" />
                   </div>
                   <div>
@@ -104,7 +104,7 @@ export default function BloodHeroAssistant() {
               <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs">
                 {/* Cutout Character Mascot Avatar Box */}
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-red-50/80 border border-red-100/90 shadow-sm">
-                  <div className="w-16 h-16 flex items-center justify-center shrink-0">
+                  <div className="w-20 h-20 flex items-center justify-center shrink-0">
                     <MascotVideo className="w-full h-full object-contain mix-blend-multiply drop-shadow-md" />
                   </div>
                   <div className="flex-1 space-y-1">
@@ -199,7 +199,7 @@ export default function BloodHeroAssistant() {
           )}
         </AnimatePresence>
 
-        {/* Cutout Floating Mascot Trigger (Enlarged Size, No Box/Circle BG) */}
+        {/* Significantly Enlarged Cutout Floating Mascot Trigger */}
         <div className="relative pointer-events-auto flex items-center gap-3">
           {/* Greeting Speech Tooltip */}
           <AnimatePresence>
@@ -222,7 +222,7 @@ export default function BloodHeroAssistant() {
             )}
           </AnimatePresence>
 
-          {/* Large Cutout Mascot Button (No Background Box) */}
+          {/* Extra Large Cutout Mascot Button */}
           <motion.button
             type="button"
             onClick={() => {
@@ -231,9 +231,9 @@ export default function BloodHeroAssistant() {
             }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.92 }}
-            className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-2xl"
+            className="relative w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-2xl"
           >
-            <MascotVideo className="w-full h-full object-contain mix-blend-multiply filter drop-shadow(0 14px 24px rgba(220,38,38,0.4))" />
+            <MascotVideo className="w-full h-full object-contain mix-blend-multiply filter drop-shadow(0 16px 32px rgba(220,38,38,0.45))" />
           </motion.button>
         </div>
       </div>
