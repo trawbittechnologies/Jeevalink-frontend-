@@ -222,7 +222,7 @@ export default function BloodHeroAssistant() {
             )}
           </AnimatePresence>
 
-          {/* Compact Sleek Mascot Button */}
+          {/* Cutout Transparent Mascot Button */}
           <motion.button
             type="button"
             onClick={() => {
@@ -231,13 +231,11 @@ export default function BloodHeroAssistant() {
             }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.94 }}
-            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-red-600 via-rose-600 to-red-700 p-1 shadow-2xl shadow-red-600/30 ring-4 ring-white/80 hover:shadow-red-600/50 transition-all flex items-center justify-center cursor-pointer group"
+            className="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
           >
-            <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center relative">
-              <MascotVideo className="w-full h-full object-cover" />
-            </div>
+            <MascotVideo className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))" />
             {/* Status Online Indicator */}
-            <span className="absolute top-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white ring-2 ring-emerald-400/40 animate-pulse" />
+            <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white ring-2 ring-emerald-400/40 animate-pulse" />
           </motion.button>
         </div>
       </div>
