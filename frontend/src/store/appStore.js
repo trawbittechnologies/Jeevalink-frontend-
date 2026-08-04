@@ -9,14 +9,25 @@ export const useAppStore = create((set, get) => ({
   allUsers: [],
   complaints: [],
   partners: [],
-  awarenessSettings: {
-    videoUrl: '',
-    posterUrl: '',
-    badgeText: 'Lifesaving Dialogue',
-    quoteTitle: '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
-    quoteDescription: 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
-    buttonLabel: 'Join Our Community'
-  },
+  awarenessSettings: (() => {
+    const defaults = {
+      videoUrl: '',
+      posterUrl: '',
+      badgeText: 'Lifesaving Dialogue',
+      quoteTitle: '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
+      quoteDescription: 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
+      buttonLabel: 'Join Our Community'
+    };
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('jeevalink_awareness_settings') : null;
+      if (saved) {
+        return { ...defaults, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      // ignore
+    }
+    return defaults;
+  })(),
   activeView: 'Splash',
   searchRadius: 15,
   selectedBloodGroup: 'B+',
@@ -796,19 +807,35 @@ export const useAppStore = create((set, get) => ({
       const res = await api.get('/awareness-settings');
       if (res.data?.success && res.data?.data) {
         const d = res.data.data;
-        set({
-          awarenessSettings: {
-            videoUrl: d.videoUrl || d.video_url || '',
-            posterUrl: d.posterUrl || d.poster_url || '',
-            badgeText: d.badgeText || d.badge_text || 'Lifesaving Dialogue',
-            quoteTitle: d.quoteTitle || d.quote_title || '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
-            quoteDescription: d.quoteDescription || d.quote_description || 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
-            buttonLabel: d.buttonLabel || d.button_label || 'Join Our Community'
-          }
-        });
+        const fetched = {
+          videoUrl: d.videoUrl || d.video_url || '',
+          posterUrl: d.posterUrl || d.poster_url || '',
+          badgeText: d.badgeText || d.badge_text || 'Lifesaving Dialogue',
+          quoteTitle: d.quoteTitle || d.quote_title || '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
+          quoteDescription: d.quoteDescription || d.quote_description || 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
+          buttonLabel: d.buttonLabel || d.button_label || 'Join Our Community'
+        };
+        set({ awarenessSettings: fetched });
+        try {
+          localStorage.setItem('jeevalink_awareness_settings', JSON.stringify(fetched));
+        } catch (e) {
+          // ignore
+        }
+        return;
       }
     } catch (err) {
-      console.error('Failed to fetch awareness settings', err);
+      // Fallback: If 404 or backend error, use cached settings from localStorage if available
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('jeevalink_awareness_settings') : null;
+      if (saved) {
+        try {
+          const cached = JSON.parse(saved);
+          if (cached && typeof cached === 'object') {
+            set((state) => ({ awarenessSettings: { ...state.awarenessSettings, ...cached } }));
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
     }
   },
 
@@ -817,22 +844,85 @@ export const useAppStore = create((set, get) => ({
       const res = await api.post('/technical-admin/awareness-settings', payloadOrFormData);
       if (res.data?.success) {
         const d = res.data.data;
-        set((state) => ({
-          awarenessSettings: {
-            ...state.awarenessSettings,
-            videoUrl: d.videoUrl || d.video_url || state.awarenessSettings.videoUrl,
-            posterUrl: d.posterUrl || d.poster_url || state.awarenessSettings.posterUrl,
-            badgeText: d.badgeText || d.badge_text || state.awarenessSettings.badgeText,
-            quoteTitle: d.quoteTitle || d.quote_title || state.awarenessSettings.quoteTitle,
-            quoteDescription: d.quoteDescription || d.quote_description || state.awarenessSettings.quoteDescription,
-            buttonLabel: d.buttonLabel || d.button_label || state.awarenessSettings.buttonLabel
-          }
-        }));
+        const updated = {
+          ...get().awarenessSettings,
+          videoUrl: d.videoUrl || d.video_url || get().awarenessSettings.videoUrl,
+          posterUrl: d.posterUrl || d.poster_url || get().awarenessSettings.posterUrl,
+          badgeText: d.badgeText || d.badge_text || get().awarenessSettings.badgeText,
+          quoteTitle: d.quoteTitle || d.quote_title || get().awarenessSettings.quoteTitle,
+          quoteDescription: d.quoteDescription || d.quote_description || get().awarenessSettings.quoteDescription,
+          buttonLabel: d.buttonLabel || d.button_label || get().awarenessSettings.buttonLabel
+        };
+        set({ awarenessSettings: updated });
+        try {
+          localStorage.setItem('jeevalink_awareness_settings', JSON.stringify(updated));
+        } catch (e) {
+          // ignore
+        }
         get().triggerToast(res.data.message || 'Awareness settings updated successfully!', 'success');
-        return { success: true, data: d };
+        return { success: true, data: updated };
       }
       return { success: false };
     } catch (err) {
+      // Fallback: If backend returns 404 (endpoint pending deployment on production server), handle update locally in browser
+      if (err.response?.status === 404) {
+        const current = get().awarenessSettings;
+        let newSettings = { ...current };
+
+        const readFileAsDataUrl = (file) => new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target?.result || '');
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(file);
+        });
+
+        if (typeof FormData !== 'undefined' && payloadOrFormData instanceof FormData) {
+          const badgeText = payloadOrFormData.get('badge_text');
+          const quoteTitle = payloadOrFormData.get('quote_title');
+          const quoteDescription = payloadOrFormData.get('quote_description');
+          const buttonLabel = payloadOrFormData.get('button_label');
+          const videoUrl = payloadOrFormData.get('video_url');
+          const posterUrl = payloadOrFormData.get('poster_url');
+          const videoFile = payloadOrFormData.get('video_file');
+          const posterFile = payloadOrFormData.get('poster_file');
+
+          if (badgeText !== null) newSettings.badgeText = badgeText;
+          if (quoteTitle !== null) newSettings.quoteTitle = quoteTitle;
+          if (quoteDescription !== null) newSettings.quoteDescription = quoteDescription;
+          if (buttonLabel !== null) newSettings.buttonLabel = buttonLabel;
+          if (videoUrl !== null && videoUrl !== '') newSettings.videoUrl = videoUrl;
+          if (posterUrl !== null && posterUrl !== '') newSettings.posterUrl = posterUrl;
+
+          if (videoFile && videoFile instanceof File) {
+            const dataUrl = await readFileAsDataUrl(videoFile);
+            if (dataUrl) newSettings.videoUrl = dataUrl;
+          }
+          if (posterFile && posterFile instanceof File) {
+            const dataUrl = await readFileAsDataUrl(posterFile);
+            if (dataUrl) newSettings.posterUrl = dataUrl;
+          }
+        } else if (payloadOrFormData && typeof payloadOrFormData === 'object') {
+          newSettings = {
+            ...newSettings,
+            badgeText: payloadOrFormData.badgeText ?? payloadOrFormData.badge_text ?? newSettings.badgeText,
+            quoteTitle: payloadOrFormData.quoteTitle ?? payloadOrFormData.quote_title ?? newSettings.quoteTitle,
+            quoteDescription: payloadOrFormData.quoteDescription ?? payloadOrFormData.quote_description ?? newSettings.quoteDescription,
+            buttonLabel: payloadOrFormData.buttonLabel ?? payloadOrFormData.button_label ?? newSettings.buttonLabel,
+            videoUrl: payloadOrFormData.videoUrl ?? payloadOrFormData.video_url ?? newSettings.videoUrl,
+            posterUrl: payloadOrFormData.posterUrl ?? payloadOrFormData.poster_url ?? newSettings.posterUrl
+          };
+        }
+
+        set({ awarenessSettings: newSettings });
+        try {
+          localStorage.setItem('jeevalink_awareness_settings', JSON.stringify(newSettings));
+        } catch (e) {
+          console.error('Failed to cache settings in localStorage:', e);
+        }
+        get().triggerToast('Awareness settings saved locally (backend pending deployment)', 'success');
+        return { success: true, data: newSettings, fallback: true };
+      }
+
       const errMsg = err.response?.data?.message || 'Failed to update awareness settings.';
       get().triggerToast(errMsg, 'error');
       return { success: false, error: errMsg };

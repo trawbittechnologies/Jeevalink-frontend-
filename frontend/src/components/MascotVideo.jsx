@@ -15,7 +15,9 @@ export default function MascotVideo({
       const playPromise = el.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn("Mascot video autoplay fallback:", err);
+          if (err.name !== 'AbortError') {
+            console.warn("Mascot video autoplay fallback:", err);
+          }
         });
       }
     }
