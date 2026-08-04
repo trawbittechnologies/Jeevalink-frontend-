@@ -9,6 +9,14 @@ export const useAppStore = create((set, get) => ({
   allUsers: [],
   complaints: [],
   partners: [],
+  awarenessSettings: {
+    videoUrl: '',
+    posterUrl: '',
+    badgeText: 'Lifesaving Dialogue',
+    quoteTitle: '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
+    quoteDescription: 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
+    buttonLabel: 'Join Our Community'
+  },
   activeView: 'Splash',
   searchRadius: 15,
   selectedBloodGroup: 'B+',
@@ -780,6 +788,54 @@ export const useAppStore = create((set, get) => ({
       }
     } catch (err) {
       console.error('Failed to fetch partners', err);
+    }
+  },
+
+  fetchAwarenessSettings: async () => {
+    try {
+      const res = await api.get('/awareness-settings');
+      if (res.data?.success && res.data?.data) {
+        const d = res.data.data;
+        set({
+          awarenessSettings: {
+            videoUrl: d.videoUrl || d.video_url || '',
+            posterUrl: d.posterUrl || d.poster_url || '',
+            badgeText: d.badgeText || d.badge_text || 'Lifesaving Dialogue',
+            quoteTitle: d.quoteTitle || d.quote_title || '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
+            quoteDescription: d.quoteDescription || d.quote_description || 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
+            buttonLabel: d.buttonLabel || d.button_label || 'Join Our Community'
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch awareness settings', err);
+    }
+  },
+
+  updateAwarenessSettings: async (payloadOrFormData) => {
+    try {
+      const res = await api.post('/technical-admin/awareness-settings', payloadOrFormData);
+      if (res.data?.success) {
+        const d = res.data.data;
+        set((state) => ({
+          awarenessSettings: {
+            ...state.awarenessSettings,
+            videoUrl: d.videoUrl || d.video_url || state.awarenessSettings.videoUrl,
+            posterUrl: d.posterUrl || d.poster_url || state.awarenessSettings.posterUrl,
+            badgeText: d.badgeText || d.badge_text || state.awarenessSettings.badgeText,
+            quoteTitle: d.quoteTitle || d.quote_title || state.awarenessSettings.quoteTitle,
+            quoteDescription: d.quoteDescription || d.quote_description || state.awarenessSettings.quoteDescription,
+            buttonLabel: d.buttonLabel || d.button_label || state.awarenessSettings.buttonLabel
+          }
+        }));
+        get().triggerToast(res.data.message || 'Awareness settings updated successfully!', 'success');
+        return { success: true, data: d };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to update awareness settings.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
     }
   },
 

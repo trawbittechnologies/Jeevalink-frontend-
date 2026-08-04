@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react';
 
-export default function MascotVideo({ className = "w-full h-full object-cover" }) {
+export default function MascotVideo({
+  className = "w-full h-full object-cover",
+  videoUrl = "",
+  posterUrl = ""
+}) {
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -15,22 +19,31 @@ export default function MascotVideo({ className = "w-full h-full object-cover" }
         });
       }
     }
-  }, []);
+  }, [videoUrl]);
+
+  const activePoster = posterUrl || "/blood_hero_mascot.png";
 
   return (
     <video
+      key={videoUrl || 'default-video'}
       ref={videoRef}
       autoPlay
       loop
       muted
       playsInline
       preload="auto"
-      poster="/blood_hero_mascot.png"
+      poster={activePoster}
       className={className}
     >
-      <source src="/e65e90f6856645b6ad0d704d686cce0d (1).webm" type="video/webm" />
-      <source src="/mascot_video.webm" type="video/webm" />
-      <img src="/blood_hero_mascot.png" alt="Jeeva Mascot Assistant" className={className} />
+      {videoUrl ? (
+        <source src={videoUrl} />
+      ) : (
+        <>
+          <source src="/e65e90f6856645b6ad0d704d686cce0d (1).webm" type="video/webm" />
+          <source src="/mascot_video.webm" type="video/webm" />
+        </>
+      )}
+      <img src={activePoster} alt="Awareness Mascot Video" className={className} />
     </video>
   );
 }

@@ -50,13 +50,14 @@ const processSteps = [
 ];
 
 export default function Landing() {
-  const { partners, fetchPartners, requests, fetchRequests } = useAppStore();
+  const { partners, fetchPartners, requests, fetchRequests, awarenessSettings, fetchAwarenessSettings } = useAppStore();
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
 
   useEffect(() => {
     fetchPartners();
     fetchRequests();
-  }, [fetchPartners, fetchRequests]);
+    fetchAwarenessSettings();
+  }, [fetchPartners, fetchRequests, fetchAwarenessSettings]);
 
   // Extract active real requests for display
   const activeRequests = (requests || []).filter(
@@ -164,10 +165,14 @@ export default function Landing() {
           <div className="bg-slate-950 text-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 items-center border border-slate-800">
             {/* Video Player */}
             <div className="md:col-span-7 relative h-72 sm:h-96 md:h-[400px] bg-black overflow-hidden group">
-              <MascotVideo className="w-full h-full object-cover" />
+              <MascotVideo
+                videoUrl={awarenessSettings?.videoUrl}
+                posterUrl={awarenessSettings?.posterUrl}
+                className="w-full h-full object-cover"
+              />
               <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-semibold pointer-events-none">
                 <Play className="w-3 h-3 text-red-500 fill-current" />
-                <span>Awareness Video</span>
+                <span>{awarenessSettings?.badgeText || "Awareness Video"}</span>
               </div>
             </div>
 
@@ -175,13 +180,13 @@ export default function Landing() {
             <div className="md:col-span-5 p-8 sm:p-10 space-y-6 flex flex-col justify-center">
               <div className="space-y-4">
                 <span className="text-red-500 font-extrabold text-xs tracking-wider uppercase">
-                  Lifesaving Dialogue
+                  {awarenessSettings?.badgeText || "Lifesaving Dialogue"}
                 </span>
                 <blockquote className="text-xl sm:text-2xl font-black leading-snug tracking-tight text-white italic">
-                  “In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”
+                  {awarenessSettings?.quoteTitle || "“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”"}
                 </blockquote>
                 <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-normal">
-                  Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.
+                  {awarenessSettings?.quoteDescription || "Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala."}
                 </p>
               </div>
 
@@ -192,7 +197,7 @@ export default function Landing() {
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <Users className="w-4 h-4 text-white" />
-                  <span>Join Our Community</span>
+                  <span>{awarenessSettings?.buttonLabel || "Join Our Community"}</span>
                 </button>
               </div>
             </div>

@@ -2,13 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldAlert, Plus, RefreshCw, ExternalLink, Edit,
-  TrendingUp, Activity, ShieldCheck, BarChart3, PieChart as PieIcon
+  TrendingUp, Activity, ShieldCheck, BarChart3, PieChart as PieIcon,
+  Video, Upload, Play, Save, Film, CheckCircle2, Image, Sparkles
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
 import api from '../../store/api.js';
+import { useAppStore } from '../../store/appStore.js';
+import MascotVideo from '../../components/MascotVideo.jsx';
 
 // Custom Modern Tooltip for Charts
 const CustomChartTooltip = ({ active, payload, label }) => {
@@ -57,6 +60,66 @@ export default function TechnicalAdminDashboard() {
   const [editSecContact, setEditSecContact] = useState('');
   const [editStatus, setEditStatus] = useState('Active');
   const [submittingEdit, setSubmittingEdit] = useState(false);
+
+  // Landing Page Awareness Video & Section Management State
+  const { awarenessSettings, fetchAwarenessSettings, updateAwarenessSettings } = useAppStore();
+  const [awarenessForm, setAwarenessForm] = useState({
+    badgeText: '',
+    quoteTitle: '',
+    quoteDescription: '',
+    buttonLabel: '',
+    videoUrl: '',
+    posterUrl: ''
+  });
+  const [videoFile, setVideoFile] = useState(null);
+  const [posterFile, setPosterFile] = useState(null);
+  const [savingAwareness, setSavingAwareness] = useState(false);
+
+  useEffect(() => {
+    fetchAwarenessSettings();
+  }, [fetchAwarenessSettings]);
+
+  useEffect(() => {
+    if (awarenessSettings) {
+      setAwarenessForm({
+        badgeText: awarenessSettings.badgeText || '',
+        quoteTitle: awarenessSettings.quoteTitle || '',
+        quoteDescription: awarenessSettings.quoteDescription || '',
+        buttonLabel: awarenessSettings.buttonLabel || '',
+        videoUrl: awarenessSettings.videoUrl || '',
+        posterUrl: awarenessSettings.posterUrl || ''
+      });
+    }
+  }, [awarenessSettings]);
+
+  const handleSaveAwareness = async (e) => {
+    e.preventDefault();
+    setSavingAwareness(true);
+    try {
+      const formData = new FormData();
+      formData.append('badge_text', awarenessForm.badgeText);
+      formData.append('quote_title', awarenessForm.quoteTitle);
+      formData.append('quote_description', awarenessForm.quoteDescription);
+      formData.append('button_label', awarenessForm.buttonLabel);
+      formData.append('video_url', awarenessForm.videoUrl);
+      formData.append('poster_url', awarenessForm.posterUrl);
+
+      if (videoFile) {
+        formData.append('video_file', videoFile);
+      }
+      if (posterFile) {
+        formData.append('poster_file', posterFile);
+      }
+
+      const res = await updateAwarenessSettings(formData);
+      if (res?.success) {
+        setVideoFile(null);
+        setPosterFile(null);
+      }
+    } finally {
+      setSavingAwareness(false);
+    }
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -371,6 +434,213 @@ export default function TechnicalAdminDashboard() {
               </BarChart>
             </ResponsiveContainer>
           )}
+        </div>
+      </div>
+
+      {/* Landing Page Awareness Video & Content Management Section */}
+      <div className="bg-white border border-red-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-red-50 pb-5">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" /> Landing Page Customizer
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+              <Video className="w-6 h-6 text-red-600" />
+              Awareness Video & Section Management
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              Upload awareness videos, customize thumbnails, and edit quotes/text rendered in the featured Landing Page section.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Form Control Side */}
+          <form onSubmit={handleSaveAwareness} className="lg:col-span-7 space-y-4 text-xs font-semibold">
+            {/* Video File / URL Input */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+              <label className="block text-slate-800 font-bold flex items-center gap-2">
+                <Film className="w-4 h-4 text-red-600" />
+                Awareness Video (Upload File or Enter URL)
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <span className="text-[11px] text-slate-500 font-medium block mb-1">Option A: Upload Video File</span>
+                  <label className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-dashed border-slate-300 rounded-xl hover:border-red-400 cursor-pointer transition">
+                    <Upload className="w-4 h-4 text-slate-500" />
+                    <span className="text-slate-700 text-[11px] font-bold truncate">
+                      {videoFile ? videoFile.name : "Choose Video (.webm, .mp4)"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="video/webm,video/mp4,video/*"
+                      onChange={(e) => setVideoFile(e.target.files[0] || null)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div>
+                  <span className="text-[11px] text-slate-500 font-medium block mb-1">Option B: External Video URL</span>
+                  <input
+                    type="text"
+                    value={awarenessForm.videoUrl}
+                    onChange={(e) => setAwarenessForm({ ...awarenessForm, videoUrl: e.target.value })}
+                    placeholder="https://... or /video.webm"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-red-500 font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Poster Image File / URL Input */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+              <label className="block text-slate-800 font-bold flex items-center gap-2">
+                <Image className="w-4 h-4 text-red-600" />
+                Poster / Thumbnail Image (Upload File or Enter URL)
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <span className="text-[11px] text-slate-500 font-medium block mb-1">Upload Poster File</span>
+                  <label className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-dashed border-slate-300 rounded-xl hover:border-red-400 cursor-pointer transition">
+                    <Upload className="w-4 h-4 text-slate-500" />
+                    <span className="text-slate-700 text-[11px] font-bold truncate">
+                      {posterFile ? posterFile.name : "Choose Image (.png, .jpg)"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setPosterFile(e.target.files[0] || null)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div>
+                  <span className="text-[11px] text-slate-500 font-medium block mb-1">External Image URL</span>
+                  <input
+                    type="text"
+                    value={awarenessForm.posterUrl}
+                    onChange={(e) => setAwarenessForm({ ...awarenessForm, posterUrl: e.target.value })}
+                    placeholder="/poster.png or https://..."
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-red-500 font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Awareness Section Fields */}
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Badge Tagline</label>
+                <input
+                  type="text"
+                  value={awarenessForm.badgeText}
+                  onChange={(e) => setAwarenessForm({ ...awarenessForm, badgeText: e.target.value })}
+                  placeholder="e.g. Lifesaving Dialogue"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Main Quote / Headline</label>
+                <textarea
+                  rows={2}
+                  value={awarenessForm.quoteTitle}
+                  onChange={(e) => setAwarenessForm({ ...awarenessForm, quoteTitle: e.target.value })}
+                  placeholder="Enter main awareness quote..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-semibold leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Description Subtext</label>
+                <textarea
+                  rows={3}
+                  value={awarenessForm.quoteDescription}
+                  onChange={(e) => setAwarenessForm({ ...awarenessForm, quoteDescription: e.target.value })}
+                  placeholder="Enter paragraph description..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Action Button Text</label>
+                <input
+                  type="text"
+                  value={awarenessForm.buttonLabel}
+                  onChange={(e) => setAwarenessForm({ ...awarenessForm, buttonLabel: e.target.value })}
+                  placeholder="e.g. Join Our Community"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-semibold"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={savingAwareness}
+                className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-2xl shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+              >
+                {savingAwareness ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Saving Changes...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Save Awareness Settings</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Live Preview Side */}
+          <div className="lg:col-span-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                Live Preview (Landing Page)
+              </span>
+              <span className="text-[10px] font-mono text-slate-400 uppercase">Realtime Preview</span>
+            </div>
+
+            <div className="bg-slate-950 text-white rounded-3xl overflow-hidden shadow-xl border border-slate-800 p-5 space-y-4">
+              <div className="relative h-48 bg-black rounded-2xl overflow-hidden border border-slate-800">
+                <MascotVideo
+                  videoUrl={videoFile ? URL.createObjectURL(videoFile) : awarenessForm.videoUrl}
+                  posterUrl={posterFile ? URL.createObjectURL(posterFile) : awarenessForm.posterUrl}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-[10px] font-semibold">
+                  <Play className="w-2.5 h-2.5 text-red-500 fill-current" />
+                  <span>{awarenessForm.badgeText || "Awareness Video"}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <span className="text-red-500 font-black text-[10px] uppercase tracking-wider block">
+                  {awarenessForm.badgeText || "Lifesaving Dialogue"}
+                </span>
+                <blockquote className="font-bold text-sm leading-snug italic text-white">
+                  {awarenessForm.quoteTitle || "“In critical emergency moments...”"}
+                </blockquote>
+                <p className="text-slate-400 text-[11px] leading-relaxed line-clamp-3">
+                  {awarenessForm.quoteDescription || "Every second counts..."}
+                </p>
+
+                <div className="pt-2">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl">
+                    {awarenessForm.buttonLabel || "Join Our Community"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
