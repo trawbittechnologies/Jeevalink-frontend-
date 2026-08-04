@@ -46,12 +46,35 @@ export async function queryJeevaLinkAI(userQuery, history = []) {
   } catch (error) {
     console.error('[AI Frontend Service] Request failed:', error);
 
-    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+    if (error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.includes('timeout'))) {
       throw new Error('Gemini API request timed out after 15 seconds. Please try again.');
     }
 
-    const backendErr = error.response?.data?.error || error.response?.data?.message || error.message;
-    throw new Error(backendErr || 'Failed to connect to AI companion.');
+    const data = error.response?.data;
+    let backendErr = null;
+
+    if (typeof data === 'string' && data.trim()) {
+      backendErr = data.trim();
+    } else if (data && typeof data === 'object') {
+      backendErr = data.error || data.message;
+      if (typeof backendErr === 'object') {
+        try {
+          backendErr = JSON.stringify(backendErr);
+        } catch {
+          backendErr = null;
+        }
+      }
+    }
+
+    if (!backendErr && typeof error.message === 'string') {
+      backendErr = error.message;
+    }
+
+    const finalMessage = (typeof backendErr === 'string' && backendErr.trim())
+      ? backendErr
+      : 'Failed to connect to AI companion.';
+
+    throw new Error(finalMessage);
   }
 }
 
