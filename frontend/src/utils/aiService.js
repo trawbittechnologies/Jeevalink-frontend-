@@ -4,7 +4,7 @@
  * powered by Google Gemini API.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import api from '../store/api.js';
 
 /**
  * Send user query & conversation history to Laravel Backend API endpoint (/api/v1/ai/chat)
@@ -30,42 +30,29 @@ export async function queryJeevaLinkAI(userQuery, history = []) {
 
   console.log('[AI Frontend Service] Sending API Request to Backend:', payload);
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
-
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/ai/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
+    const response = await api.post('/ai/chat', payload, {
+      timeout: 15000,
     });
 
-    clearTimeout(timeoutId);
+    console.log('[AI Frontend Service] Received API Response from Backend:', response.data);
 
-    const data = await response.json();
-
-    console.log('[AI Frontend Service] Received API Response from Backend:', {
-      status: response.status,
-      data,
-    });
-
-    if (response.ok && data.success && data.reply) {
-      return data.reply;
+    if (response.data && response.data.success && response.data.reply) {
+      return response.data.reply;
     }
 
-    const errorMessage = data.error || data.message || `Backend returned HTTP status ${response.status}`;
+    const errorMessage = response.data?.error || response.data?.message || 'Unexpected response from AI service.';
     throw new Error(errorMessage);
   } catch (error) {
-    clearTimeout(timeoutId);
     console.error('[AI Frontend Service] Request failed:', error);
-    if (error.name === 'AbortError') {
-      throw new Error('Gemini API request timed out after 15 seconds.');
+
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      throw new Error('Gemini API request timed out after 15 seconds. Please try again.');
     }
-    throw error;
+
+    const backendErr = error.response?.data?.error || error.response?.data?.message || error.message;
+    throw new Error(backendErr || 'Failed to connect to AI companion.');
   }
 }
+
 
