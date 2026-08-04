@@ -13,7 +13,7 @@ export default function BloodHeroAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 Greetings! I am Captain Jeeva, powered by Google Gemini. How can I assist you with voluntary blood donation in Kerala today?"
+      text: "👋 Greetings! I am Captain Jeeva. I am specialized strictly in voluntary blood donation, donor eligibility, emergency blood requests, and JeevaLink database records. How can I assist you today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -121,7 +121,7 @@ export default function BloodHeroAssistant() {
                       <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Gemini Online</span>
                     </div>
                     <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
-                      Ask any question regarding blood donation criteria or choose a quick shortcut below:
+                      Ask any question regarding blood donation, donor eligibility, emergency requests, or database records:
                     </p>
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export default function BloodHeroAssistant() {
                     type="text"
                     value={inputQuery}
                     onChange={(e) => setInputQuery(e.target.value)}
-                    placeholder="Ask Jeeva Hero anything..."
+                    placeholder="Ask about blood donation, eligibility, emergency requests..."
                     className="flex-1 px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500"
                   />
                   <button
