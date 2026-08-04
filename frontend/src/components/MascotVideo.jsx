@@ -27,8 +27,9 @@ export default function MascotVideo({ className = "w-full h-full object-cover" }
       poster="/blood_hero_mascot.png"
       className={className}
     >
+      <source src="/mascot_character.mp4" type="video/mp4" />
+      <source src="/lv_0_20260804163918 (1).mp4" type="video/mp4" />
       <source src="/mascot_video.webm" type="video/webm" />
-      <source src="/ef4440f93e8a494c85ff80cfb1c9bee4.webm" type="video/webm" />
       <img src="/blood_hero_mascot.png" alt="Jeeva Mascot Assistant" className={className} />
     </video>
   );
