@@ -199,7 +199,7 @@ export default function BloodHeroAssistant() {
           )}
         </AnimatePresence>
 
-        {/* Significantly Enlarged Cutout Floating Mascot Trigger */}
+        {/* Sleek Refined Floating Mascot Trigger */}
         <div className="relative pointer-events-auto flex items-center gap-3">
           {/* Greeting Speech Tooltip */}
           <AnimatePresence>
@@ -222,18 +222,22 @@ export default function BloodHeroAssistant() {
             )}
           </AnimatePresence>
 
-          {/* Extra Large Cutout Mascot Button */}
+          {/* Compact Sleek Mascot Button */}
           <motion.button
             type="button"
             onClick={() => {
               setIsOpen(!isOpen);
               setShowTooltip(false);
             }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.92 }}
-            className="relative w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-2xl"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
+            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-red-600 via-rose-600 to-red-700 p-1 shadow-2xl shadow-red-600/30 ring-4 ring-white/80 hover:shadow-red-600/50 transition-all flex items-center justify-center cursor-pointer group"
           >
-            <MascotVideo className="w-full h-full object-contain filter drop-shadow(0 16px 32px rgba(220,38,38,0.45))" />
+            <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center relative">
+              <MascotVideo className="w-full h-full object-cover" />
+            </div>
+            {/* Status Online Indicator */}
+            <span className="absolute top-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white ring-2 ring-emerald-400/40 animate-pulse" />
           </motion.button>
         </div>
       </div>

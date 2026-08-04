@@ -19,7 +19,6 @@ import {
   Play,
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
-import JeevaAIElement from "../components/JeevaAIElement.jsx";
 
 const bloodTypes = ["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"];
 
@@ -161,8 +160,21 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURED AWARENESS VIDEO & DIALOGUE ──────────────────────────── */}
-      <section className="py-16 bg-slate-50/50 border-b border-slate-100">
+      <section className="py-20 bg-slate-50/70 border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
+          <div className="text-center mb-10 space-y-2">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-xs font-black uppercase tracking-wider">
+              <Play className="w-3.5 h-3.5 text-red-600 fill-current" />
+              <span>Lifesaving Dialogue & Awareness</span>
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
+              Emergency Sourcing & Awareness
+            </h2>
+            <p className="text-slate-500 text-sm max-w-lg mx-auto font-medium">
+              Every second counts when a patient requires blood. Learn how voluntary donors & regional coordinators work together.
+            </p>
+          </div>
+
           <div className="bg-slate-950 text-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 items-center border border-slate-800">
             {/* Video Player */}
             <div className="md:col-span-7 relative h-72 sm:h-96 md:h-[400px] bg-black overflow-hidden group">
@@ -346,13 +358,6 @@ export default function Landing() {
               <strong className="text-red-700">Verification First:</strong> Blood requests and coordinator listings are verified by regional DYFI Block Committee officers.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* ── JEEVA AI CHAT BOX & SMART SUITE SECTION ──────────────────────── */}
-      <section className="py-16 bg-slate-950 border-b border-slate-900">
-        <div className="jl-container max-w-6xl mx-auto px-4">
-          <JeevaAIElement />
         </div>
       </section>
 
