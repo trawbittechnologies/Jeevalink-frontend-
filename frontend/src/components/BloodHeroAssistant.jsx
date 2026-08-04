@@ -80,7 +80,7 @@ export default function BloodHeroAssistant() {
               <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                   {/* Cutout Mascot Avatar */}
-                  <div className="w-14 h-14 flex items-center justify-center shrink-0">
+                  <div className="w-16 h-16 flex items-center justify-center shrink-0">
                     <MascotVideo className="w-full h-full object-contain drop-shadow-md" />
                   </div>
                   <div>
@@ -103,7 +103,7 @@ export default function BloodHeroAssistant() {
               <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs">
                 {/* Cutout Character Mascot Avatar Box */}
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-red-50/80 border border-red-100/90 shadow-sm">
-                  <div className="w-20 h-20 flex items-center justify-center shrink-0">
+                  <div className="w-24 h-24 flex items-center justify-center shrink-0">
                     <MascotVideo className="w-full h-full object-contain drop-shadow-md" />
                   </div>
                   <div className="flex-1 space-y-1">
@@ -229,7 +229,7 @@ export default function BloodHeroAssistant() {
             }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.94 }}
-            className="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
+            className="relative w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
           >
             <MascotVideo className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))" />
           </motion.button>
