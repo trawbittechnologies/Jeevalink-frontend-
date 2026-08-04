@@ -15,6 +15,7 @@ import {
   HeartHandshake,
   CheckCircle2,
   Check,
+  Play,
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
 
@@ -156,8 +157,58 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── FEATURED AWARENESS VIDEO & DIALOGUE ──────────────────────────── */}
+      <section className="py-16 bg-slate-50/50 border-b border-slate-100">
+        <div className="jl-container max-w-5xl mx-auto px-4">
+          <div className="bg-slate-950 text-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 items-center border border-slate-800">
+            {/* Video Player */}
+            <div className="md:col-span-7 relative h-72 sm:h-96 md:h-[400px] bg-black overflow-hidden group">
+              <video
+                src="/ef4440f93e8a494c85ff80cfb1c9bee4.webm"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-semibold pointer-events-none">
+                <Play className="w-3 h-3 text-red-500 fill-current" />
+                <span>Awareness Video</span>
+              </div>
+            </div>
+
+            {/* Dialogue & Message Content */}
+            <div className="md:col-span-5 p-8 sm:p-10 space-y-6 flex flex-col justify-center">
+              <div className="space-y-4">
+                <span className="text-red-500 font-extrabold text-xs tracking-wider uppercase">
+                  Lifesaving Dialogue
+                </span>
+                <blockquote className="text-xl sm:text-2xl font-black leading-snug tracking-tight text-white italic">
+                  “In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”
+                </blockquote>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-normal">
+                  Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-slate-800 flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setIsCommunityModalOpen(true)}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Users className="w-4 h-4 text-white" />
+                  <span>Join Our Community</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── REAL ACTIVE BLOOD REQUESTS SECTION ───────────────────────────── */}
-      <section className="py-16 bg-slate-50/70 border-b border-slate-100">
+      <section className="py-16 bg-white border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
@@ -249,7 +300,7 @@ export default function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-b border-slate-100">
+      <section className="py-20 bg-slate-50/60 border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center space-y-3 mb-14">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
@@ -266,7 +317,7 @@ export default function Landing() {
               return (
                 <div
                   key={step.num}
-                  className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-red-300 hover:bg-white hover:shadow-lg transition-all space-y-4 group"
+                  className="p-6 rounded-2xl bg-white border border-slate-200/80 hover:border-red-300 hover:shadow-lg transition-all space-y-4 group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
@@ -300,7 +351,7 @@ export default function Landing() {
       </section>
 
       {/* ── BLOOD GROUPS DIRECTORY ───────────────────────────────────────── */}
-      <section className="py-20 bg-slate-50/60 border-b border-slate-100">
+      <section className="py-20 bg-white border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center space-y-3 mb-12">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
@@ -316,7 +367,7 @@ export default function Landing() {
               <Link
                 key={type}
                 to={`/donor/search?blood_group=${encodeURIComponent(type)}`}
-                className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-red-500 hover:bg-red-600 hover:text-white shadow-sm hover:shadow-xl hover:shadow-red-500/20 text-center transition-all duration-200 group cursor-pointer"
+                className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-red-500 hover:bg-red-600 hover:text-white shadow-sm hover:shadow-xl hover:shadow-red-500/20 text-center transition-all duration-200 group cursor-pointer"
               >
                 <span className="block text-3xl font-black text-slate-900 group-hover:text-white transition-colors mb-1">
                   {type}
@@ -332,7 +383,7 @@ export default function Landing() {
 
       {/* ── PARTNERS SHOWCASE ────────────────────────────────────────────── */}
       {displayPartners.length > 0 && (
-        <section className="py-16 bg-white border-b border-slate-100">
+        <section className="py-16 bg-slate-50/60 border-b border-slate-100">
           <div className="jl-container max-w-5xl mx-auto px-4">
             <div className="text-center space-y-2 mb-10">
               <h2 className="text-2xl sm:text-3xl font-black text-slate-950">
@@ -344,7 +395,7 @@ export default function Landing() {
               {displayPartners.map((partner) => (
                 <div
                   key={partner.id || partner._id}
-                  className="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all text-center flex flex-col items-center justify-center space-y-2"
+                  className="p-4 rounded-2xl border border-slate-200 bg-white hover:shadow-md transition-all text-center flex flex-col items-center justify-center space-y-2"
                 >
                   {partner.logo ? (
                     <img
