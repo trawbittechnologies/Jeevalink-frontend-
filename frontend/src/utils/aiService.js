@@ -47,7 +47,7 @@ export async function queryJeevaLinkAI(userQuery, history = []) {
     console.error('[AI Frontend Service] Request failed:', error);
 
     if (error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.toLowerCase().includes('timeout'))) {
-      throw new Error('Gemini API request timed out after 15 seconds. Please try again.');
+      throw new Error('Gemini API request timed out after 15 seconds. Please try again.', { cause: error });
     }
 
     const data = error.response?.data;
@@ -79,7 +79,7 @@ export async function queryJeevaLinkAI(userQuery, history = []) {
       ? backendErr
       : 'Failed to connect to AI companion. Please ensure backend server is online.';
 
-    throw new Error(finalMessage);
+    throw new Error(finalMessage, { cause: error });
   }
 }
 
