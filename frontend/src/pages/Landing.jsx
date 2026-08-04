@@ -19,6 +19,7 @@ import {
   Play,
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
+import JeevaAIElement from "../components/JeevaAIElement.jsx";
 
 const bloodTypes = ["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"];
 
@@ -345,6 +346,13 @@ export default function Landing() {
               <strong className="text-red-700">Verification First:</strong> Blood requests and coordinator listings are verified by regional DYFI Block Committee officers.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* ── JEEVA AI CHAT BOX & SMART SUITE SECTION ──────────────────────── */}
+      <section className="py-16 bg-slate-950 border-b border-slate-900">
+        <div className="jl-container max-w-6xl mx-auto px-4">
+          <JeevaAIElement />
         </div>
       </section>
 

@@ -1,7 +1,7 @@
 /**
- * JeevaLink Project-Trained Free AI Model Service
- * Contextualized & trained on JeevaLink platform specs, Kerala districts,
- * DYFI Block Committee guidelines, blood group compatibility matrix, and medical rules.
+ * JeevaLink AI Companion Service
+ * Routes AI query requests securely through Laravel Backend (/api/v1/ai/chat)
+ * powered by Google Gemini 2.5 Flash.
  */
 
 const JEEVALINK_KNOWLEDGE = {
@@ -34,79 +34,74 @@ const JEEVALINK_KNOWLEDGE = {
   helplines: 'State Emergency Healthcare Helpline: 104 / 1910. Local DYFI Block Coordinators can be contacted via the Block Committee Directory.',
 };
 
-/**
- * Free Hugging Face Open Inference API Endpoint
- * Free public open-access LLM inference model (no API key required for public rate-limited inference)
- */
-const HUGGINGFACE_FREE_API = 'https://api-inference.huggingface.co/models/Qwen/Qwen2.5-Coder-32B-Instruct';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /**
- * Generate AI Response using Free AI Model with fallback to JeevaLink Trained Neural Engine
+ * Generate AI Response via Secure Backend Proxy (/api/v1/ai/chat)
+ * with graceful fallback to JeevaLink Neural Knowledge Engine.
  */
 export async function queryJeevaLinkAI(userQuery) {
   const query = (userQuery || '').trim();
   if (!query) return 'Hello! How can Captain Jeeva assist you today?';
 
-  const lowerQuery = query.toLowerCase();
-
-  // Check blood group compatibility query
-  for (const [bg, info] of Object.entries(JEEVALINK_KNOWLEDGE.compatibility)) {
-    if (lowerQuery.includes(bg.toLowerCase()) || lowerQuery.includes(bg.replace(/[-+]/, '').toLowerCase())) {
-      if (lowerQuery.includes('donor') || lowerQuery.includes('give') || lowerQuery.includes('receive') || lowerQuery.includes('compatible') || lowerQuery.includes('blood')) {
-        return `Captain Jeeva AI: ${info}`;
-      }
-    }
-  }
-
-  // Attempt Free Open AI Model API fetch (with 2 sec timeout for instant response)
+  // 1. Attempt secure call via Laravel Backend API endpoint (/api/v1/ai/chat)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    const prompt = `System: You are Captain Jeeva, the superhero AI mascot for JeevaLink blood donation platform in Kerala. Answer concisely and heroically based on this context: ${JSON.stringify(JEEVALINK_KNOWLEDGE)}. User Question: ${query}`;
-
-    const res = await fetch(HUGGINGFACE_FREE_API, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/ai/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ inputs: prompt, parameters: { max_new_tokens: 100 } }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query }),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
 
-    if (res.ok) {
-      const data = await res.json();
-      let generatedText = '';
-      if (Array.isArray(data) && data[0]?.generated_text) {
-        generatedText = data[0].generated_text.replace(prompt, '').trim();
+    if (response.ok) {
+      const data = await response.json();
+      if (data.reply) {
+        return data.reply;
       }
-      if (generatedText) return `Captain Jeeva AI: ${generatedText}`;
     }
   } catch {
-    // Graceful fallback to trained offline engine
+    // Offline or network fallback
   }
 
-  // JeevaLink Trained Project AI Engine Intent Matcher
+  // 2. Offline JeevaLink Trained Knowledge Engine Fallback Intent Matcher
+  const lowerQuery = query.toLowerCase();
+
+  for (const [bg, info] of Object.entries(JEEVALINK_KNOWLEDGE.compatibility)) {
+    if (lowerQuery.includes(bg.toLowerCase()) || lowerQuery.includes(bg.replace(/[-+]/, '').toLowerCase())) {
+      if (lowerQuery.includes('donor') || lowerQuery.includes('give') || lowerQuery.includes('receive') || lowerQuery.includes('compatible') || lowerQuery.includes('blood')) {
+        return info;
+      }
+    }
+  }
+
   if (lowerQuery.includes('tattoo') || lowerQuery.includes('piercing')) {
-    return `Captain Jeeva AI: ${JEEVALINK_KNOWLEDGE.eligibility.tattoo}`;
+    return JEEVALINK_KNOWLEDGE.eligibility.tattoo;
   }
   if (lowerQuery.includes('age') || lowerQuery.includes('weight') || lowerQuery.includes('eligible') || lowerQuery.includes('rule')) {
-    return `Captain Jeeva AI: To donate blood, you must be ${JEEVALINK_KNOWLEDGE.eligibility.age}, weigh at least ${JEEVALINK_KNOWLEDGE.eligibility.weight}, and have hemoglobin ${JEEVALINK_KNOWLEDGE.eligibility.hemoglobin}.`;
+    return `To donate blood, you must be ${JEEVALINK_KNOWLEDGE.eligibility.age}, weigh at least ${JEEVALINK_KNOWLEDGE.eligibility.weight}, and have hemoglobin ${JEEVALINK_KNOWLEDGE.eligibility.hemoglobin}.`;
   }
   if (lowerQuery.includes('interval') || lowerQuery.includes('often') || lowerQuery.includes('gap') || lowerQuery.includes('month') || lowerQuery.includes('days')) {
-    return `Captain Jeeva AI: ${JEEVALINK_KNOWLEDGE.eligibility.interval}`;
+    return JEEVALINK_KNOWLEDGE.eligibility.interval;
   }
   if (lowerQuery.includes('emergency') || lowerQuery.includes('sos') || lowerQuery.includes('urgent') || lowerQuery.includes('hospital')) {
-    return `Captain Jeeva AI: ${JEEVALINK_KNOWLEDGE.emergency}`;
+    return JEEVALINK_KNOWLEDGE.emergency;
   }
   if (lowerQuery.includes('district') || lowerQuery.includes('kerala') || lowerQuery.includes('location') || lowerQuery.includes('city')) {
-    return `Captain Jeeva AI: JeevaLink covers all 14 Kerala districts: ${JEEVALINK_KNOWLEDGE.districts.join(', ')}. Registered donors and DYFI block officers are active in your area.`;
+    return `JeevaLink covers all 14 Kerala districts: ${JEEVALINK_KNOWLEDGE.districts.join(', ')}. Registered donors and DYFI block officers are active in your area.`;
   }
   if (lowerQuery.includes('phone') || lowerQuery.includes('helpline') || lowerQuery.includes('contact') || lowerQuery.includes('call') || lowerQuery.includes('number')) {
-    return `Captain Jeeva AI: ${JEEVALINK_KNOWLEDGE.helplines}`;
+    return JEEVALINK_KNOWLEDGE.helplines;
   }
   if (lowerQuery.includes('alcohol') || lowerQuery.includes('drink') || lowerQuery.includes('food') || lowerQuery.includes('eat')) {
-    return `Captain Jeeva AI: ${JEEVALINK_KNOWLEDGE.eligibility.alcohol} Drink plenty of water and eat an iron-rich meal prior to donation.`;
+    return `${JEEVALINK_KNOWLEDGE.eligibility.alcohol} Drink plenty of water and eat an iron-rich meal prior to donation.`;
   }
 
-  return `Captain Jeeva AI: "Greetings Hero! JeevaLink connects voluntary blood donors and patients across all 14 districts of Kerala. You can search for donors by blood group, post emergency requests, or call helpline 104 / 1910 anytime!"`;
+  return "Greetings Hero! JeevaLink connects voluntary blood donors and patients across all 14 districts of Kerala. You can search for donors by blood group, post emergency requests, or call helpline 104 / 1910 anytime!";
 }

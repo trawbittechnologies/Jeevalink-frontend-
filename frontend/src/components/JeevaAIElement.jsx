@@ -1,18 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MascotVideo from './MascotVideo.jsx';
+import { queryJeevaLinkAI } from '../utils/aiService.js';
 import {
   Sparkles,
   Zap,
   Activity,
   ShieldCheck,
   MapPin,
-  Clock,
   CheckCircle2,
   Users,
-  Search,
   MessageSquare,
-  AlertCircle,
   ArrowRight,
   RefreshCw,
   Heart,
@@ -63,8 +61,15 @@ const healthFaqs = [
   },
 ];
 
+const quickPrompts = [
+  'Can I donate with a tattoo?',
+  'O- negative compatibility',
+  'Donation age & weight limits',
+  'How to submit Emergency SOS?'
+];
+
 export default function JeevaAIElement() {
-  const [activeTab, setActiveTab] = useState('radar'); // 'radar' | 'assistant' | 'dispatch'
+  const [activeTab, setActiveTab] = useState('assistant'); // 'assistant' | 'radar' | 'dispatch'
   const [selectedBlood, setSelectedBlood] = useState('O+');
   const [selectedDistrict, setSelectedDistrict] = useState('Kozhikode');
   const [isScanning, setIsScanning] = useState(false);
@@ -76,11 +81,25 @@ export default function JeevaAIElement() {
   const [aiThinking, setAiThinking] = useState(false);
   const [aiAnswer, setAiAnswer] = useState(null);
 
+  const scanTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (scanTimeoutRef.current) {
+        clearTimeout(scanTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleRunRadar = () => {
     setIsScanning(true);
     setScanResult(null);
 
-    setTimeout(() => {
+    if (scanTimeoutRef.current) {
+      clearTimeout(scanTimeoutRef.current);
+    }
+
+    scanTimeoutRef.current = setTimeout(() => {
       setIsScanning(false);
       setScanResult({
         donorsAvailable: Math.floor(Math.random() * 25) + 14,
@@ -92,20 +111,29 @@ export default function JeevaAIElement() {
     }, 1800);
   };
 
-  const handleAskQuestion = (e) => {
-    e.preventDefault();
-    if (!customQuestion.trim()) return;
+  const handleAskQuestion = async (e, textOverride = null) => {
+    e?.preventDefault();
+    const queryText = (textOverride !== null ? textOverride : customQuestion).trim();
+    if (!queryText || aiThinking) return;
 
     setAiThinking(true);
     setAiAnswer(null);
 
-    setTimeout(() => {
-      setAiThinking(false);
+    try {
+      const response = await queryJeevaLinkAI(queryText);
       setAiAnswer({
-        q: customQuestion,
-        a: `Based on Kerala State Blood Transfusion Council guidelines, for "${customQuestion}": Please ensure you are between 18-65 years old, weigh at least 45kg, and have a hemoglobin level above 12.5 g/dL. If you take regular medications, your local DYFI Block Coordinator will verify your profile prior to donation.`,
+        q: queryText,
+        a: response,
       });
-    }, 1200);
+      setCustomQuestion('');
+    } catch {
+      setAiAnswer({
+        q: queryText,
+        a: 'Greetings Hero! To donate blood, you must be between 18-65 years old, weigh at least 45kg, and have a hemoglobin level above 12.5 g/dL.',
+      });
+    } finally {
+      setAiThinking(false);
+    }
   };
 
   return (
@@ -382,10 +410,11 @@ export default function JeevaAIElement() {
 
                 <div className="space-y-3">
                   {healthFaqs.map((faq, idx) => (
-                    <div
+                    <button
+                      type="button"
                       key={idx}
-                      onClick={() => setActiveFaq(idx)}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                      onClick={() => setActiveFaq(activeFaq === idx ? -1 : idx)}
+                      className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer ${
                         activeFaq === idx
                           ? 'bg-slate-900 border-red-500/60 shadow-lg shadow-red-500/10'
                           : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
@@ -395,7 +424,7 @@ export default function JeevaAIElement() {
                         <span className="text-xs font-black uppercase tracking-wider text-red-400">
                           {faq.category}
                         </span>
-                        {activeFaq === idx && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                        {activeFaq === idx && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
                       </div>
 
                       <h4 className="text-sm font-bold text-white mt-1">{faq.q}</h4>
@@ -409,7 +438,7 @@ export default function JeevaAIElement() {
                           {faq.a}
                         </motion.p>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -453,24 +482,43 @@ export default function JeevaAIElement() {
                   </div>
                 </div>
 
-                {/* Input Form */}
-                <form onSubmit={handleAskQuestion} className="mt-4 flex gap-2">
-                  <input
-                    type="text"
-                    value={customQuestion}
-                    onChange={(e) => setCustomQuestion(e.target.value)}
-                    placeholder="e.g. Can I donate if I am taking antibiotic pills?"
-                    className="flex-1 px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-xs md:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
-                  />
-                  <button
-                    type="submit"
-                    disabled={aiThinking || !customQuestion.trim()}
-                    className="px-5 py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
-                  >
-                    <span>Ask AI</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
+                {/* Quick Suggestion Pills & Input Form */}
+                <div className="mt-4 space-y-3">
+                  {/* Quick Prompts */}
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-500 whitespace-nowrap">Try:</span>
+                    {quickPrompts.map((promptText, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={(e) => handleAskQuestion(e, promptText)}
+                        disabled={aiThinking}
+                        className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-medium text-slate-300 hover:text-white hover:border-red-500/50 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+                      >
+                        {promptText}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Input Form */}
+                  <form onSubmit={handleAskQuestion} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customQuestion}
+                      onChange={(e) => setCustomQuestion(e.target.value)}
+                      placeholder="e.g. Can I donate if I am taking antibiotic pills?"
+                      className="flex-1 px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-xs md:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                    />
+                    <button
+                      type="submit"
+                      disabled={aiThinking || !customQuestion.trim()}
+                      className="px-5 py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                    >
+                      <span>Ask AI</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </form>
+                </div>
               </div>
             </motion.div>
           )}
@@ -555,3 +603,4 @@ export default function JeevaAIElement() {
     </div>
   );
 }
+
