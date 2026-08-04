@@ -5,8 +5,6 @@ import { useAppStore } from "../store/appStore.js";
 import { getStorageUrl } from "../store/api.js";
 import { motion } from "framer-motion";
 import {
-  Heart,
-  Droplets,
   MapPin,
   ArrowRight,
   ShieldCheck,
@@ -14,7 +12,6 @@ import {
   Search,
   UserPlus,
   Building2,
-  Bell,
   HeartHandshake,
   CheckCircle2,
   Check,
@@ -75,28 +72,17 @@ export default function Landing() {
       />
 
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
-      <section className="relative min-h-[75vh] flex items-center justify-center bg-white pt-12 pb-20 border-b border-slate-100">
+      <section className="relative min-h-[70vh] flex items-center justify-center bg-white pt-16 pb-20 border-b border-slate-100">
         <div className="jl-container relative z-10 max-w-4xl mx-auto px-4 text-center">
-          {/* Live Network Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-xs font-extrabold uppercase tracking-wider mb-6"
-          >
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
-            <span>Kerala's Voluntary Blood Sourcing Network</span>
-          </motion.div>
-
           {/* Main Title */}
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="text-4xl sm:text-6xl md:text-7xl font-black text-slate-950 tracking-tight leading-[1.08] mb-6"
           >
             Be Someone's Hero.<br />
-            <span className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 bg-clip-text text-transparent">
+            <span className="text-red-600">
               Donate Blood. Save Lives Today.
             </span>
           </motion.h1>
@@ -105,17 +91,17 @@ export default function Landing() {
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-10 font-medium"
           >
-            Every blood donation brings hope to a patient in urgent need. Connect directly with voluntary donors and verified DYFI Block Committee coordinators across Kerala.
+            Connecting voluntary blood donors with patients in urgent need. Verified through regional DYFI Block Committee coordinators across Kerala.
           </motion.p>
 
           {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
             className="flex flex-wrap items-center justify-center gap-4 mb-12"
           >
             {/* Enter Community Button */}
@@ -147,24 +133,24 @@ export default function Landing() {
             </Link>
           </motion.div>
 
-          {/* Key Stats / Trust Indicators Ribbon */}
+          {/* Trust Indicators Ribbon */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-            className="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs sm:text-sm font-bold text-slate-500"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs sm:text-sm font-semibold text-slate-500"
           >
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
+              <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
               <span>100% Free & Voluntary</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
-              <span>14 Kerala Districts</span>
+              <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
+              <span>All 14 Kerala Districts</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
-              <span>Verified 24/7 Sourcing</span>
+              <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
+              <span>Verified 24/7 Helpline</span>
             </div>
           </motion.div>
         </div>
@@ -175,13 +161,12 @@ export default function Landing() {
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
-              <div className="inline-flex items-center gap-2 text-red-600 font-extrabold text-xs uppercase tracking-wider mb-1">
-                <Bell className="w-4 h-4 text-red-600 animate-bounce" />
-                Live Sourcing Feed
-              </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
                 Current Blood Requests
               </h2>
+              <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">
+                Active emergency sourcing calls across Kerala hospitals.
+              </p>
             </div>
 
             <Link
@@ -217,7 +202,7 @@ export default function Landing() {
                         <span
                           className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
                             isEmergency
-                              ? "bg-red-600 text-white animate-pulse"
+                              ? "bg-red-600 text-white"
                               : "bg-amber-50 text-amber-700 border border-amber-200"
                           }`}
                         >
@@ -267,15 +252,11 @@ export default function Landing() {
       <section className="py-20 bg-white border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center space-y-3 mb-14">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1 bg-red-50 border border-red-200 rounded-full text-red-600 text-xs font-extrabold uppercase tracking-wider">
-              <Heart className="w-3.5 h-3.5 text-red-600 fill-current" />
-              How JeevaLink Works
-            </span>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
-              Simple Steps. <span className="text-red-600">Lifesaving Impact.</span>
+              How JeevaLink Works
             </h2>
             <p className="text-slate-500 text-sm max-w-md mx-auto font-medium">
-              Our community framework facilitates direct connection between donors and patients.
+              Simple steps connecting voluntary donors directly with patients.
             </p>
           </div>
 
@@ -308,7 +289,7 @@ export default function Landing() {
             })}
           </div>
 
-          {/* Safety First Banner */}
+          {/* Safety First Note */}
           <div className="mt-12 p-4 rounded-2xl bg-red-50/70 border border-red-200/80 flex items-center gap-3 text-xs text-slate-700 max-w-2xl mx-auto">
             <ShieldCheck className="w-5 h-5 text-red-600 shrink-0" />
             <p className="font-semibold">
@@ -322,15 +303,11 @@ export default function Landing() {
       <section className="py-20 bg-slate-50/60 border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center space-y-3 mb-12">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1 bg-red-50 border border-red-200 rounded-full text-red-600 text-xs font-extrabold uppercase tracking-wider">
-              <Droplets className="w-3.5 h-3.5 text-red-600" />
-              Blood Group Directory
-            </span>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
-              Browse By <span className="text-red-600">Blood Group</span>
+              Browse By Blood Group
             </h2>
             <p className="text-slate-500 text-sm max-w-md mx-auto font-medium">
-              Select a blood group to view registered voluntary donors in your district.
+              Select a blood group to find registered voluntary donors near you.
             </p>
           </div>
 
@@ -353,16 +330,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── PARTNERS SHOWCASE (REAL DATA) ────────────────────────────────── */}
+      {/* ── PARTNERS SHOWCASE ────────────────────────────────────────────── */}
       {displayPartners.length > 0 && (
         <section className="py-16 bg-white border-b border-slate-100">
           <div className="jl-container max-w-5xl mx-auto px-4">
             <div className="text-center space-y-2 mb-10">
-              <span className="text-xs font-black uppercase tracking-wider text-red-600">
-                Partner Networks
-              </span>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-950">
-                Our Collaborating Organizations
+                Collaborating Partner Organizations
               </h2>
             </div>
 
@@ -389,14 +363,11 @@ export default function Landing() {
         </section>
       )}
 
-      {/* ── UNIFIED FINAL CALL TO ACTION (Duplicates Removed) ───────────── */}
+      {/* ── UNIFIED FINAL CALL TO ACTION ─────────────────────────────────── */}
       <section className="py-20 bg-gradient-to-b from-white to-red-50/40">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-3xl p-8 md:p-14 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="space-y-3 text-center md:text-left max-w-xl">
-              <span className="px-3.5 py-1 bg-white/20 text-white text-xs font-black uppercase tracking-wider rounded-full inline-block backdrop-blur-md">
-                Join Kerala's Blood Network
-              </span>
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
                 Be the reason someone receives timely help.
               </h2>
