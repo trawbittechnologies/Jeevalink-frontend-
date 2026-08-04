@@ -65,7 +65,7 @@ export default function BloodHeroAssistant() {
         onClose={() => setIsCommunityModalOpen(false)}
       />
 
-      <div className="fixed bottom-6 right-6 z-[9990] flex flex-col items-end pointer-events-none select-none">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9990] flex flex-col items-end pointer-events-none select-none">
         <AnimatePresence>
           {/* Expanded Assistant Chatbox Dialog */}
           {isOpen && (
@@ -79,8 +79,9 @@ export default function BloodHeroAssistant() {
               {/* Card Header */}
               <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md p-0.5 border border-white/20 overflow-hidden shrink-0">
-                    <MascotVideo className="w-full h-full object-cover rounded-full" />
+                  {/* Cutout Mascot Avatar */}
+                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                    <MascotVideo className="w-full h-full object-contain mix-blend-multiply drop-shadow-md" />
                   </div>
                   <div>
                     <h3 className="text-sm font-extrabold flex items-center gap-1.5">
@@ -99,12 +100,12 @@ export default function BloodHeroAssistant() {
                 </button>
               </div>
 
-              {/* Chatbox Body Area with Mascot Avatar */}
+              {/* Chatbox Body Area with Cutout Mascot Avatar */}
               <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs">
-                {/* Character Mascot Avatar Box inside Chat Area */}
-                <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-red-50/80 border border-red-100/90 shadow-sm">
-                  <div className="w-12 h-12 rounded-full border-2 border-red-500 shadow-md overflow-hidden shrink-0 bg-black">
-                    <MascotVideo className="w-full h-full object-cover rounded-full" />
+                {/* Cutout Character Mascot Avatar Box */}
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-red-50/80 border border-red-100/90 shadow-sm">
+                  <div className="w-16 h-16 flex items-center justify-center shrink-0">
+                    <MascotVideo className="w-full h-full object-contain mix-blend-multiply drop-shadow-md" />
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
@@ -198,7 +199,7 @@ export default function BloodHeroAssistant() {
           )}
         </AnimatePresence>
 
-        {/* Floating Mascot Trigger */}
+        {/* Cutout Floating Mascot Trigger (Enlarged Size, No Box/Circle BG) */}
         <div className="relative pointer-events-auto flex items-center gap-3">
           {/* Greeting Speech Tooltip */}
           <AnimatePresence>
@@ -207,7 +208,7 @@ export default function BloodHeroAssistant() {
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="bg-slate-900 text-white text-xs font-semibold px-3.5 py-2 rounded-2xl shadow-lg border border-slate-800 flex items-center gap-2 whitespace-nowrap"
+                className="bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl border border-slate-800 flex items-center gap-2 whitespace-nowrap"
               >
                 <span>Need help with blood sourcing?</span>
                 <button
@@ -221,19 +222,18 @@ export default function BloodHeroAssistant() {
             )}
           </AnimatePresence>
 
-          {/* Mascot Floating Button */}
+          {/* Large Cutout Mascot Button (No Background Box) */}
           <motion.button
             type="button"
             onClick={() => {
               setIsOpen(!isOpen);
               setShowTooltip(false);
             }}
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.94 }}
-            className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-red-600 shadow-2xl shadow-red-600/30 flex items-center justify-center p-0.5 overflow-hidden cursor-pointer group"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.92 }}
+            className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-2xl"
           >
-            <div className="absolute inset-0 rounded-full border-2 border-red-500/40 animate-ping pointer-events-none" />
-            <MascotVideo className="w-full h-full object-cover rounded-full" />
+            <MascotVideo className="w-full h-full object-contain mix-blend-multiply filter drop-shadow(0 14px 24px rgba(220,38,38,0.4))" />
           </motion.button>
         </div>
       </div>
