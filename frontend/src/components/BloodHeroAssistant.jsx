@@ -13,7 +13,7 @@ export default function BloodHeroAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 Hello! I am Jeeva Hero, your voluntary blood assistant. How can I help you save lives today?"
+      text: "👋 Greetings! I am Captain Jeeva, powered by Google Gemini. How can I assist you with voluntary blood donation in Kerala today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -39,15 +39,24 @@ export default function BloodHeroAssistant() {
     if (!inputQuery.trim() || isThinking) return;
 
     const userText = inputQuery.trim();
+    const currentHistory = [...messages];
     setMessages((prev) => [...prev, { sender: 'user', text: userText }]);
     setInputQuery('');
     setIsThinking(true);
 
     try {
-      const response = await queryJeevaLinkAI(userText);
+      const response = await queryJeevaLinkAI(userText, currentHistory);
       setMessages((prev) => [...prev, { sender: 'assistant', text: response }]);
-    } catch {
-      setMessages((prev) => [...prev, { sender: 'assistant', text: 'Thank you for your question. You can search voluntary donors or register on JeevaLink.' }]);
+    } catch (err) {
+      console.error('[BloodHeroAssistant] Error getting Gemini response:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'assistant',
+          text: `⚠️ Gemini Error: ${err.message || 'Unable to connect to Gemini API. Please try again.'}`,
+          isError: true,
+        },
+      ]);
     } finally {
       setIsThinking(false);
     }
@@ -109,7 +118,7 @@ export default function BloodHeroAssistant() {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-extrabold text-red-700 uppercase tracking-wider">Jeeva Hero</span>
-                      <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Active</span>
+                      <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Gemini Online</span>
                     </div>
                     <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
                       Ask any question regarding blood donation criteria or choose a quick shortcut below:
@@ -146,17 +155,20 @@ export default function BloodHeroAssistant() {
                       className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[85%] p-3 rounded-2xl ${msg.sender === 'user'
-                          ? 'bg-red-600 text-white font-medium rounded-br-none'
-                          : 'bg-slate-100 text-slate-800 font-normal rounded-bl-none border border-slate-200/60'
-                          }`}
+                        className={`max-w-[85%] p-3 rounded-2xl ${
+                          msg.sender === 'user'
+                            ? 'bg-red-600 text-white font-medium rounded-br-none'
+                            : msg.isError
+                            ? 'bg-rose-50 text-rose-800 border border-rose-200 font-medium rounded-bl-none'
+                            : 'bg-slate-100 text-slate-800 font-normal rounded-bl-none border border-slate-200/60'
+                        }`}
                       >
                         {msg.sender === 'assistant' && (
-                          <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-red-600 mb-1">
+                          <div className={`flex items-center gap-1.5 text-[10px] font-extrabold mb-1 ${msg.isError ? 'text-rose-700' : 'text-red-600'}`}>
                             <Sparkles className="w-3 h-3" /> Jeeva Hero
                           </div>
                         )}
-                        <p className="leading-relaxed">{msg.text}</p>
+                        <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                       </div>
                     </div>
                   ))}
