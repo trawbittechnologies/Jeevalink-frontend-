@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 export default function MascotVideo({
-  className = "w-full h-full object-cover",
+  className = "w-full h-full object-contain mix-blend-multiply",
   videoUrl = "",
   posterUrl = ""
 }) {

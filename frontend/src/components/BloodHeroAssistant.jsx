@@ -86,7 +86,6 @@ export default function BloodHeroAssistant() {
                   <div>
                     <h3 className="text-sm font-extrabold flex items-center gap-1.5">
                       <span>Jeeva Hero Assistant</span>
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     </h3>
                     <p className="text-[11px] text-red-100 font-medium">Voluntary Blood Companion</p>
                   </div>
@@ -110,7 +109,7 @@ export default function BloodHeroAssistant() {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-extrabold text-red-700 uppercase tracking-wider">Jeeva Hero</span>
-                      <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Online</span>
+                      <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Active</span>
                     </div>
                     <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
                       Ask any question regarding blood donation criteria or choose a quick shortcut below:
@@ -147,11 +146,10 @@ export default function BloodHeroAssistant() {
                       className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[85%] p-3 rounded-2xl ${
-                          msg.sender === 'user'
-                            ? 'bg-red-600 text-white font-medium rounded-br-none'
-                            : 'bg-slate-100 text-slate-800 font-normal rounded-bl-none border border-slate-200/60'
-                        }`}
+                        className={`max-w-[85%] p-3 rounded-2xl ${msg.sender === 'user'
+                          ? 'bg-red-600 text-white font-medium rounded-br-none'
+                          : 'bg-slate-100 text-slate-800 font-normal rounded-bl-none border border-slate-200/60'
+                          }`}
                       >
                         {msg.sender === 'assistant' && (
                           <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-red-600 mb-1">
@@ -234,8 +232,6 @@ export default function BloodHeroAssistant() {
             className="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
           >
             <MascotVideo className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))" />
-            {/* Status Online Indicator */}
-            <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white ring-2 ring-emerald-400/40 animate-pulse" />
           </motion.button>
         </div>
       </div>
