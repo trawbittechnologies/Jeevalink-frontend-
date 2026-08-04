@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import MascotVideo from './MascotVideo.jsx';
 import {
   Sparkles,
   Zap,
@@ -418,14 +419,7 @@ export default function JeevaAIElement() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full border-2 border-red-500 shadow-lg overflow-hidden shrink-0 bg-black">
-                      <video
-                        src="/ef4440f93e8a494c85ff80cfb1c9bee4.webm"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover"
-                      />
+                      <MascotVideo className="w-full h-full object-cover rounded-full" />
                     </div>
                     <div>
                       <h4 className="text-base font-bold text-white">Ask JeevaAI Assistant</h4>

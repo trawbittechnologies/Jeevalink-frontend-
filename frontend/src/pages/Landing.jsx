@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../jl-landing.css";
+import MascotVideo from "../components/MascotVideo.jsx";
 import { useAppStore } from "../store/appStore.js";
 import { getStorageUrl } from "../store/api.js";
 import { motion } from "framer-motion";
@@ -163,15 +164,7 @@ export default function Landing() {
           <div className="bg-slate-950 text-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 items-center border border-slate-800">
             {/* Video Player */}
             <div className="md:col-span-7 relative h-72 sm:h-96 md:h-[400px] bg-black overflow-hidden group">
-              <video
-                src="/ef4440f93e8a494c85ff80cfb1c9bee4.webm"
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
-                className="w-full h-full object-cover"
-              />
+              <MascotVideo className="w-full h-full object-cover" />
               <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-semibold pointer-events-none">
                 <Play className="w-3 h-3 text-red-500 fill-current" />
                 <span>Awareness Video</span>

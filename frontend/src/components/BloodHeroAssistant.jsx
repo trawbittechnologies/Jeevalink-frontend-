@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, Search, Droplets, Send, RefreshCw, Sparkles } from 'lucide-react';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
 import { queryJeevaLinkAI } from '../utils/aiService.js';
+import MascotVideo from './MascotVideo.jsx';
 
 export default function BloodHeroAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,14 +80,7 @@ export default function BloodHeroAssistant() {
               <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md p-0.5 border border-white/20 overflow-hidden shrink-0">
-                    <video
-                      src="/ef4440f93e8a494c85ff80cfb1c9bee4.webm"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover rounded-full"
-                    />
+                    <MascotVideo className="w-full h-full object-cover rounded-full" />
                   </div>
                   <div>
                     <h3 className="text-sm font-extrabold flex items-center gap-1.5">
@@ -105,19 +99,12 @@ export default function BloodHeroAssistant() {
                 </button>
               </div>
 
-              {/* Chatbox Body Area with Video Character Avatar */}
+              {/* Chatbox Body Area with Mascot Avatar */}
               <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs">
-                {/* Character Video Avatar Box inside Chat Area */}
+                {/* Character Mascot Avatar Box inside Chat Area */}
                 <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-red-50/80 border border-red-100/90 shadow-sm">
                   <div className="w-12 h-12 rounded-full border-2 border-red-500 shadow-md overflow-hidden shrink-0 bg-black">
-                    <video
-                      src="/ef4440f93e8a494c85ff80cfb1c9bee4.webm"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
+                    <MascotVideo className="w-full h-full object-cover rounded-full" />
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
@@ -234,7 +221,7 @@ export default function BloodHeroAssistant() {
             )}
           </AnimatePresence>
 
-          {/* Video Character Floating Button */}
+          {/* Mascot Floating Button */}
           <motion.button
             type="button"
             onClick={() => {
@@ -246,15 +233,7 @@ export default function BloodHeroAssistant() {
             className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-red-600 shadow-2xl shadow-red-600/30 flex items-center justify-center p-0.5 overflow-hidden cursor-pointer group"
           >
             <div className="absolute inset-0 rounded-full border-2 border-red-500/40 animate-ping pointer-events-none" />
-
-            <video
-              src="/ef4440f93e8a494c85ff80cfb1c9bee4.webm"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover rounded-full"
-            />
+            <MascotVideo className="w-full h-full object-cover rounded-full" />
           </motion.button>
         </div>
       </div>
