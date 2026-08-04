@@ -11,7 +11,7 @@ export default function Splash({ onComplete }) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-  // Smooth real-time progress bar calculation
+  // Smooth real-time progress calculation
   useEffect(() => {
     const start = performance.now();
     let raf;
@@ -37,153 +37,121 @@ export default function Splash({ onComplete }) {
   }, [navigate, token, onComplete]);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#ffffff',
-        zIndex: 9999,
-        userSelect: 'none',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Soft radial background glow */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '600px',
-          height: '600px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(220,38,38,0.08) 0%, rgba(255,255,255,0) 70%)',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          pointerEvents: 'none',
-        }}
-      />
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-gradient-to-b from-slate-50 via-white to-red-50/30 select-none overflow-hidden py-10 px-4">
+      {/* Background ambient radial glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-radial from-red-500/10 via-red-500/0 to-transparent pointer-events-none blur-2xl" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-rose-400/5 pointer-events-none blur-3xl animate-pulse" />
 
-      {/* Logo + progress container */}
+      {/* Top spacer for alignment balance */}
+      <div className="w-full h-4" />
+
+      {/* Center content: Logo, Title, Loading Bar */}
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] }}
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '48px' }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-col items-center gap-8 relative z-10 my-auto"
       >
-        {/* Logo with enlarged pulse rings */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {/* Outer Ring */}
+        {/* Animated Logo Container with Pulse Rings */}
+        <div className="relative flex items-center justify-center p-6">
+          {/* Outer Pulsing Aura Ring 1 */}
           <motion.div
-            animate={{ scale: [1, 1.25, 1], opacity: [0.25, 0, 0.25] }}
-            transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }}
-            style={{
-              position: 'absolute',
-              width: '280px',
-              height: '280px',
-              borderRadius: '50%',
-              border: '1.8px solid rgba(220,38,38,0.3)',
-            }}
-          />
-          {/* Inner Ring */}
-          <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.05, 0.35] }}
-            transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut', delay: 0.5 }}
-            style={{
-              position: 'absolute',
-              width: '230px',
-              height: '230px',
-              borderRadius: '50%',
-              border: '1.2px solid rgba(220,38,38,0.2)',
-            }}
+            animate={{ scale: [0.95, 1.3, 0.95], opacity: [0.3, 0, 0.3] }}
+            transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
+            className="absolute w-72 h-72 rounded-full border border-red-500/25 pointer-events-none"
           />
 
-          {/* Official JeevaLink Logo Image ONLY (Size++) */}
+          {/* Inner Pulsing Ring 2 */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ scale: [0.98, 1.15, 0.98], opacity: [0.4, 0.05, 0.4] }}
+            transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut', delay: 0.4 }}
+            className="absolute w-56 h-56 rounded-full border border-rose-500/30 pointer-events-none"
+          />
+
+          {/* Soft Glow Disc behind logo */}
+          <div className="absolute w-44 h-44 rounded-full bg-red-500/10 blur-xl pointer-events-none" />
+
+          {/* Logo Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-            style={{
-              position: 'relative',
-              zIndex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
+            className="relative z-10 flex items-center justify-center p-4 rounded-3xl bg-white/70 backdrop-blur-md border border-white/80 shadow-xl shadow-red-950/5"
           >
             <img
               src="/logo.png"
               alt="JeevaLink Logo"
-              style={{
-                width: '190px',
-                height: '190px',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 12px 24px rgba(220,38,38,0.25))',
-              }}
+              className="w-36 h-36 object-contain drop-shadow-md"
             />
           </motion.div>
         </div>
 
-        {/* Slim progress bar */}
+        {/* Brand Name & Tagline */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.45, duration: 0.5 }}
-          style={{ width: '180px' }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex flex-col items-center gap-1.5 text-center"
         >
-          <div
-            style={{
-              width: '100%',
-              height: '3px',
-              borderRadius: '99px',
-              background: 'rgba(0,0,0,0.07)',
-              overflow: 'hidden',
-            }}
-          >
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+            Jeeva<span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">Link</span>
+          </h1>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+            Connecting Donors • Saving Lives
+          </p>
+        </motion.div>
+
+        {/* Minimal Progress Bar & Percentage */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="flex flex-col items-center gap-2.5 mt-2"
+        >
+          <div className="w-56 sm:w-64 h-2 rounded-full bg-slate-200/70 p-0.5 border border-slate-300/40 shadow-inner overflow-hidden">
             <div
-              style={{
-                height: '100%',
-                width: `${progress}%`,
-                borderRadius: '99px',
-                background: 'linear-gradient(90deg, #dc2626, #f87171)',
-                transition: 'width 80ms linear',
-              }}
+              className="h-full rounded-full bg-gradient-to-r from-red-600 via-rose-500 to-red-500 transition-all duration-75 ease-out shadow-sm"
+              style={{ width: `${progress}%` }}
             />
           </div>
+          <span className="text-[11px] font-bold tracking-widest text-slate-400 uppercase">
+            {Math.round(progress)}%
+          </span>
         </motion.div>
       </motion.div>
 
-      {/* Fixed footer branding */}
+      {/* Credits Branding Section (Increased Text Size & Glassmorphic Pill) */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7, duration: 0.6 }}
-        style={{
-          position: 'absolute',
-          bottom: '28px',
-          left: 0,
-          right: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '3px',
-        }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.55, duration: 0.6 }}
+        className="relative z-10 mt-auto"
       >
-        <span style={{ fontSize: '9.5px', letterSpacing: '0.14em', color: '#9ca3af', textTransform: 'uppercase', fontWeight: 600 }}>
-          Powered by
-        </span>
-        <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#111827', letterSpacing: '0.01em' }}>
-          Trawbit Technologies
-        </span>
-        <div style={{ width: '20px', height: '1px', background: '#e5e7eb', margin: '5px 0' }} />
-        <span style={{ fontSize: '9.5px', letterSpacing: '0.14em', color: '#9ca3af', textTransform: 'uppercase', fontWeight: 600 }}>
-          Co-powered by
-        </span>
-        <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#dc2626', letterSpacing: '0.01em' }}>
-          DYFI Kasaragod
-        </span>
+        <div className="bg-white/80 backdrop-blur-md border border-slate-200/90 shadow-lg shadow-slate-200/50 px-6 sm:px-8 py-3.5 rounded-2xl sm:rounded-full flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-center sm:text-left transition-all">
+          {/* Powered by Trawbit */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+              Powered by
+            </span>
+            <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+              Trawbit Technologies
+            </span>
+          </div>
+
+          {/* Separator Dot / Line */}
+          <div className="hidden sm:block h-4 w-[1.5px] bg-slate-300/80 rounded-full" />
+          <div className="sm:hidden w-12 h-[1.5px] bg-slate-200 rounded-full" />
+
+          {/* Co-powered by DYFI Kasaragod */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+              Co-powered by
+            </span>
+            <span className="text-sm sm:text-base font-extrabold text-red-600 tracking-tight">
+              DYFI Kasaragod
+            </span>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

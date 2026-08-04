@@ -73,10 +73,13 @@ const Campaigns = safeLazy(() => import('./pages/Campaigns.jsx'));
 function PageLoader() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
-      <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center animate-spin">
-        <Loader2 className="w-6 h-6" />
+      <div className="relative flex items-center justify-center">
+        <div className="absolute w-14 h-14 rounded-2xl bg-red-500/10 blur-md" />
+        <div className="w-12 h-12 rounded-2xl bg-white border border-red-100 shadow-lg shadow-red-950/5 text-red-600 flex items-center justify-center relative z-10">
+          <Loader2 className="w-6 h-6 animate-spin text-red-600" />
+        </div>
       </div>
-      <p className="mt-3 text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Module...</p>
+      <p className="mt-4 text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Loading Module...</p>
     </div>
   );
 }
