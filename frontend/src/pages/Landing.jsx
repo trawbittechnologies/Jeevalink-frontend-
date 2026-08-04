@@ -17,6 +17,7 @@ import {
   Bell,
   HeartHandshake,
   CheckCircle2,
+  Check,
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
 
@@ -44,8 +45,8 @@ const processSteps = [
   {
     num: "04",
     icon: HeartHandshake,
-    title: "Direct Connection & Donation",
-    desc: "Connect directly with donors or recipients to complete the lifesaving blood donation.",
+    title: "Direct Connection",
+    desc: "Connect directly with voluntary donors or recipients to complete the lifesaving donation.",
   },
 ];
 
@@ -73,9 +74,19 @@ export default function Landing() {
         onClose={() => setIsCommunityModalOpen(false)}
       />
 
-      {/* ── HERO SECTION (Ultra-Clean, Humanized & Serene) ───────────── */}
-      <section className="relative min-h-[75vh] flex items-center justify-center bg-white pt-14 pb-20 border-b border-slate-100">
+      {/* ── HERO SECTION ──────────────────────────────────────────────── */}
+      <section className="relative min-h-[75vh] flex items-center justify-center bg-white pt-12 pb-20 border-b border-slate-100">
         <div className="jl-container relative z-10 max-w-4xl mx-auto px-4 text-center">
+          {/* Live Network Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-xs font-extrabold uppercase tracking-wider mb-6"
+          >
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+            <span>Kerala's Voluntary Blood Sourcing Network</span>
+          </motion.div>
 
           {/* Main Title */}
           <motion.h1
@@ -85,7 +96,7 @@ export default function Landing() {
             className="text-4xl sm:text-6xl md:text-7xl font-black text-slate-950 tracking-tight leading-[1.08] mb-6"
           >
             Be Someone's Hero.<br />
-            <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 bg-clip-text text-transparent">
               Donate Blood. Save Lives Today.
             </span>
           </motion.h1>
@@ -105,7 +116,7 @@ export default function Landing() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-4"
+            className="flex flex-wrap items-center justify-center gap-4 mb-12"
           >
             {/* Enter Community Button */}
             <button
@@ -135,6 +146,27 @@ export default function Landing() {
               Request Blood
             </Link>
           </motion.div>
+
+          {/* Key Stats / Trust Indicators Ribbon */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs sm:text-sm font-bold text-slate-500"
+          >
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
+              <span>100% Free & Voluntary</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
+              <span>14 Kerala Districts</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
+              <span>Verified 24/7 Sourcing</span>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -144,8 +176,8 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
               <div className="inline-flex items-center gap-2 text-red-600 font-extrabold text-xs uppercase tracking-wider mb-1">
-                <Bell className="w-4 h-4 text-red-600" />
-                Live Active Sourcing Feed
+                <Bell className="w-4 h-4 text-red-600 animate-bounce" />
+                Live Sourcing Feed
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
                 Current Blood Requests
@@ -231,7 +263,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS (4 Minimalist Human Steps) ──────────────────────── */}
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
       <section className="py-20 bg-white border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center space-y-3 mb-14">
@@ -242,7 +274,7 @@ export default function Landing() {
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
               Simple Steps. <span className="text-red-600">Lifesaving Impact.</span>
             </h2>
-            <p className="text-slate-500 text-sm max-w-md mx-auto">
+            <p className="text-slate-500 text-sm max-w-md mx-auto font-medium">
               Our community framework facilitates direct connection between donors and patients.
             </p>
           </div>
@@ -357,67 +389,35 @@ export default function Landing() {
         </section>
       )}
 
-      {/* ── SPOTLIGHT: COMMUNITY ACCESS PORTAL CARD ─────────────────────── */}
-      <section className="py-16 bg-white relative">
+      {/* ── UNIFIED FINAL CALL TO ACTION (Duplicates Removed) ───────────── */}
+      <section className="py-20 bg-gradient-to-b from-white to-red-50/40">
         <div className="jl-container max-w-5xl mx-auto px-4">
-          <div className="relative bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-3xl p-8 md:p-12 shadow-xl overflow-hidden">
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="space-y-3 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-red-100 text-xs font-black uppercase tracking-wider">
-                  <span>COMMUNITY ACCESS PORTAL</span>
-                </div>
-
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  Connect With Regional DYFI Block Coordinators
-                </h2>
-
-                <p className="text-red-100/90 text-xs sm:text-sm max-w-xl leading-relaxed font-medium">
-                  Access your local committee helpline, log in to your account, or explore volunteer directories across Kerala.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsCommunityModalOpen(true)}
-                className="px-8 py-4 bg-white hover:bg-red-50 text-red-600 font-extrabold text-base rounded-2xl shadow-lg transition-all transform hover:scale-105 shrink-0 flex items-center gap-2 cursor-pointer"
-              >
-                <span>Enter Community</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CALL TO ACTION BANNER ────────────────────────────────────────── */}
-      <section className="py-16 bg-gradient-to-b from-white to-red-50/40">
-        <div className="jl-container max-w-5xl mx-auto px-4">
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 md:p-12 shadow-lg space-y-6 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="space-y-3 max-w-xl">
-              <span className="px-3.5 py-1 bg-red-100 text-red-700 text-xs font-black uppercase tracking-wider rounded-full">
-                Voluntary Blood Sourcing
+          <div className="bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-3xl p-8 md:p-14 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="space-y-3 text-center md:text-left max-w-xl">
+              <span className="px-3.5 py-1 bg-white/20 text-white text-xs font-black uppercase tracking-wider rounded-full inline-block backdrop-blur-md">
+                Join Kerala's Blood Network
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
-                Be the reason <span className="text-red-600">someone receives timely help.</span>
+              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+                Be the reason someone receives timely help.
               </h2>
-              <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
-                Register as a voluntary donor today to support patients and hospitals across Kerala.
+              <p className="text-red-100 text-sm leading-relaxed font-medium">
+                Register as a voluntary donor today or access regional DYFI Block Committee directories for emergency helpline support.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setIsCommunityModalOpen(true)}
-                className="w-full sm:w-auto px-7 py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-red-50 text-red-600 font-extrabold text-base rounded-2xl shadow-lg transition-all transform hover:scale-105 shrink-0 flex items-center justify-center gap-2.5 cursor-pointer"
               >
-                <Users className="w-4 h-4 text-white" />
+                <Users className="w-5 h-5 text-red-600" />
                 <span>Enter Community</span>
               </button>
 
               <Link
                 to="/register"
-                className="w-full sm:w-auto px-7 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-2xl transition-all text-center"
+                className="w-full sm:w-auto px-8 py-4 bg-slate-950 hover:bg-slate-900 text-white font-extrabold text-base rounded-2xl transition-all text-center border border-white/10"
               >
                 Register as Donor
               </Link>
