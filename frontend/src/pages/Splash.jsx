@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
 
 const DURATION = 3000;
+const CIRCUMFERENCE = 439.82; // 2 * Math.PI * 70
 
 export default function Splash({ onComplete }) {
   const { token } = useAuthStore();
@@ -36,25 +37,57 @@ export default function Splash({ onComplete }) {
     return () => clearTimeout(timerRef.current);
   }, [navigate, token, onComplete]);
 
+  const strokeDashoffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
+
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white text-slate-900 select-none overflow-hidden py-12 px-6">
       {/* Top spacer */}
       <div className="w-full" />
 
-      {/* Main Content: Clean, Human, Handcrafted & Minimal */}
+      {/* Main Content: Logo Inside Round Animated Loading Ring */}
       <div className="flex flex-col items-center gap-8 text-center my-auto max-w-sm w-full">
-        {/* Logo Container */}
+        {/* Logo Container with Outside Round Loading Ring */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="relative flex items-center justify-center"
+          className="relative flex items-center justify-center w-40 h-40"
         >
-          <img
-            src="/logo.png"
-            alt="JeevaLink"
-            className="w-28 h-32 sm:w-32 sm:h-36 object-contain drop-shadow-md"
-          />
+          {/* Circular SVG Progress Ring Around Logo */}
+          <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 160 160">
+            {/* Background Track Circle */}
+            <circle
+              cx="80"
+              cy="80"
+              r="70"
+              strokeWidth="3"
+              className="text-slate-100"
+              stroke="currentColor"
+              fill="transparent"
+            />
+            {/* Animated Red Progress Circle */}
+            <circle
+              cx="80"
+              cy="80"
+              r="70"
+              strokeWidth="3.5"
+              className="text-red-600 transition-all duration-75 ease-out"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              stroke="currentColor"
+              fill="transparent"
+            />
+          </svg>
+
+          {/* Centered Logo Inside the Ring */}
+          <div className="absolute inset-0 flex items-center justify-center p-5">
+            <img
+              src="/logo.png"
+              alt="JeevaLink Logo"
+              className="w-22 h-26 sm:w-24 sm:h-28 object-contain drop-shadow-sm"
+            />
+          </div>
         </motion.div>
 
         {/* Brand Title & Human Copy */}
@@ -70,23 +103,8 @@ export default function Splash({ onComplete }) {
           <p className="text-sm font-normal text-slate-500 max-w-[260px] leading-relaxed">
             Connecting voluntary blood donors with patients across Kerala.
           </p>
-        </motion.div>
-
-        {/* Humanized Minimal Progress Line */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          className="w-40 flex flex-col items-center gap-2 mt-2"
-        >
-          <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-red-600 rounded-full transition-all duration-100 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <span className="text-[11px] font-medium text-slate-400">
-            Loading...
+          <span className="mt-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
+            {Math.round(progress)}%
           </span>
         </motion.div>
       </div>
