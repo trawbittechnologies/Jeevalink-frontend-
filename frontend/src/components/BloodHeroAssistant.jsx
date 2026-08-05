@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { X, Search, Droplets, Send, RefreshCw, Sparkles } from 'lucide-react';
+import {
+  X,
+  Search,
+  Droplets,
+  Send,
+  RefreshCw,
+  Sparkles,
+  RotateCcw,
+  ChevronRight
+} from 'lucide-react';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
 import { queryJeevaLinkAI } from '../utils/aiService.js';
 import MascotVideo from './MascotVideo.jsx';
@@ -13,13 +22,21 @@ export default function BloodHeroAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 Greetings! I am Captain Jeeva. I am specialized strictly in voluntary blood donation, donor eligibility, emergency blood requests, and JeevaLink database records. How can I assist you today?"
+      text: "👋 **Greetings, Hero!** I am **Captain Jeeva**, your voluntary blood donation assistant.\n\nI can help you with:\n* **Donor Eligibility**: Age, weight & screening guidelines\n* **Blood Compatibility**: Universal donor & recipient matching\n* **Emergency Sourcing**: Active blood requests & donation drives\n\nHow can I assist you today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+
+  // Quick suggestion chips
+  const SUGGESTED_PROMPTS = [
+    { label: "🩸 Am I eligible to donate?", query: "Am I eligible to donate blood? What are the key requirements?" },
+    { label: "🧪 O- Blood compatibility", query: "Which blood groups can receive O- negative blood?" },
+    { label: "🚑 How emergency requests work", query: "How do emergency blood requests work on JeevaLink?" },
+    { label: "📍 Find donors in Kerala", query: "How can I find registered voluntary donors across Kerala?" }
+  ];
 
   // Scroll chat messages to bottom
   useEffect(() => {
@@ -34,18 +51,17 @@ export default function BloodHeroAssistant() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSendMessage = async (e) => {
-    e?.preventDefault();
-    if (!inputQuery.trim() || isThinking) return;
+  const handleSendMessage = async (textToSend = null) => {
+    const query = (textToSend || inputQuery).trim();
+    if (!query || isThinking) return;
 
-    const userText = inputQuery.trim();
     const currentHistory = [...messages];
-    setMessages((prev) => [...prev, { sender: 'user', text: userText }]);
+    setMessages((prev) => [...prev, { sender: 'user', text: query }]);
     setInputQuery('');
     setIsThinking(true);
 
     try {
-      const response = await queryJeevaLinkAI(userText, currentHistory);
+      const response = await queryJeevaLinkAI(query, currentHistory);
       setMessages((prev) => [...prev, { sender: 'assistant', text: response }]);
     } catch (err) {
       console.error('[BloodHeroAssistant] Error getting Gemini response:', err);
@@ -53,7 +69,7 @@ export default function BloodHeroAssistant() {
         ...prev,
         {
           sender: 'assistant',
-          text: `⚠️ Gemini Error: ${err.message || 'Unable to connect to Gemini API. Please try again.'}`,
+          text: `⚠️ **Connection Error**: ${err.message || 'Unable to connect to AI server. Please try again.'}`,
           isError: true,
         },
       ]);
@@ -62,9 +78,55 @@ export default function BloodHeroAssistant() {
     }
   };
 
+  const handleClearChat = () => {
+    setMessages([
+      {
+        sender: 'assistant',
+        text: "👋 **Chat Reset!** I am **Captain Jeeva**. Ask me anything about voluntary blood donation, donor eligibility, or emergency sourcing across Kerala."
+      }
+    ]);
+  };
+
   const handleAction = (path) => {
     setIsOpen(false);
     navigate(path);
+  };
+
+  // Helper to render bold and bullet formatted text cleanly
+  const renderFormattedText = (rawText) => {
+    if (!rawText) return null;
+    const lines = rawText.split('\n');
+
+    return lines.map((line, lIdx) => {
+      const trimmed = line.trim();
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+
+      const formattedLine = parts.map((part, pIdx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return (
+            <strong key={pIdx} className="font-extrabold text-slate-900">
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return part;
+      });
+
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        return (
+          <div key={lIdx} className="flex items-start gap-2 my-1 pl-1">
+            <span className="text-red-500 font-bold shrink-0">•</span>
+            <span className="leading-snug">{formattedLine}</span>
+          </div>
+        );
+      }
+
+      return (
+        <p key={lIdx} className={lIdx > 0 ? 'mt-1.5 leading-relaxed' : 'leading-relaxed'}>
+          {formattedLine}
+        </p>
+      );
+    });
   };
 
   return (
@@ -79,105 +141,119 @@ export default function BloodHeroAssistant() {
           {/* Expanded Assistant Chatbox Dialog */}
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.85, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="pointer-events-auto mb-4 w-80 sm:w-96 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-2xl shadow-slate-900/15 overflow-hidden flex flex-col h-[520px]"
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+              className="pointer-events-auto mb-4 w-80 sm:w-[410px] rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-2xl shadow-slate-900/20 overflow-hidden flex flex-col h-[540px] max-h-[85vh]"
             >
-              {/* Card Header */}
-              <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0">
+              {/* Creative Glass Header */}
+              <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0 shadow-md">
                 <div className="flex items-center gap-3">
-                  {/* Cutout Mascot Avatar */}
-                  <div className="w-16 h-16 flex items-center justify-center shrink-0">
-                    <MascotVideo className="w-full h-full object-contain drop-shadow-md" />
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 p-1 flex items-center justify-center shrink-0 border border-white/20 backdrop-blur-md shadow-inner">
+                    <MascotVideo className="w-full h-full object-contain" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold flex items-center gap-1.5">
-                      <span>Jeeva Hero Assistant</span>
-                    </h3>
-                    <p className="text-[11px] text-red-100 font-medium">Voluntary Blood Companion</p>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black tracking-tight">Captain Jeeva</h3>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 border border-emerald-300/30 text-emerald-100 px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        AI Active
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-red-100 font-medium">Voluntary Blood Donation Hero</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handleClearChat}
+                    title="Reset Chat"
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 transition-all cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    title="Close"
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 transition-all cursor-pointer ml-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
-              {/* Chatbox Body Area with Cutout Mascot Avatar */}
-              <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs">
-                {/* Cutout Character Mascot Avatar Box */}
-                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-red-50/80 border border-red-100/90 shadow-sm">
-                  <div className="w-24 h-24 flex items-center justify-center shrink-0">
-                    <MascotVideo className="w-full h-full object-contain drop-shadow-md" />
+              {/* Chatbox Body */}
+              <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs bg-slate-50/50 scrollbar-thin">
+                {/* Hero Greeting Box */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-red-50/90 to-rose-50/50 border border-red-100/80 shadow-sm space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black text-red-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-red-600" />
+                      Gemini 3.6 AI Powered
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">Kerala Sourcing</span>
                   </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-extrabold text-red-700 uppercase tracking-wider">Jeeva Hero</span>
-                      <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Gemini Online</span>
+                  <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                    Ask me anything about donor eligibility, blood group matching, emergency cases, or platform records.
+                  </p>
+                </div>
+
+                {/* Quick Topic Prompts */}
+                {messages.length <= 2 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Suggested Questions</p>
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {SUGGESTED_PROMPTS.map((prompt, pIdx) => (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => handleSendMessage(prompt.query)}
+                          className="w-full text-left p-2.5 rounded-xl bg-white hover:bg-red-50/60 border border-slate-200/70 hover:border-red-200 text-slate-700 hover:text-red-700 font-semibold text-[11px] transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
+                        >
+                          <span>{prompt.label}</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5" />
+                        </button>
+                      ))}
                     </div>
-                    <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
-                      Ask any question regarding blood donation, donor eligibility, emergency requests, or database records:
-                    </p>
                   </div>
-                </div>
+                )}
 
-                {/* Quick Action Shortcuts */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleAction('/donor/search')}
-                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-red-50 border border-slate-200/80 hover:border-red-200 text-left transition-all flex items-center gap-2 group cursor-pointer"
-                  >
-                    <Search className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                    <span className="text-[11px] font-bold text-slate-800 group-hover:text-red-600">Find Donors</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAction('/requests')}
-                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-red-50 border border-slate-200/80 hover:border-red-200 text-left transition-all flex items-center gap-2 group cursor-pointer"
-                  >
-                    <Droplets className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                    <span className="text-[11px] font-bold text-slate-800 group-hover:text-red-600">Blood Requests</span>
-                  </button>
-                </div>
-
-                {/* Conversation History inside Chatbox */}
-                <div className="space-y-3 pt-2">
+                {/* Conversation History */}
+                <div className="space-y-3 pt-1">
                   {messages.map((msg, idx) => (
                     <div
                       key={idx}
                       className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[85%] p-3 rounded-2xl ${
+                        className={`max-w-[88%] p-3.5 rounded-2xl shadow-2xs ${
                           msg.sender === 'user'
-                            ? 'bg-red-600 text-white font-medium rounded-br-none'
+                            ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-tr-xs'
                             : msg.isError
-                            ? 'bg-rose-50 text-rose-800 border border-rose-200 font-medium rounded-bl-none'
-                            : 'bg-slate-100 text-slate-800 font-normal rounded-bl-none border border-slate-200/60'
+                            ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-tl-xs'
+                            : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs border-l-4 border-l-red-500'
                         }`}
                       >
                         {msg.sender === 'assistant' && (
-                          <div className={`flex items-center gap-1.5 text-[10px] font-extrabold mb-1 ${msg.isError ? 'text-rose-700' : 'text-red-600'}`}>
-                            <Sparkles className="w-3 h-3" /> Jeeva Hero
+                          <div className="flex items-center gap-1.5 text-[10px] font-black text-red-600 mb-1.5 border-b border-slate-100 pb-1">
+                            <Sparkles className="w-3 h-3 text-red-500" /> Captain Jeeva
                           </div>
                         )}
-                        <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                        <div className="text-[12px] whitespace-pre-wrap leading-relaxed">
+                          {msg.sender === 'assistant' ? renderFormattedText(msg.text) : msg.text}
+                        </div>
                       </div>
                     </div>
                   ))}
 
                   {isThinking && (
                     <div className="flex justify-start">
-                      <div className="p-3 rounded-2xl bg-slate-100 text-slate-500 rounded-bl-none flex items-center gap-2">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-red-600" />
-                        <span className="text-[11px] font-semibold">Jeeva Hero is typing...</span>
+                      <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 text-slate-600 rounded-tl-xs border-l-4 border-l-red-500 shadow-2xs flex items-center gap-2.5">
+                        <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
+                        <span className="text-[11px] font-semibold text-slate-700">Captain Jeeva is formulating a response...</span>
                       </div>
                     </div>
                   )}
@@ -186,20 +262,46 @@ export default function BloodHeroAssistant() {
                 </div>
               </div>
 
-              {/* Chat Input Form inside Chatbox */}
-              <div className="p-3 border-t border-slate-100 bg-white shrink-0">
-                <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+              {/* Quick Action Navigation Links */}
+              <div className="px-3 py-2 bg-slate-100/70 border-t border-slate-200/60 flex items-center justify-between gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleAction('/donor/search')}
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 border border-slate-200 text-slate-700 hover:text-red-600 text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <Search className="w-3 h-3 text-red-600" />
+                  <span>Find Donors</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAction('/requests')}
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 border border-slate-200 text-slate-700 hover:text-red-600 text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <Droplets className="w-3 h-3 text-red-600" />
+                  <span>Blood Requests</span>
+                </button>
+              </div>
+
+              {/* Chat Input Form */}
+              <div className="p-3 border-t border-slate-200/80 bg-white shrink-0">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }}
+                  className="flex items-center gap-2"
+                >
                   <input
                     type="text"
                     value={inputQuery}
                     onChange={(e) => setInputQuery(e.target.value)}
-                    placeholder="Ask about blood donation, eligibility, emergency requests..."
-                    className="flex-1 px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500"
+                    placeholder="Ask Captain Jeeva about blood donation..."
+                    className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
                   />
                   <button
                     type="submit"
                     disabled={!inputQuery.trim() || isThinking}
-                    className="p-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all disabled:opacity-40 cursor-pointer"
+                    className="p-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -209,9 +311,8 @@ export default function BloodHeroAssistant() {
           )}
         </AnimatePresence>
 
-        {/* Sleek Refined Floating Mascot Trigger */}
+        {/* Floating Mascot Trigger Button */}
         <div className="relative pointer-events-auto flex items-center gap-3">
-          {/* Greeting Speech Tooltip */}
           <AnimatePresence>
             {showTooltip && !isOpen && (
               <motion.div
@@ -220,7 +321,7 @@ export default function BloodHeroAssistant() {
                 exit={{ opacity: 0, x: 10 }}
                 className="bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl border border-slate-800 flex items-center gap-2 whitespace-nowrap"
               >
-                <span>Need help with blood sourcing?</span>
+                <span>Ask Captain Jeeva AI Assistant!</span>
                 <button
                   type="button"
                   onClick={() => setShowTooltip(false)}
@@ -232,7 +333,6 @@ export default function BloodHeroAssistant() {
             )}
           </AnimatePresence>
 
-          {/* Cutout Transparent Mascot Button */}
           <motion.button
             type="button"
             onClick={() => {
@@ -241,7 +341,7 @@ export default function BloodHeroAssistant() {
             }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.94 }}
-            className="relative w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
+            className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
           >
             <MascotVideo className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))" />
           </motion.button>
