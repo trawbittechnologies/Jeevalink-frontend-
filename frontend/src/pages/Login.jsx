@@ -152,13 +152,13 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Email, Mobile or JeevaLink ID
+                Email or JeevaLink ID
               </label>
               <input
                 type="text"
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
-                placeholder="you@example.com, 9876543210 or JL-SA-KSD-0001"
+                placeholder="you@example.com or JL-SA-KSD-0001"
                 className="input-base"
                 autoComplete="username"
               />
