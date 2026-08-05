@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX, Play, Pause } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function MascotVideo({
   className = "w-full h-full object-contain mix-blend-multiply",
@@ -8,72 +9,98 @@ export default function MascotVideo({
   showAudioToggle = false,
   showPlayPause = false,
 }) {
-  const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [activeIdx, setActiveIdx] = useState(0);
+  
+  const videoRefs = useRef([]);
+  const prevActiveIdx = useRef(activeIdx);
+
+  const defaultVideos = [
+    "/mascot_video.webm",
+    "/mascot 3.webm",
+    "/vedio 2.webm"
+  ];
+
+  const videosToRender = videoUrl ? [videoUrl] : defaultVideos;
 
   useEffect(() => {
-    const el = videoRef.current;
-    if (el) {
-      el.muted = isMuted;
-      const playPromise = el.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          if (err.name !== 'AbortError') {
-            console.warn("Mascot video autoplay fallback:", err);
-          }
-        });
+    // Keep muted state in sync across all videos
+    videoRefs.current.forEach((video) => {
+      if (video) video.muted = isMuted;
+    });
+  }, [isMuted]);
+
+  useEffect(() => {
+    const activeVideo = videoRefs.current[activeIdx];
+    if (activeVideo) {
+      if (prevActiveIdx.current !== activeIdx) {
+        activeVideo.currentTime = 0; // Start from beginning when switched
+        prevActiveIdx.current = activeIdx;
+      }
+      
+      if (isPlaying) {
+        const playPromise = activeVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            if (err.name !== 'AbortError') {
+               console.warn("Autoplay prevented:", err);
+            }
+          });
+        }
+      } else {
+        activeVideo.pause();
       }
     }
-  }, [videoUrl]);
+  }, [activeIdx, isPlaying]);
 
   const toggleMute = (e) => {
     e?.stopPropagation();
-    if (videoRef.current) {
-      const nextState = !videoRef.current.muted;
-      videoRef.current.muted = nextState;
-      setIsMuted(nextState);
-    }
+    setIsMuted(prev => !prev);
   };
 
   const togglePlay = (e) => {
     e?.stopPropagation();
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
-    }
+    setIsPlaying(prev => !prev);
+  };
+
+  const handleVideoEnd = () => {
+    if (videoUrl) return; 
+    
+    // Immediately switch to next video for seamless continuous feel
+    setActiveIdx((prev) => (prev + 1) % defaultVideos.length);
   };
 
   const activePoster = posterUrl || "/blood_hero_mascot.png";
 
   return (
-    <div className="relative w-full h-full overflow-hidden group flex items-center justify-center">
-      <video
-        key={videoUrl || 'default-video'}
-        ref={videoRef}
-        autoPlay
-        loop
-        muted={isMuted}
-        playsInline
-        preload="auto"
-        poster={activePoster}
-        className={className}
-      >
-        {videoUrl ? (
-          <source src={videoUrl} />
-        ) : (
-          <>
-            <source src="/e65e90f6856645b6ad0d704d686cce0d (1).webm" type="video/webm" />
-            <source src="/mascot_video.webm" type="video/webm" />
-          </>
-        )}
-        <img src={activePoster} alt="Awareness Mascot Video" className={className} />
-      </video>
+    <div className="relative w-full h-full overflow-visible group flex items-center justify-center">
+      {videosToRender.map((src, idx) => {
+        const isActive = idx === activeIdx;
+        const videoSpecificStyles = !videoUrl && idx === 0 ? "scale-[1.15]" : "scale-[1.4]";
+        
+        return (
+          <motion.video
+            key={src}
+            ref={(el) => videoRefs.current[idx] = el}
+            loop={!!videoUrl} 
+            muted={isMuted}
+            playsInline
+            preload="auto"
+            poster={activePoster}
+            initial={false}
+            animate={{ 
+              opacity: isActive ? 1 : 0, 
+              zIndex: isActive ? 10 : 0 
+            }}
+            transition={{ duration: 0.1 }} // Ultra-fast crossfade (100ms) for gapless feel
+            className={`${className} absolute inset-0 ${videoSpecificStyles} ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            onEnded={isActive ? handleVideoEnd : undefined}
+          >
+            <source src={src} type="video/webm" />
+          </motion.video>
+        );
+      })}
 
       {/* Modern Floating Controls (Audio ON/OFF & Play/Pause) */}
       {(showAudioToggle || showPlayPause) && (
@@ -120,3 +147,4 @@ export default function MascotVideo({
     </div>
   );
 }
+
