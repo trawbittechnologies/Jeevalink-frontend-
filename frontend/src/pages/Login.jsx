@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { normalizeRole } from '../utils/rbac.js';
@@ -14,6 +14,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotInput, setForgotInput] = useState('');
+  const [modalType, setModalType] = useState(null);
 
   const { login, loading } = useAuthStore();
   const { triggerToast, fetchRequests, fetchNotifications, fetchUsers, publicStats, fetchPublicStats } = useAppStore();
@@ -56,6 +57,72 @@ export default function Login() {
       }
     } catch (err) {
       triggerToast('Login failed: ' + (err.message || 'Server error'), 'error');
+    }
+  };
+
+  const renderModalContent = () => {
+    switch (modalType) {
+      case 'privacy':
+        return (
+          <>
+            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Privacy Policy</h3>
+            <div className="text-slate-500 text-sm font-medium mb-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar">
+              <p className="mb-4">Welcome to JeevaLink. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our web application and services.</p>
+              <h4 className="font-bold text-slate-800 mb-2">1. Information Collection</h4>
+              <p className="mb-4">We collect information such as your name, contact details, blood group, and precise location data when you register or use the service to coordinate life-saving blood donations. Your location is strictly used for emergency SOS proximity matching.</p>
+              <h4 className="font-bold text-slate-800 mb-2">2. How We Use Your Data</h4>
+              <p className="mb-4">Your personal details are used primarily to alert you during blood shortage emergencies and connect you with verified blood banks or patients in your vicinity. We also use aggregated, anonymized data for platform analytics.</p>
+              <h4 className="font-bold text-slate-800 mb-2">3. Data Security & Sharing</h4>
+              <p className="mb-4">We implement enterprise-grade security measures to ensure your data is protected against unauthorized access. We do not sell your personal data to third parties. Information is only shared with verified healthcare partners during an active emergency request.</p>
+              <h4 className="font-bold text-slate-800 mb-2">4. Your Rights</h4>
+              <p>You have the right to access, modify, or permanently delete your account data at any time via your user dashboard settings.</p>
+            </div>
+          </>
+        );
+      case 'terms':
+        return (
+          <>
+            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Terms of Service</h3>
+            <div className="text-slate-500 text-sm font-medium mb-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar">
+              <p className="mb-4">By accessing JeevaLink, you agree to be bound by these Terms of Service. Please read them carefully as they govern your use of the platform.</p>
+              <h4 className="font-bold text-slate-800 mb-2">1. Platform Usage</h4>
+              <p className="mb-4">You must use the platform responsibly and solely for coordinating and finding blood donations. Any misuse, false emergency requests, or spamming will result in immediate permanent account suspension.</p>
+              <h4 className="font-bold text-slate-800 mb-2">2. User Responsibility</h4>
+              <p className="mb-4">You are responsible for maintaining the confidentiality of your account credentials and providing accurate, up-to-date health and contact information. You confirm that you meet the legal age and health requirements to donate blood when opting in.</p>
+              <h4 className="font-bold text-slate-800 mb-2">3. Emergency SOS Feature</h4>
+              <p className="mb-4">The Emergency SOS feature is for critical life-threatening situations only. Abuse of the SOS siren or rapid-alert system is strictly prohibited.</p>
+              <h4 className="font-bold text-slate-800 mb-2">4. Limitation of Liability</h4>
+              <p>JeevaLink is a coordination platform. We do not guarantee the availability of blood or the medical suitability of donors. All medical procedures are the sole responsibility of the certified healthcare providers.</p>
+            </div>
+          </>
+        );
+      case 'help':
+        return (
+          <>
+            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Help Center</h3>
+            <div className="text-slate-500 text-sm font-medium mb-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar">
+              <p className="mb-6">Need assistance with your JeevaLink account or facing a technical issue? Our support teams are ready to help you.</p>
+              
+              <div className="bg-red-50 p-5 rounded-2xl border border-red-100 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Heart className="w-4 h-4 text-red-600" />
+                  <p className="font-bold text-slate-900">JeevaLink Support</p>
+                </div>
+                <p className="text-red-600 font-bold mb-1">support@jeevalink.com</p>
+                <p className="text-xs text-red-800/70 font-medium">For general inquiries and platform assistance.</p>
+              </div>
+
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                <p className="font-bold text-slate-900 mb-1">Technical Partner: Trawbit Technologies</p>
+                <p className="text-slate-700 font-bold mb-1">+91 94972 19574</p>
+                <p className="text-slate-700 font-bold mb-1">support@trawbit</p>
+                <p className="text-xs text-slate-500 font-medium mt-2">For bug reports, technical issues, and system integrations.</p>
+              </div>
+            </div>
+          </>
+        );
+      default:
+        return null;
     }
   };
 
@@ -236,11 +303,11 @@ export default function Login() {
             </div>
             
             <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-[10px] font-bold tracking-widest uppercase text-slate-400">
-              <a href="#" className="hover:text-red-600 transition-colors">Privacy Policy</a>
+              <button type="button" onClick={() => setModalType('privacy')} className="hover:text-red-600 transition-colors">Privacy Policy</button>
               <span className="opacity-50">&bull;</span>
-              <a href="#" className="hover:text-red-600 transition-colors">Terms of Service</a>
+              <button type="button" onClick={() => setModalType('terms')} className="hover:text-red-600 transition-colors">Terms of Service</button>
               <span className="opacity-50">&bull;</span>
-              <a href="#" className="hover:text-red-600 transition-colors">Help Center</a>
+              <button type="button" onClick={() => setModalType('help')} className="hover:text-red-600 transition-colors">Help Center</button>
             </div>
           </div>
         </motion.div>
@@ -311,6 +378,36 @@ export default function Login() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Info Modal (Privacy, Terms, Help) ── */}
+      <AnimatePresence>
+        {modalType && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+              onClick={() => setModalType(null)}
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative z-10 w-full max-w-md bg-white rounded-[2rem] p-8 md:p-10 shadow-2xl overflow-hidden"
+            >
+              <div className="relative z-10 flex flex-col">
+                 {renderModalContent()}
+                 <button 
+                   onClick={() => setModalType(null)} 
+                   className="w-full py-4 mt-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-xs font-bold tracking-widest uppercase transition-colors cursor-pointer"
+                 >
+                   Close
+                 </button>
               </div>
             </motion.div>
           </div>
