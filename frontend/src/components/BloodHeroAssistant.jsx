@@ -368,11 +368,13 @@ export default function BloodHeroAssistant() {
               setIsOpen(!isOpen);
               setShowTooltip(false);
             }}
-            whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.94 }}
             className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
           >
-            <MascotVideo className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))" />
+            <MascotVideo 
+              showBubble={!isOpen}
+              className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))" 
+            />
           </motion.button>
         </div>
       </div>
