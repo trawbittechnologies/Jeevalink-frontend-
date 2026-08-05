@@ -22,7 +22,7 @@ export default function BloodHeroAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 **Hello!** I am **Jeeva Support**, your AI assistant for JeevaLink blood donation platform.\n\nI am here to help you with:\n* **Donor Eligibility**: Requirements & health guidelines\n* **Blood Matching**: Donor and recipient compatibility\n* **Emergency Sourcing**: Active blood requests & donation drives\n\nHow can I help you today?"
+      text: "👋 **Hello!** I am **Hemo**, your AI assistant for JeevaLink blood donation platform.\n\nI am here to help you with:\n* **Donor Eligibility**: Requirements & health guidelines\n* **Blood Matching**: Donor and recipient compatibility\n* **Emergency Sourcing**: Active blood requests & donation drives\n\nHow can I help you today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -82,7 +82,7 @@ export default function BloodHeroAssistant() {
     setMessages([
       {
         sender: 'assistant',
-        text: "👋 **Chat Reset!** I am **Captain Jeeva**. Ask me anything about voluntary blood donation, donor eligibility, or emergency sourcing across Kerala."
+        text: "👋 **Chat Reset!** I am **Hemo**. Ask me anything about voluntary blood donation, donor eligibility, or emergency sourcing across Kerala."
       }
     ]);
   };
@@ -155,13 +155,13 @@ export default function BloodHeroAssistant() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-black tracking-tight">Jeeva Support</h3>
+                      <h3 className="text-sm font-black tracking-tight">Hemo</h3>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 border border-emerald-300/30 text-emerald-100 px-2 py-0.5 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         Online
                       </span>
                     </div>
-                    <p className="text-[11px] text-red-100 font-medium">JeevaLink AI Support</p>
+                    <p className="text-[11px] text-red-100 font-medium">JeevaLink Blood Companion</p>
                   </div>
                 </div>
 
@@ -239,7 +239,7 @@ export default function BloodHeroAssistant() {
                       >
                         {msg.sender === 'assistant' && (
                           <div className="flex items-center gap-1.5 text-[10px] font-black text-red-600 mb-1.5 border-b border-slate-100 pb-1">
-                            <Sparkles className="w-3 h-3 text-red-500" /> Jeeva Support
+                            <Sparkles className="w-3 h-3 text-red-500" /> Hemo
                           </div>
                         )}
                         <div className="text-[12px] whitespace-pre-wrap leading-relaxed">
@@ -253,7 +253,7 @@ export default function BloodHeroAssistant() {
                     <div className="flex justify-start">
                       <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 text-slate-600 rounded-tl-xs border-l-4 border-l-red-500 shadow-2xs flex items-center gap-2.5">
                         <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
-                        <span className="text-[11px] font-semibold text-slate-700">Jeeva Support is typing...</span>
+                        <span className="text-[11px] font-semibold text-slate-700">Hemo is typing...</span>
                       </div>
                     </div>
                   )}
@@ -295,7 +295,7 @@ export default function BloodHeroAssistant() {
                     type="text"
                     value={inputQuery}
                     onChange={(e) => setInputQuery(e.target.value)}
-                    placeholder="Ask Jeeva Support about blood donation..."
+                    placeholder="Ask Hemo about blood donation..."
                     className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
                   />
                   <button
@@ -321,7 +321,7 @@ export default function BloodHeroAssistant() {
                 exit={{ opacity: 0, x: 10 }}
                 className="bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl border border-slate-800 flex items-center gap-2 whitespace-nowrap"
               >
-                <span>Ask Jeeva Support AI Assistant!</span>
+                <span>Ask Hemo AI Assistant!</span>
                 <button
                   type="button"
                   onClick={() => setShowTooltip(false)}
