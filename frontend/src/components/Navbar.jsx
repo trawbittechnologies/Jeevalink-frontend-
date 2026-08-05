@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
-import { LogOut, User, Users, Bell, ChevronDown, Settings, Siren, Award, CheckCircle2, MapPin } from 'lucide-react';
+import { LogOut, User, Users, Bell, ChevronDown, Settings, Siren, Award, CheckCircle2, MapPin, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getStorageUrl } from '../store/api.js';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
@@ -22,6 +22,7 @@ export default function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [communityModalOpen, setCommunityModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -238,6 +239,15 @@ export default function Navbar() {
 
             </>
           )}
+
+          {/* Mobile Menu Toggle */}
+          <button
+            type="button"
+            className="md:hidden p-2 text-slate-600 hover:text-red-600 transition-colors cursor-pointer"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
@@ -245,6 +255,77 @@ export default function Navbar() {
         isOpen={communityModalOpen}
         onClose={() => setCommunityModalOpen(false)}
       />
+
+      {/* Mobile Sidebar Navigation */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[60] md:hidden"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-[280px] bg-white z-[70] shadow-2xl flex flex-col md:hidden border-l border-slate-100"
+            >
+              <div className="p-4 flex items-center justify-between border-b border-slate-100">
+                <JeevaLinkLogo size={32} textClassName="text-lg" />
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
+                {publicLinks.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                      isActive(link.to)
+                        ? 'text-red-600 bg-red-50'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+
+                {!user && (
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setCommunityModalOpen(true);
+                      }}
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-xl transition-colors cursor-pointer"
+                    >
+                      <Users className="w-4 h-4" /> Enter Community
+                    </button>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center w-full py-3 text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 text-sm font-bold rounded-xl transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
