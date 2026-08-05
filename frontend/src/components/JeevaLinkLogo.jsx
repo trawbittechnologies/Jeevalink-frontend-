@@ -15,7 +15,7 @@ export default function JeevaLinkLogo({
     <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
       {/* Official JeevaLink Logo Image from public/logo.png */}
       <div
-        className="relative flex items-center justify-center shrink-0 bg-white shadow-sm border border-red-300 rounded-[24%] overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-md hover:border-red-400 p-1.5"
+        className="relative flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-105"
         style={{ width: size, height: size }}
       >
         <img
