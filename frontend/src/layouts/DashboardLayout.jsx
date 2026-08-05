@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
@@ -9,11 +9,12 @@ import SOSButton from '../components/SOSButton.jsx';
 import BloodHeroAssistant from '../components/BloodHeroAssistant.jsx';
 import {
   LayoutDashboard, Droplets, Users, ClipboardList, User,
-  Bell, Siren, Building2, Megaphone
+  Bell, Siren, Building2, Megaphone, Menu
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function DashboardLayout() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loadProfile } = useAuthStore();
   const { notifications, startSOSCountdown } = useAppStore();
   const location = useLocation();
@@ -102,8 +103,8 @@ export default function DashboardLayout() {
     <div className="flex min-h-screen bg-slate-50">
       <Toast />
 
-      {/* Sidebar (desktop) */}
-      <Sidebar />
+      {/* Sidebar (desktop & mobile) */}
+      <Sidebar mobileOpen={isMobileMenuOpen} setMobileOpen={setIsMobileMenuOpen} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -111,10 +112,18 @@ export default function DashboardLayout() {
         {/* Top bar */}
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-100 h-14 flex items-center justify-between px-4 lg:px-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
 
-          {/* Logo (mobile only) */}
-          <Link to="/" className="flex items-center lg:hidden">
-            <JeevaLinkLogo size={32} textClassName="text-sm" />
-          </Link>
+          {/* Mobile Menu & Logo */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 -ml-2 text-gray-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <Link to="/" className="flex items-center">
+              <JeevaLinkLogo size={32} textClassName="text-sm" />
+            </Link>
+          </div>
 
           {/* Page breadcrumb (desktop) */}
           <div className="hidden lg:flex items-center gap-2">
@@ -160,32 +169,8 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* Mobile bottom nav */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/98 backdrop-blur-xl border-t border-slate-100 flex shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const active = isActive(link.to);
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-200 relative ${active ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="mobile-nav-active"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full"
-                  />
-                )}
-                <Icon className={`w-5 h-5 transition-transform ${active ? 'scale-110' : ''}`} />
-                <span className={`text-[9px] font-bold transition-colors ${active ? 'text-primary' : ''}`}>{link.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6 min-h-0">
+        <main className="flex-1 p-4 lg:p-6 pb-6 min-h-0">
           <Outlet />
         </main>
       </div>

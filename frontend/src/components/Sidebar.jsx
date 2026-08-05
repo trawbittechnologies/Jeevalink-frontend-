@@ -68,7 +68,7 @@ const technicalAdminLinks = [
   { to: '/profile', label: 'My Profile', icon: User },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const { user, logout } = useAuthStore();
   const { complaints } = useAppStore();
   const navigate = useNavigate();
@@ -113,7 +113,16 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-white border-r border-slate-100/80 shrink-0 shadow-[2px_0_12px_rgba(0,0,0,0.03)] z-30 overflow-y-auto overflow-x-hidden">
+    <>
+      {/* Mobile Backdrop */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-slate-100/80 shadow-[2px_0_12px_rgba(0,0,0,0.03)] overflow-y-auto overflow-x-hidden transform transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:static lg:h-screen lg:sticky lg:top-0 shrink-0`}>
 
       {/* Logo */}
       <Link to="/" className="h-16 flex items-center px-5 border-b border-slate-100 shrink-0">
@@ -133,6 +142,7 @@ export default function Sidebar() {
             <Link
               key={`${link.to}-${link.label}`}
               to={link.to}
+              onClick={() => setMobileOpen && setMobileOpen(false)}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 group ${active
                 ? 'bg-gradient-to-r from-rose-50 to-red-50/40 text-slate-900 shadow-xs border border-rose-100/80'
                 : 'text-slate-600 hover:bg-slate-50/80 hover:text-slate-900'
@@ -189,5 +199,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }
