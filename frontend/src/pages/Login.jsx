@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { normalizeRole } from '../utils/rbac.js';
-import { Mail, Eye, EyeOff, Lock, ArrowRight, ShieldCheck, Heart } from 'lucide-react';
+import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
 
@@ -128,6 +128,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full relative flex flex-col lg:flex-row bg-[#F8FAFC] overflow-hidden font-sans selection:bg-rose-200 selection:text-rose-900">
+
+      {/* ── Back to Landing Page Button ── */}
+      <Link 
+        to="/" 
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-widest uppercase transition-all duration-300 hover:-translate-x-1"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </Link>
 
       {/* ── Immersive Abstract Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden bg-gradient-to-b lg:bg-gradient-to-br from-red-600 via-rose-600 to-red-900">
