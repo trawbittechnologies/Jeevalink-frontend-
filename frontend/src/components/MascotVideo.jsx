@@ -71,7 +71,7 @@ export default function MascotVideo({
     setActiveIdx((prev) => (prev + 1) % defaultVideos.length);
   };
 
-  const activePoster = posterUrl || "/blood_hero_mascot.png";
+  const activePoster = posterUrl;
 
   return (
     <div className="relative w-full h-full overflow-visible group flex items-center justify-center">
