@@ -26,6 +26,7 @@ export default function BloodHeroAssistant() {
   ]);
   const [inputQuery, setInputQuery] = useState('');
   const [isThinking, setIsThinking] = useState(false);
+  const [languageSelected, setLanguageSelected] = useState(false);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
@@ -77,6 +78,32 @@ export default function BloodHeroAssistant() {
     }
   };
 
+  const handleLanguageSelect = async (lang) => {
+    setLanguageSelected(true);
+    const query = `I prefer to communicate in ${lang}. Please reply in ${lang} from now on and greet me.`;
+    const currentHistory = [...messages];
+
+    setMessages((prev) => [...prev, { sender: 'user', text: `Selected Language: ${lang}` }]);
+    setIsThinking(true);
+
+    try {
+      const response = await queryJeevaLinkAI(query, currentHistory);
+      setMessages((prev) => [...prev, { sender: 'assistant', text: response }]);
+    } catch (err) {
+      console.error('[BloodHeroAssistant] Error setting language:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'assistant',
+          text: `⚠️ **Connection Error**: Unable to set language. Please try again.`,
+          isError: true,
+        },
+      ]);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
   const handleClearChat = () => {
     setMessages([
       {
@@ -84,6 +111,7 @@ export default function BloodHeroAssistant() {
         text: "👋 **Chat Reset!** I am **Hemo**. Ask me anything about voluntary blood donation, donor eligibility, or emergency sourcing across Kerala."
       }
     ]);
+    setLanguageSelected(false);
   };
 
   const handleAction = (path) => {
@@ -188,18 +216,7 @@ export default function BloodHeroAssistant() {
 
               {/* Chatbox Body */}
               <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs bg-slate-50/50 scrollbar-thin">
-                {/* Hero Greeting Box */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-red-50/90 to-rose-50/50 border border-red-100/80 shadow-sm space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-extrabold text-red-700 uppercase tracking-wider">
-                      JeevaLink Support
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-medium">Kerala Sourcing</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                    Ask me anything about donor eligibility, blood group matching, emergency cases, or platform records.
-                  </p>
-                </div>
+
 
                 {/* Quick Topic Prompts */}
                 {messages.length <= 2 && (
@@ -233,25 +250,37 @@ export default function BloodHeroAssistant() {
                             ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-tr-xs'
                             : msg.isError
                               ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-tl-xs'
-                              : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs border-l-4 border-l-red-500'
+                              : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs'
                           }`}
                       >
-                        {msg.sender === 'assistant' && (
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-red-600 mb-1 border-b border-slate-100 pb-1">
-                            <img src="/hemo_avatar.png" alt="Hemo Profile" className="w-4 h-4 rounded-full border border-red-200 object-cover" />
-                            <span>Hemo</span>
-                          </div>
-                        )}
                         <div className="text-[12px] whitespace-pre-wrap leading-relaxed">
                           {msg.sender === 'assistant' ? renderFormattedText(msg.text) : msg.text}
                         </div>
+                        
+                        {/* Language Selection Buttons after first AI reply */}
+                        {msg.sender === 'assistant' && idx === 2 && !languageSelected && (
+                          <div className="mt-3 flex gap-2 pt-2 border-t border-slate-100">
+                            <button
+                              onClick={() => handleLanguageSelect('Malayalam')}
+                              className="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-[11px] font-bold transition-all shadow-sm"
+                            >
+                              മലയാളം
+                            </button>
+                            <button
+                              onClick={() => handleLanguageSelect('English')}
+                              className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all shadow-sm"
+                            >
+                              English
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
 
                   {isThinking && (
                     <div className="flex justify-start">
-                      <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 text-slate-600 rounded-tl-xs border-l-4 border-l-red-500 shadow-2xs flex items-center gap-2.5">
+                      <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 text-slate-600 rounded-tl-xs shadow-2xs flex items-center gap-2.5">
                         <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
                         <span className="text-[11px] font-semibold text-slate-700">Hemo is typing...</span>
                       </div>

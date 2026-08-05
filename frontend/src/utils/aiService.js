@@ -1,7 +1,7 @@
 /**
  * JeevaLink AI Companion Service
  * Routes AI query requests securely through Laravel Backend (/api/v1/ai/chat)
- * powered by Google Gemini API.
+ * powered by Groq API.
  */
 
 import api from '../store/api.js';
@@ -47,7 +47,7 @@ export async function queryJeevaLinkAI(userQuery, history = []) {
     console.error('[AI Frontend Service] Request failed:', error);
 
     if (error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.toLowerCase().includes('timeout'))) {
-      throw new Error('Gemini API request timed out after 15 seconds. Please try again.', { cause: error });
+      throw new Error('Groq API request timed out after 15 seconds. Please try again.', { cause: error });
     }
 
     const data = error.response?.data;
