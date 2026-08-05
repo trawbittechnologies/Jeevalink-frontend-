@@ -149,8 +149,8 @@ export default function BloodHeroAssistant() {
               {/* Creative Glass Header */}
               <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0 shadow-md">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 p-1 flex items-center justify-center shrink-0 border border-white/20 backdrop-blur-md shadow-inner">
-                    <MascotVideo className="w-full h-full object-contain" />
+                  <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/40 shadow-md flex items-center justify-center bg-white">
+                    <img src="/hemo_avatar.png" alt="Hemo Profile" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -235,8 +235,9 @@ export default function BloodHeroAssistant() {
                           }`}
                       >
                         {msg.sender === 'assistant' && (
-                          <div className="text-[10px] font-bold text-red-600 mb-1 border-b border-slate-100 pb-1">
-                            Hemo
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-red-600 mb-1 border-b border-slate-100 pb-1">
+                            <img src="/hemo_avatar.png" alt="Hemo Profile" className="w-4 h-4 rounded-full border border-red-200 object-cover" />
+                            <span>Hemo</span>
                           </div>
                         )}
                         <div className="text-[12px] whitespace-pre-wrap leading-relaxed">
