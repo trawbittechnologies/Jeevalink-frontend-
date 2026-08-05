@@ -160,14 +160,10 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURED AWARENESS VIDEO & DIALOGUE ──────────────────────────── */}
-      <section className="py-20 bg-slate-50/70 border-b border-slate-100">
+      <section className="py-16 sm:py-20 bg-slate-50/60 border-b border-slate-100">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center mb-10 space-y-2">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-xs font-black uppercase tracking-wider">
-              <Play className="w-3.5 h-3.5 text-red-600 fill-current" />
-              <span>Lifesaving Dialogue & Awareness</span>
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
               Emergency Sourcing & Awareness
             </h2>
             <p className="text-slate-500 text-sm max-w-lg mx-auto font-medium">
@@ -175,39 +171,34 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="bg-slate-950 text-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 items-center border border-slate-800">
+          <div className="bg-slate-900 text-white rounded-3xl overflow-hidden shadow-2xl border border-slate-800/80 grid grid-cols-1 md:grid-cols-12 items-center">
             {/* Video Player */}
-            <div className="md:col-span-7 relative h-72 sm:h-96 md:h-[400px] bg-black overflow-hidden group">
+            <div className="md:col-span-7 relative h-72 sm:h-96 md:h-[400px] bg-black overflow-hidden">
               <MascotVideo
                 videoUrl={awarenessSettings?.videoUrl}
                 posterUrl={awarenessSettings?.posterUrl}
+                showAudioToggle={true}
+                showPlayPause={true}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-semibold pointer-events-none">
-                <Play className="w-3 h-3 text-red-500 fill-current" />
-                <span>{awarenessSettings?.badgeText || "Awareness Video"}</span>
-              </div>
             </div>
 
             {/* Dialogue & Message Content */}
-            <div className="md:col-span-5 p-8 sm:p-10 space-y-6 flex flex-col justify-center">
+            <div className="md:col-span-5 p-7 sm:p-9 space-y-6 flex flex-col justify-center">
               <div className="space-y-4">
-                <span className="text-red-500 font-extrabold text-xs tracking-wider uppercase">
-                  {awarenessSettings?.badgeText || "Lifesaving Dialogue"}
-                </span>
-                <blockquote className="text-xl sm:text-2xl font-black leading-snug tracking-tight text-white italic">
+                <blockquote className="text-lg sm:text-xl font-bold leading-snug text-white/95 italic border-l-2 border-red-500 pl-4 py-1">
                   {awarenessSettings?.quoteTitle || "“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”"}
                 </blockquote>
-                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-normal">
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
                   {awarenessSettings?.quoteDescription || "Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala."}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center gap-4">
+              <div className="pt-2 flex items-center gap-4">
                 <button
                   type="button"
                   onClick={() => setIsCommunityModalOpen(true)}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-red-600/20 hover:shadow-red-600/35 flex items-center gap-2 cursor-pointer active:scale-98"
                 >
                   <Users className="w-4 h-4 text-white" />
                   <span>{awarenessSettings?.buttonLabel || "Join Our Community"}</span>

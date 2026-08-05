@@ -609,32 +609,27 @@ export default function TechnicalAdminDashboard() {
               <span className="text-[10px] font-mono text-slate-400 uppercase">Realtime Preview</span>
             </div>
 
-            <div className="bg-slate-950 text-white rounded-3xl overflow-hidden shadow-xl border border-slate-800 p-5 space-y-4">
+            <div className="bg-slate-900 text-white rounded-3xl overflow-hidden shadow-xl border border-slate-800/80 p-5 space-y-4">
               <div className="relative h-48 bg-black rounded-2xl overflow-hidden border border-slate-800">
                 <MascotVideo
                   videoUrl={videoFile ? URL.createObjectURL(videoFile) : awarenessForm.videoUrl}
                   posterUrl={posterFile ? URL.createObjectURL(posterFile) : awarenessForm.posterUrl}
+                  showAudioToggle={true}
+                  showPlayPause={true}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-full text-white text-[10px] font-semibold">
-                  <Play className="w-2.5 h-2.5 text-red-500 fill-current" />
-                  <span>{awarenessForm.badgeText || "Awareness Video"}</span>
-                </div>
               </div>
 
-              <div className="space-y-2 text-xs">
-                <span className="text-red-500 font-black text-[10px] uppercase tracking-wider block">
-                  {awarenessForm.badgeText || "Lifesaving Dialogue"}
-                </span>
-                <blockquote className="font-bold text-sm leading-snug italic text-white">
+              <div className="space-y-3 text-xs">
+                <blockquote className="font-bold text-xs leading-snug italic text-white/95 border-l-2 border-red-500 pl-3 py-0.5">
                   {awarenessForm.quoteTitle || "“In critical emergency moments...”"}
                 </blockquote>
                 <p className="text-slate-400 text-[11px] leading-relaxed line-clamp-3">
                   {awarenessForm.quoteDescription || "Every second counts..."}
                 </p>
 
-                <div className="pt-2">
-                  <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl">
+                <div className="pt-1">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white text-xs font-semibold rounded-xl shadow-md">
                     {awarenessForm.buttonLabel || "Join Our Community"}
                   </span>
                 </div>
