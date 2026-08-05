@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ShieldAlert, Plus, RefreshCw, ExternalLink, Edit,
   TrendingUp, Activity, ShieldCheck, BarChart3, PieChart as PieIcon,
-  Video, Upload, Play, Save, Film, CheckCircle2, Image, Sparkles
+  Video, Upload, Save, Film, CheckCircle2, Image, Sparkles
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -81,6 +81,7 @@ export default function TechnicalAdminDashboard() {
 
   useEffect(() => {
     if (awarenessSettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAwarenessForm({
         badgeText: awarenessSettings.badgeText || '',
         quoteTitle: awarenessSettings.quoteTitle || '',
@@ -132,7 +133,7 @@ export default function TechnicalAdminDashboard() {
       if (resMetrics.data?.success) {
         setMetrics(resMetrics.data.data);
       }
-      
+
       const rawSA = resSuperAdmins.data;
       let saList = [];
       if (Array.isArray(rawSA)) {

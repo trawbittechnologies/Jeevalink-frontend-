@@ -212,8 +212,8 @@ export default function DonorDashboard() {
   const tabRequests = (tab === 'matching'
     ? matchingRequests
     : tab === 'sos'
-    ? sos
-    : pending
+      ? sos
+      : pending
   ).filter((r) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
@@ -253,7 +253,7 @@ export default function DonorDashboard() {
     const units = req.unitsRequired || req.units_required || 1;
 
     const text = `🚨 *URGENT BLOOD REQUEST — JeevaLink Network* 🚨\n\n🩸 *Blood Group:* ${bg}\n👤 *Patient:* ${patient}\n🏥 *Hospital:* ${hospital}, ${city}\n📦 *Units:* ${units} Unit(s)\n📞 *Contact:* ${contact}\n\nPlease share in your WhatsApp groups & save a life! 🙏\nhttps://jeevalink.org/requests`;
-    
+
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -303,10 +303,10 @@ export default function DonorDashboard() {
   const rankInfo = totalDonations >= 10
     ? { title: 'Platinum Legend 💎', progress: 100, next: 'Max Level Achieved!' }
     : totalDonations >= 5
-    ? { title: 'Gold Guardian 🥇', progress: Math.min(100, ((totalDonations - 5) / 5) * 100), next: `${10 - totalDonations} more for Platinum` }
-    : totalDonations >= 2
-    ? { title: 'Silver Lifesaver 🥈', progress: Math.min(100, ((totalDonations - 2) / 3) * 100), next: `${5 - totalDonations} more for Gold` }
-    : { title: 'Bronze Hero 🥉', progress: Math.min(100, (totalDonations / 2) * 100), next: `${2 - totalDonations} more for Silver` };
+      ? { title: 'Gold Guardian 🥇', progress: Math.min(100, ((totalDonations - 5) / 5) * 100), next: `${10 - totalDonations} more for Platinum` }
+      : totalDonations >= 2
+        ? { title: 'Silver Lifesaver 🥈', progress: Math.min(100, ((totalDonations - 2) / 3) * 100), next: `${5 - totalDonations} more for Gold` }
+        : { title: 'Bronze Hero 🥉', progress: Math.min(100, (totalDonations / 2) * 100), next: `${2 - totalDonations} more for Silver` };
 
   const unread = notifications.filter((n) => !n.read).length;
 
@@ -351,11 +351,10 @@ export default function DonorDashboard() {
           <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
             <button
               onClick={toggleAvailability}
-              className={`px-4 py-2 font-semibold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5 cursor-pointer ${
-                user?.availableForDonation
+              className={`px-4 py-2 font-semibold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5 cursor-pointer ${user?.availableForDonation
                   ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
                   : 'bg-white text-red-700 hover:bg-red-50'
-              }`}
+                }`}
             >
               <Heart className="w-4 h-4" />
               {user?.availableForDonation ? 'Available to Donate' : 'Mark Available'}
@@ -465,11 +464,10 @@ export default function DonorDashboard() {
                 <button
                   key={val}
                   onClick={() => setTab(val)}
-                  className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                    tab === val
+                  className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${tab === val
                       ? 'bg-red-600 text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  }`}
+                    }`}
                 >
                   {label}
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab === val ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
@@ -515,11 +513,10 @@ export default function DonorDashboard() {
                           </p>
                         </div>
 
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
-                          urgency === 'Immediate' || urgency === 'SOS'
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${urgency === 'Immediate' || urgency === 'SOS'
                             ? 'bg-red-50 text-red-700 border-red-200 font-extrabold animate-pulse'
                             : 'bg-slate-100 text-slate-700 border-slate-200'
-                        }`}>
+                          }`}>
                           {urgency}
                         </span>
                       </div>
@@ -662,11 +659,10 @@ export default function DonorDashboard() {
                 <button
                   key={item.key}
                   onClick={() => setReadiness(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
-                  className={`w-full p-2 rounded-lg border text-left flex items-center justify-between transition cursor-pointer ${
-                    readiness[item.key]
+                  className={`w-full p-2 rounded-lg border text-left flex items-center justify-between transition cursor-pointer ${readiness[item.key]
                       ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900 font-semibold'
                       : 'bg-slate-50 border-slate-200 text-slate-500'
-                  }`}
+                    }`}
                 >
                   <span className="flex items-center gap-1.5">
                     <span>{item.icon}</span> {item.label}
@@ -687,13 +683,12 @@ export default function DonorDashboard() {
               Donation Eligibility
             </h3>
 
-            <div className={`p-3.5 rounded-xl border text-xs space-y-1 ${
-              eligibility.eligible === true
+            <div className={`p-3.5 rounded-xl border text-xs space-y-1 ${eligibility.eligible === true
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                 : eligibility.eligible === false
-                ? 'bg-amber-50 text-amber-900 border-amber-200'
-                : 'bg-slate-50 text-slate-700 border-slate-200'
-            }`}>
+                  ? 'bg-amber-50 text-amber-900 border-amber-200'
+                  : 'bg-slate-50 text-slate-700 border-slate-200'
+              }`}>
               <p className="font-bold flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4" />
                 {eligibility.text}

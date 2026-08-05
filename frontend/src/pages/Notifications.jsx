@@ -76,7 +76,7 @@ export default function Notifications() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-9 h-9 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-all text-slate-800 dark:text-zinc-100 shadow-sm"
+            className="w-9 h-9 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-all text-slate-800 dark:text-zinc-100"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -98,7 +98,7 @@ export default function Notifications() {
 
       {/* Notifications List */}
       {notifications.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-12 text-center text-slate-400">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-12 text-center text-slate-400">
           <Inbox className="w-9 h-9 mx-auto mb-3 text-slate-350 dark:text-zinc-750" />
           <p className="text-sm font-semibold">Your inbox is empty</p>
           <p className="text-xs text-slate-500 mt-1">We will alert you when blood requests occur nearby.</p>

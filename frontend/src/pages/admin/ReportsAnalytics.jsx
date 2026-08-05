@@ -11,7 +11,7 @@ import {
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) return (
-    <div className="bg-white border border-slate-100 rounded-xl p-3 shadow-xl text-xs">
+    <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl p-3 shadow-xl text-xs">
       <p className="text-slate-500 font-bold mb-1">{label}</p>
       {payload.map((p, i) => <p key={i} style={{ color: p.color }} className="font-semibold">{p.name}: {p.value}</p>)}
     </div>
@@ -115,7 +115,7 @@ export default function ReportsAnalytics() {
           { label: 'Success Rate', value: `${successRate}%`, trend: '+4%', color: 'text-amber-600' },
         ].map(({ label, value, trend, color }) => (
           <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+            className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-4">
             <p className={`text-2xl font-black ${color}`}>{value}</p>
             <p className="text-slate-500 text-xs mt-0.5">{label}</p>
             <p className="text-emerald-600 text-[10px] font-bold mt-1">↑ {trend} vs last period</p>
@@ -126,7 +126,7 @@ export default function ReportsAnalytics() {
       {/* Charts Row 1 */}
       <div className="grid lg:grid-cols-3 gap-4">
         {/* Monthly Area */}
-        <div className="lg:col-span-2 bg-white border border-slate-100 shadow-sm rounded-2xl p-5">
+        <div className="lg:col-span-2 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-slate-900 font-bold text-sm">Request Volume Trend</h3>
@@ -156,7 +156,7 @@ export default function ReportsAnalytics() {
         </div>
 
         {/* Success Rate Donut */}
-        <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-5">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5">
           <h3 className="text-slate-900 font-bold text-sm mb-1">Request Success Rate</h3>
           <p className="text-slate-500 text-[10px] mb-4">Overall fulfillment breakdown</p>
           <div className="flex justify-center mb-4">
@@ -182,7 +182,7 @@ export default function ReportsAnalytics() {
       </div>
 
       {/* District Report Table */}
-      <div className="bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
           <div>
             <h3 className="text-slate-900 font-bold text-sm">District-Wise Report</h3>
@@ -232,7 +232,7 @@ export default function ReportsAnalytics() {
       </div>
 
       {/* Volunteer Growth Chart */}
-      <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-5">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5">
         <h3 className="text-slate-900 font-bold text-sm mb-1">Volunteer Registration Growth</h3>
         <p className="text-slate-500 text-[10px] mb-4">Monthly new volunteer registrations</p>
         <ResponsiveContainer width="100%" height={180}>

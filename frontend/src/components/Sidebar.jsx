@@ -76,11 +76,11 @@ export default function Sidebar() {
 
   let links =
     user?.role === 'technical_admin' ? technicalAdminLinks :
-    user?.role === 'super_admin' ? superAdminLinks :
-    user?.role === 'block_admin' ? blockAdminLinks :
-    user?.role === 'volunteer' ? volunteerLinks :
-    user?.role === 'unit_squad' ? unitSquadLinks :
-    userLinks;
+      user?.role === 'super_admin' ? superAdminLinks :
+        user?.role === 'block_admin' ? blockAdminLinks :
+          user?.role === 'volunteer' ? volunteerLinks :
+            user?.role === 'unit_squad' ? unitSquadLinks :
+              userLinks;
 
   const isActive = (to) => {
     try {
@@ -134,8 +134,8 @@ export default function Sidebar() {
               key={`${link.to}-${link.label}`}
               to={link.to}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 group ${active
-                  ? 'bg-gradient-to-r from-rose-50 to-red-50/40 text-slate-900 shadow-xs border border-rose-100/80'
-                  : 'text-slate-600 hover:bg-slate-50/80 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-rose-50 to-red-50/40 text-slate-900 shadow-xs border border-rose-100/80'
+                : 'text-slate-600 hover:bg-slate-50/80 hover:text-slate-900'
                 }`}
             >
               {active && (
@@ -144,11 +144,10 @@ export default function Sidebar() {
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-rose-600 rounded-r-full"
                 />
               )}
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                active 
-                  ? 'bg-gradient-to-tr from-rose-600 to-red-500 text-white shadow-md shadow-rose-600/20 scale-105' 
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 ${active
+                  ? 'bg-gradient-to-tr from-rose-600 to-red-500 text-white shadow-md shadow-rose-600/20 scale-105'
                   : 'bg-slate-100/80 text-slate-500 group-hover:bg-rose-50 group-hover:text-rose-600 group-hover:scale-105'
-              }`}>
+                }`}>
                 <Icon className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
               </div>
               <span className="truncate">{link.label}</span>

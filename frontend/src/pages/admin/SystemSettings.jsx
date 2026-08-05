@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 const Section = ({ title, icon: Icon, children }) => (
-  <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
+  <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl overflow-hidden">
     <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
       <div className="w-8 h-8 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-center">
         <Icon className="w-4 h-4 text-red-400" />
@@ -194,7 +194,7 @@ export default function SystemSettings() {
       </Section>
 
       {/* Danger Zone */}
-      <div className="bg-white border border-red-500/20 rounded-2xl overflow-hidden">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border border-red-500/20 rounded-2xl overflow-hidden">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-red-500/10">
           <div className="w-8 h-8 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-center">
             <AlertTriangle className="w-4 h-4 text-red-400" />

@@ -86,7 +86,7 @@ export default function Leaderboard() {
 
           <button 
             onClick={fetchLeaderboard}
-            className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-2 self-start md:self-auto cursor-pointer"
+            className="px-4 py-2 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-2 self-start md:self-auto cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Rankings
           </button>
@@ -147,7 +147,7 @@ export default function Leaderboard() {
             
             {/* 1. Highest Donors Tab */}
             {activeTab === 'donors' && (
-              <div className="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-sm space-y-3">
+              <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5 md:p-6 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <Flame className="w-5 h-5 text-red-600" /> Top Blood Donors
                 </h3>
@@ -195,7 +195,7 @@ export default function Leaderboard() {
 
             {/* 2. Highest Block Committee Tab */}
             {activeTab === 'block_committee' && (
-              <div className="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-sm space-y-3">
+              <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5 md:p-6 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-red-600" /> Highest Block Committees
                 </h3>
@@ -205,7 +205,7 @@ export default function Leaderboard() {
                   (data.highest_block_committee || []).map((b, idx) => (
                     <div 
                       key={idx}
-                      className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-100 hover:border-slate-200 shadow-sm"
+                      className="flex items-center justify-between p-4 rounded-xl bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border hover:"
                     >
                       <div className="flex items-center gap-3">
                         {getRankBadge(idx)}
@@ -231,7 +231,7 @@ export default function Leaderboard() {
 
             {/* 3. Highest Meghala Committee Tab */}
             {activeTab === 'meghala_committee' && (
-              <div className="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-sm space-y-3">
+              <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5 md:p-6 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-red-600" /> Highest Meghala Committees
                 </h3>
@@ -241,7 +241,7 @@ export default function Leaderboard() {
                   (data.highest_meghala_committee || data.highest_meghala || []).map((m, idx) => (
                     <div 
                       key={idx}
-                      className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-100 hover:border-slate-200 shadow-sm"
+                      className="flex items-center justify-between p-4 rounded-xl bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border hover:"
                     >
                       <div className="flex items-center gap-3">
                         {getRankBadge(idx)}
@@ -275,7 +275,7 @@ export default function Leaderboard() {
                 ].map((b, i) => {
                   const BadgeIcon = b.Icon;
                   return (
-                    <div key={i} className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition space-y-3 relative overflow-hidden">
+                    <div key={i} className="p-6 rounded-2xl bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border hover: transition space-y-3 relative overflow-hidden">
                       <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
                         <BadgeIcon className="w-6 h-6 text-red-600" />
                       </div>

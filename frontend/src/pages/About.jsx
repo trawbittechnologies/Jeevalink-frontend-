@@ -58,7 +58,7 @@ export default function About() {
       </section>
 
       {/* ── Milestones ── */}
-      <section className="bg-white border-b border-slate-100">
+      <section className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border-b">
         <div className="container-wide py-10">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-100 rounded-2xl overflow-hidden border border-slate-100">
             {milestones.map((m, i) => (

@@ -16,7 +16,6 @@ import {
   HeartHandshake,
   CheckCircle2,
   Check,
-  Play,
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
 
@@ -75,7 +74,7 @@ export default function Landing() {
       />
 
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
-      <section className="relative min-h-[70vh] flex items-center justify-center bg-white pt-16 pb-20 border-b border-slate-100">
+      <section className="relative min-h-[70vh] flex items-center justify-center bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all pt-16 pb-20 border-b">
         <div className="jl-container relative z-10 max-w-4xl mx-auto px-4 text-center">
           {/* Main Title */}
           <motion.h1
@@ -121,7 +120,7 @@ export default function Landing() {
             {/* Find Donors */}
             <Link
               to="/donor/search"
-              className="px-7 py-4 bg-white hover:bg-slate-50 text-slate-800 hover:text-red-600 font-bold text-base rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 flex items-center gap-2"
+              className="px-7 py-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover:bg-slate-50 text-slate-800 hover:text-red-600 font-bold text-base rounded-2xl border transition-all duration-200 flex items-center gap-2"
             >
               <Search className="w-5 h-5 text-red-600" />
               <span>Search Donors</span>
@@ -210,7 +209,7 @@ export default function Landing() {
       </section>
 
       {/* ── REAL ACTIVE BLOOD REQUESTS SECTION ───────────────────────────── */}
-      <section className="py-16 bg-white border-b border-slate-100">
+      <section className="py-16 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border-b">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
@@ -245,7 +244,7 @@ export default function Landing() {
                 return (
                   <div
                     key={req.id || req._id}
-                    className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-red-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                    className="p-6 rounded-2xl bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border hover:border-red-300 hover: transition-all flex flex-col justify-between space-y-4"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -253,11 +252,10 @@ export default function Landing() {
                           {bg}
                         </span>
                         <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                            isEmergency
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${isEmergency
                               ? "bg-red-600 text-white"
                               : "bg-amber-50 text-amber-700 border border-amber-200"
-                          }`}
+                            }`}
                         >
                           {urgency}
                         </span>
@@ -290,7 +288,7 @@ export default function Landing() {
               })}
             </div>
           ) : (
-            <div className="p-8 rounded-2xl bg-white border border-slate-200 text-center space-y-3">
+            <div className="p-8 rounded-2xl bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border text-center space-y-3">
               <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
               <h3 className="text-lg font-extrabold text-slate-900">No Active Emergency Requests</h3>
               <p className="text-xs text-slate-500 max-w-md mx-auto font-medium">
@@ -319,7 +317,7 @@ export default function Landing() {
               return (
                 <div
                   key={step.num}
-                  className="p-6 rounded-2xl bg-white border border-slate-200/80 hover:border-red-300 hover:shadow-lg transition-all space-y-4 group"
+                  className="p-6 rounded-2xl bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 hover:border-red-300 hover: transition-all space-y-4 group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
@@ -353,7 +351,7 @@ export default function Landing() {
       </section>
 
       {/* ── BLOOD GROUPS DIRECTORY ───────────────────────────────────────── */}
-      <section className="py-20 bg-white border-b border-slate-100">
+      <section className="py-20 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border-b">
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center space-y-3 mb-12">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
@@ -397,7 +395,7 @@ export default function Landing() {
               {displayPartners.map((partner) => (
                 <div
                   key={partner.id || partner._id}
-                  className="p-4 rounded-2xl border border-slate-200 bg-white hover:shadow-md transition-all text-center flex flex-col items-center justify-center space-y-2"
+                  className="p-4 rounded-2xl border bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover: transition-all text-center flex flex-col items-center justify-center space-y-2"
                 >
                   {partner.logo ? (
                     <img
@@ -433,7 +431,7 @@ export default function Landing() {
               <button
                 type="button"
                 onClick={() => setIsCommunityModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-red-50 text-red-600 font-extrabold text-base rounded-2xl shadow-lg transition-all transform hover:scale-105 shrink-0 flex items-center justify-center gap-2.5 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover:bg-red-50 text-red-600 font-extrabold text-base rounded-2xl transition-all transform hover:scale-105 shrink-0 flex items-center justify-center gap-2.5 cursor-pointer"
               >
                 <Users className="w-5 h-5 text-red-600" />
                 <span>Enter Community</span>

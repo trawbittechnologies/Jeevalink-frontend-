@@ -218,7 +218,7 @@ export default function EmergencyDashboard() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-10 h-10 bg-white/15 border border-white/25 rounded-2xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/15 border border-white/25 rounded-2xl flex items-center justify-center">
                 <Siren className="w-5 h-5 animate-heartbeat" />
               </div>
               <div className="flex items-center gap-1.5 bg-red-500/40 border border-white/20 px-2.5 py-1 rounded-full">
@@ -240,23 +240,23 @@ export default function EmergencyDashboard() {
             {/* New alert creation */}
             <button
               onClick={() => setShowRequestModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-white text-red-700 font-bold rounded-2xl text-xs transition-all cursor-pointer hover:bg-red-50 shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all text-red-700 font-bold rounded-2xl text-xs transition-all cursor-pointer hover:bg-red-50"
             >
               <Plus className="w-3.5 h-3.5" /> Dispatch Alert
             </button>
 
             {/* Export items */}
-            <div className="flex bg-white/10 border border-white/20 rounded-2xl p-0.5">
+            <div className="flex bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/10 border border-white/20 rounded-2xl p-0.5">
               <button
                 onClick={exportToCSV}
-                className="p-2 hover:bg-white/10 rounded-xl text-white/80 hover:text-white cursor-pointer transition-colors"
+                className="p-2 hover:bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/10 rounded-xl text-white/80 hover:text-white cursor-pointer transition-colors"
                 title="Export to CSV"
               >
                 <Download className="w-4 h-4" />
               </button>
               <button
                 onClick={handlePrintPDF}
-                className="p-2 hover:bg-white/10 rounded-xl text-white/80 hover:text-white cursor-pointer transition-colors"
+                className="p-2 hover:bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/10 rounded-xl text-white/80 hover:text-white cursor-pointer transition-colors"
                 title="Print Dashboard Report"
               >
                 <Plus className="w-4 h-4 rotate-45" />
@@ -267,7 +267,7 @@ export default function EmergencyDashboard() {
       </motion.div>
 
       {/* SYSTEM CONTROLS & STATUS (Firebase vs WebSockets Toggle) */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
         <div className="flex items-center gap-3">
           <div className={`p-2.5 rounded-2xl flex items-center justify-center ${isLiveConnected ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40' : 'bg-slate-100 text-slate-400 dark:bg-zinc-800'}`}>
             {isLiveConnected ? <Wifi className="w-5 h-5 animate-pulse" /> : <WifiOff className="w-5 h-5" />}
@@ -370,7 +370,7 @@ export default function EmergencyDashboard() {
       <div className="grid lg:grid-cols-3 gap-6">
         
         {/* Chart 1: Requests by District */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm text-left">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5 text-left">
           <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-4">Emergency Alerts by District</h3>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -387,7 +387,7 @@ export default function EmergencyDashboard() {
         </div>
 
         {/* Chart 2: Requests by Blood Group */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm text-left">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5 text-left">
           <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-4">Blood Group Statistics</h3>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -404,7 +404,7 @@ export default function EmergencyDashboard() {
         </div>
 
         {/* Chart 3: Donor Availability Ratio */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm text-left">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5 text-left">
           <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-4">Live Donor Availability</h3>
           <div className="h-56 flex flex-col justify-center">
             <ResponsiveContainer width="100%" height="70%">
@@ -444,7 +444,7 @@ export default function EmergencyDashboard() {
       <div className="grid lg:grid-cols-4 gap-6">
         
         {/* Main Alert List (col-span-3) */}
-        <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm text-left">
+        <div className="lg:col-span-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5 text-left">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-zinc-800 pb-4 mb-4">
             <div>
               <h3 className="text-sm font-black text-slate-900 dark:text-white">Emergency Request Management</h3>
@@ -589,7 +589,7 @@ export default function EmergencyDashboard() {
         </div>
 
         {/* Real-time Notification Center (col-span-1) */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm text-left flex flex-col justify-between">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5 text-left flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3 mb-4">
               <div className="flex items-center gap-1.5">
@@ -641,7 +641,7 @@ export default function EmergencyDashboard() {
               initial={{ scale: 0.95, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }} 
               exit={{ scale: 0.95, opacity: 0 }} 
-              className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-850 rounded-3xl p-6 max-w-md w-full shadow-2xl text-left"
+              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-850 rounded-3xl p-6 max-w-md w-full shadow-2xl text-left"
             >
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-zinc-800 pb-3.5 mb-4">
                 <div>
@@ -800,7 +800,7 @@ export default function EmergencyDashboard() {
               initial={{ scale: 0.95, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }} 
               exit={{ scale: 0.95, opacity: 0 }} 
-              className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-850 rounded-3xl p-6 max-w-lg w-full shadow-2xl text-left flex flex-col max-h-[90vh]"
+              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-850 rounded-3xl p-6 max-w-lg w-full shadow-2xl text-left flex flex-col max-h-[90vh]"
             >
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-zinc-800 pb-3 mb-4 shrink-0">
                 <div>
@@ -877,7 +877,7 @@ export default function EmergencyDashboard() {
                         return (
                           <div 
                             key={resp.id} 
-                            className="p-3 bg-white dark:bg-zinc-950 border border-slate-150 dark:border-zinc-850 rounded-2xl flex items-center justify-between text-xs"
+                            className="p-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-950 border border-slate-150 dark:border-zinc-850 rounded-2xl flex items-center justify-between text-xs"
                           >
                             <div className="text-left">
                               <p className="font-bold text-slate-800 dark:text-white">{resp.donor?.primaryName || 'Anonymous Donor'}</p>

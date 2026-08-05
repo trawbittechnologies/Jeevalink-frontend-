@@ -121,7 +121,7 @@ export default function SupportCenter() {
           { label: 'Resolved', value: tickets.filter(t => t.status === 'resolved').length, color: 'text-emerald-400' },
           { label: 'Critical', value: criticalCount, color: 'text-red-400' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white border border-slate-100 rounded-2xl p-4 text-center">
+          <div key={label} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-4 text-center">
             <p className={`text-xl font-black ${color}`}>{value}</p>
             <p className="text-slate-500 text-[10px]">{label}</p>
           </div>
@@ -131,7 +131,7 @@ export default function SupportCenter() {
       {/* Split View */}
       <div className="grid lg:grid-cols-5 gap-4">
         {/* Ticket List */}
-        <div className="lg:col-span-2 bg-white border border-slate-100 rounded-2xl overflow-hidden">
+        <div className="lg:col-span-2 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl overflow-hidden">
           <FilterBar
             search={search} onSearch={setSearch}
             searchPlaceholder="Search tickets..."
@@ -177,7 +177,7 @@ export default function SupportCenter() {
         </div>
 
         {/* Ticket Detail */}
-        <div className="lg:col-span-3 bg-white border border-slate-100 rounded-2xl flex flex-col">
+        <div className="lg:col-span-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl flex flex-col">
           {!selected ? (
             <div className="flex-1 flex items-center justify-center text-slate-600">
               <div className="text-center">

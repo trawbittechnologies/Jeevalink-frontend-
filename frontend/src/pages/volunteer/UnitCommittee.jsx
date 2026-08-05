@@ -129,7 +129,7 @@ export default function UnitCommittee() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12">
       {/* ─── HEADER BANNER ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all p-6 rounded-3xl border /80 shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600">
@@ -165,7 +165,7 @@ export default function UnitCommittee() {
         ].map((st) => {
           const Icon = st.icon;
           return (
-            <div key={st.label} className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div key={st.label} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl p-5 border /80 shadow-xs flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-500">{st.label}</p>
                 <p className="text-2xl font-black text-slate-900 mt-1">{st.val}</p>
@@ -179,7 +179,7 @@ export default function UnitCommittee() {
       </div>
 
       {/* ─── UNIT SQUAD ACCOUNTS TABLE ─── */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl border /80 shadow-xs overflow-hidden">
         {/* Filter Toolbar */}
         <FilterBar
           search={search} onSearch={setSearch}
@@ -314,7 +314,7 @@ export default function UnitCommittee() {
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border border-slate-100"
+              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border"
             >
               <div className="h-24 bg-gradient-to-r from-red-600 to-rose-600 p-6 flex justify-between items-start text-white">
                 <div>
@@ -378,11 +378,11 @@ export default function UnitCommittee() {
       <AnimatePresence>
         {showAddModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 relative">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border relative">
               <div className="bg-gradient-to-r from-red-600 to-rose-600 p-6 relative overflow-hidden shrink-0">
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                    <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center text-white">
                       <Plus className="w-5 h-5" />
                     </div>
                     <div>
@@ -457,7 +457,7 @@ export default function UnitCommittee() {
                   </div>
 
                   <div className="flex gap-3 pt-3 mt-4 border-t border-slate-100">
-                    <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
+                    <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
                       Cancel
                     </button>
                     <button type="submit" disabled={loading} className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm disabled:opacity-50">
@@ -475,10 +475,10 @@ export default function UnitCommittee() {
       <AnimatePresence>
         {resetPasswordModal.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 relative">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border relative">
               <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 relative flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center">
                     <KeyRound className="w-5 h-5" />
                   </div>
                   <div>
@@ -513,7 +513,7 @@ export default function UnitCommittee() {
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setResetPasswordModal({ open: false, squad: null, newPassword: '', showPass: false })} className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 transition cursor-pointer">
+                  <button type="button" onClick={() => setResetPasswordModal({ open: false, squad: null, newPassword: '', showPass: false })} className="flex-1 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 transition cursor-pointer">
                     Cancel
                   </button>
                   <button type="submit" disabled={loading} className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50">
@@ -541,7 +541,7 @@ export default function UnitCommittee() {
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 mb-5">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Email (Username)</p>
-                  <p className="text-sm font-semibold text-slate-900 font-mono bg-white px-3 py-2 rounded-lg border border-slate-100">{credentialsModal.email}</p>
+                  <p className="text-sm font-semibold text-slate-900 font-mono bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all px-3 py-2 rounded-lg border">{credentialsModal.email}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Password</p>

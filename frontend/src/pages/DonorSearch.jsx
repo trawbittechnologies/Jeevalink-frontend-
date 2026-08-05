@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import DonorCard from '../components/DonorCard.jsx';
 import Modal from '../components/Modal.jsx';
-import { Search, SlidersHorizontal, MapPin, Info, Sparkles, Filter, ChevronRight, UserCheck } from 'lucide-react';
+import { Search, MapPin, Info, Sparkles, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const BLOOD_GROUPS = ['All', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -80,7 +80,7 @@ export default function DonorSearch() {
           </div>
           <button
             onClick={() => setShowGuide(true)}
-            className="px-4 py-3 bg-white text-red-700 hover:bg-red-50 text-xs font-black rounded-2xl shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0 self-start md:self-auto"
+            className="px-4 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all text-red-700 hover:bg-red-50 text-xs font-black rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0 self-start md:self-auto"
           >
             <Info className="w-4 h-4 text-red-600" /> Compatibility Guide
           </button>
@@ -88,7 +88,7 @@ export default function DonorSearch() {
       </div>
 
       {/* Control Panel: Search & Filters */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-5">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800 rounded-3xl p-6 space-y-5">
         {/* Top Search Bar */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -190,7 +190,7 @@ export default function DonorSearch() {
 
       {/* Grid of Modern Donor Cards */}
       {paginated.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-12 text-center text-slate-400 dark:text-zinc-500">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800 rounded-3xl p-12 text-center text-slate-400 dark:text-zinc-500">
           <Search className="w-12 h-12 mx-auto mb-3 opacity-30 text-red-500" />
           <p className="text-base font-bold text-slate-700 dark:text-zinc-300">No matching donors found</p>
           <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1 max-w-sm mx-auto">
@@ -213,7 +213,7 @@ export default function DonorSearch() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2.5 text-xs font-bold border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 rounded-2xl disabled:opacity-40 hover:border-red-300 transition-colors cursor-pointer"
+            className="px-4 py-2.5 text-xs font-bold border dark:border-zinc-800 text-slate-700 dark:text-zinc-300 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 rounded-2xl disabled:opacity-40 hover:border-red-300 transition-colors cursor-pointer"
           >
             Previous
           </button>
@@ -233,7 +233,7 @@ export default function DonorSearch() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-4 py-2.5 text-xs font-bold border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 rounded-2xl disabled:opacity-40 hover:border-red-300 transition-colors cursor-pointer"
+            className="px-4 py-2.5 text-xs font-bold border dark:border-zinc-800 text-slate-700 dark:text-zinc-300 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 rounded-2xl disabled:opacity-40 hover:border-red-300 transition-colors cursor-pointer"
           >
             Next
           </button>

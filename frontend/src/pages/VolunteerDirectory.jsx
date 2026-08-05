@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Search, Phone, ShieldCheck, User, MessageSquare, MapPin,
-  Building2, CheckCircle2, Copy, PhoneCall, Filter,
-  AlertCircle, ChevronRight, UserX, RefreshCw
+  Search, Phone, User, MessageSquare, MapPin,
+  Building2, Copy, PhoneCall,
+  UserX, RefreshCw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../store/api.js';
@@ -71,6 +71,7 @@ export default function VolunteerDirectory() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDbOptions();
   }, []);
 
@@ -145,7 +146,9 @@ export default function VolunteerDirectory() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchVolunteers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDistrict, selectedBlock, selectedMeghala]);
 
   const handleCopy = (text, id) => {
@@ -199,7 +202,7 @@ export default function VolunteerDirectory() {
         {/* ── 3 Step Cards ──────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Step 1 */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
             <div className="w-8 h-8 rounded-xl bg-red-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
               1
             </div>
@@ -210,7 +213,7 @@ export default function VolunteerDirectory() {
           </div>
 
           {/* Step 2 */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
             <div className="w-8 h-8 rounded-xl bg-red-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
               2
             </div>
@@ -221,7 +224,7 @@ export default function VolunteerDirectory() {
           </div>
 
           {/* Step 3 */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
             <div className="w-8 h-8 rounded-xl bg-red-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
               3
             </div>
@@ -233,7 +236,7 @@ export default function VolunteerDirectory() {
         </div>
 
         {/* ── 3 Select Boxes Panel (District -> Block -> Meghala Unit) ── */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 md:p-6 shadow-xs space-y-5">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 rounded-2xl p-5 md:p-6 shadow-xs space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
             {/* Select Box 1: District (Fixed 14 Kerala Districts) */}
@@ -335,13 +338,13 @@ export default function VolunteerDirectory() {
           </div>
 
           {loading ? (
-            <div className="py-12 text-center space-y-3 bg-white border border-slate-200/80 rounded-2xl">
+            <div className="py-12 text-center space-y-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 rounded-2xl">
               <div className="w-8 h-8 border-3 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-xs font-semibold text-slate-500">Loading volunteer contacts...</p>
             </div>
           ) : filteredVolunteers.length === 0 ? (
             /* Clean Minimal Empty State (Zero Dummy Data) */
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-8 text-center space-y-3">
+            <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 rounded-2xl p-8 text-center space-y-3">
               <UserX className="w-10 h-10 text-slate-300 mx-auto" />
               <div className="space-y-1 max-w-md mx-auto">
                 <h3 className="text-sm font-bold text-slate-800">No Registered Volunteers Found</h3>
@@ -371,7 +374,7 @@ export default function VolunteerDirectory() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="bg-white border border-slate-200/80 hover:border-red-300 rounded-2xl p-5 shadow-xs transition space-y-4"
+                    className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border /80 hover:border-red-300 rounded-2xl p-5 shadow-xs transition space-y-4"
                   >
                     {/* Card Header */}
                     <div className="flex items-start justify-between gap-3">

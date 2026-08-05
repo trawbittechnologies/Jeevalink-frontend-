@@ -221,15 +221,15 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={mockGrowthData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip 
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                <Tooltip
                   contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{ color: '#0f172a', fontWeight: 'bold' }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Line type="monotone" dataKey="users" name="Total Users" stroke="#94a3b8" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
-                <Line type="monotone" dataKey="vols" name="Volunteers" stroke="#dc2626" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
+                <Line type="monotone" dataKey="users" name="Total Users" stroke="#94a3b8" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="vols" name="Volunteers" stroke="#dc2626" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -245,10 +245,10 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mockActivityData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip 
-                  cursor={{fill: '#f8fafc'}}
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                <Tooltip
+                  cursor={{ fill: '#f8fafc' }}
                   contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Bar dataKey="requests" name="Total Requests" fill="#94a3b8" radius={[4, 4, 0, 0]} barSize={12} />
@@ -281,90 +281,90 @@ export default function AdminDashboard() {
                 {createdResult.msg}
               </div>
             )}
-          <form onSubmit={handleCreateMeghalaAdmin} className="space-y-3.5 text-xs">
-            <div>
-              <label className="block font-bold text-slate-700 mb-1.5">Name of Meghala / Volunteer *</label>
-              <input type="text" value={meghalaName} onChange={(e) => setMeghalaName(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleCreateMeghalaAdmin} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1.5">Name of Person 1 *</label>
-                <input type="text" value={person1Name} onChange={(e) => setPerson1Name(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+                <label className="block font-bold text-slate-700 mb-1.5">Name of Meghala / Volunteer *</label>
+                <input type="text" value={meghalaName} onChange={(e) => setMeghalaName(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1.5">Name of Person 1 *</label>
+                  <input type="text" value={person1Name} onChange={(e) => setPerson1Name(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1.5">Contact (Person 1) *</label>
+                  <input type="text" value={person1Contact} onChange={(e) => setPerson1Contact(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1.5">Name of Person 2 *</label>
+                  <input type="text" value={person2Name} onChange={(e) => setPerson2Name(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1.5">Contact (Person 2) *</label>
+                  <input type="text" value={person2Contact} onChange={(e) => setPerson2Contact(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+                </div>
               </div>
               <div>
-                <label className="block font-bold text-slate-700 mb-1.5">Contact (Person 1) *</label>
-                <input type="text" value={person1Contact} onChange={(e) => setPerson1Contact(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1.5">Name of Person 2 *</label>
-                <input type="text" value={person2Name} onChange={(e) => setPerson2Name(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+                <label className="block font-bold text-slate-700 mb-1.5">WhatsApp Number *</label>
+                <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 mb-1.5">Contact (Person 2) *</label>
-                <input type="text" value={person2Contact} onChange={(e) => setPerson2Contact(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
+                <label className="block font-bold text-slate-700 mb-1.5">Primary Email *</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
               </div>
-            </div>
-            <div>
-              <label className="block font-bold text-slate-700 mb-1.5">WhatsApp Number *</label>
-              <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
-            </div>
-            <div>
-              <label className="block font-bold text-slate-700 mb-1.5">Primary Email *</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
-            </div>
-            <button type="submit" className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer mt-2 transition">
-              <Key className="w-4 h-4" /> Create Committee
-            </button>
-          </form>
+              <button type="submit" className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer mt-2 transition">
+                <Key className="w-4 h-4" /> Create Committee
+              </button>
+            </form>
           </div>
         </div>
 
         {/* List */}
         <div className="lg:col-span-2 space-y-3">
           <h3 className="text-lg font-bold text-slate-900">Meghala Committees ({meghalaAdmins.length})</h3>
-           {meghalaAdmins.length === 0 ? (
-             <div className="text-center py-6 bg-white border border-slate-100 rounded-2xl text-slate-500 text-sm shadow-sm">No Meghala Committees found for this block.</div>
-           ) : (
-             <div className="space-y-3">
-               {meghalaAdmins.map(ba => (
-                 <div key={ba.id} className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:border-slate-200 transition">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold rounded-full">
-                          Meghala: {ba.meghala || ba.city || 'N/A'}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${ba.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
-                          {ba.status || 'Active'}
-                        </span>
-                      </div>
-                      <h4 className="text-base font-bold text-slate-900">{ba.primary_name || ba.name}</h4>
-                      <div className="text-xs text-slate-600 space-y-1 mt-1">
-                        <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Contact 1:</span> <span>{ba.mobile || 'N/A'}</span></p>
-                        {ba.secondaryContactNumber && <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Contact 2:</span> <span className="truncate max-w-[200px]">{ba.secondaryContactNumber}</span></p>}
-                        <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">WhatsApp:</span> <span>{ba.whatsapp_number || 'N/A'}</span></p>
-                        <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Email:</span> <span>{ba.email}</span></p>
-                      </div>
+          {meghalaAdmins.length === 0 ? (
+            <div className="text-center py-6 bg-white border border-slate-100 rounded-2xl text-slate-500 text-sm shadow-sm">No Meghala Committees found for this block.</div>
+          ) : (
+            <div className="space-y-3">
+              {meghalaAdmins.map(ba => (
+                <div key={ba.id} className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:border-slate-200 transition">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold rounded-full">
+                        Meghala: {ba.meghala || ba.city || 'N/A'}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${ba.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                        {ba.status || 'Active'}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                       <button onClick={() => handleResetPassword(ba)} className="px-2.5 py-1.5 text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 rounded-xl transition cursor-pointer flex items-center gap-1" title="Reset Password">
-                         <Key className="w-3.5 h-3.5" />
-                       </button>
-                       <button onClick={() => setViewUser(ba)} className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-xl transition cursor-pointer" title="View Profile">
-                         <Eye className="w-4 h-4" />
-                       </button>
-                       <button onClick={() => handleTakeAction(ba.id, ba.status === 'Active' ? 'Suspended' : 'Active')} className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${ba.status === 'Active' ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'}`}>
-                         {ba.status === 'Active' ? 'Suspend' : 'Activate'}
-                       </button>
-                       <button onClick={() => handleDeleteMeghalaAdmin(ba.id, ba.primary_name || ba.name)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 rounded-xl transition cursor-pointer">
-                         <Trash2 className="w-4 h-4" />
-                       </button>
+                    <h4 className="text-base font-bold text-slate-900">{ba.primary_name || ba.name}</h4>
+                    <div className="text-xs text-slate-600 space-y-1 mt-1">
+                      <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Contact 1:</span> <span>{ba.mobile || 'N/A'}</span></p>
+                      {ba.secondaryContactNumber && <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Contact 2:</span> <span className="truncate max-w-[200px]">{ba.secondaryContactNumber}</span></p>}
+                      <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">WhatsApp:</span> <span>{ba.whatsapp_number || 'N/A'}</span></p>
+                      <p className="flex items-center gap-2"><span className="font-semibold text-slate-700 w-20">Email:</span> <span>{ba.email}</span></p>
                     </div>
-                 </div>
-               ))}
-             </div>
-           )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                    <button onClick={() => handleResetPassword(ba)} className="px-2.5 py-1.5 text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 rounded-xl transition cursor-pointer flex items-center gap-1" title="Reset Password">
+                      <Key className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => setViewUser(ba)} className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-xl transition cursor-pointer" title="View Profile">
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleTakeAction(ba.id, ba.status === 'Active' ? 'Suspended' : 'Active')} className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${ba.status === 'Active' ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'}`}>
+                      {ba.status === 'Active' ? 'Suspend' : 'Activate'}
+                    </button>
+                    <button onClick={() => handleDeleteMeghalaAdmin(ba.id, ba.primary_name || ba.name)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 rounded-xl transition cursor-pointer">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -386,7 +386,7 @@ export default function AdminDashboard() {
               <p><strong>Block:</strong> {viewUser.blockCommitteeName || 'N/A'}</p>
               <p><strong>Meghala:</strong> {viewUser.meghala || 'N/A'}</p>
               <p className="flex items-center">
-                <strong className="mr-2">Status:</strong> 
+                <strong className="mr-2">Status:</strong>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${viewUser.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                   {viewUser.status}
                 </span>

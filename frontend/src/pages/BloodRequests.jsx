@@ -187,7 +187,7 @@ export default function BloodRequests() {
           animate={{ opacity: 1, y: 0 }}
           className="hero-gradient rounded-2xl p-4 flex items-center gap-4 text-white"
         >
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center animate-heartbeat shrink-0">
+          <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center animate-heartbeat shrink-0">
             <Siren className="w-5 h-5" />
           </div>
           <div className="min-w-0">
@@ -315,7 +315,7 @@ export default function BloodRequests() {
                 {mapSearchLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 animate-spin" />}
               </div>
               {showSearchDropdown && mapSearchResults.length > 0 && (
-                <div className="absolute left-2 right-2 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-[9999] max-h-44 overflow-y-auto">
+                <div className="absolute left-2 right-2 top-full mt-1 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl shadow-xl z-[9999] max-h-44 overflow-y-auto">
                   {mapSearchResults.map((r, i) => (
                     <button key={i} type="button" onClick={() => selectResult(r)}
                       className="w-full text-left px-3 py-2.5 text-[11px] text-slate-700 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-start gap-2">

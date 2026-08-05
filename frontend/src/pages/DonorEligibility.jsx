@@ -184,7 +184,7 @@ export default function DonorEligibility() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Top Navbar Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4.5 rounded-3xl border border-slate-200/80 shadow-xs text-left">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all p-4.5 rounded-3xl border /80 shadow-xs text-left">
         <div className="flex items-center gap-3">
           <Link
             to="/donor/dashboard"
@@ -317,7 +317,7 @@ export default function DonorEligibility() {
                 </p>
                 <button
                   onClick={startAssessment}
-                  className="px-4 py-2 border border-slate-200 text-gray-700 bg-white hover:bg-slate-50 text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer"
+                  className="px-4 py-2 border text-gray-700 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover:bg-slate-50 text-xs font-bold rounded-xl transition-colors cursor-pointer"
                 >
                   Assess Now
                 </button>

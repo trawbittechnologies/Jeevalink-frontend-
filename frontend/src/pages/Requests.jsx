@@ -355,7 +355,7 @@ export default function Requests() {
           </div>
           {/* Search Dropdown */}
           {showSearchDropdown && mapSearchResults.length > 0 && (
-            <div className="absolute left-2 right-2 top-full mt-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-[9999] max-h-48 overflow-y-auto">
+            <div className="absolute left-2 right-2 top-full mt-1 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl shadow-xl z-[9999] max-h-48 overflow-y-auto">
               {mapSearchResults.map((r, i) => (
                 <button
                   key={i}
@@ -524,7 +524,7 @@ export default function Requests() {
                   <select
                     value={filterBg}
                     onChange={(e) => setFilterBg(e.target.value)}
-                    className="px-2.5 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl font-bold text-slate-700 dark:text-zinc-300"
+                    className="px-2.5 py-1.5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl font-bold text-slate-700 dark:text-zinc-300"
                   >
                     <option value="">All Groups</option>
                     {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
@@ -534,7 +534,7 @@ export default function Requests() {
                   <select
                     value={filterUrgency}
                     onChange={(e) => setFilterUrgency(e.target.value)}
-                    className="px-2.5 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl font-bold text-slate-700 dark:text-zinc-300"
+                    className="px-2.5 py-1.5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl font-bold text-slate-700 dark:text-zinc-300"
                   >
                     <option value="">All Urgencies</option>
                     <option value="Immediate">Immediate</option>
@@ -545,7 +545,7 @@ export default function Requests() {
               </div>
 
               {displayRequests.length === 0 ? (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
+                <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
                   <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-emerald-500" />
                   <p className="text-sm font-semibold">{myRequestsOnly ? 'You have not created any blood requests yet.' : 'No active blood alerts right now.'}</p>
                   <p className="text-xs text-slate-500 mt-1">{myRequestsOnly ? 'Click "Post New Blood Alert" to create one.' : 'All patients have received matching donors.'}</p>
@@ -631,7 +631,7 @@ export default function Requests() {
             </div>
 
             {/* Right Column: New Blood Request Form (col-span-5) */}
-            <div className="col-span-5 bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-sm space-y-4">
+            <div className="col-span-5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800/80 rounded-3xl p-5 space-y-4">
               <div>
                 <h4 className="text-sm font-extrabold text-slate-900 dark:text-zinc-100 pl-0.5">Post New Blood Alert</h4>
                 <p className="text-[10px] text-slate-400 mt-0.5 pl-0.5">Alert matching donors in real-time</p>
@@ -673,7 +673,7 @@ export default function Requests() {
                   <select
                     value={filterBg}
                     onChange={(e) => setFilterBg(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-300"
+                    className="flex-1 px-3 py-2 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-300"
                   >
                     <option value="">All Blood Groups</option>
                     {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
@@ -684,7 +684,7 @@ export default function Requests() {
                   <select
                     value={filterUrgency}
                     onChange={(e) => setFilterUrgency(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-300"
+                    className="flex-1 px-3 py-2 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-300"
                   >
                     <option value="">All Urgencies</option>
                     <option value="Immediate">Immediate</option>
@@ -694,7 +694,7 @@ export default function Requests() {
                 </div>
 
                 {requests.length === 0 ? (
-                  <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
+                  <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
                     <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-emerald-500" />
                     <p className="text-sm font-semibold">No active blood alerts right now.</p>
                   </div>
@@ -771,7 +771,7 @@ export default function Requests() {
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm"
+                className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5"
               >
                 {renderRequestForm()}
               </motion.div>
@@ -795,7 +795,7 @@ export default function Requests() {
 
         return (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-6 text-center animate-fade-in">
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
+            <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
               <div className="w-14 h-14 bg-red-50 dark:bg-red-950/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-900">
                 <Droplet className="w-7 h-7 text-primary fill-primary animate-pulse" />
               </div>
@@ -831,7 +831,7 @@ export default function Requests() {
                 {(selectedReq.additionalNotes || selectedReq.additional_notes) && (
                   <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
                     <span className="text-slate-400 font-bold block mb-1">Notes:</span>
-                    <p className="text-slate-700 dark:text-zinc-350 italic bg-white dark:bg-zinc-900 p-2 rounded-lg border border-slate-100 dark:border-zinc-800">{selectedReq.additionalNotes || selectedReq.additional_notes}</p>
+                    <p className="text-slate-700 dark:text-zinc-350 italic bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 p-2 rounded-lg border dark:border-zinc-800">{selectedReq.additionalNotes || selectedReq.additional_notes}</p>
                   </div>
                 )}
               </div>
@@ -885,7 +885,7 @@ export default function Requests() {
                           if (res.success && res.request) setSelectedReq(res.request);
                         }
                       }}
-                      className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-bold text-slate-900 dark:text-zinc-100 cursor-pointer"
+                      className="px-2.5 py-1 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl text-xs font-bold text-slate-900 dark:text-zinc-100 cursor-pointer"
                     >
                       <option value="Pending">🟡 Pending</option>
                       <option value="Fulfilled">🟢 Fulfilled</option>

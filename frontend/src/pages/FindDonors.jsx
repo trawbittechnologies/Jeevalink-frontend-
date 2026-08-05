@@ -48,7 +48,7 @@ export default function FindDonors() {
     <div className="min-h-screen bg-white dark:bg-zinc-950 px-6 pt-6 pb-24 select-none">
       <div className="max-w-7xl mx-auto">
         {/* Top Filter Block */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm mb-5">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-5 mb-5">
         <h3 className="text-sm font-extrabold text-slate-900 dark:text-zinc-100 mb-4 flex items-center gap-1.5">
           <Compass className="w-5 h-5 text-primary" /> Match Filters
         </h3>
@@ -124,7 +124,7 @@ export default function FindDonors() {
           </div>
 
           {donors.length === 0 ? (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
+            <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
               <Search className="w-8 h-8 mx-auto mb-3 text-slate-350 dark:text-zinc-700" />
               <p className="text-sm font-semibold">No compatible donors found nearby.</p>
               <p className="text-xs text-slate-500 dark:text-zinc-550 mt-1">Try expanding the matching radius slider.</p>
@@ -135,7 +135,7 @@ export default function FindDonors() {
                 return (
                   <div
                     key={donor._id}
-                    className="p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm hover:border-slate-300 dark:hover:border-zinc-700 transition-all flex flex-col justify-between gap-3"
+                    className="p-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl hover:border-slate-300 dark:hover:border-zinc-700 transition-all flex flex-col justify-between gap-3"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-1.5">
@@ -192,7 +192,7 @@ export default function FindDonors() {
             center={user?.coordinates || { lat: 12.9716, lng: 77.5946 }}
             radius={searchRadius}
           />
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200/50 dark:border-zinc-800/60 rounded-2xl p-3 text-[10px] text-slate-400 font-medium shadow-sm">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /50 dark:border-zinc-800/60 rounded-2xl p-3 text-[10px] text-slate-400 font-medium">
             🚩 Map coordinates simulated in Bengaluru. Click markers to check distances and match compatibility indexes.
           </div>
         </div>
@@ -225,7 +225,7 @@ export default function FindDonors() {
             </div>
 
             {donors.length === 0 ? (
-              <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
+              <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400">
                 <Search className="w-8 h-8 mx-auto mb-3 text-slate-350 dark:text-zinc-700" />
                 <p className="text-sm font-semibold">No compatible donors found nearby.</p>
                 <p className="text-xs text-slate-500 mt-1">Try expanding the matching radius slider.</p>
@@ -236,7 +236,7 @@ export default function FindDonors() {
                   return (
                     <div
                       key={donor._id}
-                      className="p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm hover:border-slate-300 dark:hover:border-zinc-700 transition-colors flex items-start justify-between gap-3"
+                      className="p-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-2xl hover:border-slate-300 dark:hover:border-zinc-700 transition-colors flex items-start justify-between gap-3"
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
@@ -291,7 +291,7 @@ export default function FindDonors() {
       {/* Donor Profile Detail Modal overlay */}
       {selectedDonor && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-6 text-center animate-fade-in">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
             <div className="w-14 h-14 bg-red-50 dark:bg-red-950/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-900">
               <span className="text-xl font-black text-primary">{selectedDonor.bloodGroup}</span>
             </div>

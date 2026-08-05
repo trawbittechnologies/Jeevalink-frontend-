@@ -222,19 +222,19 @@ export default function TechnicalReports() {
 
         {/* Quick Stats Bar */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white border border-slate-100 rounded-2xl p-4 text-center shadow-xs">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-4 text-center shadow-xs">
             <p className="text-2xl font-black text-slate-900">{reports.length}</p>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">
               {isTechAdmin ? 'Total System Tickets' : 'My Sent Reports'}
             </p>
           </div>
-          <div className="bg-white border border-amber-100 rounded-2xl p-4 text-center shadow-xs bg-amber-50/30">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border border-amber-100 rounded-2xl p-4 text-center shadow-xs bg-amber-50/30">
             <p className="text-2xl font-black text-amber-600">{openCount}</p>
             <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mt-0.5">
               {isTechAdmin ? 'Pending Inspection' : 'My Open Reports'}
             </p>
           </div>
-          <div className="bg-white border border-emerald-100 rounded-2xl p-4 text-center shadow-xs bg-emerald-50/30">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border border-emerald-100 rounded-2xl p-4 text-center shadow-xs bg-emerald-50/30">
             <p className="text-2xl font-black text-emerald-600">{resolvedCount}</p>
             <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mt-0.5">
               {isTechAdmin ? 'Resolved Tickets' : 'My Resolved Reports'}
@@ -246,7 +246,7 @@ export default function TechnicalReports() {
         {!isTechAdmin && (
           <>
             {/* Issue Type Selector */}
-            <div className="bg-white border border-slate-100 rounded-2xl p-2 shadow-xs flex gap-2">
+            <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-2 shadow-xs flex gap-2">
               <button
                 type="button"
                 onClick={() => setReportType('bug')}
@@ -268,7 +268,7 @@ export default function TechnicalReports() {
             </div>
 
             {/* Submit Form */}
-            <form onSubmit={handleSubmit} className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
+            <form onSubmit={handleSubmit} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-6 space-y-4">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 {reportType === 'bug' ? <ShieldAlert className="w-5 h-5 text-red-600" /> : <AlertTriangle className="w-5 h-5 text-amber-600" />}
                 {reportType === 'bug' ? 'Submit Technical Issue Report' : 'Submit Volunteer Complaint'}
@@ -388,14 +388,14 @@ export default function TechnicalReports() {
                   placeholder="Search issues..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-3 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-red-500"
+                  className="pl-3 pr-3 py-1.5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl text-xs text-slate-900 focus:outline-none focus:border-red-500"
                 />
               </div>
 
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-semibold cursor-pointer"
+                className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-1.5 text-xs text-slate-700 font-semibold cursor-pointer"
               >
                 <option value="all">All Statuses</option>
                 <option value="open">Open</option>
@@ -405,7 +405,7 @@ export default function TechnicalReports() {
 
               <button
                 onClick={fetchReports}
-                className="p-1.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-slate-900 transition cursor-pointer"
+                className="p-1.5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl text-slate-600 hover:text-slate-900 transition cursor-pointer"
                 title="Refresh history"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -416,13 +416,13 @@ export default function TechnicalReports() {
           {loading ? (
             <p className="text-slate-500 text-center py-8">Loading reports queue...</p>
           ) : filteredReports.length === 0 ? (
-            <div className="bg-white border border-slate-100 rounded-2xl p-8 text-center text-slate-500 text-sm shadow-xs">
+            <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-8 text-center text-slate-500 text-sm shadow-xs">
               {isTechAdmin ? 'No matching technical reports found in system queue.' : 'You have not submitted any technical reports yet.'}
             </div>
           ) : (
             <div className="space-y-3">
               {filteredReports.map((rep) => (
-                <div key={rep.id} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-3 hover:border-slate-200 transition">
+                <div key={rep.id} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5 shadow-xs space-y-3 hover: transition">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -497,7 +497,7 @@ export default function TechnicalReports() {
                             placeholder="Type resolution notes, status updates, or official reply to user..."
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-red-500 resize-none"
+                            className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-red-500 resize-none"
                           />
 
                           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -506,7 +506,7 @@ export default function TechnicalReports() {
                               <select
                                 value={replyStatus}
                                 onChange={(e) => setReplyStatus(e.target.value)}
-                                className="bg-white border border-slate-200 rounded-xl px-2.5 py-1 font-bold text-slate-800 focus:outline-none"
+                                className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-2.5 py-1 font-bold text-slate-800 focus:outline-none"
                               >
                                 <option value="Resolved">Resolved</option>
                                 <option value="In Progress">In Progress</option>

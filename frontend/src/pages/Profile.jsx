@@ -537,7 +537,7 @@ export default function Profile() {
             <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-red-900/30 px-3 py-1.5 rounded-full border border-red-800/30">
               JeevaLink Donor Passport
             </span>
-            <div className="bg-white p-4 rounded-2xl inline-block mt-6 mb-4 shadow-lg qr-container">
+            <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all p-4 rounded-2xl inline-block mt-6 mb-4 qr-container">
               <QRCodeSVG value={qrData} size={140} fgColor="#111111" bgColor="#ffffff" level="M" />
             </div>
             <h3 className="font-bold text-lg">{user?.primaryName}</h3>

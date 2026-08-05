@@ -382,7 +382,7 @@ export default function SuperAdminManagement() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={openAddModal}
-              className="px-4 sm:px-5 py-2.5 sm:py-3 bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
+              className="px-4 sm:px-5 py-2.5 sm:py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all text-emerald-900 hover:bg-emerald-50 rounded-2xl text-xs font-black transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
             >
               <Plus className="w-4 h-4 stroke-[3]" /> Add Super Admin
             </button>
@@ -416,7 +416,7 @@ export default function SuperAdminManagement() {
       <div className="space-y-4">
         
         {/* Search & Filter Toolbar */}
-        <div className="bg-white border border-red-100 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border border-red-100 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -460,7 +460,7 @@ export default function SuperAdminManagement() {
         </div>
 
         {/* Minimal Full-Width Data Table */}
-        <div className="bg-white border border-red-100 rounded-3xl shadow-sm overflow-hidden">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border border-red-100 rounded-3xl overflow-hidden">
           <div className="px-6 py-4 border-b border-red-50 flex items-center justify-between">
             <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
               <Building2 className="w-4 h-4 text-red-600" />
@@ -732,12 +732,12 @@ export default function SuperAdminManagement() {
       {/* POPUP MODAL: ADD SUPER ADMIN FORM */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden border border-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden border max-h-[90vh] overflow-y-auto">
             {/* Modal Header Red Banner */}
             <div className="bg-red-600 p-6 relative overflow-hidden">
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                  <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center text-white">
                     <UserPlus className="w-5 h-5" />
                   </div>
                   <div>
@@ -772,7 +772,7 @@ export default function SuperAdminManagement() {
                   <div className="space-y-2 flex-1">
                     <p className="font-bold text-sm">{createdResult.msg}</p>
                     {createdResult.password && (
-                      <div className="mt-2 bg-white border border-emerald-200 rounded-xl p-3.5 space-y-2 text-slate-800">
+                      <div className="mt-2 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border border-emerald-200 rounded-xl p-3.5 space-y-2 text-slate-800">
                         <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Generated Credentials</p>
                         <p><strong>Login Email:</strong> {createdResult.email}</p>
                         <div className="flex items-center justify-between font-mono bg-emerald-50 px-3 py-2 rounded-xl text-emerald-950 font-bold text-sm border border-emerald-200">
@@ -838,7 +838,7 @@ export default function SuperAdminManagement() {
                       value={customDistrict}
                       onChange={(e) => setCustomDistrict(e.target.value)}
                       required
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 mt-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3.5 py-2.5 mt-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   )}
                 </div>
@@ -872,7 +872,7 @@ export default function SuperAdminManagement() {
                         value={fullName1}
                         onChange={(e) => setFullName1(e.target.value)}
                         required
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                     <div>
@@ -883,7 +883,7 @@ export default function SuperAdminManagement() {
                         value={mobile1}
                         onChange={(e) => setMobile1(e.target.value)}
                         required
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -903,7 +903,7 @@ export default function SuperAdminManagement() {
                         value={fullName2}
                         onChange={(e) => setFullName2(e.target.value)}
                         required
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                     <div>
@@ -914,7 +914,7 @@ export default function SuperAdminManagement() {
                         value={mobile2}
                         onChange={(e) => setMobile2(e.target.value)}
                         required
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -1022,7 +1022,7 @@ export default function SuperAdminManagement() {
                       value={editFullName1}
                       onChange={(e) => setEditFullName1(e.target.value)}
                       required
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 focus:border-red-500"
+                      className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 focus:border-red-500"
                     />
                   </div>
                   <div>
@@ -1032,7 +1032,7 @@ export default function SuperAdminManagement() {
                       value={editMobile1}
                       onChange={(e) => setEditMobile1(e.target.value)}
                       required
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 focus:border-red-500"
+                      className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 focus:border-red-500"
                     />
                   </div>
                 </div>
@@ -1051,7 +1051,7 @@ export default function SuperAdminManagement() {
                       value={editFullName2}
                       onChange={(e) => setEditFullName2(e.target.value)}
                       required
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 focus:border-red-500"
+                      className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 focus:border-red-500"
                     />
                   </div>
                   <div>
@@ -1061,7 +1061,7 @@ export default function SuperAdminManagement() {
                       value={editMobile2}
                       onChange={(e) => setEditMobile2(e.target.value)}
                       required
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 focus:border-red-500"
+                      className="w-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl px-3 py-2 focus:border-red-500"
                     />
                   </div>
                 </div>

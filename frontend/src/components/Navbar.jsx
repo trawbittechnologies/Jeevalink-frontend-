@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
-import { LogOut, User, Users, Bell, ChevronDown, Settings, Siren, Award, CheckCircle2, MapPin, ShieldCheck } from 'lucide-react';
+import { LogOut, User, Users, Bell, ChevronDown, Settings, Siren, Award, CheckCircle2, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getStorageUrl } from '../store/api.js';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
@@ -41,11 +41,11 @@ export default function Navbar() {
 
   const dashboardLink =
     user?.role === 'technical_admin' ? '/technical-admin/dashboard' :
-    user?.role === 'super_admin' ? '/super-admin/dashboard' :
-    (user?.role === 'block_admin' || user?.role === 'admin') ? '/block-admin/dashboard' :
-    user?.role === 'volunteer' ? '/volunteer/dashboard' :
-    user?.role === 'unit_squad' ? '/unit-squad/dashboard' :
-    '/dashboard';
+      user?.role === 'super_admin' ? '/super-admin/dashboard' :
+        (user?.role === 'block_admin' || user?.role === 'admin') ? '/block-admin/dashboard' :
+          user?.role === 'volunteer' ? '/volunteer/dashboard' :
+            user?.role === 'unit_squad' ? '/unit-squad/dashboard' :
+              '/dashboard';
 
   const isActive = (to) => location.pathname === to;
 
@@ -86,11 +86,10 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
           ? 'backdrop-blur-xl bg-white/95 shadow-sm border-b border-slate-100'
           : 'bg-white/90 border-b border-slate-100'
-      }`}
+        }`}
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
@@ -104,11 +103,10 @@ export default function Navbar() {
             <Link
               key={link.to}
               to={link.to}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 ${
-                isActive(link.to)
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 ${isActive(link.to)
                   ? 'text-red-600 bg-red-50'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               {link.label}
             </Link>
@@ -155,11 +153,10 @@ export default function Navbar() {
                             <div
                               key={n._id}
                               onClick={() => useAppStore.getState().markNotificationRead(n._id)}
-                              className={`p-2.5 rounded-xl border cursor-pointer flex gap-2.5 items-start transition-all ${
-                                n.read 
-                                  ? 'opacity-50 bg-slate-50 border-slate-100' 
+                              className={`p-2.5 rounded-xl border cursor-pointer flex gap-2.5 items-start transition-all ${n.read
+                                  ? 'opacity-50 bg-slate-50 border-slate-100'
                                   : 'bg-red-50 hover:bg-red-100/60 border-red-100'
-                              }`}
+                                }`}
                             >
                               {getMiniIcon(n.type)}
                               <div className="min-w-0 flex-1 text-left">

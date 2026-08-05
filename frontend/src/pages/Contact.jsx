@@ -182,7 +182,7 @@ export default function Contact() {
               >
                 <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="flex items-start gap-4 relative z-10">
-                  <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-2xl flex items-center justify-center shrink-0">
                     <Droplets className="w-6 h-6 text-white" />
                   </div>
                   <div>

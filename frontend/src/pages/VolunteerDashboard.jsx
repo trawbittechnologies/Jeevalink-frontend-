@@ -28,7 +28,7 @@ export default function VolunteerDashboard() {
   const [top5Modal, setTop5Modal] = useState(null);   // { reqId, donors }
   const [loadingTop5, setLoadingTop5] = useState(false);
   const [posterModal, setPosterModal] = useState(null); // { data, reqId }
-  
+
   // Search
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -183,8 +183,8 @@ export default function VolunteerDashboard() {
   const rawTabRequests = tab === 'pending'
     ? (pendingFromServer.length > 0 ? pendingFromServer : unverified)
     : tab === 'verified'
-    ? verified
-    : fulfilled;
+      ? verified
+      : fulfilled;
 
   const tabRequests = rawTabRequests.filter((r) => {
     if (!searchQuery) return true;
@@ -335,7 +335,7 @@ export default function VolunteerDashboard() {
         {/* ── Left Column: All Requests ── */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-            
+
             {/* Queue Header & Search */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
               <div>
@@ -365,11 +365,10 @@ export default function VolunteerDashboard() {
                 <button
                   key={val}
                   onClick={() => setTab(val)}
-                  className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                    tab === val
+                  className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${tab === val
                       ? 'bg-red-600 text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  }`}
+                    }`}
                 >
                   {label}
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab === val ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
@@ -531,7 +530,7 @@ export default function VolunteerDashboard() {
 
         {/* ── Right Column: Notifications & Scope ── */}
         <div className="space-y-4">
-          
+
           {/* Notifications */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">

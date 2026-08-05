@@ -13,7 +13,7 @@ const ALL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 function parseBlockAdminContacts(ba) {
   let admin1Name = ba.primaryContactName || ba.primary_contact_name || ba.primaryName || ba.primary_name || ba.name || '';
   let admin2Name = ba.secondary_name || ba.secondaryName || ba.secondaryContactName || '';
-  
+
   if (!admin2Name && admin1Name.includes(' & ')) {
     const parts = admin1Name.split(' & ');
     admin1Name = parts[0] ? parts[0].trim() : '';
@@ -253,7 +253,7 @@ export default function SuperAdminDashboard() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
-      
+
       {/* Sleek Minimal Header Banner */}
       <div className="relative rounded-3xl p-6 text-white shadow-lg overflow-hidden border border-red-900/20">
         <img
@@ -262,7 +262,7 @@ export default function SuperAdminDashboard() {
           className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none opacity-40"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-red-950/95 via-black/85 to-red-950/60 pointer-events-none" />
-        
+
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/30 border border-red-400/40 rounded-full text-white text-[11px] font-bold uppercase tracking-wider mb-2 backdrop-blur-md">
@@ -278,14 +278,14 @@ export default function SuperAdminDashboard() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Link 
-              to="/super-admin/blocks" 
+            <Link
+              to="/super-admin/blocks"
               className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer"
             >
               <Building2 className="w-4 h-4" /> Manage Blocks
             </Link>
-            <button 
-              onClick={loadData} 
+            <button
+              onClick={loadData}
               className="p-2.5 bg-black/40 hover:bg-black/60 border border-white/20 rounded-xl text-xs font-bold text-white transition cursor-pointer backdrop-blur-md"
               title="Refresh Data"
             >
@@ -297,7 +297,7 @@ export default function SuperAdminDashboard() {
 
       {/* Modern 4 KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        
+
         {/* KPI 1: Donors */}
         <div className="bg-white border border-red-100 p-4 rounded-2xl shadow-xs hover:border-red-200 transition">
           <div className="flex items-center justify-between">
@@ -353,10 +353,10 @@ export default function SuperAdminDashboard() {
 
       {/* Main 2-Column Balanced Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        
+
         {/* Left Column (8 cols): Blood Group Matrix & Emergency Feed */}
         <div className="lg:col-span-8 space-y-5">
-          
+
           {/* Minimal Blood Group Matrix */}
           <div className="bg-white border border-red-100 rounded-2xl p-4.5 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-red-50 pb-3">
@@ -423,11 +423,10 @@ export default function SuperAdminDashboard() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                        req.urgency_level === 'Emergency' || req.urgency_level === 'Critical'
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${req.urgency_level === 'Emergency' || req.urgency_level === 'Critical'
                           ? 'bg-red-50 text-red-700 border border-red-200'
                           : 'bg-slate-100 text-slate-700'
-                      }`}>
+                        }`}>
                         {req.urgency_level || 'Urgent'}
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
@@ -464,9 +463,9 @@ export default function SuperAdminDashboard() {
                     <span className="text-slate-500 font-normal text-[11px]">{ba.users} Donors</span>
                   </div>
                   <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-red-600 h-full rounded-full" 
-                      style={{ width: `${Math.max(8, (ba.users / maxUsersInBlock) * 100)}%` }} 
+                    <div
+                      className="bg-red-600 h-full rounded-full"
+                      style={{ width: `${Math.max(8, (ba.users / maxUsersInBlock) * 100)}%` }}
                     />
                   </div>
                 </div>
@@ -572,9 +571,8 @@ export default function SuperAdminDashboard() {
                       </td>
 
                       <td className="py-3 px-4 text-center whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                          ba.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'
-                        }`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${ba.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'
+                          }`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                           {ba.status || 'Active'}
                         </span>
@@ -582,17 +580,17 @@ export default function SuperAdminDashboard() {
 
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
-                          <button 
-                            onClick={() => handleOpenEdit(ba)} 
+                          <button
+                            onClick={() => handleOpenEdit(ba)}
                             className="px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:text-red-600 bg-slate-50 border border-slate-200 rounded-lg transition cursor-pointer flex items-center gap-1"
                           >
                             <Edit3 className="w-3 h-3" /> Edit
                           </button>
-                          <button 
+                          <button
                             onClick={() => {
                               setDeletingAdminId(ba.id);
                               setDeletingAdminName(ba.primary_name || ba.name);
-                            }} 
+                            }}
                             className="px-2.5 py-1 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg transition cursor-pointer flex items-center gap-1"
                           >
                             <Trash2 className="w-3 h-3" /> Delete
@@ -623,8 +621,8 @@ export default function SuperAdminDashboard() {
                     <p className="text-red-100 text-[10px]">Update Block Committee information</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setEditingAdmin(null)} 
+                <button
+                  onClick={() => setEditingAdmin(null)}
                   className="w-7 h-7 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
                 >
                   <X className="w-4 h-4" />
@@ -634,9 +632,8 @@ export default function SuperAdminDashboard() {
 
             <div className="p-5 space-y-4">
               {editMsg && (
-                <div className={`p-3 rounded-xl text-xs font-bold ${
-                  editMsg.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                }`}>
+                <div className={`p-3 rounded-xl text-xs font-bold ${editMsg.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                  }`}>
                   {editMsg.msg}
                 </div>
               )}
@@ -644,35 +641,35 @@ export default function SuperAdminDashboard() {
               <form onSubmit={handleSaveEditBlockAdmin} className="space-y-3.5 text-xs">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Block Committee Name *</label>
-                  <input 
-                    type="text" 
-                    value={editBlockName} 
-                    onChange={(e) => setEditBlockName(e.target.value)} 
-                    required 
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
+                  <input
+                    type="text"
+                    value={editBlockName}
+                    onChange={(e) => setEditBlockName(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Primary Contact Name *</label>
-                    <input 
-                      type="text" 
-                      value={editFullName1} 
-                      onChange={(e) => setEditFullName1(e.target.value)} 
-                      required 
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
+                    <input
+                      type="text"
+                      value={editFullName1}
+                      onChange={(e) => setEditFullName1(e.target.value)}
+                      required
+                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Primary Phone Number *</label>
-                    <input 
-                      type="tel" 
-                      value={editMobile1} 
-                      onChange={(e) => setEditMobile1(e.target.value)} 
-                      required 
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
+                    <input
+                      type="tel"
+                      value={editMobile1}
+                      onChange={(e) => setEditMobile1(e.target.value)}
+                      required
+                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500"
                     />
                   </div>
                 </div>
@@ -680,23 +677,23 @@ export default function SuperAdminDashboard() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Secondary Contact Name *</label>
-                    <input 
-                      type="text" 
-                      value={editFullName2} 
-                      onChange={(e) => setEditFullName2(e.target.value)} 
+                    <input
+                      type="text"
+                      value={editFullName2}
+                      onChange={(e) => setEditFullName2(e.target.value)}
                       required
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
+                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Secondary Phone Number *</label>
-                    <input 
-                      type="tel" 
-                      value={editMobile2} 
-                      onChange={(e) => setEditMobile2(e.target.value)} 
+                    <input
+                      type="tel"
+                      value={editMobile2}
+                      onChange={(e) => setEditMobile2(e.target.value)}
                       required
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
+                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500"
                     />
                   </div>
                 </div>
@@ -704,20 +701,20 @@ export default function SuperAdminDashboard() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Email Address *</label>
-                    <input 
-                      type="email" 
-                      value={editEmail} 
-                      onChange={(e) => setEditEmail(e.target.value)} 
-                      required 
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500" 
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      required
+                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-red-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Account Status</label>
-                    <select 
-                      value={editStatus} 
-                      onChange={(e) => setEditStatus(e.target.value)} 
+                    <select
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-bold cursor-pointer focus:outline-none focus:border-red-500"
                     >
                       <option value="Active">🟢 Active</option>
@@ -727,16 +724,16 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 <div className="flex gap-3 pt-3 border-t border-slate-100">
-                  <button 
-                    type="button" 
-                    onClick={() => setEditingAdmin(null)} 
+                  <button
+                    type="button"
+                    onClick={() => setEditingAdmin(null)}
                     className="flex-1 py-2.5 border border-slate-200 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-50 cursor-pointer"
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    disabled={submittingEdit} 
+                  <button
+                    type="submit"
+                    disabled={submittingEdit}
                     className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer disabled:opacity-50"
                   >
                     {submittingEdit ? 'Saving...' : 'Save Changes'}

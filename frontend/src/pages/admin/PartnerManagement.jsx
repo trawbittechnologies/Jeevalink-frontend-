@@ -199,12 +199,12 @@ export default function PartnerManagement() {
 
       {/* Partners Cards Grid */}
       {loading ? (
-        <div className="bg-white border border-slate-100 rounded-2xl p-12 flex flex-col items-center justify-center min-h-[300px]">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-12 flex flex-col items-center justify-center min-h-[300px]">
           <Loader2 className="w-8 h-8 text-red-500 animate-spin mb-4" />
           <p className="text-slate-500 text-sm font-medium">Loading partners data...</p>
         </div>
       ) : partners.length === 0 ? (
-        <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center max-w-xl mx-auto space-y-4">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-12 text-center max-w-xl mx-auto space-y-4">
           <div className="w-14 h-14 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center mx-auto text-red-500">
             <Handshake className="w-7 h-7" />
           </div>
@@ -228,7 +228,7 @@ export default function PartnerManagement() {
               <motion.div
                 key={partner._id}
                 layout
-                className="bg-white border border-slate-100 rounded-2xl p-5 flex flex-col items-center text-center relative overflow-hidden transition-all shadow-sm group hover:border-slate-200"
+                className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-5 flex flex-col items-center text-center relative overflow-hidden transition-all group hover:"
               >
                 {/* Logo wrapper */}
                 <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5 mb-4 overflow-hidden relative shadow-sm">
@@ -287,13 +287,13 @@ export default function PartnerManagement() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-100 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden my-8"
+              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl w-full max-w-md shadow-2xl overflow-hidden my-8"
             >
               {/* Modal Head Banner */}
               <div className="bg-red-600 p-6 relative overflow-hidden">
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                    <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center text-white">
                       <Plus className="w-5 h-5" />
                     </div>
                     <div>
@@ -392,7 +392,7 @@ export default function PartnerManagement() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer shadow-sm"
+                    className="flex-1 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -418,7 +418,7 @@ export default function PartnerManagement() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-100 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden my-8 p-6 text-center relative"
+              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden my-8 p-6 text-center relative"
             >
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8 text-red-500" />

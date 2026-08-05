@@ -280,7 +280,7 @@ export default function Campaigns() {
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-red-600 text-xs font-extrabold uppercase tracking-wider mb-4 shadow-sm">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all text-red-600 text-xs font-extrabold uppercase tracking-wider mb-4">
                 <HeartHandshake className="w-4 h-4 text-red-600" />
                 <span>Community Health Hub</span>
               </div>
@@ -295,7 +295,7 @@ export default function Campaigns() {
             {canCreate && (
               <button
                 onClick={handleOpenCreateModal}
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white text-red-600 font-extrabold text-sm shadow-lg hover:bg-red-50 transition self-start md:self-center shrink-0 border border-white/20"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all text-red-600 font-extrabold text-sm hover:bg-red-50 transition self-start md:self-center shrink-0 border border-white/20"
               >
                 <Plus className="w-5 h-5 stroke-[3]" />
                 <span>Publish Program</span>
@@ -309,7 +309,7 @@ export default function Campaigns() {
       <div className="max-w-6xl mx-auto px-4 sm:px-8 mt-6 relative z-10">
 
         {/* Filter & Search Bar - Clean Red & White */}
-        <div className="bg-white rounded-2xl shadow-lg border border-red-100 p-4 mb-8">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl border border-red-100 p-4 mb-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
 
             {/* Category Tabs */}
@@ -347,7 +347,7 @@ export default function Campaigns() {
                 placeholder="Search camps..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-white border border-red-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+                className="w-full pl-9 pr-4 py-2.5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border border-red-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
               />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -360,7 +360,7 @@ export default function Campaigns() {
 
         {/* Card Grid */}
         {filteredPosts.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-red-100 shadow-sm max-w-md mx-auto my-12">
+          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl p-12 text-center border border-red-100 max-w-md mx-auto my-12">
             <Smile className="w-8 h-8 text-red-600 mx-auto mb-3" />
             <h3 className="text-base font-bold text-slate-900">No Active Campaigns</h3>
             <p className="text-slate-500 text-xs mt-1">There are no programs posted yet under this filter. Click below to publish your first campaign!</p>
@@ -383,7 +383,7 @@ export default function Campaigns() {
               return (
                 <article
                   key={post.id}
-                  className="bg-white rounded-2xl overflow-hidden border-t-4 border-t-red-600 border-x border-b border-red-100 shadow-sm hover:shadow-xl hover:border-red-300 transition duration-300 flex flex-col justify-between"
+                  className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl overflow-hidden border-t-4 border-t-red-600 border-x border-b border-red-100 hover:shadow-xl hover:border-red-300 transition duration-300 flex flex-col justify-between"
                 >
                   <div>
                     {/* Cover Banner */}
@@ -524,7 +524,7 @@ export default function Campaigns() {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              className="bg-white rounded-2xl shadow-2xl border border-red-100 w-full max-w-lg overflow-hidden"
+              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl shadow-2xl border border-red-100 w-full max-w-lg overflow-hidden"
             >
               <div className="bg-red-600 px-6 py-4 text-white flex items-center justify-between">
                 <h3 className="text-base font-extrabold text-white">
@@ -692,7 +692,7 @@ export default function Campaigns() {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-sm text-center border border-red-100 shadow-2xl"
+              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl p-6 w-full max-w-sm text-center border border-red-100 shadow-2xl"
             >
               <h3 className="text-base font-extrabold text-slate-900">Share Program</h3>
               <p className="text-xs text-slate-500 mt-1 line-clamp-1">{shareModalPost.title}</p>
@@ -706,7 +706,7 @@ export default function Campaigns() {
                 </button>
                 <button
                   onClick={() => handleCopyLink(shareModalPost)}
-                  className="w-full py-2.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 font-bold text-xs rounded-xl transition"
+                  className="w-full py-2.5 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover:bg-red-50 text-red-600 border border-red-200 font-bold text-xs rounded-xl transition"
                 >
                   {copiedLink ? 'Link Copied!' : 'Copy Direct Link'}
                 </button>
@@ -818,7 +818,7 @@ export default function Campaigns() {
                 </button>
                 <button
                   onClick={() => setViewModalPost(null)}
-                  className="px-6 py-3 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-sm rounded-xl transition"
+                  className="px-6 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border hover:bg-slate-100 text-slate-700 font-bold text-sm rounded-xl transition"
                 >
                   Close
                 </button>

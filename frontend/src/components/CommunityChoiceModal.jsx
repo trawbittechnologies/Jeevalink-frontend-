@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, Users, X, ArrowRight, ShieldCheck, Sparkles, Heart } from 'lucide-react';
+import { LogIn, Users, X, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function CommunityChoiceModal({ isOpen, onClose }) {
   const navigate = useNavigate();

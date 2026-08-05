@@ -118,7 +118,7 @@ export default function VolunteerManagement() {
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all p-6 rounded-3xl border /80 shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-slate-900 text-xl font-black tracking-tight">Volunteer Management (Meghala Committee)</h1>
@@ -155,7 +155,7 @@ export default function VolunteerManagement() {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl border /80 shadow-xs overflow-hidden">
         {/* Filter Toolbar */}
         <FilterBar
           search={search} onSearch={setSearch}
@@ -354,7 +354,7 @@ export default function VolunteerManagement() {
             <>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50" onClick={() => setShowViewModal(false)} />
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4">
-                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xl">
+                <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-6 shadow-xl">
                   <div className="flex items-center justify-between mb-5">
                     <h3 className="text-slate-900 text-lg font-black">Volunteer (Meghala) Details</h3>
                     <button onClick={() => setShowViewModal(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"><X className="w-4 h-4" /></button>
@@ -407,11 +407,11 @@ export default function VolunteerManagement() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" onClick={() => { setShowAddModal(false); setShowEditModal(false); }} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+              <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl shadow-xl overflow-hidden border">
                 <div className="bg-red-600 p-6 relative overflow-hidden">
                   <div className="relative z-10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                      <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center text-white">
                         {showAddModal ? <Plus className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
                       </div>
                       <div>
@@ -521,7 +521,7 @@ export default function VolunteerManagement() {
                     
                     <div className="flex gap-3 pt-3 mt-4 border-t border-slate-100">
                       <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(false); }}
-                        className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer shadow-sm">
+                        className="flex-1 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
                         Cancel
                       </button>
                       <button type="submit" disabled={loading}

@@ -115,7 +115,7 @@ export default function FeedbackManagement() {
       {/* Content Split */}
       <div className="grid lg:grid-cols-2 gap-4">
         {/* Left: Feedback List */}
-        <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl overflow-hidden">
           <FilterBar
             search={search} onSearch={setSearch}
             searchPlaceholder="Search feedback..."
@@ -162,7 +162,7 @@ export default function FeedbackManagement() {
         </div>
 
         {/* Right: Detail + Reply Panel */}
-        <div className="bg-white border border-slate-100 rounded-2xl flex flex-col">
+        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl flex flex-col">
           {!selected ? (
             <div className="flex-1 flex items-center justify-center text-slate-600 text-sm">
               <div className="text-center">

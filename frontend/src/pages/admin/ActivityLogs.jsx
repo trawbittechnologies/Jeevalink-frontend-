@@ -53,7 +53,7 @@ export default function ActivityLogs() {
           { label: 'Logins', value: logs.filter(l => l.type === 'login').length, color: 'text-emerald-400' },
           { label: 'Critical Actions', value: logs.filter(l => l.type === 'delete' || l.type === 'alert').length, color: 'text-red-400' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white border border-slate-100 rounded-2xl p-4 text-center">
+          <div key={label} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl p-4 text-center">
             <p className={`text-xl font-black ${color}`}>{value}</p>
             <p className="text-slate-500 text-[10px]">{label}</p>
           </div>
@@ -61,7 +61,7 @@ export default function ActivityLogs() {
       </div>
 
       {/* Logs */}
-      <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
+      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-2xl overflow-hidden">
         <FilterBar
           search={search} onSearch={setSearch}
           searchPlaceholder="Search actions, details..."

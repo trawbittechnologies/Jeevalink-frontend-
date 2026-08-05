@@ -23,7 +23,7 @@ export const useAppStore = create((set, get) => ({
       if (saved) {
         return { ...defaults, ...JSON.parse(saved) };
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
     return defaults;
@@ -818,12 +818,12 @@ export const useAppStore = create((set, get) => ({
         set({ awarenessSettings: fetched });
         try {
           localStorage.setItem('jeevalink_awareness_settings', JSON.stringify(fetched));
-        } catch (e) {
+        } catch {
           // ignore
         }
         return;
       }
-    } catch (err) {
+    } catch {
       // Fallback: If 404 or backend error, use cached settings from localStorage if available
       const saved = typeof window !== 'undefined' ? localStorage.getItem('jeevalink_awareness_settings') : null;
       if (saved) {
@@ -832,7 +832,7 @@ export const useAppStore = create((set, get) => ({
           if (cached && typeof cached === 'object') {
             set((state) => ({ awarenessSettings: { ...state.awarenessSettings, ...cached } }));
           }
-        } catch (e) {
+        } catch {
           // ignore
         }
       }
@@ -856,7 +856,7 @@ export const useAppStore = create((set, get) => ({
         set({ awarenessSettings: updated });
         try {
           localStorage.setItem('jeevalink_awareness_settings', JSON.stringify(updated));
-        } catch (e) {
+        } catch {
           // ignore
         }
         get().triggerToast(res.data.message || 'Awareness settings updated successfully!', 'success');

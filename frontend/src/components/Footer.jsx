@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Droplet, Activity, Mail, MapPin, Quote } from 'lucide-react';
+import { Heart, Droplet, Mail, MapPin, Quote } from 'lucide-react';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
 const platformLinks = [
