@@ -238,9 +238,7 @@ export default function Navbar() {
               <Link to="/login" className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors rounded-xl hover:bg-slate-50">
                 Sign In
               </Link>
-              <Link to="/register" className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold rounded-xl shadow-md transition-all">
-                Register
-              </Link>
+
             </>
           )}
         </div>

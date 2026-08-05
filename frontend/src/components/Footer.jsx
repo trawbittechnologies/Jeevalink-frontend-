@@ -7,7 +7,6 @@ const platformLinks = [
   { to: '/', label: 'Home' },
   { to: '/donor/search', label: 'Find Donors' },
   { to: '/requests', label: 'Blood Requests' },
-  { to: '/register', label: 'Register as Donor' },
   { to: '/volunteer-directory', label: 'Directory' },
 ];
 
@@ -90,13 +89,7 @@ export default function Footer() {
               ))}
             </div>
             
-            <Link
-              to="/register"
-              className="px-6 py-2.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white font-bold text-sm rounded-full transition-colors flex items-center gap-2 group"
-            >
-              <span>Join the Registry</span>
-              <Heart className="w-4 h-4 fill-current group-hover:animate-ping" />
-            </Link>
+
           </div>
         </div>
       </div>

@@ -271,12 +271,7 @@ export default function Login() {
             Continue with Google
           </button>
 
-          <p className="text-center text-xs text-slate-500 mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary font-bold hover:underline">
-              Register here
-            </Link>
-          </p>
+
         </motion.div>
       </div>
 

@@ -29,7 +29,7 @@ function safeLazy(importFn) {
 const Splash = safeLazy(() => import('./pages/Splash.jsx'));
 const Landing = safeLazy(() => import('./pages/Landing.jsx'));
 const Login = safeLazy(() => import('./pages/Login.jsx'));
-const Register = safeLazy(() => import('./pages/Register.jsx'));
+
 const ResetPassword = safeLazy(() => import('./pages/ResetPassword.jsx'));
 const CompleteProfile = safeLazy(() => import('./pages/CompleteProfile.jsx'));
 const DonorDashboard = safeLazy(() => import('./pages/DonorDashboard.jsx'));
@@ -184,7 +184,7 @@ export default function App() {
 
               {/* Auth pages — no Navbar/Footer */}
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/complete-profile" element={<CompleteProfile />} />
 
