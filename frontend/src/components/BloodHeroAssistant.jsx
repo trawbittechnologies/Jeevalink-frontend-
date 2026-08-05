@@ -21,7 +21,7 @@ export default function BloodHeroAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 **Hello!** I am **Hemo**, your AI assistant for JeevaLink blood donation platform.\n\nI am here to help you with:\n* **Donor Eligibility**: Requirements & health guidelines\n* **Blood Matching**: Donor and recipient compatibility\n* **Emergency Sourcing**: Active blood requests & donation drives\n\nHow can I help you today?"
+      text: "👋 **Hello!** I am **Hemo**, your assistant for JeevaLink blood donation platform.\n\nI am here to help you with donor eligibility, blood group matching, emergency requests, and platform services.\n\nHow can I help you today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -68,7 +68,7 @@ export default function BloodHeroAssistant() {
         ...prev,
         {
           sender: 'assistant',
-          text: `⚠️ **Connection Error**: ${err.message || 'Unable to connect to AI server. Please try again.'}`,
+          text: `⚠️ **Connection Error**: ${err.message || 'Unable to connect to server. Please try again.'}`,
           isError: true,
         },
       ]);
@@ -98,7 +98,9 @@ export default function BloodHeroAssistant() {
 
     return lines.map((line, lIdx) => {
       const trimmed = line.trim();
-      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      const isBullet = trimmed.startsWith('* ') || trimmed.startsWith('- ');
+      const cleanLine = isBullet ? trimmed.replace(/^[*|-]\s+/, '') : line;
+      const parts = cleanLine.split(/(\*\*[^*]+\*\*)/g);
 
       const formattedLine = parts.map((part, pIdx) => {
         if (part.startsWith('**') && part.endsWith('**')) {
@@ -111,7 +113,7 @@ export default function BloodHeroAssistant() {
         return part;
       });
 
-      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+      if (isBullet) {
         return (
           <div key={lIdx} className="flex items-start gap-2 my-1 pl-1">
             <span className="text-red-500 font-bold shrink-0">•</span>
