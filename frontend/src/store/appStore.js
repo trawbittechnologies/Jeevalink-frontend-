@@ -32,6 +32,23 @@ export const useAppStore = create((set, get) => ({
   searchRadius: 15,
   selectedBloodGroup: 'B+',
   toast: { show: false, message: '', type: 'success' },
+  publicStats: { totalVolunteers: '-', totalRequests: '-' },
+
+  fetchPublicStats: async () => {
+    try {
+      const res = await api.get('/public/stats');
+      if (res.data.success) {
+        set({
+          publicStats: {
+            totalVolunteers: res.data.data.total_volunteers || 0,
+            totalRequests: res.data.data.total_requests || 0
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch public stats', err);
+    }
+  },
 
   // Admin Panel State
   adminStats: {
