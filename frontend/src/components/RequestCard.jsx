@@ -129,17 +129,25 @@ export default function RequestCard({ request, showActions = true }) {
 
   const acceptedList = (() => {
     try {
-      return Array.isArray(request.accepted_donors) 
-        ? request.accepted_donors 
-        : JSON.parse(request.accepted_donors || '[]');
-    } catch {
+      let raw = request.accepted_donors;
+      if (typeof raw === 'string') raw = JSON.parse(raw || '[]');
+      if (Array.isArray(raw)) return raw;
+      if (request.accepted_by || request.accepted_by_user_id) {
+        return [request.accepted_by || request.accepted_by_user_id];
+      }
       return [];
+    } catch {
+      return (request.accepted_by || request.accepted_by_user_id) ? [request.accepted_by || request.accepted_by_user_id] : [];
     }
   })();
-  const isAcceptedByMe = user && (
-    acceptedList.includes(user._id) || 
-    acceptedList.includes(user.id) || 
-    String(request.accepted_by_user_id) === String(user._id || user.id)
+
+  const currentUserIdStr = user ? String(user._id || user.id) : null;
+  const isAcceptedByMe = Boolean(
+    currentUserIdStr && (
+      acceptedList.map(String).includes(currentUserIdStr) ||
+      String(request.accepted_by_user_id) === currentUserIdStr ||
+      String(request.accepted_by) === currentUserIdStr
+    )
   );
 
   const handleAcceptRequest = async () => {
@@ -252,32 +260,39 @@ export default function RequestCard({ request, showActions = true }) {
           </div>
 
           {/* Units + Status chip row */}
-          <div className="flex items-center justify-between mb-3 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
-            <div className="flex items-center gap-1.5">
-              <Droplet className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-              <span className="text-xs font-bold text-slate-700">
+          <div className="flex items-center justify-between mb-3 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Droplet className="w-3.5 h-3.5 text-red-500 fill-red-500 shrink-0" />
+              <span className="text-xs font-bold text-slate-700 truncate">
                 {request.unitsRequired || request.units_required} units needed
               </span>
             </div>
-            {canManage ? (
-              <select
-                value={request.status || 'Pending'}
-                onChange={handleStatusChange}
-                className="text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-red-400"
-              >
-                <option value="Pending">🟡 Pending</option>
-                <option value="Fulfilled">🟢 Fulfilled</option>
-                <option value="Cancelled">🔴 Cancelled</option>
-              </select>
-            ) : (
-              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                request.status === 'Fulfilled'
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                  : 'bg-amber-50 text-amber-700 border border-amber-200'
-              }`}>
-                {request.status}
-              </span>
-            )}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isAcceptedByMe && (
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Accepted
+                </span>
+              )}
+              {canManage ? (
+                <select
+                  value={request.status || 'Pending'}
+                  onChange={handleStatusChange}
+                  className="text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-red-400"
+                >
+                  <option value="Pending">🟡 Pending</option>
+                  <option value="Fulfilled">🟢 Fulfilled</option>
+                  <option value="Cancelled">🔴 Cancelled</option>
+                </select>
+              ) : (
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                  request.status === 'Fulfilled'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}>
+                  {request.status}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* ─── Action Buttons ─── */}
@@ -288,15 +303,23 @@ export default function RequestCard({ request, showActions = true }) {
               {request.status === 'Pending' && !isOwner && !isPrivileged && (
                 <button
                   onClick={handleAcceptRequest}
-                  disabled={accepting || isAcceptedByMe}
+                  disabled={accepting || isAcceptedByMe || acceptedList.length >= 5}
                   className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isAcceptedByMe
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : acceptedList.length >= 5
+                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
                       : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm shadow-emerald-500/20'
                   }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  {isAcceptedByMe ? '✓ Accepted to Donate' : 'Accept & Donate'}
+                  {isAcceptedByMe
+                    ? '✓ Accepted to Donate'
+                    : acceptedList.length >= 5
+                    ? 'Max 5 Donors Accepted'
+                    : acceptedList.length > 0
+                    ? `Accept & Donate (${acceptedList.length}/5 Donors)`
+                    : 'Accept & Donate'}
                 </button>
               )}
 
