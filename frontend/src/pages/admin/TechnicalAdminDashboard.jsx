@@ -640,79 +640,7 @@ export default function TechnicalAdminDashboard() {
         </div>
       </div>
 
-      {/* Quick District Super Admins Overview */}
-      <div className="bg-white border border-red-100 rounded-3xl p-6 shadow-sm space-y-4 overflow-hidden relative">
-        <div className="relative rounded-2xl p-4 sm:p-5 -mx-2 -mt-2 text-white overflow-hidden shadow-md">
-          <img
-            src="/kasaragod_banner.png"
-            alt="Super Admin Directory Cover Image"
-            className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none" />
-          <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 drop-shadow-md">
-                <ShieldCheck className="w-5 h-5 text-emerald-300" />
-                District Super Admins Directory Quick View ({superAdmins.length})
-              </h3>
-              <p className="text-xs text-slate-100 font-medium drop-shadow-sm">District leaders and contact assignments</p>
-            </div>
 
-            <Link
-              to="/technical-admin/super-admins"
-              className="px-4 py-2.5 bg-white text-emerald-900 hover:bg-emerald-50 rounded-xl text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer transform hover:scale-105"
-            >
-              <Plus className="w-4 h-4" /> Open Full Super Admin Table
-            </Link>
-          </div>
-        </div>
-
-        {superAdmins.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 space-y-2">
-            <p className="text-sm font-bold text-slate-700">No Super Admins Registered Yet</p>
-            <p className="text-xs">Click above to add District Super Admins.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {superAdmins.slice(0, 6).map((sa) => (
-              <div key={sa.id} className="bg-slate-50/70 border border-slate-200/70 rounded-2xl p-4 space-y-2 hover:border-red-200 transition">
-                <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold rounded-full">
-                    {sa.district || 'District'}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${sa.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
-                      }`}>
-                      {sa.status || 'Active'}
-                    </span>
-                    <button
-                      onClick={() => openEditSA(sa)}
-                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                      title="Edit Super Admin"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-                <h4 className="font-bold text-slate-900 text-sm truncate">{sa.primaryName || sa.primary_name || sa.name}</h4>
-                {(() => {
-                  const sId = sa.jeevalink_id || sa.employee_id || sa.jeevalinkId || (sa.id || sa._id ? `JL-SA-${String(sa.id || sa._id).padStart(4, '0')}` : null);
-                  return sId ? (
-                    <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2 py-0.5 rounded-lg">
-                      {sId}
-                    </span>
-                  ) : null;
-                })()}
-                <div className="text-xs text-slate-600 space-y-0.5 font-medium">
-                  <p className="truncate">Email: {sa.email}</p>
-                  <p>Mobile: {sa.mobile}</p>
-                  {(sa.secondaryName || sa.secondary_name || sa.secondary_contact) && <p>Sec: {sa.secondaryName || sa.secondary_name || sa.secondary_contact}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Edit Modal */}
       {editingSA && (
