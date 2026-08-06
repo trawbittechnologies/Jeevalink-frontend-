@@ -1,71 +1,94 @@
+import { searchKeralaPlaces } from '../data/keralaPlacesData';
+
 /**
  * Map & Geocoding Service
- * Powered by OpenStreetMap Open Source APIs:
- * - Photon (Search / Autocomplete by Komoot)
+ * Powered by OpenStreetMap Open Source APIs + Kerala Curated Database:
+ * - Local Kerala Places & Hospitals Engine
+ * - Photon (Search / Autocomplete by Komoot with Kerala Bounding Box Biasing)
  * - Nominatim (Reverse Geocoding)
  * - OSRM (Open Source Routing Machine for Distance & Driving Polyline Routes)
  */
 
 /**
- * Photon OpenStreetMap Search & Autocomplete
+ * Photon OpenStreetMap Search & Autocomplete (Kerala-aware & Biased)
  * @param {string} query Search text
  * @param {object} options { limit: number, lat: number, lng: number }
- * @returns {Promise<Array<{id: string|number, displayName: string, lat: number, lng: number, city: string, state: string, country: string}>>}
+ * @returns {Promise<Array<{id: string|number, displayName: string, lat: number, lng: number, city: string, state: string, country: string, isKeralaPreset?: boolean}>>}
  */
 export async function searchLocationPhoton(query, options = {}) {
   if (!query || query.trim().length < 2) return [];
 
-  const { limit = 6, lat, lng } = options;
-  let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=${limit}`;
-  
-  if (lat !== undefined && lng !== undefined) {
-    url += `&lat=${lat}&lon=${lng}`;
+  const { limit = 8, lat = 10.8505, lng = 76.2711 } = options;
+
+  // 1. Fetch Instant Kerala Local Dataset Matches
+  const localKeralaMatches = searchKeralaPlaces(query, 4);
+
+  // 2. Query Photon OSM API with Kerala Bounding Box and Proximity Bias
+  // Kerala bounding box: [Min Lng: 74.85, Min Lat: 8.28, Max Lng: 77.58, Max Lat: 12.79]
+  let searchQuery = query.trim();
+  if (!searchQuery.toLowerCase().includes('kerala') && !searchQuery.toLowerCase().includes('india')) {
+    searchQuery = `${searchQuery}, Kerala`;
   }
 
+  const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(searchQuery)}&bbox=74.85,8.28,77.58,12.79&lat=${lat}&lon=${lng}&limit=${limit}`;
+
+  let photonResults = [];
   try {
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error(`Photon search failed: ${res.status}`);
-    const data = await res.json();
-    
-    if (!data || !Array.isArray(data.features)) return [];
+    const res = await fetch(photonUrl, { headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.features)) {
+        photonResults = data.features.map((feature, idx) => {
+          const props = feature.properties || {};
+          const coords = feature.geometry?.coordinates || [0, 0];
+          const lngVal = coords[0];
+          const latVal = coords[1];
 
-    return data.features.map((feature, idx) => {
-      const props = feature.properties || {};
-      const coords = feature.geometry?.coordinates || [0, 0];
-      const lngVal = coords[0];
-      const latVal = coords[1];
+          // Format clean readable address
+          const parts = [
+            props.name,
+            props.street ? (props.housenumber ? `${props.housenumber} ${props.street}` : props.street) : null,
+            props.district || props.suburb || props.locality,
+            props.city || props.town || props.village || props.county,
+            props.state,
+            props.country
+          ].filter(Boolean);
 
-      // Format a clean, readable display address
-      const parts = [
-        props.name,
-        props.street ? (props.housenumber ? `${props.housenumber} ${props.street}` : props.street) : null,
-        props.district || props.suburb || props.locality,
-        props.city || props.town || props.village || props.county,
-        props.state,
-        props.country
-      ].filter(Boolean);
+          const uniqueParts = parts.filter((item, pos, self) => self.indexOf(item) === pos);
+          const displayName = uniqueParts.join(', ') || props.name || 'Location in Kerala';
 
-      // Remove duplicate consecutive parts
-      const uniqueParts = parts.filter((item, pos, self) => self.indexOf(item) === pos);
-      const displayName = uniqueParts.join(', ') || props.name || 'Unknown Location';
-
-      return {
-        id: props.osm_id || `photon-${idx}-${Date.now()}`,
-        displayName,
-        name: props.name || displayName.split(',')[0],
-        lat: latVal,
-        lng: lngVal,
-        city: props.city || props.town || props.village || props.county || props.district || '',
-        state: props.state || '',
-        country: props.country || '',
-        postcode: props.postcode || '',
-        raw: feature
-      };
-    });
+          return {
+            id: props.osm_id || `photon-${idx}-${Date.now()}`,
+            displayName,
+            name: props.name || displayName.split(',')[0],
+            lat: latVal,
+            lng: lngVal,
+            city: props.city || props.town || props.village || props.county || props.district || '',
+            state: props.state || 'Kerala',
+            country: props.country || 'India',
+            postcode: props.postcode || '',
+            raw: feature
+          };
+        });
+      }
+    }
   } catch (err) {
-    console.error('Photon autocomplete error:', err);
-    return [];
+    console.error('Photon autocomplete fetch error:', err);
   }
+
+  // 3. Combine Local Kerala Preset Matches & Photon Results, Removing Duplicates
+  const combined = [...localKeralaMatches];
+  const seenNames = new Set(localKeralaMatches.map(m => m.name.toLowerCase()));
+
+  for (const item of photonResults) {
+    const itemNameLower = item.name.toLowerCase();
+    if (!seenNames.has(itemNameLower)) {
+      seenNames.add(itemNameLower);
+      combined.push(item);
+    }
+  }
+
+  return combined.slice(0, limit);
 }
 
 /**
