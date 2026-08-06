@@ -328,15 +328,15 @@ export default function RequestCard({ request, showActions = true }) {
                 >
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   {accepting
-                    ? 'Processing Acceptance...'
+                    ? 'Processing...'
                     : isAcceptedByMe
                     ? myQueuePosition === 1
-                      ? '✓ Accepted (Primary Donor)'
-                      : `✓ Accepted — In Waiting List (Queue #${myQueuePosition})`
+                      ? 'Accepted'
+                      : 'Queueing'
                     : acceptedList.length >= 5
-                    ? 'Max 5 Donors Accepted (Waiting List Full)'
+                    ? 'Waiting List Full'
                     : acceptedList.length > 0
-                    ? `Accept & Donate (${acceptedList.length}/5 Donors — Queue #${acceptedList.length + 1})`
+                    ? `Accept & Donate (${acceptedList.length}/5)`
                     : 'Accept & Donate'}
                 </button>
               )}
