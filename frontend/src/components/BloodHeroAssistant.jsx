@@ -256,16 +256,16 @@ export default function BloodHeroAssistant() {
                     >
                       <div
                         className={`max-w-[88%] p-3.5 rounded-2xl shadow-2xs ${msg.sender === 'user'
-                            ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-tr-xs'
-                            : msg.isError
-                              ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-tl-xs'
-                              : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs'
+                          ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-tr-xs'
+                          : msg.isError
+                            ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-tl-xs'
+                            : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs'
                           }`}
                       >
                         <div className="text-[12px] whitespace-pre-wrap leading-relaxed">
                           {msg.sender === 'assistant' ? renderFormattedText(msg.text) : msg.text}
                         </div>
-                        
+
                         {/* Language Selection Buttons after first AI reply */}
                         {msg.sender === 'assistant' && idx === 2 && !languageSelected && (
                           <div className="mt-3 flex gap-2 pt-2 border-t border-slate-100">
@@ -380,9 +380,9 @@ export default function BloodHeroAssistant() {
             whileTap={{ scale: 0.94 }}
             className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer group drop-shadow-xl"
           >
-            <MascotVideo 
+            <MascotVideo
               showBubble={!isOpen}
-              className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))" 
+              className="w-full h-full object-contain filter drop-shadow(0 12px 24px rgba(220,38,38,0.35))"
             />
           </motion.button>
         </div>

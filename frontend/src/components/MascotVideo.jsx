@@ -97,42 +97,32 @@ export default function MascotVideo({
       {/* Comic Style Red & White Bubble - Repositioned to Left with Right Tail */}
       {showBubble && (
         <motion.div
-          className="absolute -top-[70px] sm:-top-[80px] left-[30%] sm:left-[20%] -translate-x-1/2 z-30 pointer-events-none w-max"
-          animate={{ y: [0, -6, 0] }}
+          className="absolute -top-[70px] sm:-top-[80px] left-[30%] sm:left-[20%] -translate-x-1/2 z-30 pointer-events-none w-max drop-shadow-md"
+          animate={{ y: [0, -4, 0] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <AnimatePresence mode="wait">
             <motion.div
               key={msgIdx}
-              initial={{ opacity: 0, y: 10, scale: 0.8, rotate: 3 }}
-              animate={{ opacity: 1, y: 0, scale: 1, rotate: -2 }}
-              exit={{ opacity: 0, y: -5, scale: 0.9, rotate: -5 }}
-              transition={{ duration: 0.5, type: "spring", bounce: 0.6 }}
-              className="relative bg-white px-4 py-2 rounded-[1.25rem] shadow-[4px_4px_0px_#dc2626] border-[3px] border-red-600 flex flex-col items-center whitespace-nowrap"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -5, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="relative bg-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl flex flex-col items-center whitespace-nowrap cursor-pointer pointer-events-auto"
             >
-              <p className="text-[12px] sm:text-[13px] font-black text-red-600 uppercase tracking-tight flex items-center justify-center gap-1.5 mb-1">
+              <p className="text-[13px] sm:text-[14px] font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1.5">
                 {creativeMessages[msgIdx]}
               </p>
 
-              <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-[3px] rounded-full shadow-inner mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_4px_#fff]"></span>
-                <span className="text-[9px] uppercase tracking-widest font-black text-white">
-                  Click to Chat
+              <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                <span className="text-[10px] font-bold text-white tracking-wider">
+                  CLICK TO CHAT
                 </span>
               </div>
 
-              {/* Comic Tail pointing down-right */}
-              <svg
-                className="absolute -bottom-[16px] right-6 w-6 h-6 text-white drop-shadow-[4px_4px_0px_#dc2626]"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M2 0 L22 0 L22 22 Z" className="fill-white stroke-red-600 stroke-[3px] stroke-linejoin-round" />
-              </svg>
-
-              {/* White patch to hide the overlapping border */}
-              <div className="absolute -bottom-[3px] right-[26px] w-[18px] h-1.5 bg-white z-10"></div>
+              {/* Clean Tail pointing down */}
+              <div className="absolute -bottom-[8px] right-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-white"></div>
             </motion.div>
 
           </AnimatePresence>
