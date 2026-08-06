@@ -6,6 +6,7 @@ import { normalizeRole } from '../utils/rbac.js';
 import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
+import BloodHeroAssistant from '../components/BloodHeroAssistant.jsx';
 
 export default function Login() {
   const [credential, setCredential] = useState('techadmin@jeevalink.org');
@@ -422,6 +423,9 @@ export default function Login() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Floating Mascot Character & AI Chat Assistant */}
+      <BloodHeroAssistant />
     </div>
   );
 }

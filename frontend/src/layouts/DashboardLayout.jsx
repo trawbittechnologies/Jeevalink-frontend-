@@ -6,7 +6,6 @@ import Toast from '../components/Toast.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
 import SOSButton from '../components/SOSButton.jsx';
-import BloodHeroAssistant from '../components/BloodHeroAssistant.jsx';
 import {
   LayoutDashboard, Droplets, Users, ClipboardList, User,
   Bell, Siren, Building2, Megaphone, Menu
@@ -178,8 +177,6 @@ export default function DashboardLayout() {
 
       {/* Floating SOS button */}
       <SOSButton />
-      {/* Floating Blood Hero Mascot Assistant */}
-      <BloodHeroAssistant />
     </div>
   );
 }

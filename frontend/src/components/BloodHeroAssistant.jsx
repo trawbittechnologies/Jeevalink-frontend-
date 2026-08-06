@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   X,
   Search,
@@ -15,6 +15,13 @@ import { queryJeevaLinkAI } from '../utils/aiService.js';
 import MascotVideo from './MascotVideo.jsx';
 
 export default function BloodHeroAssistant() {
+  const location = useLocation();
+  const allowedPaths = ['/', '/login'];
+
+  if (!allowedPaths.includes(location.pathname)) {
+    return null;
+  }
+
   const [isOpen, setIsOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
