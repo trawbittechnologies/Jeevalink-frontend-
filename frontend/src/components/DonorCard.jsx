@@ -4,6 +4,7 @@ import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import Modal from './Modal.jsx';
 import { getStorageUrl } from '../store/api.js';
+import { getDisplayJeevalinkId } from '../utils/jeevalinkId.js';
 
 const bloodColors = {
   'A+': 'from-red-500 to-rose-600 text-white shadow-red-200',
@@ -49,7 +50,7 @@ export default function DonorCard({ donor }) {
   const livesSaved = donor.livesSaved ?? donor.lives_saved ?? (donations * 3);
   const isAvailable = donor.availableForDonation !== undefined ? donor.availableForDonation : (donor.available_for_donation !== undefined ? donor.available_for_donation : true);
   const donorId = donor._id || donor.id;
-  const donorJeevalinkId = donor.jeevalink_id || donor.employee_id || donor.jeevalinkId || donor.employeeId || (donorId ? `JL-UR-${String(donorId).padStart(4, '0')}` : null);
+  const donorJeevalinkId = getDisplayJeevalinkId(donor);
   const userId = user?._id || user?.id;
   const sex = donor.sex || donor.gender || '';
   const dob = donor.dob || donor.date_of_birth || '';

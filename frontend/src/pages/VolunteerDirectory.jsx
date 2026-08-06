@@ -7,6 +7,7 @@ import {
 import { motion } from 'framer-motion';
 import api from '../store/api.js';
 import { useAppStore } from '../store/appStore.js';
+import { getDisplayJeevalinkId } from '../utils/jeevalinkId.js';
 
 // Fallback: Kerala's 14 official districts (shown only if DB returns none)
 const KERALA_DISTRICTS = [
@@ -365,7 +366,7 @@ export default function VolunteerDirectory() {
                 const secondaryPhone = vol.secondary_phone || vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || vol.secondaryPhone || '';
                 const primaryName = vol.primary_name || vol.primaryName || vol.name || vol.person1Name || 'DYFI Volunteer';
                 const secondaryName = vol.secondary_name || vol.secondaryName || vol.secondary_contact_name || vol.person2Name || '';
-                const volJeevalinkId = vol.jeevalink_id || vol.employee_id || vol.jeevalinkId || (vol.id || vol._id ? `JL-VO-${String(vol.id || vol._id).padStart(4, '0')}` : null);
+                const volJeevalinkId = getDisplayJeevalinkId(vol);
                 const roleText = vol.roleText || vol.role_title || vol.role_name || (vol.role ? getRoleLabel(vol.role) : 'Volunteer Coordinator');
 
                 return (

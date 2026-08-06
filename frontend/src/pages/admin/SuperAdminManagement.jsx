@@ -6,6 +6,7 @@ import {
   Eye, EyeOff
 } from 'lucide-react';
 import api from '../../store/api.js';
+import { getDisplayJeevalinkId } from '../../utils/jeevalinkId.js';
 
 const KERALA_DISTRICTS = [
   'Kozhikode', 'Ernakulam', 'Thiruvananthapuram', 'Thrissur', 'Malappuram',
@@ -514,7 +515,7 @@ export default function SuperAdminManagement() {
                         {/* JeevaLink Employee ID */}
                         <td className="py-4 px-6 whitespace-nowrap">
                           {(() => {
-                            const sId = sa.jeevalink_id || sa.employee_id || sa.jeevalinkId || (sa.id || sa._id ? `JL-SA-${String(sa.id || sa._id).padStart(4, '0')}` : null);
+                            const sId = getDisplayJeevalinkId(sa);
                             return sId ? (
                               <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
                                 {sId}

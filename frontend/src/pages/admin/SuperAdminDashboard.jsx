@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../../store/api.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
+import { getDisplayJeevalinkId } from '../../utils/jeevalinkId.js';
 
 const ALL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -530,7 +531,7 @@ export default function SuperAdminDashboard() {
                     <tr key={ba.id} className="hover:bg-red-50/20 transition-colors">
                       <td className="py-3 px-4 whitespace-nowrap">
                         {(() => {
-                          const bId = ba.jeevalink_id || ba.employee_id || ba.jeevalinkId || (ba.id || ba._id ? `JL-BA-${String(ba.id || ba._id).padStart(4, '0')}` : null);
+                          const bId = getDisplayJeevalinkId(ba);
                           return bId ? (
                             <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2 py-0.5 rounded-lg">
                               {bId}

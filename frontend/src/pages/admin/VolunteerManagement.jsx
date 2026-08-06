@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
+import { getDisplayJeevalinkId } from '../../utils/jeevalinkId.js';
 
 const DISTRICTS = ['Ernakulam', 'Thrissur', 'Thiruvananthapuram', 'Kozhikode', 'Bengaluru Urban', 'Chennai', 'Mumbai', 'Delhi', 'Kottayam', 'Palakkad'];
 const STATUS_OPTIONS = ['active', 'inactive', 'blocked', 'under_review'];
@@ -214,7 +215,7 @@ export default function VolunteerManagement() {
                       {/* JeevaLink Employee ID */}
                       <td className="py-4 px-6 whitespace-nowrap">
                         {(() => {
-                          const vId = vol.jeevalink_id || vol.employee_id || vol.jeevalinkId || (vol.id || vol._id ? `JL-VO-${String(vol.id || vol._id).padStart(4, '0')}` : null);
+                          const vId = getDisplayJeevalinkId(vol);
                           return vId ? (
                             <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
                               {vId}

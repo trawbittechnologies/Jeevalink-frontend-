@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { Edit3, History, QrCode, LogOut, Calendar, Award, Scale, Loader2, Copy, CheckCheck, BadgeCheck } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { getStorageUrl } from '../store/api.js';
+import { getDisplayJeevalinkId } from '../utils/jeevalinkId.js';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -20,7 +21,7 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [idCopied, setIdCopied] = useState(false);
 
-  const displayJeevalinkId = user?.jeevalink_id || user?.employee_id || user?.jeevalinkId || user?.employeeId || (user?.id || user?._id ? `JL-${(user?.role || 'UR').slice(0, 2).toUpperCase()}-${String(user.id || user._id).padStart(4, '0')}` : null);
+  const displayJeevalinkId = getDisplayJeevalinkId(user);
 
   const handleCopyEmployeeId = () => {
     const id = displayJeevalinkId;
