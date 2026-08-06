@@ -41,10 +41,17 @@ export default function Profile() {
     });
   };
 
+  // primary_name in DB is the combined full name (e.g. "rahul & deva").
+  // Extract only the first person's name for the Primary Name field.
+  const combinedName = user?.primaryName || user?.primary_name || user?.name || '';
+  const nameParts = combinedName.split(/[&,]+/).map(s => s.trim()).filter(Boolean);
+  const person1Name = user?.person1Name || nameParts[0] || combinedName;
+  const person2Name = user?.secondaryName || user?.secondary_name || user?.person2Name || nameParts[1] || '';
+
   const { register, handleSubmit } = useForm({
     defaultValues: {
-      primaryName: user?.primaryName || '',
-      secondaryName: user?.secondaryName || '',
+      primaryName: person1Name,
+      secondaryName: person2Name,
       email: user?.email || '',
       mobile: user?.mobile || '',
       secondaryContactNumber: user?.secondaryContactNumber || '',
