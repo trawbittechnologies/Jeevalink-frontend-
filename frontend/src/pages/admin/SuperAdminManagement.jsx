@@ -198,6 +198,7 @@ export default function SuperAdminManagement() {
           mailSent: res.data?.mailSent ?? res.data?.mail_sent ?? true,
           mailError: res.data?.mailError ?? res.data?.mail_error ?? null,
         });
+        setShowCreatedPassword(true); // Show password by default after creation
         setSearchTerm('');
         setSelectedDistrictFilter('ALL');
         setStatusFilter('ALL');
