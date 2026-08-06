@@ -450,6 +450,7 @@ export default function VolunteerManagement() {
                         setForm(emptyVolunteerForm);
                         setFormError('');
                         setCredentialsModal({ open: true, email: form.email, password: res.generatedPassword, emailSent: res.emailSent });
+                        fetchUsers();
                       } else {
                         setFormError(res.error || 'Failed to add Volunteer. Please try again.');
                       }
@@ -466,6 +467,7 @@ export default function VolunteerManagement() {
                       if (res.success) {
                         triggerToast('Volunteer details updated!', 'success');
                         setShowEditModal(false);
+                        fetchUsers();
                       } else {
                         setFormError(res.error || 'Failed to update Volunteer. Please try again.');
                       }
