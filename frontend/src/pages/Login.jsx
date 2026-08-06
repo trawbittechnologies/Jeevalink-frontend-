@@ -207,7 +207,7 @@ export default function Login() {
             <p className="text-slate-500 text-sm font-medium">Please securely log in to your portal.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
 
             {/* Modern Outline Input - Email */}
             <div className="space-y-1.5">
@@ -222,6 +222,7 @@ export default function Login() {
                   type="text"
                   value={credential}
                   onChange={(e) => setCredential(e.target.value)}
+                  autoComplete="off"
                   className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 focus:border-red-500 rounded-2xl transition-all duration-300 py-4 pl-12 pr-4 text-slate-900 font-medium text-sm outline-none shadow-sm"
                   placeholder="you@jeevalink.org"
                 />
@@ -246,6 +247,7 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
                   className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 focus:border-red-500 rounded-2xl transition-all duration-300 py-4 pl-12 pr-12 text-slate-900 font-medium text-sm outline-none tracking-widest shadow-sm"
                   placeholder="••••••••"
                 />
@@ -358,6 +360,7 @@ export default function Login() {
                       value={forgotInput}
                       onChange={(e) => setForgotInput(e.target.value)}
                       placeholder="you@jeevalink.org"
+                      autoComplete="off"
                       className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 focus:border-red-500 rounded-2xl transition-all duration-300 py-4 pl-12 pr-4 text-slate-900 font-medium text-sm outline-none shadow-sm"
                     />
                   </div>
