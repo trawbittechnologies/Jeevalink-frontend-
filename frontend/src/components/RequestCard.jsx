@@ -157,9 +157,17 @@ export default function RequestCard({ request, showActions = true }) {
   const myQueueIndex = currentUserIdStr ? acceptedList.indexOf(currentUserIdStr) : -1;
   const myQueuePosition = myQueueIndex >= 0 ? myQueueIndex + 1 : null;
 
+  const userBloodGroup = user?.blood_group || user?.bloodGroup;
+  const requestBloodGroup = request.bloodGroup || request.blood_group;
+  const isBloodGroupMatch = userBloodGroup === requestBloodGroup;
+
   const handleAcceptRequest = async () => {
     if (!user) {
       alert("Please login to accept blood requests.");
+      return;
+    }
+    if (!isBloodGroupMatch) {
+      alert("You can only accept blood requests that match your blood group.");
       return;
     }
     if (isAcceptedByMe) return;
@@ -369,6 +377,14 @@ export default function RequestCard({ request, showActions = true }) {
                     className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 text-xs font-bold rounded-xl cursor-not-allowed"
                   >
                     Waiting List Full (5/5)
+                  </button>
+                ) : !isBloodGroupMatch ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 text-xs font-bold rounded-xl cursor-not-allowed"
+                  >
+                    Blood Group Mismatch
                   </button>
                 ) : (
                   <button
