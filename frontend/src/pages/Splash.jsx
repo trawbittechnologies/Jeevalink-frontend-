@@ -4,8 +4,6 @@ import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
 
 const DURATION = 3000;
-const CIRCUMFERENCE = 439.82; // 2 * Math.PI * 70
-
 export default function Splash({ onComplete }) {
   const { token } = useAuthStore();
   const timerRef = useRef(null);
@@ -37,7 +35,6 @@ export default function Splash({ onComplete }) {
     return () => clearTimeout(timerRef.current);
   }, [navigate, token, onComplete]);
 
-  const strokeDashoffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
 
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white text-slate-900 select-none overflow-hidden py-12 px-6">
@@ -46,48 +43,21 @@ export default function Splash({ onComplete }) {
 
       {/* Main Content: Logo Inside Round Animated Loading Ring */}
       <div className="flex flex-col items-center gap-8 text-center my-auto max-w-sm w-full">
-        {/* Logo Container with Outside Round Loading Ring */}
+        {/* Animated Loading Video */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="relative flex items-center justify-center w-40 h-40"
+          className="relative flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72"
         >
-          {/* Circular SVG Progress Ring Around Logo */}
-          <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 160 160">
-            {/* Background Track Circle */}
-            <circle
-              cx="80"
-              cy="80"
-              r="70"
-              strokeWidth="3"
-              className="text-slate-100"
-              stroke="currentColor"
-              fill="transparent"
-            />
-            {/* Animated Red Progress Circle */}
-            <circle
-              cx="80"
-              cy="80"
-              r="70"
-              strokeWidth="3.5"
-              className="text-red-600 transition-all duration-75 ease-out"
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              stroke="currentColor"
-              fill="transparent"
-            />
-          </svg>
-
-          {/* Centered Logo Inside the Ring */}
-          <div className="absolute inset-0 flex items-center justify-center p-5">
-            <img
-              src="/logo.png"
-              alt="JeevaLink Logo"
-              className="w-22 h-26 sm:w-24 sm:h-28 object-contain drop-shadow-sm"
-            />
-          </div>
+          <video 
+            src="/loader.webm" 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-contain"
+          />
         </motion.div>
 
         {/* Brand Title & Human Copy */}
