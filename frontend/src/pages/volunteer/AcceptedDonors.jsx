@@ -127,7 +127,7 @@ export default function AcceptedDonors() {
   // Calculate totals
   const totalAcceptedRequests = requestsWithAcceptedDonors.length;
   const totalAcceptedDonorsCount = requestsWithAcceptedDonors.reduce((acc, r) => acc + r.resolvedDonorIds.length, 0);
-  const totalPendingFulfillments = requestsWithAcceptedDonors.filter(r => r.status === 'Pending').length;
+  const totalPendingFulfillments = requestsWithAcceptedDonors.filter(r => !['Fulfilled', 'Completed', 'Cancelled', 'Expired'].includes(r.status)).length;
 
   return (
     <div className="min-h-screen bg-slate-50/60 p-4 lg:p-8 text-left space-y-6">
@@ -213,7 +213,9 @@ export default function AcceptedDonors() {
             className="w-full md:w-auto px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500/20"
           >
             <option value="All">All Statuses</option>
-            <option value="Pending">Pending Fulfillment</option>
+            <option value="Pending">Pending</option>
+            <option value="Waiting">Waiting for Donors</option>
+            <option value="Accepted">Accepted (Target Reached)</option>
             <option value="Fulfilled">Fulfilled</option>
           </select>
         </div>
@@ -267,7 +269,7 @@ export default function AcceptedDonors() {
                             ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
                             : 'bg-amber-100 text-amber-800 border border-amber-200'
                         }`}>
-                          {request.status === 'Fulfilled' ? '🟢 Fulfilled' : '🟡 Pending'}
+                          {request.status === 'Fulfilled' ? '🟢 Fulfilled' : `🟡 ${request.status}`}
                         </span>
                         <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200 flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-red-600" />
@@ -290,7 +292,7 @@ export default function AcceptedDonors() {
                   </div>
 
                   {/* Actions for volunteer */}
-                  {request.status === 'Pending' && (user?.role === 'volunteer' || user?.role === 'admin' || user?.role === 'block_admin' || user?.role === 'super_admin' || user?.role === 'technical_admin') && (
+                  {!['Fulfilled', 'Completed', 'Cancelled', 'Expired'].includes(request.status) && (user?.role === 'volunteer' || user?.role === 'admin' || user?.role === 'block_admin' || user?.role === 'super_admin' || user?.role === 'technical_admin') && (
                     <button
                       onClick={() => fulfillRequest(reqId)}
                       className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"

@@ -215,6 +215,8 @@ export const useAppStore = create((set, get) => ({
         set((state) => ({
           requests: state.requests.map((r) => String(r._id || r.id) === String(requestId) ? { ...r, ...updatedReq } : r)
         }));
+        if (get().fetchRequests) get().fetchRequests();
+        if (get().fetchAdminStats) get().fetchAdminStats();
         get().triggerToast('Blood Request accepted! Thank you for stepping up to save a life.', 'success');
         return { success: true, request: updatedReq };
       }
