@@ -1,12 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
-import { 
-  HeartHandshake, Users, Phone, Mail, MapPin, Search, 
-  Droplet, Building2, CheckCircle2, ShieldAlert, Clock,
-  Filter, MessageSquare, ExternalLink, Sparkles, ChevronRight
+import {
+  HeartHandshake, Users, Phone, Mail, MapPin, Search,
+  Droplet, Building2, CheckCircle2,
+  MessageSquare, Sparkles,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const bloodColors = {
   'A+': 'bg-red-600 text-white',
@@ -20,52 +20,81 @@ const bloodColors = {
 };
 
 export default function AcceptedDonors() {
-  const { requests, allUsers, fulfillRequest, markDonorDonated } = useAppStore();
+  const { requests, fetchRequests, allUsers, fulfillRequest, markDonorDonated } = useAppStore();
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    fetchRequests();
+
+    // Polling mechanism for realtime updates of accepted donors
+    const interval = setInterval(() => {
+      fetchRequests();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [fetchRequests]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBloodGroup, setSelectedBloodGroup] = useState('All');
   const [selectedDistrict, setSelectedDistrict] = useState('All');
-  const [selectedUrgency, setSelectedUrgency] = useState('All');
+  const selectedUrgency = 'All';
   const [selectedRequestFilter, setSelectedRequestFilter] = useState('All');
   const [loadingDonorId, setLoadingDonorId] = useState(null);
 
-  // Filter requests that have accepted donors AND were added by the logged-in volunteer (if volunteer role)
+  // Filter requests that have accepted donors
   const requestsWithAcceptedDonors = useMemo(() => {
     return requests.map((req) => {
       let donorIds = [];
       try {
-        if (Array.isArray(req.accepted_donors)) {
-          donorIds = req.accepted_donors;
-        } else if (typeof req.accepted_donors === 'string') {
-          donorIds = JSON.parse(req.accepted_donors || '[]');
-        } else if (req.accepted_by || req.accepted_by_user_id) {
-          donorIds = [req.accepted_by || req.accepted_by_user_id];
+        const rawDonors = req.acceptedDonors || req.accepted_donors;
+        if (Array.isArray(rawDonors)) {
+          donorIds = rawDonors;
+        } else if (typeof rawDonors === 'string') {
+          donorIds = JSON.parse(rawDonors || '[]');
         }
       } catch {
-        donorIds = (req.accepted_by || req.accepted_by_user_id) ? [req.accepted_by || req.accepted_by_user_id] : [];
+        donorIds = [];
+      }
+
+      // Fallback to accepted_by / accepted_by_user_id if donorIds is empty
+      const accBy = req.acceptedBy || req.accepted_by || req.acceptedByUserId || req.accepted_by_user_id;
+      if ((!donorIds || donorIds.length === 0) && accBy) {
+        donorIds = [accBy];
       }
 
       // Parse donated donors list
       let donatedIds = [];
       try {
-        if (Array.isArray(req.donated_donors)) {
-          donatedIds = req.donated_donors;
-        } else if (typeof req.donated_donors === 'string') {
-          donatedIds = JSON.parse(req.donated_donors || '[]');
+        const rawDonated = req.donatedDonors || req.donated_donors;
+        if (Array.isArray(rawDonated)) {
+          donatedIds = rawDonated;
+        } else if (typeof rawDonated === 'string') {
+          donatedIds = JSON.parse(rawDonated || '[]');
         }
       } catch {
         donatedIds = [];
       }
 
       // Map donor details from request.accepted_donor_details OR allUsers store
-      const donorDetails = (req.accepted_donor_details && req.accepted_donor_details.length > 0)
-        ? req.accepted_donor_details
-        : donorIds.map(id => {
-            const foundUser = allUsers.find(u => String(u._id || u.id) === String(id));
-            if (foundUser) return foundUser;
-            return { id, primary_name: `Donor #${id}`, blood_group: req.bloodGroup || req.blood_group };
-          }).filter(Boolean);
+      let donorDetails = [];
+      const rawDetails = req.acceptedDonorDetails || req.accepted_donor_details;
+      if (Array.isArray(rawDetails) && rawDetails.length > 0) {
+        donorDetails = rawDetails;
+      } else if (typeof rawDetails === 'string') {
+        try {
+          donorDetails = JSON.parse(rawDetails || '[]');
+        } catch {
+          donorDetails = [];
+        }
+      }
+
+      if (!donorDetails || donorDetails.length === 0) {
+        donorDetails = donorIds.map(id => {
+          const foundUser = (allUsers || []).find(u => String(u._id || u.id) === String(id));
+          if (foundUser) return foundUser;
+          return { id, primary_name: `Donor #${id}`, blood_group: req.bloodGroup || req.blood_group };
+        }).filter(Boolean);
+      }
 
       return {
         ...req,
@@ -74,19 +103,9 @@ export default function AcceptedDonors() {
         resolvedDonorDetails: donorDetails
       };
     }).filter(req => {
-      if (!req.resolvedDonorIds || req.resolvedDonorIds.length === 0) return false;
-
-      // REQUIREMENT: For volunteer / unit_squad role, ONLY show blood requests added by THAT volunteer
-      if (user?.role === 'volunteer' || user?.role === 'unit_squad') {
-        const creatorId = req.requested_by || req.requestedBy || req.user_id || req.userId;
-        if (String(creatorId) !== String(user?.id || user?._id)) {
-          return false;
-        }
-      }
-
-      return true;
+      return req.resolvedDonorIds && req.resolvedDonorIds.length > 0;
     });
-  }, [requests, allUsers, user]);
+  }, [requests, allUsers]);
 
   // Unique list of districts for filter dropdown
   const districts = useMemo(() => {
@@ -118,7 +137,8 @@ export default function AcceptedDonors() {
       const matchesBloodGroup = selectedBloodGroup === 'All' || (req.bloodGroup || req.blood_group) === selectedBloodGroup;
       const matchesDistrict = selectedDistrict === 'All' || req.district === selectedDistrict;
       const matchesUrgency = selectedUrgency === 'All' || (req.urgencyLevel || req.urgency_level) === selectedUrgency;
-      const matchesStatus = selectedRequestFilter === 'All' || req.status === selectedRequestFilter;
+      const matchesStatus = selectedRequestFilter === 'All' ||
+        (selectedRequestFilter === 'Active' ? ['Pending', 'Waiting', 'Accepted'].includes(req.status) : req.status === selectedRequestFilter);
 
       return matchesQuery && matchesBloodGroup && matchesDistrict && matchesUrgency && matchesStatus;
     });
@@ -131,11 +151,11 @@ export default function AcceptedDonors() {
 
   return (
     <div className="min-h-screen bg-slate-50/60 p-4 lg:p-8 text-left space-y-6">
-      
+
       {/* ─── Header Banner ─── */}
       <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 rounded-3xl p-6 lg:p-8 text-white shadow-xl shadow-red-500/10">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider">
@@ -145,7 +165,7 @@ export default function AcceptedDonors() {
               Accepted Donors Directory
             </h1>
             <p className="text-red-100 text-xs lg:text-sm font-medium leading-relaxed">
-              Showing accepted donors for your added blood requests. After donation is complete, click <span className="font-extrabold underline decoration-white underline-offset-2">"Donated"</span> to credit 100 points to the donor, 20 points to the Meghala Volunteer, and 20 points to the Block Admin.
+              Showing accepted donors for all active blood requests. After donation is complete, click <span className="font-extrabold underline decoration-white underline-offset-2">"Donated"</span> to credit 100 points to the donor, 20 points to the Meghala Volunteer, and 20 points to the Block Admin.
             </p>
           </div>
 
@@ -156,7 +176,7 @@ export default function AcceptedDonors() {
             </div>
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-center min-w-[110px]">
               <span className="block text-2xl font-black">{totalAcceptedRequests}</span>
-              <span className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Your Requests</span>
+              <span className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Total Requests</span>
             </div>
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-center min-w-[110px]">
               <span className="block text-2xl font-black">{totalPendingFulfillments}</span>
@@ -169,7 +189,7 @@ export default function AcceptedDonors() {
       {/* ─── Search & Filters Bar ─── */}
       <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row items-center gap-3">
-          
+
           {/* Search bar */}
           <div className="relative flex-1 w-full">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -213,9 +233,7 @@ export default function AcceptedDonors() {
             className="w-full md:w-auto px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500/20"
           >
             <option value="All">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Waiting">Waiting for Donors</option>
-            <option value="Accepted">Accepted (Target Reached)</option>
+            <option value="Active">Active</option>
             <option value="Fulfilled">Fulfilled</option>
           </select>
         </div>
@@ -230,8 +248,8 @@ export default function AcceptedDonors() {
           <div className="max-w-md mx-auto">
             <h3 className="text-base font-black text-slate-900">No Accepted Donors Found</h3>
             <p className="text-xs text-slate-500 mt-1">
-              {requestsWithAcceptedDonors.length === 0 
-                ? 'No accepted donors found for blood requests created by you. Accepted donors will appear here as soon as donors respond to your requests.' 
+              {requestsWithAcceptedDonors.length === 0
+                ? 'No accepted donors found for active blood requests. Accepted donors will appear here as soon as donors respond to requests.'
                 : 'No accepted donors match your search criteria or filters. Try adjusting your filters.'}
             </p>
           </div>
@@ -254,7 +272,7 @@ export default function AcceptedDonors() {
               >
                 {/* ── Top Bar: Request Summary ── */}
                 <div className="p-5 lg:p-6 bg-slate-50/70 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  
+
                   <div className="flex items-start gap-4">
                     <div className={`px-4 py-2.5 rounded-2xl text-lg font-black shrink-0 shadow-sm ${bloodColors[bloodGroup] || 'bg-red-600 text-white'}`}>
                       {bloodGroup}
@@ -264,11 +282,10 @@ export default function AcceptedDonors() {
                         <h3 className="font-black text-slate-900 text-base">
                           Patient: {patientName}
                         </h3>
-                        <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                          request.status === 'Fulfilled' 
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                        <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${request.status === 'Fulfilled'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                             : 'bg-amber-100 text-amber-800 border border-amber-200'
-                        }`}>
+                          }`}>
                           {request.status === 'Fulfilled' ? '🟢 Fulfilled' : `🟡 ${request.status}`}
                         </span>
                         <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200 flex items-center gap-1">
@@ -422,15 +439,16 @@ export default function AcceptedDonors() {
                               ) : (
                                 <button
                                   onClick={async () => {
-                                    if (!donor.id) return;
-                                    setLoadingDonorId(donor.id);
-                                    await markDonorDonated(reqId, donor.id);
+                                    const targetDonorId = donor.id || donor._id;
+                                    if (!targetDonorId) return;
+                                    setLoadingDonorId(targetDonorId);
+                                    await markDonorDonated(reqId, targetDonorId);
                                     setLoadingDonorId(null);
                                   }}
-                                  disabled={loadingDonorId === donor.id}
+                                  disabled={loadingDonorId === (donor.id || donor._id)}
                                   className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold rounded-xl text-xs shadow-sm hover:shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                                 >
-                                  {loadingDonorId === donor.id ? (
+                                  {loadingDonorId === (donor.id || donor._id) ? (
                                     <span>Processing Points...</span>
                                   ) : (
                                     <>

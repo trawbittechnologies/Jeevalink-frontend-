@@ -4,9 +4,9 @@ import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import api from '../store/api.js';
 import {
-  ClipboardList, ShieldCheck, Download, Loader2, X, Search, Phone, RefreshCw,
-  Heart, Siren, Droplet, FileText, AlertTriangle, Send, ShieldAlert,
-  Share2, Copy, HeartHandshake, MapPin, Check, Plus
+  ClipboardList, Download, Loader2, X, Search, Phone, RefreshCw,
+  Heart, Siren, Droplet, Send, ShieldAlert,
+  Share2, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PosterModal from '../components/PosterModal.jsx';
@@ -15,7 +15,7 @@ import Modal from '../components/Modal.jsx';
 export default function DonorDashboard() {
   const { user, setAvailability, updateProfile } = useAuthStore();
   const {
-    requests, notifications, fetchRequests, fetchNotifications, triggerToast
+    requests, fetchRequests, fetchNotifications, triggerToast
   } = useAppStore();
 
   const [tab, setTab] = useState('matching'); // 'matching' | 'sos' | 'all'
@@ -34,10 +34,6 @@ export default function DonorDashboard() {
   const [reportForm, setReportForm] = useState({ title: '', description: '', type: 'Bug Report' });
   const [submittingReport, setSubmittingReport] = useState(false);
 
-  // Complaint Modal
-  const [showComplaintModal, setShowComplaintModal] = useState(false);
-  const [complaintForm, setComplaintForm] = useState({ target_id: '', reason: '' });
-  const [submittingComplaint, setSubmittingComplaint] = useState(false);
 
   // Ineligible warning modal
   const [showIneligibleModal, setShowIneligibleModal] = useState(false);
@@ -118,29 +114,6 @@ export default function DonorDashboard() {
     }
   };
 
-  // Complaint Submit
-  const handleSubmitComplaint = async (e) => {
-    e.preventDefault();
-    if (!complaintForm.target_id || !complaintForm.reason.trim()) {
-      triggerToast('Please fill in target ID and reason', 'error');
-      return;
-    }
-    setSubmittingComplaint(true);
-    try {
-      const res = await api.post('/admin/complaints', complaintForm);
-      if (res.data.success) {
-        triggerToast('Complaint submitted for review', 'success');
-        setComplaintForm({ target_id: '', reason: '' });
-        setShowComplaintModal(false);
-      } else {
-        triggerToast(res.data.message || 'Failed to file complaint', 'error');
-      }
-    } catch (err) {
-      triggerToast(err.response?.data?.message || 'Submission failed', 'error');
-    } finally {
-      setSubmittingComplaint(false);
-    }
-  };
 
   const toggleAvailability = async () => {
     const next = !user?.availableForDonation;

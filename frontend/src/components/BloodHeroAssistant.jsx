@@ -18,9 +18,7 @@ export default function BloodHeroAssistant() {
   const location = useLocation();
   const allowedPaths = ['/', '/login'];
 
-  if (!allowedPaths.includes(location.pathname)) {
-    return null;
-  }
+
 
   const [isOpen, setIsOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
@@ -164,6 +162,10 @@ export default function BloodHeroAssistant() {
       );
     });
   };
+
+  if (!allowedPaths.includes(location.pathname)) {
+    return null;
+  }
 
   return (
     <>

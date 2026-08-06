@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldAlert, Plus, RefreshCw, ExternalLink, Edit,
-  TrendingUp, Activity, ShieldCheck, BarChart3, PieChart as PieIcon,
+  ShieldAlert, RefreshCw, ExternalLink,
+  TrendingUp, Activity, BarChart3, PieChart as PieIcon,
   Video, Upload, Save, Film, CheckCircle2, Image, Sparkles
 } from 'lucide-react';
 import {
@@ -159,15 +159,7 @@ export default function TechnicalAdminDashboard() {
     return () => { active = false; };
   }, [loadData]);
 
-  const openEditSA = (sa) => {
-    setEditingSA(sa);
-    setEditDistrict(sa.district || 'Kozhikode');
-    setEditFullName(sa.primaryName || sa.primary_name || sa.name || '');
-    setEditEmail(sa.email || '');
-    setEditMobile(sa.mobile || '');
-    setEditSecContact(sa.secondaryName || sa.secondary_name || sa.secondary_contact || '');
-    setEditStatus(sa.status || 'Active');
-  };
+
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();

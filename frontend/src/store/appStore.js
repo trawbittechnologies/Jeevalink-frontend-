@@ -228,6 +228,27 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
+  unacceptRequest: async (requestId) => {
+    try {
+      const res = await api.patch(`/requests/${requestId}/unaccept`);
+      if (res.data.success) {
+        const updatedReq = res.data.data.request || res.data.data;
+        set((state) => ({
+          requests: state.requests.map((r) => String(r._id || r.id) === String(requestId) ? { ...r, ...updatedReq } : r)
+        }));
+        if (get().fetchRequests) get().fetchRequests();
+        if (get().fetchAdminStats) get().fetchAdminStats();
+        get().triggerToast('Your response to this request has been cancelled.', 'info');
+        return { success: true, request: updatedReq };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to cancel acceptance.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
   verifyRequest: async (requestId) => {
     try {
       const res = await api.patch(`/requests/${requestId}/verify`);

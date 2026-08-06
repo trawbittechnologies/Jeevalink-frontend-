@@ -158,8 +158,6 @@ export default function EditRequestModal({ isOpen, onClose, request }) {
             className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-900 font-bold focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
           >
             <option value="Pending">🟡 Pending (New)</option>
-            <option value="Waiting">🔵 Waiting (Accepting Donors)</option>
-            <option value="Accepted">🔵 Accepted (Target Reached)</option>
             <option value="Fulfilled">🟢 Fulfilled</option>
             <option value="Cancelled">🔴 Cancelled</option>
             <option value="Expired">🔴 Expired</option>

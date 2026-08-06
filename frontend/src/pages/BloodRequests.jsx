@@ -1,14 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import RequestCard from '../components/RequestCard.jsx';
 import Modal from '../components/Modal.jsx';
-import { Plus, SlidersHorizontal, Siren, Filter, MapPin, Search, Loader2, Navigation, X as XIcon } from 'lucide-react';
+import { Plus, SlidersHorizontal, Siren, Filter, MapPin, Navigation, X as XIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PosterModal from '../components/PosterModal.jsx';
 import MapLibreContainer from '../components/MapLibreContainer.jsx';
 import LocationSearchInput from '../components/LocationSearchInput.jsx';
-
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const URGENCIES = ['Immediate', 'Critical', 'Moderate'];
@@ -22,10 +21,6 @@ export default function BloodRequests() {
   const [showModal, setShowModal] = useState(false);
   const [mapPos, setMapPos] = useState(null);
   const [mapPickedAddress, setMapPickedAddress] = useState('');
-  const [mapSearch, setMapSearch] = useState('');
-  const [mapSearchResults, setMapSearchResults] = useState([]);
-  const [mapSearchLoading, setMapSearchLoading] = useState(false);
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [form, setForm] = useState({
     patientName: '',
     bloodGroup: 'B+',
@@ -40,8 +35,10 @@ export default function BloodRequests() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = requests.filter((r) => {
-    let matches = (!filterBG || r.bloodGroup === filterBG) &&
-                  (!filterUrgency || r.urgencyLevel === filterUrgency);
+    const bg = r.bloodGroup || r.blood_group;
+    const urg = r.urgencyLevel || r.urgency_level;
+    let matches = (!filterBG || bg === filterBG) &&
+      (!filterUrgency || urg === filterUrgency || (filterUrgency === 'Immediate' && urg === 'Emergency SOS'));
     if (filterStatus && filterStatus !== 'All') {
       if (filterStatus === 'Active') {
         matches = matches && ['Pending', 'Waiting', 'Accepted'].includes(r.status);
@@ -54,37 +51,7 @@ export default function BloodRequests() {
 
   const [posterReq, setPosterReq] = useState(null);
 
-  const handleMapPicked = useCallback((geo) => {
-    const addr = geo.address || {};
-    const placeName =
-      addr.amenity || addr.hospital || addr.clinic ||
-      addr.building || geo.name || '';
-    const city = addr.city || addr.town || addr.county || '';
-    const road = addr.road || addr.street || '';
-    const suburb = addr.suburb || addr.village || addr.town || addr.city_district || '';
-    const fullAddr = [road, suburb, city, addr.state].filter(Boolean).join(', ');
-    setMapPickedAddress(geo.display_name || fullAddr);
-    if (placeName) setForm(f => ({ ...f, hospitalName: placeName }));
-    if (city) setForm(f => ({ ...f, city }));
-  }, []);
 
-  const handleMapSearch = useCallback(async (q) => {
-    if (!q || q.length < 3) { setMapSearchResults([]); return; }
-    setMapSearchLoading(true);
-    setMapSearchResults(await forwardGeocode(q));
-    setMapSearchLoading(false);
-    setShowSearchDropdown(true);
-  }, []);
-
-  const selectResult = useCallback(async (r) => {
-    const lat = parseFloat(r.lat), lng = parseFloat(r.lon);
-    setMapPos({ lat, lng });
-    setMapSearch(r.display_name);
-    setShowSearchDropdown(false);
-    setMapSearchResults([]);
-    const geo = await reverseGeocode(lat, lng);
-    if (geo) handleMapPicked(geo);
-  }, [handleMapPicked]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,7 +66,7 @@ export default function BloodRequests() {
       setShowModal(false);
       setMapPos(null);
       setMapPickedAddress('');
-      setMapSearch('');
+
       const newReq = {
         patient_name: form.patientName,
         blood_group: form.bloodGroup,
@@ -117,7 +84,7 @@ export default function BloodRequests() {
     }
   };
 
-  const sosCount = requests.filter((r) => r.urgencyLevel === 'Immediate' && ['Pending', 'Waiting', 'Accepted'].includes(r.status)).length;
+  const sosCount = requests.filter((r) => ((r.urgencyLevel || r.urgency_level) === 'Immediate' || (r.urgencyLevel || r.urgency_level) === 'Emergency SOS') && ['Pending', 'Waiting', 'Accepted'].includes(r.status)).length;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -187,13 +154,13 @@ export default function BloodRequests() {
 
             {/* Status toggle */}
             <div className="flex bg-slate-100 rounded-xl p-0.5 gap-0.5">
-              {['All', 'Active', 'Pending', 'Waiting', 'Accepted', 'Fulfilled', 'Cancelled'].map((s) => (
+              {['All', 'Active', 'Fulfilled', 'Cancelled'].map((s) => (
                 <button
                   key={s}
                   onClick={() => setFilterStatus(s)}
                   className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${filterStatus === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
-                  {s === 'All' ? 'All Statuses' : s === 'Active' ? 'Active (Pending/Waiting/Accepted)' : s}
+                  {s === 'All' ? 'All Statuses' : s}
                 </button>
               ))}
             </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Search, X, Loader2, Navigation, Building2, Hospital } from 'lucide-react';
+import { MapPin, Search, X, Loader2, Navigation, Hospital } from 'lucide-react';
 import { searchLocationPhoton } from '../services/mapService';
 
 export default function LocationSearchInput({
@@ -17,6 +17,7 @@ export default function LocationSearchInput({
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(initialValue);
   }, [initialValue]);
 
@@ -34,6 +35,7 @@ export default function LocationSearchInput({
   // Debounced Search
   useEffect(() => {
     if (!query || query.trim().length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
       setLoading(false);
       return;

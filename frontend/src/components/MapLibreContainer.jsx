@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { reverseGeocodeNominatim, getOSRMRoute } from '../services/mapService';
-import { Navigation, MapPin, Building2, Siren, Heart, Layers, Compass } from 'lucide-react';
+import { Navigation, Layers } from 'lucide-react';
 
 export default function MapLibreContainer({
   donors = [],

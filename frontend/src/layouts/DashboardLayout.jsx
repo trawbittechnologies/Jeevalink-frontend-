@@ -6,11 +6,7 @@ import Toast from '../components/Toast.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
 import SOSButton from '../components/SOSButton.jsx';
-import {
-  LayoutDashboard, Droplets, Users, ClipboardList, User,
-  Bell, Siren, Building2, Megaphone, Menu
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Bell, Siren, Menu } from 'lucide-react';
 import { getStorageUrl } from '../store/api.js';
 
 export default function DashboardLayout() {
@@ -26,54 +22,7 @@ export default function DashboardLayout() {
     loadProfile();
   }, [loadProfile]);
 
-  const donorNav = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/donor/search', icon: Users, label: 'Donors' },
-    { to: '/requests', icon: Droplets, label: 'Requests' },
-    { to: '/profile', icon: User, label: 'Profile' },
-  ];
-  const volNav = [
-    { to: '/volunteer/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/volunteer/users', icon: Users, label: 'Users' },
-    { to: '/requests', icon: Droplets, label: 'Requests' },
-    { to: '/profile', icon: User, label: 'Profile' },
-  ];
-  const adminNav = [
-    { to: '/block-admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/admin/volunteers', icon: Users, label: 'Volunteers' },
-    { to: '/requests', icon: Droplets, label: 'Requests' },
-    { to: '/profile', icon: User, label: 'Profile' },
-  ];
-  const superAdminNav = [
-    { to: '/super-admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/super-admin/blocks', icon: Building2, label: 'Block Committees' },
-    { to: '/requests', icon: Droplets, label: 'Requests' },
-    { to: '/profile', icon: User, label: 'Profile' },
-  ];
-  const techAdminNav = [
-    { to: '/technical-admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/technical-reports', icon: ClipboardList, label: 'Reports' },
-    { to: '/profile', icon: User, label: 'Profile' },
-  ];
-  const unitSquadNav = [
-    { to: '/unit-squad/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/volunteer/users', icon: Users, label: 'Manage Users' },
-    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/technical-reports', icon: ClipboardList, label: 'Tech Report' },
-    { to: '/profile', icon: User, label: 'Profile' },
-  ];
-  const hospitalNav = [
-    { to: '/hospital/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
-    { to: '/donor/search', icon: Users, label: 'Donors' },
-    { to: '/requests', icon: Droplets, label: 'Requests' },
-    { to: '/profile', icon: User, label: 'Profile' },
-  ];
+
 
   // Intercept navigation for pending hospital
   useEffect(() => {
@@ -81,23 +30,6 @@ export default function DashboardLayout() {
       navigate('/hospital/dashboard', { replace: true });
     }
   }, [user, location.pathname, navigate]);
-
-  let navLinks =
-    user?.role === 'technical_admin' ? techAdminNav :
-      user?.role === 'super_admin' ? superAdminNav :
-        user?.role === 'admin' ? adminNav :
-          user?.role === 'volunteer' ? volNav :
-            user?.role === 'unit_squad' ? unitSquadNav :
-              user?.role === 'hospital' ? hospitalNav :
-                donorNav;
-
-  if (user?.role === 'hospital' && user?.status === 'Pending Approval') {
-    navLinks = [
-      { to: '/hospital/dashboard', icon: LayoutDashboard, label: 'Dashboard' }
-    ];
-  }
-
-  const isActive = (to) => location.pathname === to;
 
   return (
     <div className="flex min-h-screen bg-slate-50">
