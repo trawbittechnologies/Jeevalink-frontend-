@@ -18,7 +18,7 @@ export default function BloodRequests() {
   const { user } = useAuthStore();
   const [filterBG, setFilterBG] = useState('');
   const [filterUrgency, setFilterUrgency] = useState('');
-  const [filterStatus, setFilterStatus] = useState('Pending');
+  const [filterStatus, setFilterStatus] = useState('Active');
   const [showModal, setShowModal] = useState(false);
   const [mapPos, setMapPos] = useState(null);
   const [mapPickedAddress, setMapPickedAddress] = useState('');
@@ -40,11 +40,16 @@ export default function BloodRequests() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = requests.filter((r) => {
-    return (
-      (!filterBG || r.bloodGroup === filterBG) &&
-      (!filterUrgency || r.urgencyLevel === filterUrgency) &&
-      (!filterStatus || r.status === filterStatus)
-    );
+    let matches = (!filterBG || r.bloodGroup === filterBG) &&
+                  (!filterUrgency || r.urgencyLevel === filterUrgency);
+    if (filterStatus && filterStatus !== 'All') {
+      if (filterStatus === 'Active') {
+        matches = matches && ['Pending', 'Waiting', 'Accepted'].includes(r.status);
+      } else {
+        matches = matches && r.status === filterStatus;
+      }
+    }
+    return matches;
   });
 
   const [posterReq, setPosterReq] = useState(null);
@@ -112,7 +117,7 @@ export default function BloodRequests() {
     }
   };
 
-  const sosCount = requests.filter((r) => r.urgencyLevel === 'Immediate' && r.status === 'Pending').length;
+  const sosCount = requests.filter((r) => r.urgencyLevel === 'Immediate' && ['Pending', 'Waiting', 'Accepted'].includes(r.status)).length;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -182,13 +187,13 @@ export default function BloodRequests() {
 
             {/* Status toggle */}
             <div className="flex bg-slate-100 rounded-xl p-0.5 gap-0.5">
-              {['Pending', 'Fulfilled', ''].map((s) => (
+              {['All', 'Active', 'Pending', 'Waiting', 'Accepted', 'Fulfilled', 'Cancelled'].map((s) => (
                 <button
                   key={s}
                   onClick={() => setFilterStatus(s)}
                   className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${filterStatus === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
-                  {s || 'All'}
+                  {s === 'All' ? 'All Statuses' : s === 'Active' ? 'Active (Pending/Waiting/Accepted)' : s}
                 </button>
               ))}
             </div>

@@ -169,8 +169,8 @@ export default function VolunteerDashboard() {
   };
 
   // Filter lists
-  const unverified = requests.filter((r) => !r.verified && r.status === 'Pending');
-  const verified = requests.filter((r) => r.verified && r.status === 'Pending');
+  const unverified = requests.filter((r) => !r.verified && ['Pending', 'Waiting', 'Accepted'].includes(r.status));
+  const verified = requests.filter((r) => r.verified && ['Pending', 'Waiting', 'Accepted'].includes(r.status));
   const fulfilled = requests.filter((r) => r.status === 'Fulfilled');
 
   const stats = [

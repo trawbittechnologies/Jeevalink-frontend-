@@ -183,13 +183,13 @@ export default function DonorDashboard() {
   const currentUserId = user ? String(user._id || user.id) : null;
   const isNotOwner = (r) => currentUserId !== String(r.requested_by || r.requestedBy);
 
-  const pending = requests.filter((r) => r.status === 'Pending' && isNotOwner(r));
-  const sos = requests.filter((r) => (r.urgencyLevel === 'Immediate' || r.urgency_level === 'Immediate') && r.status === 'Pending' && isNotOwner(r));
+  const pending = requests.filter((r) => ['Pending', 'Waiting', 'Accepted'].includes(r.status) && isNotOwner(r));
+  const sos = requests.filter((r) => (r.urgencyLevel === 'Immediate' || r.urgency_level === 'Immediate') && ['Pending', 'Waiting', 'Accepted'].includes(r.status) && isNotOwner(r));
 
   const userBg = (user?.bloodGroup || user?.blood_group || 'O+').toUpperCase();
 
   const matchingRequests = requests.filter(r => {
-    if (r.status !== 'Pending') return false;
+    if (!['Pending', 'Waiting', 'Accepted'].includes(r.status)) return false;
     if (!isNotOwner(r)) return false;
     const reqBg = (r.bloodGroup || r.blood_group || '').toUpperCase();
     if (reqBg === userBg) return true;

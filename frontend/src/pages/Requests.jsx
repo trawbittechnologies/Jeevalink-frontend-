@@ -824,8 +824,11 @@ export default function Requests() {
                       className="px-2.5 py-1 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl text-xs font-bold text-slate-900 dark:text-zinc-100 cursor-pointer"
                     >
                       <option value="Pending">🟡 Pending</option>
+                      <option value="Waiting">🔵 Waiting</option>
+                      <option value="Accepted">🔵 Accepted</option>
                       <option value="Fulfilled">🟢 Fulfilled</option>
                       <option value="Cancelled">🔴 Cancelled</option>
+                      <option value="Expired">🔴 Expired</option>
                     </select>
                   </div>
                   <div className="flex gap-2 pt-2 border-t border-red-100 dark:border-red-900/30">

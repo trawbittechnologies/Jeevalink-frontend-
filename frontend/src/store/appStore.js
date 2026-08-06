@@ -62,7 +62,7 @@ export const useAppStore = create((set, get) => ({
   fetchAdminStats: async () => {
     try {
       const state = get();
-      const pendingRequests = state.requests.filter(r => r.status === 'Pending').length;
+      const pendingRequests = state.requests.filter(r => ['Pending', 'Waiting', 'Accepted'].includes(r.status)).length;
       const totalVolunteers = state.allUsers.filter(u => u.role === 'volunteer').length;
       const activeVolunteers = state.allUsers.filter(u => u.role === 'volunteer' && u.status === 'Active').length;
       set({

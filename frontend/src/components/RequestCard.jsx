@@ -289,8 +289,11 @@ export default function RequestCard({ request, showActions = true }) {
                   className="text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-red-400"
                 >
                   <option value="Pending">🟡 Pending</option>
+                  <option value="Waiting">🔵 Waiting</option>
+                  <option value="Accepted">🔵 Accepted</option>
                   <option value="Fulfilled">🟢 Fulfilled</option>
                   <option value="Cancelled">🔴 Cancelled</option>
+                  <option value="Expired">🔴 Expired</option>
                 </select>
               ) : (
                 <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
@@ -309,7 +312,7 @@ export default function RequestCard({ request, showActions = true }) {
             <div className="space-y-2 pt-2.5 border-t border-slate-100">
 
               {/* Accept & Donate — full width, for NON-owners who are NOT privileged, on pending requests */}
-              {request.status === 'Pending' && !isOwner && !isPrivileged && (
+              {['Pending', 'Waiting', 'Accepted'].includes(request.status) && !isOwner && !isPrivileged && (
                 <button
                   onClick={handleAcceptRequest}
                   disabled={accepting || isAcceptedByMe || acceptedList.length >= 5}
@@ -375,7 +378,7 @@ export default function RequestCard({ request, showActions = true }) {
               </div>
 
               {/* Approve — Admin/Volunteer full width */}
-              {(user?.role === 'volunteer' || user?.role === 'admin') && request.status === 'Pending' && !isOwner && (
+              {(user?.role === 'volunteer' || user?.role === 'admin') && ['Pending', 'Waiting', 'Accepted'].includes(request.status) && !isOwner && (
                 <button
                   onClick={() => fulfillRequest(reqId)}
                   className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm cursor-pointer"

@@ -53,7 +53,7 @@ export default function ReportsAnalytics() {
 
   const PERFORMANCE = [
     { name: 'Fulfilled', value: (statusCounts['Fulfilled'] || 0) + (statusCounts['Completed'] || 0), color: '#10b981' },
-    { name: 'Pending', value: statusCounts['Pending'] || 0, color: '#f59e0b' },
+    { name: 'Active/Pending', value: (statusCounts['Pending'] || 0) + (statusCounts['Waiting'] || 0) + (statusCounts['Accepted'] || 0), color: '#f59e0b' },
     { name: 'Approved', value: statusCounts['Approved'] || 0, color: '#3b82f6' },
     { name: 'Cancelled', value: (statusCounts['Cancelled'] || 0) + (statusCounts['Rejected'] || 0), color: '#ef4444' }
   ];
