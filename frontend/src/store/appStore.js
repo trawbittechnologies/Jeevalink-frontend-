@@ -427,7 +427,8 @@ export const useAppStore = create((set, get) => ({
     try {
       const res = await api.get('/admin/users');
       if (res.data.success) {
-        set({ allUsers: res.data.data.users || [] });
+        const usersList = res.data.data.users || (Array.isArray(res.data.data) ? res.data.data : []);
+        set({ allUsers: usersList });
       }
     } catch (err) {
       console.error('Failed to fetch users', err);
