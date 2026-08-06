@@ -4,7 +4,7 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, Megaphone
+  Building2, Megaphone, HeartHandshake
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
@@ -21,6 +21,7 @@ const userLinks = [
 
 const unitSquadLinks = [
   { to: '/unit-squad/dashboard', label: 'Unit Squad Dashboard', icon: LayoutDashboard },
+  { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/volunteer/users', label: 'Add & Manage Users', icon: Users },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
@@ -29,6 +30,7 @@ const unitSquadLinks = [
 
 const volunteerLinks = [
   { to: '/volunteer/dashboard', label: 'Volunteer Dashboard', icon: LayoutDashboard },
+  { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/volunteer/users', label: 'Manage Users & Donors', icon: Users },
   { to: '/volunteer/unit-committee', label: 'Unit Squad Committee', icon: ShieldCheck },
@@ -40,6 +42,7 @@ const volunteerLinks = [
 
 const blockAdminLinks = [
   { to: '/block-admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
+  { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/admin/volunteers', label: 'Add & Manage Volunteers', icon: Users },
   { to: '/volunteer/unit-committee', label: 'Unit Squad Committee', icon: ShieldCheck },
@@ -52,6 +55,7 @@ const blockAdminLinks = [
 
 const superAdminLinks = [
   { to: '/super-admin/dashboard', label: 'District Dashboard', icon: LayoutDashboard },
+  { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/super-admin/blocks', label: 'Manage Block Committees', icon: Building2 },
   { to: '/admin/feedback', label: 'Feedback & Complaints', icon: ClipboardList },

@@ -6,7 +6,7 @@ import api from '../store/api.js';
 import {
   ClipboardList, CheckCircle2, XCircle,
   Bell, Users, Download, Star,
-  AlertCircle, Loader2, X, Search, RefreshCw
+  AlertCircle, Loader2, X, Search, RefreshCw, HeartHandshake
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import PosterModal from '../components/PosterModal.jsx';
@@ -221,7 +221,13 @@ export default function VolunteerDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <Link
+              to="/volunteer/accepted-donors"
+              className="px-4 py-2 bg-white/90 hover:bg-white text-red-700 font-bold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5"
+            >
+              <HeartHandshake className="w-4 h-4 text-red-600" /> Accepted Donors
+            </Link>
             <Link
               to="/volunteer/users"
               className="px-4 py-2 bg-white text-red-700 hover:bg-red-50 font-semibold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5"

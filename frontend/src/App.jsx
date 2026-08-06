@@ -50,6 +50,7 @@ const EmergencyDashboard = safeLazy(() => import('./pages/EmergencyDashboard.jsx
 // Volunteer Module Pages
 const VolunteerUserManagement = safeLazy(() => import('./pages/volunteer/UserManagement.jsx'));
 const UnitCommittee = safeLazy(() => import('./pages/volunteer/UnitCommittee.jsx'));
+const AcceptedDonors = safeLazy(() => import('./pages/volunteer/AcceptedDonors.jsx'));
 
 // Admin Module Pages
 const VolunteerManagement = safeLazy(() => import('./pages/admin/VolunteerManagement.jsx'));
@@ -279,6 +280,11 @@ export default function App() {
                 <Route path="/volunteer/unit-committee" element={
                   <ProtectedRoute roles={['volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                     <UnitCommittee />
+                  </ProtectedRoute>
+                } />
+                <Route path="/volunteer/accepted-donors" element={
+                  <ProtectedRoute roles={['volunteer', 'unit_squad', 'block_admin', 'super_admin', 'technical_admin']}>
+                    <AcceptedDonors />
                   </ProtectedRoute>
                 } />
 
