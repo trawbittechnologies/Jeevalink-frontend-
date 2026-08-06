@@ -12,6 +12,7 @@ import {
   Bell, Siren, Building2, Megaphone, Menu
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getStorageUrl } from '../store/api.js';
 
 export default function DashboardLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -157,8 +158,8 @@ export default function DashboardLayout() {
               to="/profile"
               className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 hover:shadow-md hover:shadow-red-200 transition-all shadow-sm border border-slate-200/50"
             >
-              {user?.photo ? (
-                <img src={user.photo} alt="Avatar" className="w-full h-full object-cover" />
+              {(user?.profilePicture || user?.photo) ? (
+                <img src={getStorageUrl(user.profilePicture || user.photo)} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary to-red-800 flex items-center justify-center text-white font-black text-xs">
                   {user?.primaryName?.[0]}

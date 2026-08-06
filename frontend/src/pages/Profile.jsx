@@ -84,29 +84,64 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1024 * 1024) {
-      triggerToast('File is too large. Max size is 1MB.', 'warning');
+    // Reset input so same file can be re-selected if needed
+    e.target.value = '';
+
+    if (file.size > 5 * 1024 * 1024) {
+      triggerToast('File is too large. Max size is 5MB.', 'warning');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      triggerToast('Please select a valid image file.', 'warning');
       return;
     }
 
     setIsUploadingPhoto(true);
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64Data = reader.result;
+    try {
+      // Compress & resize using canvas (max 400x400, 80% quality JPEG)
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = () => reject(new Error('Failed to load image'));
+          img.onload = () => {
+            const MAX_SIZE = 400;
+            let { width, height } = img;
+            if (width > MAX_SIZE || height > MAX_SIZE) {
+              if (width > height) {
+                height = Math.round((height * MAX_SIZE) / width);
+                width = MAX_SIZE;
+              } else {
+                width = Math.round((width * MAX_SIZE) / height);
+                height = MAX_SIZE;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
       const res = await updateProfile({ profilePicture: base64Data });
       setIsUploadingPhoto(false);
       if (res.success) {
-        triggerToast('Profile photo updated successfully!', 'success');
+        triggerToast('Profile photo updated!', 'success');
       } else {
-        triggerToast('Failed to update photo.', 'error');
+        triggerToast(res.error || 'Failed to update photo.', 'error');
       }
-    };
-    reader.onerror = () => {
+    } catch {
       setIsUploadingPhoto(false);
-      triggerToast('Error reading file.', 'error');
-    };
-    reader.readAsDataURL(file);
+      triggerToast('Error processing image.', 'error');
+    }
   };
 
   const handleLogout = () => {
