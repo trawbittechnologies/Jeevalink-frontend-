@@ -4,6 +4,7 @@ import { useAuthStore } from './store/authStore.js';
 import { useAppStore } from './store/appStore.js';
 import { normalizeRole } from './utils/rbac.js';
 import Toast from './components/Toast.jsx';
+import BetaWarningPopup from './components/BetaWarningPopup.jsx';
 import { Loader2 } from 'lucide-react';
 
 // Layouts
@@ -167,6 +168,7 @@ export default function App() {
       ) : (
         <>
           <Toast />
+          <BetaWarningPopup />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Splash screen route for manual/direct access */}
