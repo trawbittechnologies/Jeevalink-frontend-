@@ -9,8 +9,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import BloodHeroAssistant from '../components/BloodHeroAssistant.jsx';
 
 export default function Login() {
-  const [credential, setCredential] = useState('techadmin@jeevalink.org');
-  const [password, setPassword] = useState('TechAdmin@2026');
+  const [credential, setCredential] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
