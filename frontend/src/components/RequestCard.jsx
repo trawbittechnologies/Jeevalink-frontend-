@@ -131,30 +131,34 @@ export default function RequestCard({ request, showActions = true }) {
     try {
       let raw = request.accepted_donors;
       if (typeof raw === 'string') raw = JSON.parse(raw || '[]');
-      if (Array.isArray(raw)) return raw;
+      if (Array.isArray(raw)) return raw.map(String);
       if (request.accepted_by || request.accepted_by_user_id) {
-        return [request.accepted_by || request.accepted_by_user_id];
+        return [String(request.accepted_by || request.accepted_by_user_id)];
       }
       return [];
     } catch {
-      return (request.accepted_by || request.accepted_by_user_id) ? [request.accepted_by || request.accepted_by_user_id] : [];
+      return (request.accepted_by || request.accepted_by_user_id) ? [String(request.accepted_by || request.accepted_by_user_id)] : [];
     }
   })();
 
   const currentUserIdStr = user ? String(user._id || user.id) : null;
   const isAcceptedByMe = Boolean(
     currentUserIdStr && (
-      acceptedList.map(String).includes(currentUserIdStr) ||
+      acceptedList.includes(currentUserIdStr) ||
       String(request.accepted_by_user_id) === currentUserIdStr ||
       String(request.accepted_by) === currentUserIdStr
     )
   );
+
+  const myQueueIndex = currentUserIdStr ? acceptedList.indexOf(currentUserIdStr) : -1;
+  const myQueuePosition = myQueueIndex >= 0 ? myQueueIndex + 1 : null;
 
   const handleAcceptRequest = async () => {
     if (!user) {
       alert("Please login to accept blood requests.");
       return;
     }
+    if (isAcceptedByMe) return;
     setAccepting(true);
     await acceptRequest(reqId);
     setAccepting(false);
@@ -269,8 +273,13 @@ export default function RequestCard({ request, showActions = true }) {
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               {isAcceptedByMe && (
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Accepted
+                <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${
+                  myQueuePosition === 1
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                }`}>
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  {myQueuePosition === 1 ? 'Accepted (Primary)' : `Accepted (Queue #${myQueuePosition})`}
                 </span>
               )}
               {canManage ? (
@@ -304,21 +313,27 @@ export default function RequestCard({ request, showActions = true }) {
                 <button
                   onClick={handleAcceptRequest}
                   disabled={accepting || isAcceptedByMe || acceptedList.length >= 5}
-                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     isAcceptedByMe
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      ? myQueuePosition === 1
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 cursor-not-allowed font-black'
+                        : 'bg-amber-50 text-amber-800 border border-amber-300 cursor-not-allowed font-black'
                       : acceptedList.length >= 5
                       ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm shadow-emerald-500/20'
+                      : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm shadow-emerald-500/20 cursor-pointer'
                   }`}
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  {isAcceptedByMe
-                    ? '✓ Accepted to Donate'
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  {accepting
+                    ? 'Processing Acceptance...'
+                    : isAcceptedByMe
+                    ? myQueuePosition === 1
+                      ? '✓ Accepted (Primary Donor)'
+                      : `✓ Accepted — In Waiting List (Queue #${myQueuePosition})`
                     : acceptedList.length >= 5
-                    ? 'Max 5 Donors Accepted'
+                    ? 'Max 5 Donors Accepted (Waiting List Full)'
                     : acceptedList.length > 0
-                    ? `Accept & Donate (${acceptedList.length}/5 Donors)`
+                    ? `Accept & Donate (${acceptedList.length}/5 Donors — Queue #${acceptedList.length + 1})`
                     : 'Accept & Donate'}
                 </button>
               )}
