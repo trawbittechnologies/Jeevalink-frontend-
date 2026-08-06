@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
-import { Map, List, Search, Award, MessageSquare, Compass, Eye, ShieldCheck } from 'lucide-react';
+import { Map, List, Search, Award, MessageSquare, Compass, Eye, ShieldCheck, Navigation } from 'lucide-react';
 import MapContainer from '../components/MapContainer.jsx';
 
 export default function FindDonors() {
@@ -20,6 +20,10 @@ export default function FindDonors() {
 
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
   const [selectedDonor, setSelectedDonor] = useState(null);
+  const [routeDonor, setRouteDonor] = useState(null);
+
+  const donorLat = (d) => d?.coordinates?.lat || d?.lat || 12.9339;
+  const donorLng = (d) => d?.coordinates?.lng || d?.lng || 77.6244;
 
   useEffect(() => {
     fetchRequests();
@@ -169,13 +173,26 @@ export default function FindDonors() {
                         <Award className="w-3 h-3 fill-primary" />
                         <span className="text-[10px] font-black">{donor.matchScore}%</span>
                       </div>
-                      
-                      <button
-                        onClick={() => handleContactDonor(donor)}
-                        className="text-xs font-extrabold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
-                      >
-                        Contact <Eye className="w-3.5 h-3.5" />
-                      </button>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setRouteDonor(routeDonor?._id === donor._id ? null : donor)}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-colors cursor-pointer flex items-center gap-1 ${
+                            routeDonor?._id === donor._id
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                              : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          <Navigation className="w-3 h-3 text-blue-500" />
+                          {routeDonor?._id === donor._id ? 'Clear' : 'OSRM Route'}
+                        </button>
+                        <button
+                          onClick={() => handleContactDonor(donor)}
+                          className="text-xs font-extrabold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
+                        >
+                          Contact <Eye className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -191,9 +208,11 @@ export default function FindDonors() {
             requests={requests.filter(r => r.status === 'Pending')} 
             center={user?.coordinates || { lat: 12.9716, lng: 77.5946 }}
             radius={searchRadius}
+            routeStart={routeDonor ? (user?.coordinates || { lat: 12.9716, lng: 77.5946 }) : null}
+            routeEnd={routeDonor ? (routeDonor.coordinates || { lat: donorLat(routeDonor), lng: donorLng(routeDonor) }) : null}
           />
           <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /50 dark:border-zinc-800/60 rounded-2xl p-3 text-[10px] text-slate-400 font-medium">
-            🚩 Map coordinates simulated in Bengaluru. Click markers to check distances and match compatibility indexes.
+            🗺️ MapLibre GL JS + OpenStreetMap with OSRM driving routes & Photon autocomplete search.
           </div>
         </div>
       </div>
@@ -207,9 +226,11 @@ export default function FindDonors() {
               requests={requests.filter(r => r.status === 'Pending')} 
               center={user?.coordinates || { lat: 12.9716, lng: 77.5946 }}
               radius={searchRadius}
+              routeStart={routeDonor ? (user?.coordinates || { lat: 12.9716, lng: 77.5946 }) : null}
+              routeEnd={routeDonor ? (routeDonor.coordinates || { lat: donorLat(routeDonor), lng: donorLng(routeDonor) }) : null}
             />
             <div className="bg-slate-100 dark:bg-zinc-900 border border-slate-200/50 dark:border-zinc-800 rounded-2xl p-3 text-[10px] text-slate-400 font-medium">
-              🚩 Map coordinates simulated in Bengaluru. Click markers to check distances and match compatibility indexes.
+              🗺️ MapLibre GL JS + OpenStreetMap with OSRM driving routes.
             </div>
           </div>
         ) : (

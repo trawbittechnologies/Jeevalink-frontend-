@@ -6,59 +6,9 @@ import Modal from '../components/Modal.jsx';
 import { Plus, SlidersHorizontal, Siren, Filter, MapPin, Search, Loader2, Navigation, X as XIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PosterModal from '../components/PosterModal.jsx';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import MapLibreContainer from '../components/MapLibreContainer.jsx';
+import LocationSearchInput from '../components/LocationSearchInput.jsx';
 
-let DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-async function reverseGeocode(lat, lng) {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    return await res.json();
-  } catch { return null; }
-}
-
-async function forwardGeocode(query) {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    return await res.json();
-  } catch { return []; }
-}
-
-function FlyTo({ position }) {
-  const map = useMap();
-  useEffect(() => {
-    if (position) map.flyTo([position.lat, position.lng], 16, { animate: true, duration: 1 });
-  }, [position, map]);
-  return null;
-}
-
-function ClickMarker({ position, setPosition, onPicked }) {
-  useMapEvents({
-    async click(e) {
-      const latlng = e.latlng;
-      setPosition(latlng);
-      const geo = await reverseGeocode(latlng.lat, latlng.lng);
-      if (geo && onPicked) onPicked(geo);
-    },
-  });
-  return position ? <Marker position={position} /> : null;
-}
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const URGENCIES = ['Immediate', 'Critical', 'Moderate'];
@@ -291,51 +241,55 @@ export default function BloodRequests() {
             <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-red-500" />
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick Hospital on Map</span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick Hospital on OpenStreetMap</span>
               </div>
               {mapPos && (
-                <button type="button" onClick={() => { setMapPos(null); setMapPickedAddress(''); setMapSearch(''); }}
+                <button type="button" onClick={() => { setMapPos(null); setMapPickedAddress(''); }}
                   className="text-[9px] font-bold text-red-500 hover:text-red-700 flex items-center gap-0.5 cursor-pointer">
                   <XIcon className="w-3 h-3" /> Clear
                 </button>
               )}
             </div>
             {/* Search */}
-            <div className="relative px-2 pt-2 pb-1 bg-white">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  value={mapSearch}
-                  onChange={(e) => { setMapSearch(e.target.value); handleMapSearch(e.target.value); }}
-                  onFocus={() => mapSearchResults.length > 0 && setShowSearchDropdown(true)}
-                  placeholder="Search hospital or place..."
-                  className="w-full pl-8 pr-8 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-gray-900 outline-none focus:border-red-400"
-                />
-                {mapSearchLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 animate-spin" />}
-              </div>
-              {showSearchDropdown && mapSearchResults.length > 0 && (
-                <div className="absolute left-2 right-2 top-full mt-1 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl shadow-xl z-[9999] max-h-44 overflow-y-auto">
-                  {mapSearchResults.map((r, i) => (
-                    <button key={i} type="button" onClick={() => selectResult(r)}
-                      className="w-full text-left px-3 py-2.5 text-[11px] text-slate-700 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-start gap-2">
-                      <MapPin className="w-3 h-3 text-red-400 mt-0.5 shrink-0" />
-                      <span className="line-clamp-2">{r.display_name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+            <div className="p-2 bg-white">
+              <LocationSearchInput
+                onSelectLocation={(loc) => {
+                  if (!loc) {
+                    setMapPos(null);
+                    setMapPickedAddress('');
+                    return;
+                  }
+                  const pos = { lat: loc.lat, lng: loc.lng };
+                  setMapPos(pos);
+                  setMapPickedAddress(loc.displayName);
+                  setForm(prev => ({
+                    ...prev,
+                    hospitalName: loc.name || prev.hospitalName,
+                    city: loc.city || prev.city
+                  }));
+                }}
+                placeholder="Search hospital or place (Photon OSM)..."
+              />
             </div>
             {/* Map */}
             <div className="h-[180px] w-full relative z-0">
-              <MapContainer center={[11.2588, 75.7804]} zoom={10} scrollWheelZoom={true} className="h-full w-full">
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <ClickMarker position={mapPos} setPosition={setMapPos} onPicked={handleMapPicked} />
-                <FlyTo position={mapPos} />
-              </MapContainer>
+              <MapLibreContainer
+                isPicker={true}
+                pickerLocation={mapPos}
+                center={mapPos || { lat: 11.2588, lng: 75.7804 }}
+                zoom={mapPos ? 14 : 10}
+                onLocationPicked={(loc) => {
+                  const pos = { lat: loc.lat, lng: loc.lng };
+                  setMapPos(pos);
+                  setMapPickedAddress(loc.displayName);
+                  setForm(prev => ({
+                    ...prev,
+                    hospitalName: loc.address?.hospital || loc.displayName.split(',')[0] || prev.hospitalName,
+                    city: loc.city || prev.city
+                  }));
+                }}
+                height="100%"
+              />
             </div>
             {mapPickedAddress ? (
               <div className="px-3 py-2 bg-emerald-50 border-t border-emerald-200 flex items-start gap-2">
@@ -344,7 +298,7 @@ export default function BloodRequests() {
               </div>
             ) : (
               <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100">
-                <p className="text-[10px] text-slate-400 font-medium">📍 Click map or search to auto-fill hospital & city</p>
+                <p className="text-[10px] text-slate-400 font-medium">📍 Search above (Photon) or click map (Nominatim) to auto-fill hospital & city</p>
               </div>
             )}
           </div>

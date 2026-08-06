@@ -10,68 +10,10 @@ import confetti from 'canvas-confetti';
 import PosterModal from '../components/PosterModal.jsx';
 import EditRequestModal from '../components/EditRequestModal.jsx';
 import DeleteConfirmModal from '../components/DeleteConfirmModal.jsx';
-import { MapContainer as LeafletMapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import MapLibreContainer from '../components/MapLibreContainer.jsx';
+import LocationSearchInput from '../components/LocationSearchInput.jsx';
+import { reverseGeocodeNominatim } from '../services/mapService.js';
 
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-// Reverse geocode using free Nominatim API (OpenStreetMap)
-async function reverseGeocode(lat, lng) {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    const data = await res.json();
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-// Forward geocode / search using Nominatim
-async function forwardGeocode(query) {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    return await res.json();
-  } catch {
-    return [];
-  }
-}
-
-function FlyToPosition({ position }) {
-  const map = useMap();
-  useEffect(() => {
-    if (position) map.flyTo([position.lat, position.lng], 16, { animate: true, duration: 1 });
-  }, [position, map]);
-  return null;
-}
-
-function LocationMarker({ position, setPosition, onPicked }) {
-  useMapEvents({
-    async click(e) {
-      const latlng = e.latlng;
-      setPosition(latlng);
-      const geo = await reverseGeocode(latlng.lat, latlng.lng);
-      if (geo && onPicked) onPicked(geo, latlng);
-    },
-  });
-  return position === null ? null : (
-    <Marker position={position}></Marker>
-  );
-}
 
 // Zod Validation Schema for creating request
 const createRequestSchema = z.object({
@@ -323,12 +265,12 @@ export default function Requests() {
         <div className="bg-slate-50 dark:bg-zinc-950 px-3 py-2 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-red-500" />
-            <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Pin Hospital / Place on Map</span>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Pin Hospital on OpenStreetMap</span>
           </div>
           {position && (
             <button
               type="button"
-              onClick={() => { setPosition(null); setMapPickedAddress(''); setMapSearch(''); }}
+              onClick={() => { setPosition(null); setMapPickedAddress(''); }}
               className="text-[9px] font-bold text-red-500 hover:text-red-700 flex items-center gap-0.5 cursor-pointer"
             >
               <XIcon className="w-3 h-3" /> Clear
@@ -336,51 +278,45 @@ export default function Requests() {
           )}
         </div>
 
-        {/* Search Box */}
-        <div className="relative px-2 pt-2 pb-1 bg-white dark:bg-zinc-900">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <input
-              type="text"
-              value={mapSearch}
-              onChange={(e) => {
-                setMapSearch(e.target.value);
-                handleMapSearch(e.target.value);
-              }}
-              onFocus={() => mapSearchResults.length > 0 && setShowSearchDropdown(true)}
-              placeholder="Search hospital, place, area..."
-              className="w-full pl-8 pr-8 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-zinc-100 outline-none focus:border-red-400"
-            />
-            {mapSearchLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 animate-spin" />}
-          </div>
-          {/* Search Dropdown */}
-          {showSearchDropdown && mapSearchResults.length > 0 && (
-            <div className="absolute left-2 right-2 top-full mt-1 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl shadow-xl z-[9999] max-h-48 overflow-y-auto">
-              {mapSearchResults.map((r, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => selectSearchResult(r)}
-                  className="w-full text-left px-3 py-2.5 text-[11px] text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-100 dark:border-zinc-800 last:border-0 cursor-pointer flex items-start gap-2"
-                >
-                  <MapPin className="w-3 h-3 text-red-400 mt-0.5 shrink-0" />
-                  <span className="line-clamp-2">{r.display_name}</span>
-                </button>
-              ))}
-            </div>
-          )}
+        {/* Photon Location Search Box */}
+        <div className="p-2 bg-white dark:bg-zinc-900">
+          <LocationSearchInput
+            onSelectLocation={(loc) => {
+              if (!loc) {
+                setPosition(null);
+                setMapPickedAddress('');
+                return;
+              }
+              const newPos = { lat: loc.lat, lng: loc.lng };
+              setPosition(newPos);
+              setMapPickedAddress(loc.displayName);
+              if (loc.name) setValue('hospitalName', loc.name, { shouldValidate: true });
+              if (loc.displayName) setValue('location', loc.displayName, { shouldValidate: true });
+            }}
+            placeholder="Search hospital, place, area (Photon OSM)..."
+          />
         </div>
 
-        {/* Map Canvas */}
+        {/* MapLibre Canvas */}
         <div className="h-[220px] w-full relative z-0">
-          <LeafletMapContainer center={[11.2588, 75.7804]} zoom={10} scrollWheelZoom={true} className="h-full w-full">
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <LocationMarker position={position} setPosition={setPosition} onPicked={handleMapPicked} />
-            <FlyToPosition position={position} />
-          </LeafletMapContainer>
+          <MapLibreContainer
+            isPicker={true}
+            pickerLocation={position}
+            center={position || { lat: 11.2588, lng: 75.7804 }}
+            zoom={position ? 14 : 10}
+            onLocationPicked={(loc) => {
+              const newPos = { lat: loc.lat, lng: loc.lng };
+              setPosition(newPos);
+              setMapPickedAddress(loc.displayName);
+              if (loc.address?.hospital || loc.displayName) {
+                setValue('hospitalName', loc.address?.hospital || loc.displayName.split(',')[0], { shouldValidate: true });
+              }
+              if (loc.displayName) {
+                setValue('location', loc.displayName, { shouldValidate: true });
+              }
+            }}
+            height="100%"
+          />
         </div>
 
         {/* Picked location preview */}
@@ -391,7 +327,7 @@ export default function Requests() {
           </div>
         ) : (
           <div className="px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-t border-slate-100 dark:border-zinc-800">
-            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">📍 Click on the map or search above to auto-fill hospital & location</p>
+            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">📍 Search above (Photon) or click map (Nominatim) to auto-fill location</p>
           </div>
         )}
       </div>
