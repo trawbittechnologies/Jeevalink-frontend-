@@ -20,7 +20,7 @@ const bloodColors = {
 };
 
 export default function AcceptedDonors() {
-  const { requests, allUsers, fulfillRequest } = useAppStore();
+  const { requests, allUsers, fulfillRequest, markDonorDonated } = useAppStore();
   const { user } = useAuthStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,8 +28,9 @@ export default function AcceptedDonors() {
   const [selectedDistrict, setSelectedDistrict] = useState('All');
   const [selectedUrgency, setSelectedUrgency] = useState('All');
   const [selectedRequestFilter, setSelectedRequestFilter] = useState('All');
+  const [loadingDonorId, setLoadingDonorId] = useState(null);
 
-  // Filter requests that have accepted donors
+  // Filter requests that have accepted donors AND were added by the logged-in volunteer (if volunteer role)
   const requestsWithAcceptedDonors = useMemo(() => {
     return requests.map((req) => {
       let donorIds = [];
@@ -45,6 +46,18 @@ export default function AcceptedDonors() {
         donorIds = (req.accepted_by || req.accepted_by_user_id) ? [req.accepted_by || req.accepted_by_user_id] : [];
       }
 
+      // Parse donated donors list
+      let donatedIds = [];
+      try {
+        if (Array.isArray(req.donated_donors)) {
+          donatedIds = req.donated_donors;
+        } else if (typeof req.donated_donors === 'string') {
+          donatedIds = JSON.parse(req.donated_donors || '[]');
+        }
+      } catch {
+        donatedIds = [];
+      }
+
       // Map donor details from request.accepted_donor_details OR allUsers store
       const donorDetails = (req.accepted_donor_details && req.accepted_donor_details.length > 0)
         ? req.accepted_donor_details
@@ -57,10 +70,23 @@ export default function AcceptedDonors() {
       return {
         ...req,
         resolvedDonorIds: donorIds,
+        resolvedDonatedIds: donatedIds.map(id => String(id)),
         resolvedDonorDetails: donorDetails
       };
-    }).filter(req => req.resolvedDonorIds.length > 0);
-  }, [requests, allUsers]);
+    }).filter(req => {
+      if (!req.resolvedDonorIds || req.resolvedDonorIds.length === 0) return false;
+
+      // REQUIREMENT: For volunteer / unit_squad role, ONLY show blood requests added by THAT volunteer
+      if (user?.role === 'volunteer' || user?.role === 'unit_squad') {
+        const creatorId = req.requested_by || req.requestedBy || req.user_id || req.userId;
+        if (String(creatorId) !== String(user?.id || user?._id)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [requests, allUsers, user]);
 
   // Unique list of districts for filter dropdown
   const districts = useMemo(() => {
@@ -74,7 +100,6 @@ export default function AcceptedDonors() {
   // Apply search and dropdown filters
   const filteredRequests = useMemo(() => {
     return requestsWithAcceptedDonors.filter((req) => {
-      // Search term filter across patient, hospital, city, district, and donor names/phones
       const query = searchTerm.toLowerCase().trim();
       const matchesQuery = !query || [
         req.patientName || req.patient_name,
@@ -120,7 +145,7 @@ export default function AcceptedDonors() {
               Accepted Donors Directory
             </h1>
             <p className="text-red-100 text-xs lg:text-sm font-medium leading-relaxed">
-              View, contact, and manage all verified donors who accepted blood donation requests. Coordinate directly via call or WhatsApp to confirm fulfillment.
+              Showing accepted donors for your added blood requests. After donation is complete, click <span className="font-extrabold underline decoration-white underline-offset-2">"Donated"</span> to credit 100 points to the donor, 20 points to the Meghala Volunteer, and 20 points to the Block Admin.
             </p>
           </div>
 
@@ -131,7 +156,7 @@ export default function AcceptedDonors() {
             </div>
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-center min-w-[110px]">
               <span className="block text-2xl font-black">{totalAcceptedRequests}</span>
-              <span className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Active Requests</span>
+              <span className="text-[10px] font-bold text-red-100 uppercase tracking-wider">Your Requests</span>
             </div>
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-center min-w-[110px]">
               <span className="block text-2xl font-black">{totalPendingFulfillments}</span>
@@ -204,7 +229,7 @@ export default function AcceptedDonors() {
             <h3 className="text-base font-black text-slate-900">No Accepted Donors Found</h3>
             <p className="text-xs text-slate-500 mt-1">
               {requestsWithAcceptedDonors.length === 0 
-                ? 'No blood requests currently have accepted donors. Donors will appear here as soon as they accept requests.' 
+                ? 'No accepted donors found for blood requests created by you. Accepted donors will appear here as soon as donors respond to your requests.' 
                 : 'No accepted donors match your search criteria or filters. Try adjusting your filters.'}
             </p>
           </div>
@@ -283,13 +308,15 @@ export default function AcceptedDonors() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {request.resolvedDonorDetails.map((donor, idx) => {
-                      const donorName = donor.primary_name || donor.primaryName || donor.name || `Donor #${donor.id || idx + 1}`;
+                      const donorIdVal = String(donor.id || donor._id || idx + 1);
+                      const donorName = donor.primary_name || donor.primaryName || donor.name || `Donor #${donorIdVal}`;
                       const donorSecName = donor.secondary_name || donor.secondaryName || '';
                       const donorMobile = donor.mobile || donor.contact_number || donor.phone || '';
                       const donorEmail = donor.email || '';
                       const donorBlood = donor.blood_group || donor.bloodGroup || bloodGroup;
                       const donorCity = donor.city || donor.district || '';
                       const donorJeevalinkId = donor.jeevalink_id || donor.jeevalinkId || '';
+                      const isDonated = request.resolvedDonatedIds?.includes(donorIdVal) || request.donated_donors?.map(String).includes(donorIdVal);
 
                       const whatsappMsg = encodeURIComponent(
                         `Hi ${donorName}, regarding blood request for patient *${patientName}* (${bloodGroup}) at ${hospitalName}. Thank you for accepting! Please let us know your availability.`
@@ -351,35 +378,67 @@ export default function AcceptedDonors() {
                             </div>
                           </div>
 
-                          {/* Call & WhatsApp Quick Buttons */}
-                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60">
-                            {donorMobile ? (
-                              <a
-                                href={`tel:${donorMobile}`}
-                                className="flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
-                              >
-                                <Phone className="w-3.5 h-3.5 fill-white" /> Call
-                              </a>
-                            ) : (
-                              <button disabled className="py-2 bg-slate-200 text-slate-400 font-bold rounded-xl text-xs cursor-not-allowed">
-                                No Mobile
-                              </button>
-                            )}
+                          <div className="space-y-2">
+                            {/* Call & WhatsApp Quick Buttons */}
+                            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60">
+                              {donorMobile ? (
+                                <a
+                                  href={`tel:${donorMobile}`}
+                                  className="flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                                >
+                                  <Phone className="w-3.5 h-3.5 fill-white" /> Call
+                                </a>
+                              ) : (
+                                <button disabled className="py-2 bg-slate-200 text-slate-400 font-bold rounded-xl text-xs cursor-not-allowed">
+                                  No Mobile
+                                </button>
+                              )}
 
-                            {donorMobile ? (
-                              <a
-                                href={`https://wa.me/${donorMobile.replace(/\D/g, '')}?text=${whatsappMsg}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-1.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
-                              >
-                                <MessageSquare className="w-3.5 h-3.5 fill-white" /> WhatsApp
-                              </a>
-                            ) : (
-                              <button disabled className="py-2 bg-slate-200 text-slate-400 font-bold rounded-xl text-xs cursor-not-allowed">
-                                WhatsApp
-                              </button>
-                            )}
+                              {donorMobile ? (
+                                <a
+                                  href={`https://wa.me/${donorMobile.replace(/\D/g, '')}?text=${whatsappMsg}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center gap-1.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5 fill-white" /> WhatsApp
+                                </a>
+                              ) : (
+                                <button disabled className="py-2 bg-slate-200 text-slate-400 font-bold rounded-xl text-xs cursor-not-allowed">
+                                  WhatsApp
+                                </button>
+                              )}
+                            </div>
+
+                            {/* ─── REQUIREMENT: Donated Button with Points Credit ─── */}
+                            <div className="pt-1">
+                              {isDonated ? (
+                                <div className="w-full py-2 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-center gap-1.5 text-xs font-black text-emerald-700 shadow-2xs">
+                                  <Sparkles className="w-4 h-4 text-emerald-600 animate-pulse" />
+                                  ✓ Donated (+100 Pts Credited)
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={async () => {
+                                    if (!donor.id) return;
+                                    setLoadingDonorId(donor.id);
+                                    await markDonorDonated(reqId, donor.id);
+                                    setLoadingDonorId(null);
+                                  }}
+                                  disabled={loadingDonorId === donor.id}
+                                  className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold rounded-xl text-xs shadow-sm hover:shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                >
+                                  {loadingDonorId === donor.id ? (
+                                    <span>Processing Points...</span>
+                                  ) : (
+                                    <>
+                                      <Sparkles className="w-4 h-4" />
+                                      <span>Donated (+100 Pts)</span>
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -394,3 +453,4 @@ export default function AcceptedDonors() {
     </div>
   );
 }
+

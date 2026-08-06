@@ -172,7 +172,7 @@ export const useAppStore = create((set, get) => ({
       if (res.data.success) {
         const updatedReq = res.data.data.request;
         set((state) => ({
-          requests: state.requests.map((r) => String(r._id) === String(requestId) ? updatedReq : r)
+          requests: state.requests.map((r) => String(r._id || r.id) === String(requestId) ? updatedReq : r)
         }));
         get().triggerToast('Request marked as fulfilled. Lives saved!', 'success');
         return { success: true };
@@ -180,6 +180,28 @@ export const useAppStore = create((set, get) => ({
       return { success: false };
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Failed to fulfill request.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  markDonorDonated: async (requestId, donorId) => {
+    try {
+      const res = await api.patch(`/requests/${requestId}/mark-donor-donated`, { donor_id: donorId });
+      if (res.data.success) {
+        const updatedReq = res.data.data.request;
+        set((state) => ({
+          requests: state.requests.map((r) => String(r._id || r.id) === String(requestId) ? { ...r, ...updatedReq } : r)
+        }));
+        if (get().fetchAllUsers) {
+          get().fetchAllUsers();
+        }
+        get().triggerToast(res.data.message || 'Donation confirmed! Points credited successfully.', 'success');
+        return { success: true, request: updatedReq };
+      }
+      return { success: false };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to mark donation.';
       get().triggerToast(errMsg, 'error');
       return { success: false, error: errMsg };
     }
