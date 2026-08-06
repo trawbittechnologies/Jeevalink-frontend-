@@ -312,7 +312,7 @@ export default function RequestCard({ request, showActions = true }) {
             <div className="space-y-2 pt-2.5 border-t border-slate-100">
 
               {/* Accept & Donate — full width, for NON-owners who are NOT privileged, on pending requests */}
-              {['Pending', 'Waiting', 'Accepted'].includes(request.status) && !isOwner && !isPrivileged && (
+              {['pending', 'waiting', 'accepted'].includes((request.status || '').toLowerCase()) && !isOwner && !isPrivileged && (
                 <button
                   onClick={handleAcceptRequest}
                   disabled={accepting || isAcceptedByMe || acceptedList.length >= 5}
@@ -378,7 +378,7 @@ export default function RequestCard({ request, showActions = true }) {
               </div>
 
               {/* Approve — Admin/Volunteer full width */}
-              {(user?.role === 'volunteer' || user?.role === 'admin') && ['Pending', 'Waiting', 'Accepted'].includes(request.status) && !isOwner && (
+              {(user?.role === 'volunteer' || user?.role === 'admin') && ['pending', 'waiting', 'accepted'].includes((request.status || '').toLowerCase()) && !isOwner && (
                 <button
                   onClick={() => fulfillRequest(reqId)}
                   className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
