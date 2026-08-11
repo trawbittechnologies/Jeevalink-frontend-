@@ -196,10 +196,13 @@ api.interceptors.response.use(
       error.response.data = toCamel(error.response.data);
     }
 
-    // If we get an authentication error, clean up token
+    // If we get an authentication error, clean up token and reset store state
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('jeevalink_token');
       localStorage.removeItem('jeevalink_user');
+      import('./authStore.js').then(({ useAuthStore }) => {
+        useAuthStore.getState().logout();
+      }).catch(() => {});
     }
     return Promise.reject(error);
   }
