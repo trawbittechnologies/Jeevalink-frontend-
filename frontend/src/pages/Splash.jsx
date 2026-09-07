@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import Lottie from 'lottie-react';
 import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
+import lottieAnimation from '../../public/hupng-mp4-to-lottie-1788790621586.json';
 
 const DURATION = 3000;
 export default function Splash({ onComplete }) {
@@ -41,22 +43,20 @@ export default function Splash({ onComplete }) {
       {/* Top spacer */}
       <div className="w-full" />
 
-      {/* Main Content: Logo Inside Round Animated Loading Ring */}
+      {/* Main Content: Lottie Animation */}
       <div className="flex flex-col items-center gap-8 text-center my-auto max-w-sm w-full">
-        {/* Animated Loading Video */}
+        {/* Lottie Loading Animation */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="relative flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72"
         >
-          <video 
-            src="/loader.webm" 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            className="w-full h-full object-contain"
+          <Lottie
+            animationData={lottieAnimation}
+            loop={true}
+            autoplay={true}
+            style={{ width: '100%', height: '100%' }}
           />
         </motion.div>
 
