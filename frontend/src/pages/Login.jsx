@@ -194,6 +194,12 @@ export default function Login() {
               <div className="text-[10px] font-bold tracking-widest text-white/60 uppercase">Blood Requests</div>
             </div>
           </div>
+
+          {/* DYFI Kasaragod badge */}
+          <div className="mt-6 inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-md text-white text-[10px] font-extrabold tracking-widest uppercase rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-200 animate-pulse inline-block" />
+            Co-powered by DYFI Kasaragod
+          </div>
         </motion.div>
       </div>
 
