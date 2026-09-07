@@ -5,24 +5,52 @@ import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
 
 const DURATION = 3000;
+const ANIMATION_FILES = [
+  '/hupng-mp4-to-lottie-1788794978563.json',
+  '/hupng-mp4-to-lottie-1788795025178.json',
+];
+
 export default function Splash({ onComplete }) {
   const { token } = useAuthStore();
   const timerRef = useRef(null);
   const lottieContainerRef = useRef(null);
+  const animRef = useRef(null);
+  const animIndexRef = useRef(0);
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-  // Mount lottie-web animation using built-in path loader
-  useEffect(() => {
+  // Load a lottie animation by index, play once then advance to next
+  const loadAnimation = (index) => {
     if (!lottieContainerRef.current) return;
+    if (animRef.current) {
+      animRef.current.destroy();
+      animRef.current = null;
+    }
     const anim = lottie.loadAnimation({
       container: lottieContainerRef.current,
       renderer: 'svg',
-      loop: true,
+      loop: false,
       autoplay: true,
-      path: '/hupng-mp4-to-lottie-1788790621586.json',
+      path: ANIMATION_FILES[index],
     });
-    return () => anim.destroy();
+    animRef.current = anim;
+    anim.addEventListener('complete', () => {
+      const next = (index + 1) % ANIMATION_FILES.length;
+      animIndexRef.current = next;
+      loadAnimation(next);
+    });
+  };
+
+  // Mount sequential lottie animations
+  useEffect(() => {
+    loadAnimation(0);
+    return () => {
+      if (animRef.current) {
+        animRef.current.destroy();
+        animRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Smooth real-time progress calculation
