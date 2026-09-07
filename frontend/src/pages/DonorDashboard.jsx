@@ -242,7 +242,7 @@ export default function DonorDashboard() {
               {/* DYFI Kasaragod badge */}
               <div className="mt-1.5 inline-flex items-center gap-1 bg-red-50 border border-red-100 text-red-700 text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
-                Co-powered by DYFI Kasaragod
+                DYFI Kasaragod
               </div>
             </div>
           </div>

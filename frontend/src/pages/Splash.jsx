@@ -52,59 +52,58 @@ export default function Splash({ onComplete }) {
   }, [navigate, token, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white text-slate-900 select-none overflow-hidden py-12 px-6">
-      {/* Top spacer */}
-      <div className="w-full" />
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white text-slate-900 select-none overflow-hidden px-6 gap-6">
 
-      {/* Main Content */}
-      <div className="flex flex-col items-center gap-6 text-center my-auto max-w-sm w-full">
-        {/* Loading Animation (hero) */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="relative flex items-center justify-center"
-          style={{ width: 'min(80vw, 300px)', height: 'min(80vw, 300px)' }}
-        >
-          <div ref={lottieContainerRef} style={{ width: '100%', height: '100%', overflow: 'visible' }} />
-        </motion.div>
-
-        {/* Brand Title & Copy */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
-          className="flex flex-col items-center gap-2"
-        >
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Jeeva<span className="text-red-600">Link</span>
-          </h1>
-          <p className="text-sm font-normal text-slate-500 max-w-[260px] leading-relaxed">
-            Connecting voluntary blood donors with patients across Kerala.
-          </p>
-          <span className="mt-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
-            {Math.round(progress)}%
-          </span>
-        </motion.div>
-      </div>
-
-      {/* Credits Footer */}
+      {/* 1. Loading Animation */}
       <motion.div
+        initial={{ opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+        className="flex items-center justify-center"
+        style={{ width: 'min(75vw, 280px)', height: 'min(75vw, 280px)' }}
+      >
+        <div ref={lottieContainerRef} style={{ width: '100%', height: '100%', overflow: 'visible' }} />
+      </motion.div>
+
+
+
+      {/* 3. JeevaLink brand name */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.25, ease: 'easeOut' }}
+        className="flex flex-col items-center gap-2"
+      >
+        <h1
+          className="text-4xl font-bold tracking-tight leading-none text-slate-900"
+          style={{ fontFamily: "'Comfortaa', sans-serif" }}
+        >
+          Jeeva<span className="text-red-600 font-bold">Link</span>
+        </h1>
+        <span className="mt-0.5 text-[11px] font-bold tracking-widest text-slate-400 uppercase">
+          {Math.round(progress)}%
+        </span>
+      </motion.div>
+
+      {/* 4. DYFI Kasaragod */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+        className="flex flex-col items-center gap-0.5 -mt-2"
+      >
+        <span className="text-xl font-black text-red-600 tracking-tight">DYFI Kasaragod</span>
+      </motion.div>
+
+      {/* Footer */}
+      <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.35, duration: 0.5 }}
-        className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center text-xs text-slate-500 pt-4 border-t border-slate-100 sm:border-0 w-full sm:w-auto"
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="absolute bottom-8 text-[10px] text-slate-400 font-medium tracking-wide"
       >
-        <div className="flex items-center gap-1.5">
-          <span className="font-normal text-slate-400 text-xs">Powered by</span>
-          <span className="font-bold text-slate-800 text-sm">Trawbit Technologies</span>
-        </div>
-        <span className="hidden sm:inline text-slate-300">•</span>
-        <div className="flex items-center gap-1.5">
-          <span className="font-normal text-slate-400 text-xs">Co-powered by</span>
-          <span className="font-bold text-red-600 text-sm">DYFI Kasaragod</span>
-        </div>
-      </motion.div>
+        Powered by <span className="font-bold text-slate-600">Trawbit Technologies</span>
+      </motion.p>
     </div>
   );
 }
