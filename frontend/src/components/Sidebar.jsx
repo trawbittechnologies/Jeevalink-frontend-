@@ -131,7 +131,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       {/* Logo Header */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100 shrink-0">
         <Link to="/" onClick={() => setMobileOpen && setMobileOpen(false)} className="flex items-center">
-          <JeevaLinkLogo size={36} textClassName="text-[17px]" showSubtitle={true} />
+          <JeevaLinkLogo size={36} textClassName="text-[17px]" showSubtitle={false} />
         </Link>
         <button
           type="button"
