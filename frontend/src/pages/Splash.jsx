@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import Lottie from 'lottie-react';
+import lottie from 'lottie-web';
 import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
 import lottieAnimation from '../../public/hupng-mp4-to-lottie-1788790621586.json';
@@ -9,8 +9,22 @@ const DURATION = 3000;
 export default function Splash({ onComplete }) {
   const { token } = useAuthStore();
   const timerRef = useRef(null);
+  const lottieContainerRef = useRef(null);
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
+
+  // Mount lottie-web animation
+  useEffect(() => {
+    if (!lottieContainerRef.current) return;
+    const anim = lottie.loadAnimation({
+      container: lottieContainerRef.current,
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      animationData: lottieAnimation,
+    });
+    return () => anim.destroy();
+  }, []);
 
   // Smooth real-time progress calculation
   useEffect(() => {
@@ -52,12 +66,7 @@ export default function Splash({ onComplete }) {
           transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="relative flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72"
         >
-          <Lottie
-            animationData={lottieAnimation}
-            loop={true}
-            autoplay={true}
-            style={{ width: '100%', height: '100%' }}
-          />
+          <div ref={lottieContainerRef} style={{ width: '100%', height: '100%' }} />
         </motion.div>
 
         {/* Brand Title & Human Copy */}
