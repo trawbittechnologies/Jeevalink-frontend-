@@ -12,23 +12,17 @@ export default function Splash({ onComplete }) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-  // Mount lottie-web animation (fetch from public, not bundled)
+  // Mount lottie-web animation using built-in path loader
   useEffect(() => {
     if (!lottieContainerRef.current) return;
-    let anim;
-    fetch('/hupng-mp4-to-lottie-1788790621586.json')
-      .then((r) => r.json())
-      .then((animationData) => {
-        if (!lottieContainerRef.current) return;
-        anim = lottie.loadAnimation({
-          container: lottieContainerRef.current,
-          renderer: 'svg',
-          loop: true,
-          autoplay: true,
-          animationData,
-        });
-      });
-    return () => anim?.destroy();
+    const anim = lottie.loadAnimation({
+      container: lottieContainerRef.current,
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: '/hupng-mp4-to-lottie-1788790621586.json',
+    });
+    return () => anim.destroy();
   }, []);
 
   // Smooth real-time progress calculation
