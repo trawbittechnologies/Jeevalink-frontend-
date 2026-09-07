@@ -219,6 +219,11 @@ export default function VolunteerDashboard() {
               <span>•</span>
               <span>Block: <strong className="text-white">{user?.blockCommitteeName || user?.block_committee_name || 'Central'}</strong></span>
             </div>
+            {/* DYFI Kasaragod badge */}
+            <div className="mt-2 inline-flex items-center gap-1 bg-white/15 border border-white/30 text-white text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-200 animate-pulse inline-block" />
+              DYFI Kasaragod
+            </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
