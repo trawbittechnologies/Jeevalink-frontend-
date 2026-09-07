@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import lottie from 'lottie-web';
 import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
-import lottieAnimation from '../../public/hupng-mp4-to-lottie-1788790621586.json';
 
 const DURATION = 3000;
 export default function Splash({ onComplete }) {
