@@ -255,44 +255,41 @@ export default function SuperAdminDashboard() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
 
-      {/* Sleek Minimal Header Banner */}
-      <div className="relative rounded-3xl p-6 text-white shadow-lg overflow-hidden border border-red-900/20">
-        <img
-          src="/kasaragod_banner.png"
-          alt="District Banner"
-          className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none opacity-40"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-red-950/95 via-black/85 to-red-950/60 pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/30 border border-red-400/40 rounded-full text-white text-[11px] font-bold uppercase tracking-wider mb-2 backdrop-blur-md">
-              <ShieldCheck className="w-3.5 h-3.5 text-red-300" />
-              {districtData.district} District Super Admin
+      {/* Modern Minimal Header */}
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-700 text-[11px] font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
+                {districtData.district} District Super Admin
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse inline-block" />
+                DYFI Kasaragod
+              </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              {districtData.district} Blood Command
-            </h1>
-            <p className="text-red-100/80 text-xs mt-0.5 font-medium">
-              Real-time donor status, emergency requests & block administration
-            </p>
-            {/* DYFI Kasaragod badge */}
-            <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-md text-white text-[10px] font-extrabold tracking-widest uppercase rounded-full px-3 py-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-300 animate-pulse inline-block" />
-              DYFI Kasaragod
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                {districtData.district} Blood Command
+              </h1>
+              <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-medium">
+                Real-time donor status, emergency requests & block administration
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 shrink-0">
             <Link
               to="/super-admin/blocks"
-              className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs hover:shadow-sm transition flex items-center gap-2 cursor-pointer"
             >
               <Building2 className="w-4 h-4" /> Manage Blocks
             </Link>
             <button
               onClick={loadData}
-              className="p-2.5 bg-black/40 hover:bg-black/60 border border-white/20 rounded-xl text-xs font-bold text-white transition cursor-pointer backdrop-blur-md"
+              disabled={loading}
+              className="p-2.5 bg-slate-50 hover:bg-slate-100 active:scale-95 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center cursor-pointer disabled:opacity-50"
               title="Refresh Data"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
