@@ -57,13 +57,8 @@ export default function DashboardLayout() {
             </Link>
           </div>
 
-          {/* Page breadcrumb & DYFI Kasaragod (desktop) */}
-          <div className="hidden lg:flex items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-100/90 rounded-full text-red-700 text-[10px] font-black uppercase tracking-widest shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-              DYFI Kasaragod
-            </span>
-            <span className="text-slate-300 text-xs font-light">•</span>
+          {/* Page breadcrumb (desktop) */}
+          <div className="hidden lg:flex items-center gap-2">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest capitalize">
               {user?.role?.replace('_', ' ')} portal
             </span>
