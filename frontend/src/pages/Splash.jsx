@@ -91,9 +91,10 @@ export default function Splash({ onComplete }) {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="relative flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72"
+          className="relative flex items-center justify-center"
+          style={{ width: 'min(85vw, 340px)', height: 'min(85vw, 340px)' }}
         >
-          <div ref={lottieContainerRef} style={{ width: '100%', height: '100%' }} />
+          <div ref={lottieContainerRef} style={{ width: '100%', height: '100%', overflow: 'visible' }} />
         </motion.div>
 
         {/* Brand Title & Human Copy */}
