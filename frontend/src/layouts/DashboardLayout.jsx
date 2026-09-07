@@ -53,7 +53,7 @@ export default function DashboardLayout() {
               <Menu className="w-6 h-6" />
             </button>
             <Link to="/" className="flex items-center">
-              <JeevaLinkLogo size={30} textClassName="text-sm" />
+              <JeevaLinkLogo size={30} textClassName="text-sm" showSubtitle={false} />
             </Link>
           </div>
 

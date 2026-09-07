@@ -275,7 +275,7 @@ export default function Navbar() {
               className="fixed top-0 right-0 bottom-0 w-[280px] bg-white z-[70] shadow-2xl flex flex-col md:hidden border-l border-slate-100"
             >
               <div className="p-4 flex items-center justify-between border-b border-slate-100">
-                <JeevaLinkLogo size={32} textClassName="text-lg" />
+                <JeevaLinkLogo size={32} textClassName="text-lg" showSubtitle={false} />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"

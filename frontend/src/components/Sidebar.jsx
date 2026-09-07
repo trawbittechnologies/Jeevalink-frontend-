@@ -4,7 +4,7 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, Megaphone, HeartHandshake
+  Building2, Megaphone, HeartHandshake, X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
@@ -128,10 +128,19 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
       <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-slate-100/80 shadow-[2px_0_12px_rgba(0,0,0,0.03)] overflow-y-auto overflow-x-hidden transform transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:static lg:h-screen lg:sticky lg:top-0 shrink-0`}>
 
-      {/* Logo */}
-      <Link to="/" className="h-16 flex items-center px-5 border-b border-slate-100 shrink-0">
-        <JeevaLinkLogo size={36} textClassName="text-[17px]" />
-      </Link>
+      {/* Logo Header */}
+      <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100 shrink-0">
+        <Link to="/" onClick={() => setMobileOpen && setMobileOpen(false)} className="flex items-center">
+          <JeevaLinkLogo size={36} textClassName="text-[17px]" showSubtitle={true} />
+        </Link>
+        <button
+          type="button"
+          onClick={() => setMobileOpen && setMobileOpen(false)}
+          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors lg:hidden cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
