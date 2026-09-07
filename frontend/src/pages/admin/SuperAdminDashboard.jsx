@@ -268,10 +268,6 @@ export default function SuperAdminDashboard() {
                 <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
                 {currentDistrict} Super Admin
               </span>
-              <span className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse inline-block" />
-                DYFI {currentDistrict}
-              </span>
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">

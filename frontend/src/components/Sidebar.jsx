@@ -129,8 +129,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-slate-100/80 shadow-[2px_0_12px_rgba(0,0,0,0.03)] overflow-y-auto overflow-x-hidden transform transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:static lg:h-screen lg:sticky lg:top-0 shrink-0`}>
 
       {/* Logo */}
-      <Link to="/" className="h-16 flex items-center px-5 border-b border-slate-100 shrink-0">
-        <JeevaLinkLogo size={36} textClassName="text-[17px]" />
+      <Link to="/" className="h-16 flex items-center justify-between px-4 border-b border-slate-100 shrink-0">
+        <JeevaLinkLogo size={34} textClassName="text-[17px]" />
+        <span className="inline-flex items-center px-2 py-0.5 bg-red-50 border border-red-100/90 rounded-full text-red-700 text-[9px] font-black uppercase tracking-wider">
+          DYFI Kasaragod
+        </span>
       </Link>
 
       {/* Nav links */}

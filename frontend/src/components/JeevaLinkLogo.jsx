@@ -10,6 +10,8 @@ export default function JeevaLinkLogo({
   textClassName = '',
   light = false,
   imgClassName = '',
+  showSubtitle = true,
+  subtitle = 'DYFI Kasaragod',
 }) {
   return (
     <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
@@ -27,13 +29,24 @@ export default function JeevaLinkLogo({
 
       {/* Brand Typography */}
       {showText && (
-        <span
-          style={{ fontFamily: "'Comfortaa', display" }}
-          className={`font-bold tracking-tight leading-none ${light ? 'text-white' : 'text-slate-900'
-            } ${textClassName || 'text-xl'}`}
-        >
-          Jeeva<span className="text-red-600 font-bold">Link</span>
-        </span>
+        <div className="flex flex-col justify-center text-left">
+          <span
+            style={{ fontFamily: "'Comfortaa', display" }}
+            className={`font-bold tracking-tight leading-none ${light ? 'text-white' : 'text-slate-900'
+              } ${textClassName || 'text-xl'}`}
+          >
+            Jeeva<span className="text-red-600 font-bold">Link</span>
+          </span>
+          {showSubtitle && subtitle && (
+            <span
+              className={`text-[9px] sm:text-[9.5px] font-black tracking-wider uppercase leading-none mt-1 ${
+                light ? 'text-rose-200' : 'text-red-600'
+              }`}
+            >
+              {subtitle}
+            </span>
+          )}
+        </div>
       )}
     </div>
   );

@@ -95,7 +95,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center shrink-0">
-          <JeevaLinkLogo size={42} textClassName="text-2xl" />
+          <JeevaLinkLogo size={40} textClassName="text-xl" />
         </Link>
 
         {/* Clean Minimal Desktop Nav */}
@@ -275,7 +275,12 @@ export default function Navbar() {
               className="fixed top-0 right-0 bottom-0 w-[280px] bg-white z-[70] shadow-2xl flex flex-col md:hidden border-l border-slate-100"
             >
               <div className="p-4 flex items-center justify-between border-b border-slate-100">
-                <JeevaLinkLogo size={32} textClassName="text-lg" />
+                <div className="flex items-center gap-2">
+                  <JeevaLinkLogo size={32} textClassName="text-lg" />
+                  <span className="inline-flex items-center px-2 py-0.5 bg-red-50 border border-red-100 rounded-full text-red-700 text-[9px] font-black uppercase tracking-wider">
+                    DYFI Kasaragod
+                  </span>
+                </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
