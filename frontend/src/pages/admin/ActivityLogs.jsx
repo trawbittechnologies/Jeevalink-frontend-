@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Filter, Clock, User, Shield, Trash2, CheckCircle2, AlertTriangle, LogIn, LogOut } from 'lucide-react';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 
-const MOCK_LOGS = [];
+const INITIAL_LOGS = [];
 
 const TYPE_CONFIG = {
   login:        { icon: LogIn,        color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',  dot: 'bg-emerald-400' },
@@ -19,7 +19,7 @@ const TYPE_CONFIG = {
 };
 
 export default function ActivityLogs() {
-  const [logs] = useState(MOCK_LOGS);
+  const [logs] = useState(INITIAL_LOGS);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState('');

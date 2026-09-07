@@ -500,10 +500,9 @@ export const useAppStore = create((set, get) => ({
         }));
         
         // Sync with authStore if current user was updated
-        try {
-          useAuthStore.getState().updateMockUserStatus(userId, status);
-        } catch (err) {
-          console.error(err);
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser && String(currentUser._id) === String(userId)) {
+          useAuthStore.setState({ user: { ...currentUser, status } });
         }
 
         get().triggerToast(`User status updated to ${status}.`, 'success');
@@ -709,9 +708,7 @@ export const useAppStore = create((set, get) => ({
           _id: user._id,
           primaryName: user.primaryName,
           bloodGroup: user.bloodGroup,
-          city: user.city || 'Bengaluru',
-          district: user.district || 'Bengaluru Urban',
-          distance: Math.round((Math.random() * 5 + 0.5) * 10) / 10,
+          distance: user.distance !== undefined ? user.distance : null,
           availableForDonation: user.availableForDonation !== undefined ? user.availableForDonation : true,
           totalDonations: user.totalDonations || 0,
           compatibilityScore: 100,

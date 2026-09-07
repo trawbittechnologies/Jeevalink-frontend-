@@ -53,13 +53,6 @@ export function toCamel(obj) {
       result.matchScore = result.compatibilityScore;
     } else if (result.matchScore !== undefined) {
       result.compatibilityScore = result.matchScore;
-    } else if (result.role === 'user') {
-      result.matchScore = Math.floor(Math.random() * 25) + 75; // 75 - 99
-      result.compatibilityScore = result.matchScore;
-    }
-
-    if (result.distance === undefined && result.role === 'user') {
-      result.distance = Math.round((Math.random() * 5 + 0.5) * 10) / 10;
     }
 
     return result;

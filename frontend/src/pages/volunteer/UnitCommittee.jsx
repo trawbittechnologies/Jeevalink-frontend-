@@ -69,8 +69,6 @@ export default function UnitCommittee() {
     }
     setLoading(true);
 
-    const dummyMobile = '999' + Math.floor(1000000 + Math.random() * 9000000).toString(); // 10-digit unique dummy number
-
     const payload = {
       role: 'unit_squad',
       unit: form.unit,
@@ -78,7 +76,7 @@ export default function UnitCommittee() {
       district: user?.district || 'Kozhikode',
       primary_name: form.primary_name,
       email: form.email,
-      mobile: dummyMobile,
+      mobile: form.mobile || '',
       password: form.password
     };
 

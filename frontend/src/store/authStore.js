@@ -48,39 +48,6 @@ export const useAuthStore = create((set, get) => ({
       return { success: true, role: normalizedRole };
     } catch (err) {
       console.error('[DEBUG authStore] Catch block caught login error:', err);
-      // Fallback handling for default Technical Admin account
-      const cred = credential?.toString().trim().toLowerCase();
-      
-      let mockUser = null;
-      if ((cred === 'techadmin@jeevalink.org' || cred === '9900000000') && (password === 'TechAdmin@2026' || password === 'admin123')) {
-        mockUser = {
-          id: 1,
-          jeevalink_id: 'JL-TA-0001',
-          employee_id: 'JL-TA-0001',
-          name: 'Technical Admin',
-          primaryName: 'System Technical Admin',
-          email: 'techadmin@jeevalink.org',
-          mobile: '9900000000',
-          role: 'technical_admin',
-          district: 'Kozhikode',
-          city: 'Kozhikode',
-          status: 'Active',
-          isVerified: true
-        };
-      }
-
-      if (mockUser) {
-        const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-        const payload = btoa(JSON.stringify({ sub: mockUser.id, role: mockUser.role, exp: Math.floor(Date.now()/1000) + 86400 * 7 }));
-        const mockToken = `${header}.${payload}.mock_sig`;
-        
-        localStorage.setItem('jeevalink_token', mockToken);
-        localStorage.setItem('jeevalink_user', JSON.stringify(mockUser));
-        set({ token: mockToken, user: mockUser, loading: false });
-        console.log('[DEBUG authStore] Dev fallback login success with role:', mockUser.role);
-        return { success: true, role: mockUser.role };
-      }
-
       const errMsg = err.response?.data?.message || err.message || 'Invalid credentials. Try again.';
       set({ loading: false, error: errMsg });
       return { success: false, error: errMsg };
@@ -91,8 +58,8 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       // Use a consistent default password for Google authentication simulation
-      const dummyPass = 'GoogleUserPassword123!';
-      const res = await api.post('/auth/login', { credential: email, password: dummyPass });
+      const defaultOauthPass = 'GoogleUserPassword123!';
+      const res = await api.post('/auth/login', { credential: email, password: defaultOauthPass });
       const { token, user } = res.data.data;
       localStorage.setItem('jeevalink_token', token);
       localStorage.setItem('jeevalink_user', JSON.stringify(user));
@@ -101,12 +68,12 @@ export const useAuthStore = create((set, get) => ({
     } catch {
       // If login fails, user might not exist in db. Attempt registration first!
       try {
-        const dummyPass = 'GoogleUserPassword123!';
+        const defaultOauthPass = 'GoogleUserPassword123!';
         const regRes = await api.post('/auth/register', {
           primaryName: fullName || 'Google User',
           email,
-          mobile: 'G-' + Date.now().toString().slice(-8), // unique dummy mobile
-          password: dummyPass,
+          mobile: 'G-' + Date.now().toString().slice(-8), // generated mobile identifier
+          password: defaultOauthPass,
           role: 'user',
           city: 'Kochi',
           district: 'Ernakulam',
@@ -402,15 +369,6 @@ export const useAuthStore = create((set, get) => ({
       return { success: true, user: updatedUser };
     } catch {
       return { success: false, error: 'Failed to update availability.' };
-    }
-  },
-
-  updateMockUserStatus: (userId, status) => {
-    const currentUser = get().user;
-    if (currentUser && String(currentUser._id) === String(userId)) {
-      const updated = { ...currentUser, status };
-      localStorage.setItem('jeevalink_user', JSON.stringify(updated));
-      set({ user: updated });
     }
   },
 }));

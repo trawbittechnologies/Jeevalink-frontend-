@@ -36,37 +36,11 @@ export default function TechnicalReports() {
       const res = await api.get('/technical-reports');
       if (res.data?.success && Array.isArray(res.data.data)) {
         setReports(res.data.data);
-      } else if (isTechAdmin) {
-        // Demo fallback reports for Technical Admin inspection queue
-        setReports([
-          {
-            id: 'TR-101',
-            title: 'OTP SMS Verification Delay in Kozhikode District',
-            category: 'OTP / Authentication',
-            priority: 'High',
-            status: 'Open',
-            created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-            description: 'OTP code takes more than 45 seconds to arrive on BSNL numbers during peak donation drives.',
-            reply: null,
-            reporter_role: 'Volunteer'
-          },
-          {
-            id: 'TR-102',
-            title: 'Volunteer Contact Card Display Alignment Bug',
-            category: 'Interface / Design Issue',
-            priority: 'Low',
-            status: 'Resolved',
-            created_at: new Date(Date.now() - 3600000 * 72).toISOString(),
-            description: 'The phone button text clips slightly on mobile screen width below 360px.',
-            reply: 'CSS flex layout bounds adjusted. Issue verified resolved.',
-            reporter_role: 'User'
-          }
-        ]);
       } else {
         setReports([]);
       }
     } catch {
-      if (!isTechAdmin) setReports([]);
+      setReports([]);
     } finally {
       setLoading(false);
     }

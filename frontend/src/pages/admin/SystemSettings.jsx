@@ -212,7 +212,7 @@ export default function SystemSettings() {
                 <p className="text-red-400/50 text-[10px]">{sub}</p>
               </div>
               <button
-                onClick={() => triggerToast('Action requires confirmation. Feature disabled in demo.', 'warning')}
+                onClick={() => triggerToast('Action requires high-level administrative confirmation.', 'warning')}
                 className="shrink-0 px-3 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold rounded-lg hover:bg-red-500/20 transition-colors cursor-pointer whitespace-nowrap">
                 Execute
               </button>

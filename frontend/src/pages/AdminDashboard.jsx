@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import api from '../store/api.js';
 
-const mockGrowthData = [
+const growthOverviewData = [
   { name: 'Jan', users: 0, vols: 0 },
   { name: 'Feb', users: 0, vols: 0 },
   { name: 'Mar', users: 0, vols: 0 },
@@ -17,7 +17,7 @@ const mockGrowthData = [
   { name: 'Jun', users: 0, vols: 0 },
 ];
 
-const mockActivityData = [
+const weeklyActivityData = [
   { day: 'Mon', requests: 0, fulfilled: 0 },
   { day: 'Tue', requests: 0, fulfilled: 0 },
   { day: 'Wed', requests: 0, fulfilled: 0 },
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
           </h3>
           <div className="flex-1 w-full min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockGrowthData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <LineChart data={growthOverviewData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
           </h3>
           <div className="flex-1 w-full min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockActivityData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={weeklyActivityData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
