@@ -15,53 +15,54 @@ const creativeMessages = [
   "How can I help? 💬"
 ];
 
-export default function MascotVideo({
-  className = "",
-  showBubble = true,
-}) {
-  const containerRef = useRef(null);
-  const animRef = useRef(null);
+export default function MascotVideo({ showBubble = true }) {
+  // Two separate container divs — both loaded at mount, only one visible at a time
+  const containerRefs = useRef([null, null]);
+  const animRefs    = useRef([null, null]);
+  const activeRef   = useRef(0);           // which index is currently visible
+  const [active, setActive] = useState(0); // drives CSS visibility
   const [msgIdx, setMsgIdx] = useState(0);
 
   // Cycle speech bubble messages
   useEffect(() => {
     if (!showBubble) return;
     const interval = setInterval(() => {
-      setMsgIdx((prev) => (prev + 1) % creativeMessages.length);
+      setMsgIdx(prev => (prev + 1) % creativeMessages.length);
     }, 4500);
     return () => clearInterval(interval);
   }, [showBubble]);
 
-  // Load character animation by index, play once then advance
-  const loadAnim = (index) => {
-    if (!containerRef.current) return;
-    if (animRef.current) {
-      animRef.current.destroy();
-      animRef.current = null;
-    }
-    const anim = lottie.loadAnimation({
-      container: containerRef.current,
-      renderer: 'svg',
-      loop: false,
-      autoplay: true,
-      path: CHARACTER_FILES[index],
-    });
-    animRef.current = anim;
-    anim.addEventListener('complete', () => {
-      const next = (index + 1) % CHARACTER_FILES.length;
-      loadAnim(next);
-    });
-  };
-
   useEffect(() => {
-    loadAnim(0);
+    // Pre-load BOTH animations simultaneously so switching is instant (no fetch gap)
+    CHARACTER_FILES.forEach((path, idx) => {
+      const container = containerRefs.current[idx];
+      if (!container) return;
+
+      const anim = lottie.loadAnimation({
+        container,
+        renderer: 'svg',
+        loop: false,
+        autoplay: idx === 0, // only the first one auto-plays
+        path,
+      });
+      animRefs.current[idx] = anim;
+
+      anim.addEventListener('complete', () => {
+        const next = (idx + 1) % CHARACTER_FILES.length;
+
+        // Reset the NEXT animation to frame 0, then play it
+        animRefs.current[next].goToAndPlay(0, true);
+
+        // Instantly swap visibility — zero gap
+        activeRef.current = next;
+        setActive(next);
+      });
+    });
+
     return () => {
-      if (animRef.current) {
-        animRef.current.destroy();
-        animRef.current = null;
-      }
+      animRefs.current.forEach(a => a?.destroy());
+      animRefs.current = [null, null];
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -71,7 +72,7 @@ export default function MascotVideo({
         <motion.div
           className="absolute -top-[70px] sm:-top-[80px] left-[30%] sm:left-[20%] -translate-x-1/2 z-30 pointer-events-none w-max drop-shadow-md"
           animate={{ y: [0, -4, 0] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -87,9 +88,7 @@ export default function MascotVideo({
               </p>
               <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                <span className="text-[10px] font-bold text-white tracking-wider">
-                  CLICK TO CHAT
-                </span>
+                <span className="text-[10px] font-bold text-white tracking-wider">CLICK TO CHAT</span>
               </div>
               {/* Tail */}
               <div className="absolute -bottom-[8px] right-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-white" />
@@ -98,12 +97,22 @@ export default function MascotVideo({
         </motion.div>
       )}
 
-      {/* Lottie character container */}
-      <div
-        ref={containerRef}
-        className={className}
-        style={{ width: '100%', height: '100%', overflow: 'visible' }}
-      />
+      {/* Both lottie containers stacked — only active one is visible */}
+      {CHARACTER_FILES.map((_, idx) => (
+        <div
+          key={idx}
+          ref={el => (containerRefs.current[idx] = el)}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'visible',
+            opacity: active === idx ? 1 : 0,
+            // No transition delay — swap is instantaneous
+            transition: 'none',
+            pointerEvents: active === idx ? 'auto' : 'none',
+          }}
+        />
+      ))}
     </div>
   );
 }

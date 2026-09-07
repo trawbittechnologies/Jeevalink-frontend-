@@ -276,6 +276,11 @@ export default function SuperAdminDashboard() {
             <p className="text-red-100/80 text-xs mt-0.5 font-medium">
               Real-time donor status, emergency requests & block administration
             </p>
+            {/* DYFI Kasaragod badge */}
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-md text-white text-[10px] font-extrabold tracking-widest uppercase rounded-full px-3 py-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-300 animate-pulse inline-block" />
+              DYFI Kasaragod
+            </div>
           </div>
 
           <div className="flex items-center gap-2.5">

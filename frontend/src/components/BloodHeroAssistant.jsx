@@ -379,7 +379,7 @@ export default function BloodHeroAssistant() {
             }}
             whileTap={{ scale: 0.94 }}
             className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-xl"
-            style={{ width: 140, height: 140 }}
+            style={{ width: 190, height: 190 }}
           >
             <MascotVideo showBubble={!isOpen} />
           </motion.button>
