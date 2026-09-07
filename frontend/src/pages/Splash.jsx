@@ -52,7 +52,7 @@ export default function Splash({ onComplete }) {
   }, [navigate, token, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white text-slate-900 select-none overflow-hidden px-6 gap-6">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white text-slate-900 select-none overflow-hidden px-6">
 
       {/* 1. Loading Animation */}
       <motion.div
@@ -60,19 +60,17 @@ export default function Splash({ onComplete }) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
         className="flex items-center justify-center"
-        style={{ width: 'min(75vw, 280px)', height: 'min(75vw, 280px)' }}
+        style={{ width: 'min(70vw, 240px)', height: 'min(70vw, 240px)' }}
       >
         <div ref={lottieContainerRef} style={{ width: '100%', height: '100%', overflow: 'visible' }} />
       </motion.div>
 
-
-
-      {/* 3. JeevaLink brand name */}
+      {/* 2. JeevaLink brand name */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.25, ease: 'easeOut' }}
-        className="flex flex-col items-center gap-2"
+        className="flex flex-col items-center gap-1.5 -mt-4"
       >
         <h1
           className="text-4xl font-bold tracking-tight leading-none text-slate-900"
@@ -85,12 +83,12 @@ export default function Splash({ onComplete }) {
         </span>
       </motion.div>
 
-      {/* 4. DYFI Kasaragod */}
+      {/* 3. DYFI Kasaragod */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-        className="flex flex-col items-center gap-0.5 -mt-2"
+        className="flex flex-col items-center gap-0.5 mt-4"
       >
         <span className="text-xl font-black text-red-600 tracking-tight">DYFI Kasaragod</span>
       </motion.div>
