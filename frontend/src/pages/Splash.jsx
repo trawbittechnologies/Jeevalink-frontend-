@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
 
 const DURATION = 3000;
-const ANIMATION_FILES = [
+const CHARACTER_FILES = [
   '/hupng-mp4-to-lottie-1788794978563.json',
   '/hupng-mp4-to-lottie-1788795025178.json',
 ];
@@ -13,41 +13,39 @@ const ANIMATION_FILES = [
 export default function Splash({ onComplete }) {
   const { token } = useAuthStore();
   const timerRef = useRef(null);
-  const lottieContainerRef = useRef(null);
-  const animRef = useRef(null);
-  const animIndexRef = useRef(0);
+  const charContainerRef = useRef(null);
+  const charAnimRef = useRef(null);
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-  // Load a lottie animation by index, play once then advance to next
-  const loadAnimation = (index) => {
-    if (!lottieContainerRef.current) return;
-    if (animRef.current) {
-      animRef.current.destroy();
-      animRef.current = null;
+  // Load a character animation by index, play once then advance to next
+  const loadCharAnimation = (index) => {
+    if (!charContainerRef.current) return;
+    if (charAnimRef.current) {
+      charAnimRef.current.destroy();
+      charAnimRef.current = null;
     }
     const anim = lottie.loadAnimation({
-      container: lottieContainerRef.current,
+      container: charContainerRef.current,
       renderer: 'svg',
       loop: false,
       autoplay: true,
-      path: ANIMATION_FILES[index],
+      path: CHARACTER_FILES[index],
     });
-    animRef.current = anim;
+    charAnimRef.current = anim;
     anim.addEventListener('complete', () => {
-      const next = (index + 1) % ANIMATION_FILES.length;
-      animIndexRef.current = next;
-      loadAnimation(next);
+      const next = (index + 1) % CHARACTER_FILES.length;
+      loadCharAnimation(next);
     });
   };
 
-  // Mount sequential lottie animations
+  // Mount sequential character animations
   useEffect(() => {
-    loadAnimation(0);
+    loadCharAnimation(0);
     return () => {
-      if (animRef.current) {
-        animRef.current.destroy();
-        animRef.current = null;
+      if (charAnimRef.current) {
+        charAnimRef.current.destroy();
+        charAnimRef.current = null;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,9 +82,9 @@ export default function Splash({ onComplete }) {
       {/* Top spacer */}
       <div className="w-full" />
 
-      {/* Main Content: Lottie Animation */}
-      <div className="flex flex-col items-center gap-8 text-center my-auto max-w-sm w-full">
-        {/* Lottie Loading Animation */}
+      {/* Main Content: Character Animation + Brand */}
+      <div className="flex flex-col items-center gap-4 text-center my-auto max-w-sm w-full">
+        {/* Character Animation (sequential: file 1 → file 2 → ...) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -94,7 +92,7 @@ export default function Splash({ onComplete }) {
           className="relative flex items-center justify-center"
           style={{ width: 'min(85vw, 340px)', height: 'min(85vw, 340px)' }}
         >
-          <div ref={lottieContainerRef} style={{ width: '100%', height: '100%', overflow: 'visible' }} />
+          <div ref={charContainerRef} style={{ width: '100%', height: '100%', overflow: 'visible' }} />
         </motion.div>
 
         {/* Brand Title & Human Copy */}
@@ -110,7 +108,17 @@ export default function Splash({ onComplete }) {
           <p className="text-sm font-normal text-slate-500 max-w-[260px] leading-relaxed">
             Connecting voluntary blood donors with patients across Kerala.
           </p>
-          <span className="mt-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
+        </motion.div>
+
+        {/* Loading Animation + Progress */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="flex flex-col items-center gap-1"
+        >
+          <LoadingLottie />
+          <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
             {Math.round(progress)}%
           </span>
         </motion.div>
@@ -134,5 +142,26 @@ export default function Splash({ onComplete }) {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+/** Separate component — mounts its own looping lottie loading animation */
+function LoadingLottie() {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const anim = lottie.loadAnimation({
+      container: containerRef.current,
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: '/hupng-mp4-to-lottie-1788790621586.json',
+    });
+    return () => anim.destroy();
+  }, []);
+
+  return (
+    <div ref={containerRef} style={{ width: 72, height: 72 }} />
   );
 }
