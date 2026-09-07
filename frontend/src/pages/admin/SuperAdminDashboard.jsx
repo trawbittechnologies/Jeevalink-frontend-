@@ -6,6 +6,7 @@ import {
   Droplets, Flame, CheckCircle2, Award, ArrowUpRight
 } from 'lucide-react';
 import api from '../../store/api.js';
+import { useAuthStore } from '../../store/authStore.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 import { getDisplayJeevalinkId } from '../../utils/jeevalinkId.js';
 
@@ -53,8 +54,9 @@ function parseBlockAdminContacts(ba) {
 }
 
 export default function SuperAdminDashboard() {
+  const { user } = useAuthStore();
   const [districtData, setDistrictData] = useState({
-    district: 'Kasaragod',
+    district: user?.district || 'Kasaragod',
     total_users: 0,
     total_volunteers: 0,
     total_admins: 0,
@@ -252,6 +254,8 @@ export default function SuperAdminDashboard() {
     }
   });
 
+  const currentDistrict = districtData.district || user?.district || 'Kasaragod';
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
 
@@ -262,16 +266,16 @@ export default function SuperAdminDashboard() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-700 text-[11px] font-bold uppercase tracking-wider">
                 <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
-                {districtData.district} District Super Admin
+                {currentDistrict} Super Admin
               </span>
               <span className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse inline-block" />
-                DYFI Kasaragod
+                DYFI {currentDistrict}
               </span>
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                {districtData.district} Blood Command
+                {currentDistrict}
               </h1>
               <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-medium">
                 Real-time donor status, emergency requests & block administration

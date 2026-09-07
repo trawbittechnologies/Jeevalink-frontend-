@@ -169,10 +169,10 @@ export default function AdminDashboard() {
           </div>
           <h1 className="text-2xl font-black text-slate-900">Block Administration</h1>
           <p className="text-slate-500 text-xs mt-1">Manage Meghala Committees and Block Analytics</p>
-          {/* DYFI Kasaragod badge */}
+          {/* DYFI District badge */}
           <div className="mt-2 inline-flex items-center gap-1 bg-red-50 border border-red-100 text-red-700 text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
-            DYFI Kasaragod
+            DYFI {user?.district || blockData?.district || 'Kasaragod'}
           </div>
         </div>
         <div className="flex items-center gap-3">

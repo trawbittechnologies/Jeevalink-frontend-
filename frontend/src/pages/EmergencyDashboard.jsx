@@ -228,10 +228,10 @@ export default function EmergencyDashboard() {
             </div>
             <h1 className="text-2xl font-black tracking-tight mb-1">Emergency Blood Alert Portal</h1>
             <p className="text-red-200 text-sm">Real-time FCM alert dispatcher & emergency response command dashboard</p>
-            {/* DYFI Kasaragod badge */}
-            <div className="mt-2 inline-flex items-center gap-1 bg-white/15 border border-white/30 text-white text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-200 animate-pulse inline-block" />
-              DYFI Kasaragod
+            {/* DYFI District badge */}
+            <div className="mt-1.5 inline-flex items-center gap-1 bg-red-50 border border-red-100 text-red-700 text-[10px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+              DYFI {user?.district || 'Kasaragod'}
             </div>
           </div>
 
