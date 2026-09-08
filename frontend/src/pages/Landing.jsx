@@ -12,9 +12,7 @@ import {
   Search,
   UserPlus,
   HeartHandshake,
-  CheckCircle2,
-  Check,
-  Sparkles
+  CheckCircle2
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
 
@@ -72,11 +70,27 @@ export default function Landing() {
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
       <section className="relative min-h-[70vh] flex items-center justify-center bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all pt-16 pb-20 border-b">
         <div className="jl-container relative z-10 max-w-4xl mx-auto px-4 text-center">
+          {/* DYFI KASARAGOD Creative Minimal Typography */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mb-4 inline-flex items-center justify-center gap-3 sm:gap-4 select-none"
+          >
+            <span className="text-sm sm:text-base md:text-lg font-black text-red-600 tracking-[0.3em] uppercase">
+              DYFI
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0 opacity-80" />
+            <span className="text-sm sm:text-base md:text-lg font-black text-red-600 tracking-[0.3em] uppercase">
+              KASARAGOD
+            </span>
+          </motion.div>
+
           {/* Main Title */}
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
             className="text-4xl sm:text-6xl md:text-7xl font-black text-slate-950 tracking-tight leading-[1.08] mb-6"
           >
             Be Someone's Hero.<br />
@@ -89,10 +103,12 @@ export default function Landing() {
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+            transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
             className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-10 font-medium"
           >
-            Connecting voluntary blood donors with patients in urgent need. Verified through regional DYFI Block Committee coordinators across Kerala.
+            Connecting voluntary blood donors with patients in urgent need. A lifesaving initiative by{" "}
+            <span className="font-extrabold text-red-600">DYFI Kasaragod</span>
+            , verified through regional Block Committee coordinators across Kerala.
           </motion.p>
 
           {/* Action Buttons */}
@@ -129,27 +145,6 @@ export default function Landing() {
             >
               Request Blood
             </Link>
-          </motion.div>
-
-          {/* Trust Indicators Ribbon */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs sm:text-sm font-semibold text-slate-500"
-          >
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
-              <span>100% Free & Voluntary</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
-              <span>All 14 Kerala Districts</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
-              <span>Verified 24/7 Helpline</span>
-            </div>
           </motion.div>
         </div>
       </section>
