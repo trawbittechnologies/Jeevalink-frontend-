@@ -1,300 +1,249 @@
 import { useRef, useState } from 'react';
-import {
-  X, Download, RefreshCw, Share2
-} from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { X, Download, RefreshCw, Share2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import posterBg from '../assets/blank_poster_template.png';
+
+/**
+ * PosterModal — Blood Request Poster Generator
+ *
+ * Uses the DYFI "I Donate Kasaragod" poster as the background template.
+ * Overlays: Patient Name, Blood Group, Unit, Hospital, Contact Number.
+ *
+ * ➜ Place your poster image at:
+ *     frontend/src/assets/dyfi_blood_request_template.png
+ *
+ * The overlay positions (top %) are tuned for the 3:4 DYFI poster layout.
+ * Tweak the `top` values below if your image differs slightly.
+ */
+
+// Static import — Vite will bundle the image automatically once the file exists.
+// If the file isn't added yet, this import will fail at build time (not runtime).
+import dyfiTemplate from '../assets/dyfi_blood_request_template.png';
+
+// ─── Small helper used only in fallback card ──────────────────────────────────
+function InfoRow({ label, value }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', padding: '4px 0', borderBottom: '1px solid #f1f5f9' }}>
+      <span style={{ fontWeight: 700, color: '#374151', minWidth: '110px', fontSize: '12px' }}>{label}</span>
+      <span style={{ color: '#9ca3af', fontSize: '12px' }}>:</span>
+      <span style={{ fontWeight: 800, color: '#111827', fontSize: '13px', flex: 1 }}>{value || '—'}</span>
+    </div>
+  );
+}
 
 export default function PosterModal({ isOpen, onClose, data }) {
-  const posterRef = useRef(null);
+  const posterRef  = useRef(null);
   const [downloading, setDownloading] = useState(false);
 
   if (!isOpen || !data) return null;
 
-  // Extract clean template variables
-  const patientName = data.patient_name || data.patientName || '';
-  const bloodGroup  = data.blood_group  || data.bloodGroup  || 'O+';
+  // ─── Extract request fields ───────────────────────────────────────────────
+  const patientName = data.patient_name   || data.patientName   || '';
+  const bloodGroup  = data.blood_group    || data.bloodGroup    || 'O+';
   const units       = data.units_required || data.unitsRequired || '1';
   const hospital    = data.hospital_name  || data.hospitalName  || data.venue || data.location || '';
-  const phone       = data.contact_phone  || data.contact_number || data.contactNumber || data.mobile || '8848601076';
+  const phone       = data.contact_phone  || data.contact_number || data.contactNumber || data.mobile || '';
   const requestId   = data.request_id || data.id || data._id || `JL-${Date.now().toString().slice(-4)}`;
 
-  // ─── PNG Export ───────────────────────────────────────────────────────────
+  // ─── HD PNG Download ──────────────────────────────────────────────────────
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
     setDownloading(true);
     try {
-      await new Promise((res) => setTimeout(res, 150));
+      await new Promise((res) => setTimeout(res, 250));
       const dataUrl = await toPng(posterRef.current, {
         quality: 1.0,
-        pixelRatio: 3,
+        pixelRatio: 3,        // 3× = ~1260×1680 px output
         cacheBust: true,
       });
-      const link = document.createElement('a');
-      link.download = `Blood_Request_${bloodGroup}_${requestId}.png`;
-      link.href = dataUrl;
+      const link      = document.createElement('a');
+      link.download   = `BloodRequest_${bloodGroup}_${requestId}.png`;
+      link.href       = dataUrl;
       link.click();
     } catch (err) {
-      console.error('Poster PNG rendering error:', err);
+      console.error('Poster PNG render error:', err);
       window.print();
     } finally {
       setDownloading(false);
     }
   };
 
-  // ─── Share ────────────────────────────────────────────────────────────────
+  // ─── Share link ───────────────────────────────────────────────────────────
   const handleShare = async () => {
     const url = `${window.location.origin}/requests/${requestId}`;
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Emergency Blood Request: ${bloodGroup}`,
+          title: `Blood Request: ${bloodGroup}`,
           text: `Urgent need for ${bloodGroup} blood at ${hospital}. Please help!`,
           url,
         });
-      } catch (err) {
-        console.error('Error sharing', err);
-      }
+      } catch (err) { /* user cancelled */ }
     } else {
       navigator.clipboard.writeText(url);
       alert('Link copied to clipboard!');
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 overflow-y-auto select-none">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative text-slate-900 border border-slate-200 animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto">
+  // ─── Overlay style base ───────────────────────────────────────────────────
+  // The DYFI poster info section lives in the lower-left area.
+  // Positions below are in % of the poster height (aspect ratio 3:4).
+  //   Patient Name ≈ 70 %
+  //   Blood Group  ≈ 74.5 %
+  //   Unit         ≈ 79 %
+  //   Hospital     ≈ 83.5 %
+  //   Contact      ≈ 88 %
+  // Adjust `top` percentages to match your exact poster image.
 
-        {/* Close */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition cursor-pointer z-20"
-        >
-          <X className="w-5 h-5" />
+  const rowBase = {
+    position: 'absolute',
+    left: '7%',
+    right: '50%',          // keep text within the info column (left side)
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '4px',
+    fontFamily: '"Segoe UI", Arial, sans-serif',
+    fontSize: 'clamp(8px, 2.5vw, 13px)',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  };
+
+  const labelSt = {
+    fontWeight: 700,
+    color: '#374151',
+    minWidth: '80px',
+    flexShrink: 0,
+  };
+
+  const colonSt = { color: '#6b7280', margin: '0 3px', flexShrink: 0 };
+
+  const valueSt = (color = '#111827') => ({
+    fontWeight: 900,
+    color,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  });
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 50,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(15,23,42,0.82)', backdropFilter: 'blur(8px)',
+      padding: '16px', overflowY: 'auto',
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: '24px',
+        maxWidth: '440px', width: '100%',
+        padding: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.35)',
+        position: 'relative', maxHeight: '92vh', overflowY: 'auto',
+      }}>
+
+        {/* ── Close ── */}
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 16, right: 16, width: 36, height: 36,
+          border: 'none', borderRadius: '50%', background: '#f1f5f9',
+          cursor: 'pointer', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', color: '#64748b', zIndex: 10,
+        }}>
+          <X size={18} />
         </button>
 
-        <h2 className="text-base font-black text-slate-800 mb-4 pr-10">Blood Request Poster</h2>
+        <h2 style={{ fontSize: '15px', fontWeight: 900, marginBottom: '16px', paddingRight: '40px', color: '#0f172a' }}>
+          Blood Request Poster
+        </h2>
 
         {/* ── POSTER ── */}
-        <div className="mx-auto w-full max-w-[420px] shadow-2xl rounded-xl overflow-hidden">
+        <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.20)' }}>
           <div
             ref={posterRef}
-            className="relative w-full"
-            style={{ aspectRatio: '3/4', fontFamily: 'sans-serif' }}
+            style={{ position: 'relative', width: '100%', aspectRatio: '3 / 4', overflow: 'hidden' }}
           >
-            {/* Background template image */}
+            {/* Background image — the full DYFI template */}
             <img
-              src={posterBg}
-              alt="poster background"
-              className="absolute inset-0 w-full h-full object-fill"
+              src={dyfiTemplate}
+              alt="DYFI Blood Request Poster"
               crossOrigin="anonymous"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'fill', display: 'block' }}
             />
 
-            {/* ── DATA OVERLAY ── */}
-            {/* These absolute-positioned elements sit on top of the template image.
-                Percentages are tuned to the blank_poster_template.png layout.
-                The template has:
-                  BLOOD GROUP | DATE
-                  TIME        | CONTACT
-                  VENUE       | WHATSAPP
-                rows inside a rounded card that starts at ~42% from top. */}
+            {/* ── OVERLAID DATA FIELDS ── */}
 
-            {/* Row 1 – Blood Group */}
-            <span
-              style={{
-                position: 'absolute',
-                top: '44.5%',
-                left: '30%',
-                fontSize: '2.8vw',
-                fontWeight: 900,
-                color: '#b91c1c',
-                letterSpacing: '-0.01em',
-                lineHeight: 1,
-                maxWidth: '16%',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {bloodGroup}
-            </span>
-
-            {/* Row 1 – Date (using "Unit" value as units required) */}
-            <span
-              style={{
-                position: 'absolute',
-                top: '44.5%',
-                left: '67%',
-                fontSize: '2.4vw',
-                fontWeight: 800,
-                color: '#1e293b',
-                maxWidth: '28%',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-            </span>
-
-            {/* Row 2 – Time */}
-            <span
-              style={{
-                position: 'absolute',
-                top: '54.5%',
-                left: '18%',
-                fontSize: '2.4vw',
-                fontWeight: 800,
-                color: '#1e293b',
-                maxWidth: '22%',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Urgent
-            </span>
-
-            {/* Row 2 – Contact */}
-            <span
-              style={{
-                position: 'absolute',
-                top: '54.5%',
-                left: '55%',
-                fontSize: '2.4vw',
-                fontWeight: 800,
-                color: '#1e293b',
-                maxWidth: '40%',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {phone}
-            </span>
-
-            {/* Row 3 – Venue (Hospital) */}
-            <span
-              style={{
-                position: 'absolute',
-                top: '64.5%',
-                left: '18%',
-                fontSize: '2.2vw',
-                fontWeight: 800,
-                color: '#1e293b',
-                maxWidth: '36%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {hospital || '—'}
-            </span>
-
-            {/* Row 3 – WhatsApp */}
-            <span
-              style={{
-                position: 'absolute',
-                top: '64.5%',
-                left: '55%',
-                fontSize: '2.4vw',
-                fontWeight: 800,
-                color: '#1e293b',
-                maxWidth: '40%',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {phone}
-            </span>
-
-            {/* Patient name badge near top-center (optional callout) */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '36%',
-                left: '5%',
-                right: '5%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              {patientName && (
-                <span
-                  style={{
-                    fontSize: '2.6vw',
-                    fontWeight: 900,
-                    color: '#1e293b',
-                    background: 'rgba(255,255,255,0.85)',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
-                  }}
-                >
-                  Patient: {patientName}
-                </span>
-              )}
-              {units && (
-                <span
-                  style={{
-                    fontSize: '2.4vw',
-                    fontWeight: 800,
-                    color: '#b91c1c',
-                    background: 'rgba(255,255,255,0.85)',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
-                    marginLeft: 'auto',
-                  }}
-                >
-                  Units: {units}
-                </span>
-              )}
+            {/* Patient Name */}
+            <div style={{ ...rowBase, top: '70%' }}>
+              <span style={labelSt}>Patient Name</span>
+              <span style={colonSt}>:</span>
+              <span style={valueSt('#111827')}>{patientName}</span>
             </div>
 
-            {/* QR code over the template QR zone */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '8.5%',
-                right: '8%',
-                background: '#fff',
-                padding: '4px',
-                borderRadius: '6px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-              }}
-            >
-              <QRCodeSVG
-                value={`${window.location.origin}/requests/${requestId}`}
-                size={52}
-                level="Q"
-                includeMargin={false}
-              />
+            {/* Blood Group */}
+            <div style={{ ...rowBase, top: '74.5%' }}>
+              <span style={labelSt}>Blood Group</span>
+              <span style={colonSt}>:</span>
+              <span style={valueSt('#b91c1c')}>{bloodGroup}</span>
+            </div>
+
+            {/* Unit */}
+            <div style={{ ...rowBase, top: '79%' }}>
+              <span style={labelSt}>Unit</span>
+              <span style={colonSt}>:</span>
+              <span style={valueSt('#111827')}>{units}</span>
+            </div>
+
+            {/* Hospital */}
+            <div style={{ ...rowBase, top: '83.5%' }}>
+              <span style={labelSt}>Hospital</span>
+              <span style={colonSt}>:</span>
+              <span style={valueSt('#111827')}>{hospital}</span>
+            </div>
+
+            {/* Contact Number */}
+            <div style={{ ...rowBase, top: '88%' }}>
+              <span style={labelSt}>Contact</span>
+              <span style={colonSt}>:</span>
+              <span style={valueSt('#111827')}>{phone}</span>
             </div>
           </div>
         </div>
 
         {/* ── Action Buttons ── */}
-        <div className="flex flex-wrap gap-3 mt-5">
+        <div style={{ display: 'flex', gap: '10px', marginTop: '18px', flexWrap: 'wrap' }}>
           <button
             onClick={handleDownloadPNG}
             disabled={downloading}
-            className="flex-1 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition cursor-pointer text-sm disabled:opacity-50"
+            style={{
+              flex: 1, padding: '12px 16px',
+              background: '#dc2626', color: '#fff',
+              fontWeight: 800, fontSize: '13px',
+              border: 'none', borderRadius: '16px',
+              cursor: downloading ? 'default' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              opacity: downloading ? 0.7 : 1,
+              boxShadow: '0 4px 14px rgba(220,38,38,0.30)',
+            }}
           >
-            {downloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {downloading ? 'Rendering HD Poster...' : 'Download Poster (PNG)'}
+            {downloading
+              ? <><RefreshCw size={14} className="animate-spin" /> Rendering...</>
+              : <><Download size={14} /> Download Poster (PNG)</>}
           </button>
 
           <button
             onClick={handleShare}
-            className="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-2xl transition flex items-center gap-2 text-sm cursor-pointer"
+            style={{
+              padding: '12px 16px', background: '#f1f5f9',
+              color: '#1e293b', fontWeight: 700, fontSize: '13px',
+              border: 'none', borderRadius: '16px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px',
+            }}
           >
-            <Share2 className="w-4 h-4" />
-            Share Link
+            <Share2 size={14} /> Share
           </button>
 
           <button
             onClick={onClose}
-            className="px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition text-sm cursor-pointer"
+            style={{
+              padding: '12px 16px', background: '#0f172a',
+              color: '#fff', fontWeight: 700, fontSize: '13px',
+              border: 'none', borderRadius: '16px', cursor: 'pointer',
+            }}
           >
             Close
           </button>
