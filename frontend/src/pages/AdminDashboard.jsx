@@ -90,11 +90,17 @@ export default function AdminDashboard() {
     e.preventDefault();
     setCreatedResult(null);
     try {
+      const cleanFullName = person2Name ? `${person1Name} & ${person2Name}` : person1Name;
       const res = await api.post('/block-admin/volunteers', {
-        primary_name: person1Name,
+        primary_name: cleanFullName,
         email: email,
         mobile: person1Contact,
+        secondary_name: person2Name || null,
+        secondary_phone: person2Contact || null,
+        whatsapp_number: whatsapp || person1Contact,
         city: meghalaName || 'Local Unit',
+        meghala: meghalaName || 'Local Unit',
+        organization_name: blockData.blockCommitteeName || user?.city || user?.block || null,
         district: user?.district || 'Kasaragod',
       });
 
@@ -106,7 +112,7 @@ export default function AdminDashboard() {
         setMeghalaName(''); setPerson1Name(''); setPerson1Contact('');
         setPerson2Name(''); setPerson2Contact('');
         setWhatsapp(''); setEmail('');
-        loadData();
+        await loadData();
       }
     } catch (err) {
       let errMsg = err.response?.data?.message || 'Network error while creating Committee.';

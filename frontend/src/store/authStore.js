@@ -170,6 +170,7 @@ export const useAuthStore = create((set, get) => ({
 
       const payload = {
         meghala: volunteerData.meghalaName || volunteerData.meghala,
+        city: volunteerData.meghalaName || volunteerData.meghala,
         person1Name: cleanP1,
         person1Contact: p1Contact,
         person2Name: cleanP2,
@@ -178,8 +179,11 @@ export const useAuthStore = create((set, get) => ({
         mobile: p1Contact,
         secondaryName: cleanP2,
         secondaryContactNumber: p2Contact,
+        secondary_phone: p2Contact,
         email: volunteerData.email,
         whatsapp_number: volunteerData.whatsapp || p1Contact,
+        organization_name: volunteerData.blockCommitteeName || volunteerData.block || get().user?.city || null,
+        district: volunteerData.district || get().user?.district || 'Kasaragod',
       };
 
       const res = await api.post('/block-admin/volunteers', payload);
