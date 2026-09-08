@@ -255,6 +255,8 @@ export default function SuperAdminDashboard() {
   });
 
   const currentDistrict = districtData.district || user?.district || 'Kasaragod';
+  const cleanDistrict = currentDistrict.replace(/^dyfi\s*/i, '').trim();
+  const displayDistrict = `DYFI ${cleanDistrict}`;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
@@ -266,12 +268,12 @@ export default function SuperAdminDashboard() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-700 text-[11px] font-bold uppercase tracking-wider">
                 <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
-                {currentDistrict} Super Admin
+                {displayDistrict} Super Admin
               </span>
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                {currentDistrict}
+                {displayDistrict}
               </h1>
               <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-medium">
                 Real-time donor status, emergency requests & block administration
@@ -409,7 +411,7 @@ export default function SuperAdminDashboard() {
 
             {(!districtData.recent_requests || districtData.recent_requests.length === 0) ? (
               <div className="p-6 text-center text-slate-400 text-xs font-semibold bg-slate-50/50 rounded-xl">
-                No active emergency requests reported in {districtData.district}.
+                No active emergency requests reported in {cleanDistrict}.
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
