@@ -6,7 +6,7 @@ import { LogOut, User, Users, Bell, ChevronDown, Settings, Siren, Award, CheckCi
 import { motion, AnimatePresence } from 'framer-motion';
 import { getStorageUrl } from '../store/api.js';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
-import JeevaLinkLogo from './JeevaLinkLogo.jsx';
+
 
 const publicLinks = [
   { label: 'Home', to: '/' },
@@ -124,9 +124,14 @@ export default function Navbar() {
         }`}
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
-        {/* Logo */}
-        <Link to="/" className="flex items-center shrink-0">
-          <JeevaLinkLogo size={40} textClassName="text-xl" showSubtitle={false} />
+        {/* Logo — iDonate brand */}
+        <Link to="/" className="flex flex-col items-start shrink-0 leading-none select-none">
+          <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a', lineHeight: 1 }}>
+            <span style={{ color: '#dc2626' }}>i</span>Donate
+          </span>
+          <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.14em', color: '#dc2626', textTransform: 'uppercase', marginTop: '2px' }}>
+            by DYFI Kasaragod
+          </span>
         </Link>
 
         {/* Clean Minimal Desktop Nav */}
@@ -307,7 +312,14 @@ export default function Navbar() {
               className="fixed top-0 right-0 bottom-0 h-[100dvh] w-[280px] max-w-[85vw] bg-white z-[70] shadow-2xl flex flex-col md:hidden border-l border-slate-100"
             >
               <div className="p-4 flex items-center justify-between border-b border-slate-100 shrink-0">
-                <JeevaLinkLogo size={32} textClassName="text-lg" showSubtitle={false} />
+                <Link to="/" className="flex flex-col items-start leading-none select-none">
+                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a', lineHeight: 1 }}>
+                    <span style={{ color: '#dc2626' }}>i</span>Donate
+                  </span>
+                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '0.5rem', fontWeight: 800, letterSpacing: '0.14em', color: '#dc2626', textTransform: 'uppercase', marginTop: '2px' }}>
+                    by DYFI Kasaragod
+                  </span>
+                </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"

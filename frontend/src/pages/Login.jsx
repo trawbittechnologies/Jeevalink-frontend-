@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { normalizeRole } from '../utils/rbac.js';
-import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck, Heart } from 'lucide-react';
+import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import BloodHeroAssistant from '../components/BloodHeroAssistant.jsx';
@@ -163,42 +163,58 @@ export default function Login() {
       </div>
 
       {/* ── Brand Hero (Top on Mobile, Left on Desktop) ── */}
-      <div className="relative z-10 w-full lg:w-[45%] xl:w-[50%] flex flex-col justify-start lg:justify-center px-6 pt-12 pb-32 sm:pb-40 lg:p-20 text-white">
-        {/* Logo and name removed for extreme minimalism, as user already saw it on landing page */}
+      <div className="relative z-10 w-full lg:w-[45%] xl:w-[50%] flex flex-col justify-start lg:justify-center px-6 pt-16 pb-32 sm:pb-40 lg:p-20 text-white">
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-12 lg:mt-16 max-w-lg"
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="max-w-lg"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6 shadow-sm">
-            <Heart className="w-3.5 h-3.5 text-rose-200 fill-rose-200/50" />
-            <span className="text-[10px] font-bold tracking-widest uppercase text-white drop-shadow-sm">A Community of Hope</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.1] tracking-tight mb-5 text-white drop-shadow-md">
-            Humanity at its <br />
-            <span className="italic text-white/90 font-light">most vital.</span>
-          </h1>
-          <p className="text-white/80 text-sm sm:text-base leading-relaxed drop-shadow-sm font-medium">
-            Behind every login is a potential life saved. Access your portal to coordinate, connect, and continue the mission of compassion.
-          </p>
-          
-          <div className="grid grid-cols-2 gap-6 border-t border-white/10 pt-8 mt-10">
-            <div>
-              <div className="text-3xl font-black text-white drop-shadow-md mb-1">{publicStats?.totalVolunteers || '-'}</div>
-              <div className="text-[10px] font-bold tracking-widest text-white/60 uppercase">Active Volunteers</div>
-            </div>
-            <div>
-              <div className="text-3xl font-black text-white drop-shadow-md mb-1">{publicStats?.totalRequests || '-'}</div>
-              <div className="text-[10px] font-bold tracking-widest text-white/60 uppercase">Blood Requests</div>
-            </div>
+          {/* iDonate Wordmark — loading screen style */}
+          <div className="mb-2 select-none">
+            <span
+              style={{
+                fontFamily: "'Inter', system-ui, sans-serif",
+                fontSize: 'clamp(3rem, 10vw, 4.5rem)',
+                fontWeight: 900,
+                letterSpacing: '-0.035em',
+                lineHeight: 1,
+                color: '#ffffff',
+                display: 'block',
+              }}
+            >
+              <span style={{ color: 'rgba(255,255,255,0.65)' }}>i</span>Donate
+            </span>
+            <span
+              style={{
+                fontFamily: "'Inter', system-ui, sans-serif",
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                letterSpacing: '0.18em',
+                color: 'rgba(255,255,255,0.7)',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginTop: '6px',
+              }}
+            >
+              by DYFI Kasaragod
+            </span>
           </div>
 
-          {/* DYFI Kasaragod badge */}
-          <div className="mt-6 inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-md text-white text-[10px] font-extrabold tracking-widest uppercase rounded-full px-3 py-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-200 animate-pulse inline-block" />
-            DYFI Kasaragod
+          <p className="text-white/70 text-sm sm:text-base leading-relaxed font-medium mt-8 mb-10">
+            Behind every login is a potential life saved. Access your portal to coordinate, connect, and continue the mission of compassion.
+          </p>
+
+          <div className="grid grid-cols-2 gap-6 border-t border-white/15 pt-8">
+            <div>
+              <div className="text-3xl font-black text-white mb-1">{publicStats?.totalVolunteers || '-'}</div>
+              <div className="text-[10px] font-bold tracking-widest text-white/50 uppercase">Active Volunteers</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white mb-1">{publicStats?.totalRequests || '-'}</div>
+              <div className="text-[10px] font-bold tracking-widest text-white/50 uppercase">Blood Requests</div>
+            </div>
           </div>
         </motion.div>
       </div>
