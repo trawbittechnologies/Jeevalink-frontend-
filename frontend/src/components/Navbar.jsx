@@ -126,7 +126,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center shrink-0">
-          <JeevaLinkLogo size={40} textClassName="text-xl" />
+          <JeevaLinkLogo size={40} textClassName="text-xl" showSubtitle={false} />
         </Link>
 
         {/* Clean Minimal Desktop Nav */}

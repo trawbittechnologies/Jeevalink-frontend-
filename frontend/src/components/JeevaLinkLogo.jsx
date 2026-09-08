@@ -10,7 +10,7 @@ export default function JeevaLinkLogo({
   textClassName = '',
   light = false,
   imgClassName = '',
-  showSubtitle = true,
+  showSubtitle = false,
   subtitle = 'DYFI Kasaragod',
 }) {
   return (

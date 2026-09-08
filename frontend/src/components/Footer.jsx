@@ -122,8 +122,7 @@ export default function Footer() {
 
           {/* Links Columns */}
           <div className="md:col-span-2 md:col-start-6 space-y-6">
-            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500"></span>
+            <h4 className="text-sm font-bold text-slate-900">
               Platform
             </h4>
             <ul className="space-y-3">
@@ -141,8 +140,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2 space-y-6">
-            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+            <h4 className="text-sm font-bold text-slate-900">
               Resources
             </h4>
             <ul className="space-y-3">
@@ -161,8 +159,7 @@ export default function Footer() {
 
           {/* Contact Details */}
           <div className="md:col-span-3 space-y-6">
-            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <h4 className="text-sm font-bold text-slate-900">
               Emergency Contact
             </h4>
             
