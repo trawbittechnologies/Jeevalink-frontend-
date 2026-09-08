@@ -68,7 +68,7 @@ export default function Landing() {
       />
 
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] flex items-center overflow-hidden">
 
         {/* Full-bleed background image */}
         <motion.div
@@ -97,58 +97,59 @@ export default function Landing() {
           }} />
           {/* Bottom fade into next section */}
           <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%',
-            background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 30%, transparent 100%)',
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%',
+            background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.65) 25%, transparent 100%)',
           }} />
           {/* Top subtle fade */}
           <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: '15%',
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, transparent 100%)',
+            position: 'absolute', top: 0, left: 0, right: 0, height: '12%',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 100%)',
           }} />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 w-full max-w-6xl mx-auto px-8 sm:px-12 lg:px-16 xl:px-20 py-28">
-          <div className="max-w-lg">
+        <div className="relative z-10 w-full px-6 sm:px-10 lg:px-16 xl:px-24 pt-5 pb-8 sm:pt-6 sm:pb-10 lg:py-0">
+          <div className="w-full max-w-lg lg:max-w-[560px] xl:max-w-[590px]">
 
             {/* Organization label */}
             <motion.div
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              style={{ marginBottom: '1.75rem' }}
+              style={{ marginBottom: '0.85rem' }}
             >
               <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '10px',
-                fontSize: '0.6rem', fontWeight: 800,
-                letterSpacing: '0.24em', color: '#dc2626',
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                fontSize: '0.62rem', fontWeight: 800,
+                letterSpacing: '0.22em', color: '#dc2626',
                 textTransform: 'uppercase',
               }}>
-                <span style={{ width: 24, height: 2, background: '#dc2626', display: 'inline-block', borderRadius: 2, flexShrink: 0 }} />
+                <span style={{ width: 22, height: 2, background: '#dc2626', display: 'inline-block', borderRadius: 2, flexShrink: 0 }} />
                 DYFI Kasaragod · JeevaLink
               </span>
             </motion.div>
 
             {/* iDonate wordmark */}
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              style={{ marginBottom: '1.25rem' }}
+              style={{ marginBottom: '0.85rem' }}
             >
               <div style={{
-                fontSize: 'clamp(0.8rem, 2vw, 1rem)',
-                fontWeight: 500, color: '#94a3b8',
-                marginBottom: '0.5rem', letterSpacing: '0.02em',
+                fontSize: '0.78rem',
+                fontWeight: 600, color: '#94a3b8',
+                marginBottom: '0.25rem', letterSpacing: '0.08em',
+                textTransform: 'uppercase',
               }}>
                 Introducing
               </div>
               <h1 style={{
                 fontFamily: "'Inter', system-ui, sans-serif",
-                fontSize: 'clamp(3.8rem, 8vw, 6rem)',
+                fontSize: 'clamp(3.2rem, 5.8vw, 4.8rem)',
                 fontWeight: 900,
-                letterSpacing: '-0.045em',
-                lineHeight: 0.9,
+                letterSpacing: '-0.04em',
+                lineHeight: 0.92,
                 color: '#0f172a',
                 margin: 0,
               }}>
@@ -161,15 +162,15 @@ export default function Landing() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              style={{ marginBottom: '1.5rem' }}
+              style={{ marginBottom: '0.85rem' }}
             >
               <p style={{
-                fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)',
+                fontSize: 'clamp(1.05rem, 1.8vw, 1.3rem)',
                 fontWeight: 700, color: '#1e293b',
-                lineHeight: 1.3, letterSpacing: '-0.02em',
+                lineHeight: 1.25, letterSpacing: '-0.02em',
                 margin: 0,
               }}>
-                Be someone's reason<br />
+                Be someone's reason{' '}
                 <span style={{ color: '#dc2626' }}>to live.</span>
               </p>
             </motion.div>
@@ -180,9 +181,9 @@ export default function Landing() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               style={{
-                fontSize: '0.875rem', fontWeight: 500,
-                color: '#64748b', lineHeight: 1.8,
-                maxWidth: '390px', marginBottom: '2.25rem',
+                fontSize: '0.85rem', fontWeight: 500,
+                color: '#64748b', lineHeight: 1.7,
+                maxWidth: '440px', marginBottom: '1.35rem',
               }}
             >
               Connecting voluntary blood donors with patients in urgent need —
@@ -194,43 +195,45 @@ export default function Landing() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.38 }}
-              style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: '3rem' }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '1.6rem' }}
             >
               <button
                 type="button"
                 onClick={() => setIsCommunityModalOpen(true)}
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  padding: '13px 26px',
+                  display: 'inline-flex', alignItems: 'center', gap: '7px',
+                  padding: '11px 22px',
                   background: '#dc2626', color: '#fff',
                   fontWeight: 800, fontSize: '0.82rem',
                   letterSpacing: '0.01em', borderRadius: '12px', border: 'none',
-                  boxShadow: '0 8px 24px rgba(220,38,38,0.28)',
+                  boxShadow: '0 6px 20px rgba(220,38,38,0.28)',
                   cursor: 'pointer', transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(220,38,38,0.38)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.28)'; }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 26px rgba(220,38,38,0.36)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(220,38,38,0.28)'; }}
               >
-                <Users style={{ width: 15, height: 15 }} />
+                <Users style={{ width: 14, height: 14 }} />
                 Enter Community
-                <ArrowRight style={{ width: 14, height: 14 }} />
+                <ArrowRight style={{ width: 13, height: 13 }} />
               </button>
 
               <Link
                 to="/donor/search"
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '7px',
-                  padding: '13px 20px',
-                  background: 'rgba(255,255,255,0.85)', color: '#0f172a',
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  padding: '11px 18px',
+                  background: 'rgba(255,255,255,0.9)', color: '#0f172a',
                   fontWeight: 700, fontSize: '0.82rem',
-                  borderRadius: '12px', border: '1.5px solid rgba(226,232,240,0.8)',
+                  borderRadius: '12px', border: '1.5px solid rgba(226,232,240,0.85)',
                   backdropFilter: 'blur(8px)',
                   textDecoration: 'none', transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#dc2626'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(226,232,240,0.8)'; e.currentTarget.style.color = '#0f172a'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(226,232,240,0.85)'; e.currentTarget.style.color = '#0f172a'; }}
               >
-                <Search style={{ width: 14, height: 14, color: '#dc2626' }} />
+                <Search style={{ width: 13, height: 13, color: '#dc2626' }} />
                 Search Donors
               </Link>
 
@@ -238,15 +241,16 @@ export default function Landing() {
                 to="/requests"
                 style={{
                   display: 'inline-flex', alignItems: 'center',
-                  padding: '13px 18px',
-                  background: 'rgba(255,255,255,0.7)', color: '#475569',
+                  padding: '11px 16px',
+                  background: 'rgba(255,255,255,0.75)', color: '#475569',
                   fontWeight: 700, fontSize: '0.82rem',
-                  borderRadius: '12px', border: '1.5px solid rgba(226,232,240,0.7)',
+                  borderRadius: '12px', border: '1.5px solid rgba(226,232,240,0.75)',
                   backdropFilter: 'blur(8px)',
                   textDecoration: 'none', transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#1e293b'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#475569'; }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.75)'; }}
               >
                 Request Blood
               </Link>
@@ -259,7 +263,7 @@ export default function Landing() {
               transition={{ delay: 0.5, duration: 0.5 }}
               style={{
                 display: 'flex', gap: '2rem',
-                paddingTop: '1.75rem', borderTop: '1px solid rgba(241,245,249,0.8)',
+                paddingTop: '1.1rem', borderTop: '1px solid rgba(226,232,240,0.8)',
               }}
             >
               {[
@@ -268,7 +272,7 @@ export default function Landing() {
                 { val: 'Real-time', label: 'SOS Response' },
               ].map(s => (
                 <div key={s.label}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#dc2626', marginBottom: 3 }}>{s.val}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#dc2626', marginBottom: 2, lineHeight: 1.2 }}>{s.val}</div>
                   <div style={{ fontSize: '0.58rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.label}</div>
                 </div>
               ))}
@@ -374,8 +378,8 @@ export default function Landing() {
                         </span>
                         <span
                           className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${isEmergency
-                              ? "bg-red-600 text-white"
-                              : "bg-amber-50 text-amber-700 border border-amber-200"
+                            ? "bg-red-600 text-white"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
                             }`}
                         >
                           {urgency}
