@@ -60,7 +60,6 @@ const SupportCenter = safeLazy(() => import('./pages/admin/SupportCenter.jsx'));
 const ReportsAnalytics = safeLazy(() => import('./pages/admin/ReportsAnalytics.jsx'));
 const ActivityLogs = safeLazy(() => import('./pages/admin/ActivityLogs.jsx'));
 const SystemSettings = safeLazy(() => import('./pages/admin/SystemSettings.jsx'));
-const PartnerManagement = safeLazy(() => import('./pages/admin/PartnerManagement.jsx'));
 const TechnicalAdminDashboard = safeLazy(() => import('./pages/admin/TechnicalAdminDashboard.jsx'));
 const SuperAdminDashboard = safeLazy(() => import('./pages/admin/SuperAdminDashboard.jsx'));
 const SuperAdminManagement = safeLazy(() => import('./pages/admin/SuperAdminManagement.jsx'));
@@ -209,11 +208,6 @@ export default function App() {
                     <SuperAdminManagement />
                   </ProtectedRoute>
                 } />
-                <Route path="/technical-admin/partners" element={
-                  <ProtectedRoute roles={['technical_admin', 'super_admin', 'block_admin']}>
-                    <PartnerManagement />
-                  </ProtectedRoute>
-                } />
 
                 {/* Super Admin Dashboard */}
                 <Route path="/super-admin/dashboard" element={
@@ -265,11 +259,6 @@ export default function App() {
                 <Route path="/admin/settings" element={
                   <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                     <SystemSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/partners" element={
-                  <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
-                    <PartnerManagement />
                   </ProtectedRoute>
                 } />
 

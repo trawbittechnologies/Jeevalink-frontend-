@@ -5,7 +5,7 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, Megaphone, HeartHandshake, Handshake, X
+  Building2, Megaphone, HeartHandshake, X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
@@ -23,8 +23,10 @@ const userLinks = [
 const unitSquadLinks = [
   { to: '/unit-squad/dashboard', label: 'Unit Squad Dashboard', icon: LayoutDashboard },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
-  { to: '/volunteer/users', label: 'Add & Manage Users', icon: Users },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
+  { to: '/volunteer/users', label: 'Donor Database', icon: Users },
+  { to: '/requests', label: 'Blood Requests', icon: Droplets },
+  { to: '/donor/search', label: 'Find Donors', icon: Search },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
   { to: '/profile', label: 'My Profile', icon: User },
 ];
@@ -43,7 +45,6 @@ const volunteerLinks = [
 
 const blockAdminLinks = [
   { to: '/block-admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
-  { to: '/admin/partners', label: 'Manage Partners', icon: Handshake },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/admin/volunteers', label: 'Add & Manage Volunteers', icon: Users },
@@ -57,7 +58,6 @@ const blockAdminLinks = [
 
 const superAdminLinks = [
   { to: '/super-admin/dashboard', label: 'District Dashboard', icon: LayoutDashboard },
-  { to: '/admin/partners', label: 'Manage Partners', icon: Handshake },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/super-admin/blocks', label: 'Manage Block Committees', icon: Building2 },
@@ -70,7 +70,6 @@ const superAdminLinks = [
 
 const technicalAdminLinks = [
   { to: '/technical-admin/dashboard', label: 'Technical Dashboard', icon: LayoutDashboard },
-  { to: '/admin/partners', label: 'Manage Partners', icon: Handshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/technical-reports', label: 'Tech Reports Queue', icon: ShieldAlert },
   { to: '/profile', label: 'My Profile', icon: User },

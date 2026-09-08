@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import "../jl-landing.css";
 import MascotVideo from "../components/MascotVideo.jsx";
 import { useAppStore } from "../store/appStore.js";
-import { getStorageUrl } from "../store/api.js";
 import { motion } from "framer-motion";
 import {
   MapPin,
@@ -12,13 +11,9 @@ import {
   Users,
   Search,
   UserPlus,
-  Building2,
   HeartHandshake,
   CheckCircle2,
   Check,
-  Handshake,
-  ExternalLink,
-  Globe,
   Sparkles
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
@@ -159,115 +154,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── PARTNERSHIP DETAILS SECTION (AFTER HERO SECTION) ─────────────── */}
-      <section id="partnerships" className="py-20 sm:py-24 bg-gradient-to-b from-white via-slate-50/50 to-white border-b border-slate-100/80 relative overflow-hidden scroll-mt-16">
-        {/* Subtle Ambient Studio Background Glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none overflow-hidden">
-          <div className="absolute -top-32 left-1/4 w-96 h-96 bg-gradient-to-br from-red-500/8 via-rose-500/4 to-transparent rounded-full blur-3xl" />
-          <div className="absolute top-1/3 -right-20 w-80 h-80 bg-gradient-to-bl from-rose-500/8 via-orange-500/4 to-transparent rounded-full blur-3xl" />
-        </div>
 
-        <div className="jl-container max-w-6xl mx-auto px-4 relative z-10">
-          {/* Creative Minimal Section Header */}
-          <div className="text-center max-w-2xl mx-auto mb-14 sm:mb-16 space-y-3">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-50/80 border border-red-200/70 text-red-600 text-[11px] font-extrabold tracking-widest uppercase shadow-2xs backdrop-blur-sm"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-              <span>Verified Collaborations</span>
-            </motion.div>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
-            >
-              Our Life-Saving <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">Partner Network</span>
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.15 }}
-              className="text-slate-500 text-sm sm:text-base leading-relaxed font-medium"
-            >
-              Collaborating directly with verified grassroots organizations, community youth wings, and healthcare groups saving lives across Kerala.
-            </motion.p>
-          </div>
-
-          {/* Dynamic Partner Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
-            {displayPartners.map((partner, pIdx) => {
-              const platformType = partner.social_media_type || partner.socialMediaType || partner.socialPlatform || 'link';
-              const platformConfig = getSocialPlatformConfig(platformType);
-              const SocialIcon = platformConfig.icon;
-              const linkUrl = partner.social_media_link || partner.socialMediaLink || partner.socialLink || '#';
-
-              return (
-                <motion.div
-                  key={partner.id || partner._id || partner.name}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: pIdx * 0.05 }}
-                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                  className="group relative bg-white rounded-3xl p-6 sm:p-7 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.03)] hover:shadow-[0_20px_35px_-10px_rgba(220,38,38,0.12)] hover:border-red-100 transition-all duration-300 flex flex-col items-center text-center justify-between"
-                >
-                  {/* Floating Circular Avatar with Animated Gradient Ring & Verified Badge */}
-                  <div className="relative mb-5">
-                    <div className="w-22 h-22 sm:w-24 sm:h-24 rounded-full p-1 bg-gradient-to-tr from-slate-100 via-slate-50 to-slate-200 group-hover:from-red-500 group-hover:via-rose-400 group-hover:to-orange-400 transition-all duration-500 shadow-inner">
-                      <div className="w-full h-full rounded-full bg-white overflow-hidden flex items-center justify-center p-0.5 border border-slate-100 shadow-xs">
-                        {partner.logo ? (
-                          <img
-                            src={getStorageUrl(partner.logo)}
-                            alt={partner.name}
-                            className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHJ4PSIxNSIgZmlsbD0iI0YzRjRGNiIvPjx0ZXh0IHg9IjMwIiB5PSIzNSIgZmlsbD0iIzlDQTNBRiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxPR088L3RleHQ+PC9zdmc+';
-                            }}
-                          />
-                        ) : (
-                          <Building2 className="w-9 h-9 text-red-500" />
-                        )}
-                      </div>
-                    </div>
-                    {/* Micro verified checkmark badge pinned to the avatar corner */}
-                    <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white shadow-xs" title="Verified Partner">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
-                  </div>
-
-                  {/* Clean Partner Name */}
-                  <div className="mb-6 flex-1 flex items-center justify-center px-1">
-                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug">
-                      {partner.name}
-                    </h3>
-                  </div>
-
-                  {/* Pill Social Media Button */}
-                  <a
-                    href={linkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`w-full inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-full border text-xs sm:text-[13px] font-semibold transition-all duration-300 cursor-pointer shadow-2xs group/btn ${platformConfig.className}`}
-                  >
-                    <SocialIcon className="w-4 h-4 shrink-0 transition-transform duration-300 group-hover/btn:scale-110" />
-                    <span className="truncate">{platformConfig.label}</span>
-                    <ExternalLink className="w-3.5 h-3.5 opacity-60 shrink-0 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
-                  </a>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* ── FEATURED AWARENESS VIDEO & DIALOGUE ──────────────────────────── */}
       <section className="py-16 sm:py-20 bg-slate-50/60 border-b border-slate-100">
