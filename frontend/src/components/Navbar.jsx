@@ -10,7 +10,6 @@ import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
 const publicLinks = [
   { label: 'Home', to: '/' },
-  { label: 'Partnerships', to: '/#partnerships' },
   { label: 'Find Donors', to: '/donor/search' },
   { label: 'Requests', to: '/requests' },
   { label: 'Directory', to: '/volunteer-directory' },
