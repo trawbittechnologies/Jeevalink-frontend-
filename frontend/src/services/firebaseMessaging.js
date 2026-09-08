@@ -46,7 +46,7 @@ export const requestNotificationPermission = async () => {
       });
 
       if (token) {
-        await api.post('/notifications/token', {
+        await api.post('/notifications/register-token', {
           token,
           device_type: navigator.userAgent
         });
@@ -75,7 +75,7 @@ export const removeNotificationToken = async () => {
     });
     
     if (token) {
-      await api.delete('/notifications/token', {
+      await api.delete('/notifications/remove-token', {
         data: { token }
       });
       // Optionally could delete token from IndexedDB/Firebase but typically backend removal is sufficient
