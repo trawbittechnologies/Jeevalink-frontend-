@@ -50,7 +50,20 @@ const StatusBadge = ({ status, isVerified }) => {
 };
 
 export default function UserManagement() {
-  const { allUsers, fetchUsers, volunteerSendOtp, volunteerVerifyOtp, volunteerUpdateUser, volunteerAddUser, volunteerVerifyUser, volunteerRejectUser, deleteUser, triggerToast } = useAppStore();
+  const {
+    allUsers,
+    fetchUsers,
+    volunteerSendOtp,
+    volunteerVerifyOtp,
+    volunteerSendRegistrationOtp,
+    volunteerVerifyRegistrationOtp,
+    volunteerUpdateUser,
+    volunteerAddUser,
+    volunteerVerifyUser,
+    volunteerRejectUser,
+    deleteUser,
+    triggerToast
+  } = useAppStore();
   const { user: currentUser } = useAuthStore();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({ status: 'all', role: 'all' });
@@ -61,15 +74,68 @@ export default function UserManagement() {
   const [confirmModal, setConfirmModal] = useState({ open: false, item: null });
   const [rejectingUserId, setRejectingUserId] = useState(null);
 
-  // OTP states
+  // Edit OTP states
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
+
+  // Add Donor / Registration OTP states
+  const [addOtpSent, setAddOtpSent] = useState(false);
+  const [addOtpCode, setAddOtpCode] = useState('');
+  const [addOtpVerified, setAddOtpVerified] = useState(false);
+  const [addOtpLoading, setAddOtpLoading] = useState(false);
+  const [addOtpCooldown, setAddOtpCooldown] = useState(0);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+
+  // Add OTP Cooldown Countdown
+  useEffect(() => {
+    let timer;
+    if (addOtpCooldown > 0) {
+      timer = setInterval(() => {
+        setAddOtpCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [addOtpCooldown]);
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
   const [verifyingUserId, setVerifyingUserId] = useState(null);
+
+  const handleSendAddOtp = async () => {
+    const emailToVerify = (form.email || '').trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailToVerify || !emailRegex.test(emailToVerify)) {
+      triggerToast('Please enter a valid donor email address first.', 'warning');
+      return;
+    }
+
+    setAddOtpLoading(true);
+    const res = await volunteerSendRegistrationOtp(emailToVerify, form.primary_name);
+    if (res.success) {
+      setAddOtpSent(true);
+      setAddOtpCooldown(60);
+      setAddOtpCode('');
+    }
+    setAddOtpLoading(false);
+  };
+
+  const handleVerifyAddOtp = async () => {
+    const emailToVerify = (form.email || '').trim().toLowerCase();
+    if (!addOtpCode || addOtpCode.trim().length !== 6) {
+      triggerToast('Please enter the 6-digit OTP code sent to the email.', 'warning');
+      return;
+    }
+
+    setAddOtpLoading(true);
+    const res = await volunteerVerifyRegistrationOtp(emailToVerify, addOtpCode.trim());
+    if (res.success) {
+      setAddOtpVerified(true);
+      setVerifiedEmail(emailToVerify);
+    }
+    setAddOtpLoading(false);
+  };
 
   const openEditModal = (userToEdit) => {
     const target = userToEdit || selectedUser;

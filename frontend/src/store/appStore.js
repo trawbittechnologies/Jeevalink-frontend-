@@ -1043,6 +1043,42 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
+  volunteerSendRegistrationOtp: async (email, primaryName) => {
+    try {
+      const res = await api.post('/volunteer/users/send-registration-otp', {
+        email,
+        primary_name: primaryName,
+      });
+      if (res.data.success) {
+        get().triggerToast(res.data.message || 'OTP sent to donor email successfully.', 'success');
+        return { success: true, message: res.data.message };
+      }
+      return { success: false, message: res.data.message };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.response?.data?.errors?.email?.[0] || 'Failed to send OTP.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
+  volunteerVerifyRegistrationOtp: async (email, otp) => {
+    try {
+      const res = await api.post('/volunteer/users/verify-registration-otp', {
+        email,
+        otp,
+      });
+      if (res.data.success) {
+        get().triggerToast(res.data.message || 'Donor email verified successfully.', 'success');
+        return { success: true, message: res.data.message };
+      }
+      return { success: false, message: res.data.message };
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Invalid or expired OTP.';
+      get().triggerToast(errMsg, 'error');
+      return { success: false, error: errMsg };
+    }
+  },
+
   volunteerSendOtp: async (userId) => {
     try {
       const res = await api.post(`/volunteer/users/${userId}/send-otp`);
