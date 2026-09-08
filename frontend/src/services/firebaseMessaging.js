@@ -15,6 +15,22 @@ const app = initializeApp(firebaseConfig);
 
 let messaging = null;
 
+// Auto-initialize if notification permission is already granted
+// so foreground message listeners work on page load without needing
+// the user to click "Allow Notifications" again.
+(async () => {
+  try {
+    if (typeof window !== 'undefined' && Notification.permission === 'granted') {
+      const supported = await isSupported();
+      if (supported) {
+        messaging = getMessaging(app);
+      }
+    }
+  } catch (_) {
+    // silently ignore — will be initialized later when user grants permission
+  }
+})();
+
 export const initializeMessaging = async () => {
   try {
     const supported = await isSupported();

@@ -6,6 +6,7 @@ import Toast from '../components/Toast.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
 import SOSButton from '../components/SOSButton.jsx';
+import GlobalNotificationPopup from '../components/GlobalNotificationPopup.jsx';
 import { Bell, Siren, Menu } from 'lucide-react';
 import { getStorageUrl } from '../store/api.js';
 
@@ -109,6 +110,9 @@ export default function DashboardLayout() {
 
       {/* Floating SOS button */}
       <SOSButton />
+
+      {/* Global Notification Prompt Modal */}
+      <GlobalNotificationPopup />
     </div>
   );
 }
