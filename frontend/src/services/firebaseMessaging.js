@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 import api from '../store/api';
 
@@ -11,11 +11,9 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
+// Prevent "Firebase App already exists" error on hot reload
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-let messaging = null;
-
-// Build the SW URL with firebase config as query params
 const getSwUrl = () =>
   `/firebase-messaging-sw.js?apiKey=${firebaseConfig.apiKey}` +
   `&authDomain=${firebaseConfig.authDomain}` +
@@ -24,56 +22,31 @@ const getSwUrl = () =>
   `&messagingSenderId=${firebaseConfig.messagingSenderId}` +
   `&appId=${firebaseConfig.appId}`;
 
-/**
- * Initialize Firebase Messaging with the service worker registered.
- * Returns the messaging instance or null if unsupported.
- */
-export const initializeMessaging = async () => {
-  if (messaging) return messaging;
+let messagingInstance = null;
 
+const getMessagingInstance = async () => {
+  if (messagingInstance) return messagingInstance;
   try {
     const supported = await isSupported();
-    if (!supported) {
-      console.warn('[FCM] Firebase Messaging not supported in this browser.');
-      return null;
-    }
-
-    // Register service worker first — FCM needs it to function
-    const registration = await navigator.serviceWorker.register(getSwUrl());
-    await navigator.serviceWorker.ready;
-
-    messaging = getMessaging(app);
-    console.log('[FCM] Messaging initialized successfully.');
-    return messaging;
-  } catch (error) {
-    console.error('[FCM] Error initializing messaging:', error);
+    if (!supported) return null;
+    messagingInstance = getMessaging(app);
+    return messagingInstance;
+  } catch (err) {
+    console.error('[FCM] getMessaging failed:', err);
     return null;
   }
 };
 
-/**
- * A promise that resolves to the messaging instance.
- * Auto-initializes on page load if permission is already granted,
- * so foreground listeners work without requiring the user to re-grant permission.
- */
-let messagingReady;
+// ─── Public API ────────────────────────────────────────────────────────────────
 
-if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-  console.log('[FCM] Permission already granted — auto-initializing messaging...');
-  messagingReady = initializeMessaging();
-} else {
-  messagingReady = Promise.resolve(null);
-}
+export const initializeMessaging = getMessagingInstance;
 
-/**
- * Request notification permission, register SW, get FCM token, and save to backend.
- */
 export const requestNotificationPermission = async () => {
   try {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return null;
 
-    const msg = await initializeMessaging();
+    const msg = await getMessagingInstance();
     if (!msg) return null;
 
     const registration = await navigator.serviceWorker.register(getSwUrl());
@@ -88,27 +61,22 @@ export const requestNotificationPermission = async () => {
         token,
         device_type: navigator.userAgent
       });
-      console.log('[FCM] Token registered:', token);
+      console.log('[FCM] Token registered successfully');
       return token;
     }
-
     return null;
   } catch (error) {
-    console.error('[FCM] Error requesting notification permission:', error);
+    console.error('[FCM] requestNotificationPermission error:', error);
     throw error;
   }
 };
 
-/**
- * Remove the current FCM token from the backend.
- */
 export const removeNotificationToken = async () => {
   try {
-    const msg = await messagingReady || await initializeMessaging();
+    const msg = await getMessagingInstance();
     if (!msg) return;
 
     const registration = await navigator.serviceWorker.register(getSwUrl());
-
     const token = await getToken(msg, {
       vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
       serviceWorkerRegistration: registration
@@ -118,22 +86,31 @@ export const removeNotificationToken = async () => {
       await api.delete('/notifications/remove-token', { data: { token } });
     }
   } catch (error) {
-    console.error('[FCM] Error removing notification token:', error);
+    console.error('[FCM] removeNotificationToken error:', error);
     throw error;
   }
 };
 
 /**
  * Register a foreground message listener.
- * Waits for messaging to be initialized before attaching the listener.
- * Returns an unsubscribe function.
+ * Firebase's onMessage only fires when the page is in the foreground.
  */
 export const onForegroundMessage = async (callback) => {
-  const msg = await messagingReady || await initializeMessaging();
-  if (!msg) {
-    console.warn('[FCM] Could not initialize messaging — foreground listener not registered.');
+  try {
+    const msg = await getMessagingInstance();
+    if (!msg) {
+      console.warn('[FCM] Messaging not available — foreground listener skipped.');
+      return () => {};
+    }
+    console.log('[FCM] Registering foreground message listener...');
+    const unsubscribe = onMessage(msg, (payload) => {
+      console.log('[FCM] Foreground message received:', payload);
+      callback(payload);
+    });
+    console.log('[FCM] Foreground listener active.');
+    return unsubscribe;
+  } catch (err) {
+    console.error('[FCM] onForegroundMessage setup error:', err);
     return () => {};
   }
-  console.log('[FCM] Foreground message listener registered.');
-  return onMessage(msg, callback);
 };

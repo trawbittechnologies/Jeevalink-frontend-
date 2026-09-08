@@ -18,14 +18,24 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  
+  console.log('[firebase-messaging-sw.js] Background message received:', payload);
+
   const notificationTitle = payload.notification?.title || 'JeevaLink Alert';
   const notificationOptions = {
-    body: payload.notification?.body,
+    body: payload.notification?.body || '',
     icon: '/logo.png',
-    data: payload.data
+    badge: '/favicon.png',
+    data: payload.data,
+    tag: 'jeevalink-notification', // replaces previous notification instead of stacking
   };
 
+  // Show system notification
   self.registration.showNotification(notificationTitle, notificationOptions);
+
+  // Also relay to any open page windows so UI can update (toast, badge, etc.)
+  self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: 'FCM_MESSAGE', payload });
+    });
+  });
 });
