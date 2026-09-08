@@ -6,6 +6,7 @@ import { normalizeRole } from './utils/rbac.js';
 import Toast from './components/Toast.jsx';
 import BetaWarningPopup from './components/BetaWarningPopup.jsx';
 import { Loader2 } from 'lucide-react';
+import { onForegroundMessage } from './services/firebaseMessaging.js';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout.jsx';
@@ -151,12 +152,26 @@ function ProtectedRoute({ children, roles }) {
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const { token, loadProfile } = useAuthStore();
+  const { triggerToast } = useAppStore();
 
   useEffect(() => {
     if (token) {
       loadProfile();
     }
   }, [token, loadProfile]);
+
+  useEffect(() => {
+    const unsubscribe = onForegroundMessage((payload) => {
+      console.log('Foreground message received:', payload);
+      triggerToast(
+        payload.notification?.title || 'New Notification',
+        'info'
+      );
+    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [triggerToast]);
 
   return (
     <BrowserRouter>
@@ -321,6 +336,12 @@ export default function App() {
                     <BloodRequests />
                   </ProtectedRoute>
                 } />
+                <Route path="/blood-requests/:id" element={
+                  <ProtectedRoute roles={['user', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
+                    <BloodRequests />
+                  </ProtectedRoute>
+                } />
+                <Route path="/blood-requests" element={<Navigate to="/requests" replace />} />
                 <Route path="/campaigns" element={<Campaigns />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />

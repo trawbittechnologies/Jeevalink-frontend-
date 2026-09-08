@@ -5,6 +5,7 @@ import {
   Moon, Sun, BellRing, Smartphone, KeyRound, Mail, ChevronRight, Settings as SettingsIcon
 } from 'lucide-react';
 import AccountSecurityModal from '../components/AccountSecurityModal.jsx';
+import { requestNotificationPermission, removeNotificationToken } from '../services/firebaseMessaging.js';
 
 // Reusable toggle switch
 function Toggle({ enabled, onToggle, id }) {
@@ -55,7 +56,9 @@ export default function Settings() {
   const [isDarkMode, setIsDarkMode] = useState(() =>
     document.documentElement.classList.contains('dark')
   );
-  const [pushEnabled, setPushEnabled] = useState(true);
+  const [pushEnabled, setPushEnabled] = useState(() => 
+    'Notification' in window && Notification.permission === 'granted'
+  );
   const [smsEnabled, setSmsEnabled] = useState(false);
   const [securityModal, setSecurityModal] = useState(null); // 'password' | 'email' | null
 
@@ -73,9 +76,25 @@ export default function Settings() {
     setIsDarkMode(v => !v);
     triggerToast(!isDarkMode ? 'Dark mode enabled!' : 'Light mode enabled!', 'info');
   };
-  const togglePush = () => {
-    setPushEnabled(v => !v);
-    triggerToast(!pushEnabled ? 'Push notifications enabled!' : 'Push notifications disabled.', 'info');
+  const togglePush = async () => {
+    try {
+      if (pushEnabled) {
+        await removeNotificationToken();
+        setPushEnabled(false);
+        triggerToast('Push notifications disabled.', 'info');
+      } else {
+        const token = await requestNotificationPermission();
+        if (token) {
+          setPushEnabled(true);
+          triggerToast('Push notifications enabled!', 'success');
+        } else {
+          triggerToast(Notification.permission === 'denied' ? 'Notifications blocked in browser.' : 'Failed to enable push notifications.', 'error');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      triggerToast('Error updating notification preferences.', 'error');
+    }
   };
   const toggleSms = () => {
     setSmsEnabled(v => !v);

@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import PosterModal from '../components/PosterModal.jsx';
 import Modal from '../components/Modal.jsx';
+import NotificationPermissionBanner from '../components/NotificationPermissionBanner.jsx';
 
 export default function DonorDashboard() {
   const { user, setAvailability, updateProfile } = useAuthStore();
@@ -273,6 +274,10 @@ export default function DonorDashboard() {
           </button>
         </div>
       </div>
+
+      <NotificationPermissionBanner 
+        onPermissionGranted={() => triggerToast('Push notifications enabled successfully', 'success')} 
+      />
 
       {/* ─── 2. EMERGENCY SOS ALERT BANNER ─── */}
       {sos.length > 0 && (
