@@ -38,9 +38,9 @@ export default function Splash({ onComplete }) {
         >
           <h1
             style={{
-              fontSize: 'clamp(3.5rem, 14vw, 6rem)',
+              fontSize: 'clamp(2.2rem, 9vw, 3.5rem)',
               fontWeight: 900,
-              letterSpacing: '-0.035em',
+              letterSpacing: '-0.03em',
               lineHeight: 1,
               color: '#0f172a',
             }}
@@ -49,20 +49,6 @@ export default function Splash({ onComplete }) {
           </h1>
         </motion.div>
 
-        {/* Thin separator */}
-        <motion.div
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            width: '2.5rem',
-            height: '1.5px',
-            background: '#e2e8f0',
-            borderRadius: '999px',
-            marginBottom: '1.5rem',
-            transformOrigin: 'center',
-          }}
-        />
 
         {/* 2. by DYFI Kasaragod — secondary, with logo */}
         <motion.div
@@ -73,9 +59,9 @@ export default function Splash({ onComplete }) {
         >
           <span
             style={{
-              fontSize: '0.8125rem',
-              fontWeight: 700,
-              letterSpacing: '0.06em',
+              fontSize: '1.35rem',
+              fontWeight: 800,
+              letterSpacing: '0.1em',
               color: '#dc2626',
               textTransform: 'uppercase',
             }}
