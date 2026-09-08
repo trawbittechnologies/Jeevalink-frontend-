@@ -163,24 +163,23 @@ export default function App() {
   useEffect(() => {
     let unsubscribe = null;
 
-    // Channel 1: Firebase onMessage (fires when tab is focused)
+    // Channel 1: Firebase onMessage (may or may not fire depending on SW state)
     onForegroundMessage((payload) => {
       const title = payload.notification?.title || 'New Notification';
       const body = payload.notification?.body || '';
       triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
-      if (Notification.permission === 'granted') {
-        new Notification(title, { body, icon: '/logo.png' });
-      }
     }).then((unsub) => { unsubscribe = unsub; });
 
-    // Channel 2: Service Worker postMessage relay (backup — always works)
+    // Channel 2: Raw push relay from service worker — ALWAYS fires regardless of focus state
     const handleSwMessage = (event) => {
-      if (event.data?.type === 'FCM_MESSAGE') {
-        console.log('[App] SW relayed FCM message:', event.data.payload);
-        const payload = event.data.payload;
-        const title = payload.notification?.title || 'New Notification';
-        const body = payload.notification?.body || '';
+      const { type, title, body } = event.data || {};
+      if (type === 'FCM_PUSH' && title) {
+        console.log('[App] FCM push received via SW relay:', title, body);
         triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
+        // Native browser notification
+        if (Notification.permission === 'granted') {
+          new Notification(title, { body, icon: '/logo.png' });
+        }
       }
     };
     navigator.serviceWorker?.addEventListener('message', handleSwMessage);

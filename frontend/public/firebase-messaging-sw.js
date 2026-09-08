@@ -17,25 +17,56 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+// ─── Background handler (tab not open / not focused) ─────────────────────────
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Background message received:', payload);
-
-  const notificationTitle = payload.notification?.title || 'JeevaLink Alert';
-  const notificationOptions = {
-    body: payload.notification?.body || '',
+  console.log('[SW] onBackgroundMessage:', payload);
+  const title = payload.notification?.title || 'JeevaLink Alert';
+  const body  = payload.notification?.body  || '';
+  self.registration.showNotification(title, {
+    body,
     icon: '/logo.png',
     badge: '/favicon.png',
+    tag: 'jeevalink-notification',
     data: payload.data,
-    tag: 'jeevalink-notification', // replaces previous notification instead of stacking
-  };
-
-  // Show system notification
-  self.registration.showNotification(notificationTitle, notificationOptions);
-
-  // Also relay to any open page windows so UI can update (toast, badge, etc.)
-  self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({ type: 'FCM_MESSAGE', payload });
-    });
   });
+});
+
+// ─── Raw push relay (ALWAYS fires — foreground AND background) ───────────────
+// This runs for every incoming push, regardless of page focus state.
+// It relays the notification data to all open page windows via postMessage,
+// so the React app can display an in-app toast even when onMessage doesn't fire.
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  let payload = null;
+  try { payload = event.data.json(); } catch (_) {
+    try { payload = JSON.parse(event.data.text()); } catch (__) { return; }
+  }
+
+  // Extract title/body from any known FCM format
+  const title = payload?.notification?.title
+    || payload?.data?.title
+    || payload?.title
+    || '';
+  const body  = payload?.notification?.body
+    || payload?.data?.body
+    || payload?.body
+    || '';
+
+  if (!title && !body) return; // skip internal Firebase keep-alive pings
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: 'FCM_PUSH',
+            title,
+            body,
+            data: payload?.data || {},
+          });
+        });
+      })
+  );
 });
