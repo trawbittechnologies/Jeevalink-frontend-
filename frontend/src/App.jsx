@@ -163,27 +163,33 @@ export default function App() {
   useEffect(() => {
     let unsubscribe = null;
 
+    // Channel 1: Firebase onMessage (fires when tab is focused)
     onForegroundMessage((payload) => {
-      console.log('[FCM] Foreground message received:', payload);
       const title = payload.notification?.title || 'New Notification';
       const body = payload.notification?.body || '';
-
-      // Show toast with title + body
       triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
-
-      // Also show a native browser notification
       if (Notification.permission === 'granted') {
         new Notification(title, { body, icon: '/logo.png' });
       }
-    }).then((unsub) => {
-      unsubscribe = unsub;
-    });
+    }).then((unsub) => { unsubscribe = unsub; });
+
+    // Channel 2: Service Worker postMessage relay (backup — always works)
+    const handleSwMessage = (event) => {
+      if (event.data?.type === 'FCM_MESSAGE') {
+        console.log('[App] SW relayed FCM message:', event.data.payload);
+        const payload = event.data.payload;
+        const title = payload.notification?.title || 'New Notification';
+        const body = payload.notification?.body || '';
+        triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
+      }
+    };
+    navigator.serviceWorker?.addEventListener('message', handleSwMessage);
 
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
+      navigator.serviceWorker?.removeEventListener('message', handleSwMessage);
     };
   }, [triggerToast]);
-
 
 
   return (
