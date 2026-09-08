@@ -110,33 +110,12 @@ export default function Landing() {
         {/* Foreground Content — Centered & Enlarged */}
         <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 pt-5 pb-8 sm:pt-6 sm:pb-10 lg:py-2 flex flex-col items-center text-center">
 
-          {/* Organization label */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            style={{ marginBottom: '0.85rem' }}
-          >
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '10px',
-              padding: '5px 16px', borderRadius: '9999px',
-              background: 'rgba(254,242,242,0.85)', border: '1px solid rgba(254,202,202,0.7)',
-              fontSize: '0.72rem', fontWeight: 800,
-              letterSpacing: '0.2em', color: '#dc2626',
-              textTransform: 'uppercase',
-              boxShadow: '0 2px 8px rgba(220,38,38,0.06)',
-            }}>
-              <span style={{ width: 6, height: 6, background: '#dc2626', display: 'inline-block', borderRadius: '50%', flexShrink: 0 }} />
-              DYFI Kasaragod · JeevaLink
-            </span>
-          </motion.div>
-
           {/* iDonate wordmark */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            style={{ marginBottom: '0.85rem' }}
+            style={{ marginBottom: '0.95rem' }}
           >
             <div style={{
               fontSize: 'clamp(0.85rem, 1.4vw, 1.05rem)',
@@ -157,6 +136,16 @@ export default function Landing() {
             }}>
               <span style={{ color: '#dc2626' }}>i</span>Donate
             </h1>
+            <div style={{
+              fontSize: 'clamp(0.75rem, 1.2vw, 0.92rem)',
+              fontWeight: 800,
+              letterSpacing: '0.22em',
+              color: '#dc2626',
+              textTransform: 'uppercase',
+              marginTop: '0.5rem',
+            }}>
+              by DYFI Kasaragod
+            </div>
           </motion.div>
 
           {/* Tagline */}
