@@ -17,7 +17,10 @@ import { toPng } from 'html-to-image';
 
 // Static import — Vite will bundle the image automatically once the file exists.
 // If the file isn't added yet, this import will fail at build time (not runtime).
-import dyfiTemplate from '../assets/dyfi_blood_request_template.png';
+// ⬇ Replace this file with your DYFI poster image once you have it.
+// The file must be saved at: frontend/src/assets/dyfi_blood_request_template.png
+// For now it falls back to the existing blank template so the build doesn't break.
+import dyfiTemplate from '../assets/blank_poster_template.png';
 
 // ─── Small helper used only in fallback card ──────────────────────────────────
 function InfoRow({ label, value }) {
