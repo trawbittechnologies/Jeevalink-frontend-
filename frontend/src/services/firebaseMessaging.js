@@ -41,6 +41,37 @@ const getMessagingInstance = async () => {
 
 export const initializeMessaging = getMessagingInstance;
 
+/**
+ * Silently get the latest FCM token and sync it to the backend.
+ * Called on page load to ensure the token is always fresh after SW updates.
+ */
+export const refreshFcmToken = async () => {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+    const msg = await getMessagingInstance();
+    if (!msg) return;
+
+    const registration = await navigator.serviceWorker.register(getSwUrl());
+    await navigator.serviceWorker.ready;
+
+    const token = await getToken(msg, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration
+    });
+
+    if (token) {
+      await api.post('/notifications/register-token', {
+        token,
+        device_type: navigator.userAgent
+      });
+      console.log('[FCM] Token refreshed and synced:', token.slice(0, 20) + '...');
+    }
+  } catch (err) {
+    console.warn('[FCM] Token refresh failed (non-critical):', err.message);
+  }
+};
+
 export const requestNotificationPermission = async () => {
   try {
     const permission = await Notification.requestPermission();

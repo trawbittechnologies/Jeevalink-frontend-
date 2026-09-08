@@ -6,7 +6,7 @@ import { normalizeRole } from './utils/rbac.js';
 import Toast from './components/Toast.jsx';
 import BetaWarningPopup from './components/BetaWarningPopup.jsx';
 import { Loader2 } from 'lucide-react';
-import { onForegroundMessage } from './services/firebaseMessaging.js';
+import { onForegroundMessage, refreshFcmToken } from './services/firebaseMessaging.js';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout.jsx';
@@ -157,8 +157,12 @@ export default function App() {
   useEffect(() => {
     if (token) {
       loadProfile();
+      // Silently refresh FCM token on every login/page load so the DB always
+      // has a valid, up-to-date token after service worker updates.
+      refreshFcmToken();
     }
   }, [token, loadProfile]);
+
 
   useEffect(() => {
     let unsubscribe = null;
