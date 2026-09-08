@@ -37,8 +37,12 @@ export const requestNotificationPermission = async () => {
       const msg = messaging || await initializeMessaging();
       if (!msg) return null;
 
+      const swUrl = `/firebase-messaging-sw.js?apiKey=${firebaseConfig.apiKey}&authDomain=${firebaseConfig.authDomain}&projectId=${firebaseConfig.projectId}&storageBucket=${firebaseConfig.storageBucket}&messagingSenderId=${firebaseConfig.messagingSenderId}&appId=${firebaseConfig.appId}`;
+      const registration = await navigator.serviceWorker.register(swUrl);
+
       const token = await getToken(msg, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration: registration
       });
 
       if (token) {
@@ -61,9 +65,13 @@ export const removeNotificationToken = async () => {
     const msg = messaging || await initializeMessaging();
     if (!msg) return;
 
+    const swUrl = `/firebase-messaging-sw.js?apiKey=${firebaseConfig.apiKey}&authDomain=${firebaseConfig.authDomain}&projectId=${firebaseConfig.projectId}&storageBucket=${firebaseConfig.storageBucket}&messagingSenderId=${firebaseConfig.messagingSenderId}&appId=${firebaseConfig.appId}`;
+    const registration = await navigator.serviceWorker.register(swUrl);
+
     // Get current token to remove it from backend
     const token = await getToken(msg, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration
     });
     
     if (token) {
