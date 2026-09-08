@@ -1,13 +1,15 @@
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js');
 
+const params = new URL(location).searchParams;
+
 const firebaseConfig = {
-  apiKey: "AIzaSyA5eAvl7HpMibKakfPcbUGT8N-ae16JGbU",
-  authDomain: "idonate---dyfi-kasaragod.firebaseapp.com",
-  projectId: "idonate---dyfi-kasaragod",
-  storageBucket: "idonate---dyfi-kasaragod.firebasestorage.app",
-  messagingSenderId: "649937525559",
-  appId: "1:649937525559:web:c20eb15c92dac9f8a198b2"
+  apiKey: params.get('apiKey'),
+  authDomain: params.get('authDomain'),
+  projectId: params.get('projectId'),
+  storageBucket: params.get('storageBucket'),
+  messagingSenderId: params.get('messagingSenderId'),
+  appId: params.get('appId')
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -19,7 +21,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'JeevaLink Alert';
   const notificationOptions = {
     body: payload.notification?.body,
-    icon: '/logo.png', // Ensure this exists or use appropriate default
+    icon: '/logo.png',
     data: payload.data
   };
 
