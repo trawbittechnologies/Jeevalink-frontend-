@@ -1,252 +1,282 @@
 import { useRef, useState } from 'react';
-import { X, Download, RefreshCw, Share2 } from 'lucide-react';
+import {
+  X, Download, Phone, Calendar, Clock, MapPin,
+  Heart, RefreshCw, MessageSquare, Droplet, Share2
+} from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { toPng } from 'html-to-image';
 
-/**
- * PosterModal — Blood Request Poster Generator
- *
- * Uses the DYFI "I Donate Kasaragod" poster as the background template.
- * Overlays: Patient Name, Blood Group, Unit, Hospital, Contact Number.
- *
- * ➜ Place your poster image at:
- *     frontend/src/assets/dyfi_blood_request_template.png
- *
- * The overlay positions (top %) are tuned for the 3:4 DYFI poster layout.
- * Tweak the `top` values below if your image differs slightly.
- */
-
-// Static import — Vite will bundle the image automatically once the file exists.
-// If the file isn't added yet, this import will fail at build time (not runtime).
-// ⬇ Replace this file with your DYFI poster image once you have it.
-// The file must be saved at: frontend/src/assets/dyfi_blood_request_template.png
-// For now it falls back to the existing blank template so the build doesn't break.
-import dyfiTemplate from '../assets/blank_poster_template.png';
-
-// ─── Small helper used only in fallback card ──────────────────────────────────
-function InfoRow({ label, value }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', padding: '4px 0', borderBottom: '1px solid #f1f5f9' }}>
-      <span style={{ fontWeight: 700, color: '#374151', minWidth: '110px', fontSize: '12px' }}>{label}</span>
-      <span style={{ color: '#9ca3af', fontSize: '12px' }}>:</span>
-      <span style={{ fontWeight: 800, color: '#111827', fontSize: '13px', flex: 1 }}>{value || '—'}</span>
-    </div>
-  );
-}
-
 export default function PosterModal({ isOpen, onClose, data }) {
-  const posterRef  = useRef(null);
+  const posterRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
 
   if (!isOpen || !data) return null;
 
-  // ─── Extract request fields ───────────────────────────────────────────────
-  const patientName = data.patient_name   || data.patientName   || '';
-  const bloodGroup  = data.blood_group    || data.bloodGroup    || 'O+';
-  const units       = data.units_required || data.unitsRequired || '1';
-  const hospital    = data.hospital_name  || data.hospitalName  || data.venue || data.location || '';
-  const phone       = data.contact_phone  || data.contact_number || data.contactNumber || data.mobile || '';
-  const requestId   = data.request_id || data.id || data._id || `JL-${Date.now().toString().slice(-4)}`;
+  // Extract clean template variables
+  const bloodGroup = data.blood_group || data.bloodGroup || 'O+';
+  const date = data.date || data.required_date || new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+  const time = data.time || data.required_time || 'Immediate / Urgent';
+  const venue = data.venue || data.hospital_name || data.hospitalName || data.location || 'Local Hospital';
+  const phone = data.contact_phone || data.contact_number || data.contactNumber || data.mobile || '9876543210';
+  const whatsapp = data.whatsapp_number || data.whatsapp || phone;
+  const requestId = data.request_id || data.id || data._id || 'JL-REQ';
 
-  // ─── HD PNG Download ──────────────────────────────────────────────────────
+  // Dynamic DYFI Committee Attribution
+  const getDyfiCommitteeTitle = (d) => {
+    if (!d) return 'DYFI Kasaragod District Committee';
+    const block = d.block || d.block_name;
+    const district = d.district || d.district_name;
+    const meghala = d.meghala || d.meghala_name || d.unit;
+    const organizer = d.organizer_name || d.author_name || d.created_by;
+
+    if (block) {
+      const cleanBlock = block.replace(/block|committee|dyfi/gi, '').trim();
+      return `DYFI ${cleanBlock} Block Committee`;
+    }
+    if (meghala) {
+      const cleanMeghala = meghala.replace(/meghala|unit|committee|dyfi/gi, '').trim();
+      return `DYFI ${cleanMeghala} Meghala Committee`;
+    }
+    if (district) {
+      const cleanDistrict = district.replace(/district|committee|dyfi/gi, '').trim();
+      return `DYFI ${cleanDistrict} District Committee`;
+    }
+    if (organizer && organizer.toLowerCase().includes('dyfi')) {
+      return organizer;
+    }
+    return 'DYFI Kasaragod District Committee';
+  };
+
+  const committeeTitle = getDyfiCommitteeTitle(data);
+
+  // 100% DOM-to-PNG Pixel-Perfect Exporter
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
     setDownloading(true);
     try {
-      await new Promise((res) => setTimeout(res, 250));
+      // Small timeout to ensure all SVGs and fonts are rendered
+      await new Promise((res) => setTimeout(res, 100));
+
       const dataUrl = await toPng(posterRef.current, {
         quality: 1.0,
-        pixelRatio: 3,        // 3× = ~1260×1680 px output
+        pixelRatio: 3, // 3x Ultra-HD Resolution Output
         cacheBust: true,
+        backgroundColor: '#FFFFFF',
       });
-      const link      = document.createElement('a');
-      link.download   = `BloodRequest_${bloodGroup}_${requestId}.png`;
-      link.href       = dataUrl;
+
+      const link = document.createElement('a');
+      link.download = `Blood_Request_${bloodGroup}_${requestId}.png`;
+      link.href = dataUrl;
       link.click();
     } catch (err) {
-      console.error('Poster PNG render error:', err);
+      console.error("Poster PNG rendering error:", err);
+      // Fallback print if browser restricts DOM canvas capture
       window.print();
     } finally {
       setDownloading(false);
     }
   };
 
-  // ─── Share link ───────────────────────────────────────────────────────────
   const handleShare = async () => {
     const url = `${window.location.origin}/requests/${requestId}`;
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Blood Request: ${bloodGroup}`,
-          text: `Urgent need for ${bloodGroup} blood at ${hospital}. Please help!`,
-          url,
+          title: `Emergency Blood Request: ${bloodGroup}`,
+          text: `Urgent need for ${bloodGroup} blood at ${venue}. Please help!`,
+          url: url,
         });
-      } catch (err) { /* user cancelled */ }
+      } catch (err) {
+        console.error("Error sharing", err);
+      }
     } else {
       navigator.clipboard.writeText(url);
       alert('Link copied to clipboard!');
     }
   };
 
-  // ─── Overlay style base ───────────────────────────────────────────────────
-  // The DYFI poster info section lives in the lower-left area.
-  // Positions below are in % of the poster height (aspect ratio 3:4).
-  //   Patient Name ≈ 70 %
-  //   Blood Group  ≈ 74.5 %
-  //   Unit         ≈ 79 %
-  //   Hospital     ≈ 83.5 %
-  //   Contact      ≈ 88 %
-  // Adjust `top` percentages to match your exact poster image.
-
-  const rowBase = {
-    position: 'absolute',
-    left: '7%',
-    right: '50%',          // keep text within the info column (left side)
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '4px',
-    fontFamily: '"Segoe UI", Arial, sans-serif',
-    fontSize: 'clamp(8px, 2.5vw, 13px)',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-  };
-
-  const labelSt = {
-    fontWeight: 700,
-    color: '#374151',
-    minWidth: '80px',
-    flexShrink: 0,
-  };
-
-  const colonSt = { color: '#6b7280', margin: '0 3px', flexShrink: 0 };
-
-  const valueSt = (color = '#111827') => ({
-    fontWeight: 900,
-    color,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  });
-
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 50,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(15,23,42,0.82)', backdropFilter: 'blur(8px)',
-      padding: '16px', overflowY: 'auto',
-    }}>
-      <div style={{
-        background: '#fff', borderRadius: '24px',
-        maxWidth: '440px', width: '100%',
-        padding: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.35)',
-        position: 'relative', maxHeight: '92vh', overflowY: 'auto',
-      }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 overflow-y-auto select-none">
+      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 lg:p-8 shadow-2xl relative text-slate-900 border border-slate-200 animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto">
 
-        {/* ── Close ── */}
-        <button onClick={onClose} style={{
-          position: 'absolute', top: 16, right: 16, width: 36, height: 36,
-          border: 'none', borderRadius: '50%', background: '#f1f5f9',
-          cursor: 'pointer', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', color: '#64748b', zIndex: 10,
-        }}>
-          <X size={18} />
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition cursor-pointer z-20"
+        >
+          <X className="w-5 h-5" />
         </button>
 
-        <h2 style={{ fontSize: '15px', fontWeight: 900, marginBottom: '16px', paddingRight: '40px', color: '#0f172a' }}>
-          Blood Request Poster
-        </h2>
 
-        {/* ── POSTER ── */}
-        <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.20)' }}>
-          <div
-            ref={posterRef}
-            style={{ position: 'relative', width: '100%', aspectRatio: '3 / 4', overflow: 'hidden' }}
-          >
-            {/* Background image — the full DYFI template */}
-            <img
-              src={dyfiTemplate}
-              alt="DYFI Blood Request Poster"
-              crossOrigin="anonymous"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'fill', display: 'block' }}
-            />
 
-            {/* ── OVERLAID DATA FIELDS ── */}
+        {/* Wrapper to prevent html-to-image boundary clipping bug caused by margins/shadows */}
+        <div className="mx-auto w-full max-w-[480px] shadow-2xl">
+          {/* 100% PIXEL PERFECT POSTER DOM CONTAINER FOR PREVIEW & HD PNG EXPORT */}
+          <div ref={posterRef} className="print-area bg-[#f8fafc] relative overflow-hidden border border-slate-200/80 w-full m-0">
 
-            {/* Patient Name */}
-            <div style={{ ...rowBase, top: '70%' }}>
-              <span style={labelSt}>Patient Name</span>
-              <span style={colonSt}>:</span>
-              <span style={valueSt('#111827')}>{patientName}</span>
+            {/* Top Section - Deep Red Premium Gradient */}
+            <div className="relative bg-gradient-to-br from-red-700 via-red-600 to-rose-700 px-8 pt-12 pb-20 overflow-hidden">
+              {/* Abstract Background Shapes for Depth (Canvas-safe) */}
+              <div className="absolute top-[-50px] right-[-50px] w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(239,68,68,0.6)_0%,rgba(239,68,68,0)_70%)] rounded-full"></div>
+              <div className="absolute bottom-[-50px] left-[-50px] w-[350px] h-[350px] bg-[radial-gradient(circle,rgba(244,63,94,0.6)_0%,rgba(244,63,94,0)_70%)] rounded-full"></div>
+
+              {/* Diagonal Grid Pattern Overlay */}
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNyIvPjwvc3ZnPg==')] opacity-40 transform -rotate-12 scale-150"></div>
+
+              <div className="relative z-10 flex justify-between items-start">
+                <div className="space-y-4">
+                  {/* Typography */}
+                  <h1 className="text-5xl font-black text-white uppercase tracking-tighter leading-[0.9] mt-2" style={{ textShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>
+                    Blood <br />
+                    <span className="text-red-200">Request</span>
+                  </h1>
+                </div>
+
+                {/* Blood Group Badge - Solid 3D Effect (Canvas-safe) */}
+                <div className="relative z-20">
+                  <div className="absolute inset-0 bg-red-950/20 rounded-3xl translate-y-2"></div>
+                  <div className="relative bg-gradient-to-b from-white to-slate-50 rounded-3xl p-5 border border-white shadow-xl flex flex-col items-center justify-center min-w-[100px] transform rotate-3">
+                    <Droplet className="w-8 h-8 text-red-600 mb-1" fill="currentColor" />
+                    <span className="text-5xl font-black text-red-600 leading-none tracking-tighter">{bloodGroup}</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Group</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Blood Group */}
-            <div style={{ ...rowBase, top: '74.5%' }}>
-              <span style={labelSt}>Blood Group</span>
-              <span style={colonSt}>:</span>
-              <span style={valueSt('#b91c1c')}>{bloodGroup}</span>
+            {/* Details Section - Overlapping Card */}
+            <div className="relative bg-white mx-5 -mt-10 rounded-3xl p-6 shadow-xl border border-slate-100 z-20">
+
+              <div className="space-y-5">
+                {/* Venue Row */}
+                <div className="flex gap-4 items-start p-1">
+                  <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center shrink-0 border border-red-100/50 shadow-inner">
+                    <MapPin className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="pt-1">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Hospital / Venue</p>
+                    <p className="text-base font-bold text-slate-900 leading-tight">{venue}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Date */}
+                  <div className="flex gap-3 items-center p-3 rounded-2xl bg-slate-50/80 border border-slate-100/50 hover:bg-slate-50 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm border border-slate-100">
+                      <Calendar className="w-4 h-4 text-slate-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Date</p>
+                      <p className="text-xs font-bold text-slate-900 leading-tight break-words pr-1">{date}</p>
+                    </div>
+                  </div>
+
+                  {/* Time */}
+                  <div className="flex gap-3 items-center p-3 rounded-2xl bg-slate-50/80 border border-slate-100/50 hover:bg-slate-50 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm border border-slate-100">
+                      <Clock className="w-4 h-4 text-slate-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Time</p>
+                      <p className="text-xs font-bold text-slate-900 leading-tight break-words pr-1">{time}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Row */}
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 border-dashed">
+                  {/* Call */}
+                  <div className="flex gap-3 items-center">
+                    <div className="w-11 h-11 rounded-full bg-slate-900 flex items-center justify-center shrink-0 shadow-md">
+                      <Phone className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Call</p>
+                      <p className="text-sm font-black text-slate-900 leading-tight break-words">{phone}</p>
+                    </div>
+                  </div>
+
+                  {/* WhatsApp */}
+                  <div className="flex gap-3 items-center">
+                    <div className="w-11 h-11 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">
+                      <MessageSquare className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp</p>
+                      <p className="text-sm font-black text-slate-900 leading-tight break-words">{whatsapp}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Unit */}
-            <div style={{ ...rowBase, top: '79%' }}>
-              <span style={labelSt}>Unit</span>
-              <span style={colonSt}>:</span>
-              <span style={valueSt('#111827')}>{units}</span>
+            {/* Bottom Section - Call to Action */}
+            <div className="px-6 pt-8 pb-8 relative z-10">
+              {/* CTA & QR Card */}
+              <div className="flex items-center justify-between bg-slate-900 text-white rounded-3xl p-4 shadow-xl border border-slate-800 relative overflow-hidden">
+                {/* Subtle background glow in CTA (Canvas-safe) */}
+                <div className="absolute right-[-20px] top-[-20px] w-[150px] h-[150px] bg-[radial-gradient(circle,rgba(220,38,38,0.25)_0%,rgba(220,38,38,0)_70%)] rounded-full"></div>
+
+                <div className="pl-3 pr-4 relative z-10">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Save a Life Today</p>
+                  <p className="text-xl font-black uppercase leading-[1.1] tracking-tight">Donate<br /><span className="text-red-500">Blood</span></p>
+                </div>
+                <div className="bg-white p-2.5 rounded-2xl relative z-10 shadow-inner">
+                  <div id="pure-code-qr-code">
+                    <QRCodeSVG
+                      value={`${window.location.origin}/requests/${requestId}`}
+                      size={60}
+                      level="Q"
+                      includeMargin={false}
+                      className="rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Branding Footer */}
+              <div className="mt-8 flex items-center justify-between px-2">
+                <div>
+                  <h3 className="text-lg font-black text-red-600 uppercase tracking-tighter leading-none flex items-center gap-1">
+                    <Heart className="w-4 h-4 fill-red-600" /> JEEVALINK
+                  </h3>
+                  <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1.5 ml-5">Connecting Life</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-px h-8 bg-slate-300"></div>
+                  <div className="text-right">
+                    <h3 className="text-base font-black text-slate-900 uppercase tracking-tight leading-none">{committeeTitle}</h3>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Official Volunteer Network</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Hospital */}
-            <div style={{ ...rowBase, top: '83.5%' }}>
-              <span style={labelSt}>Hospital</span>
-              <span style={colonSt}>:</span>
-              <span style={valueSt('#111827')}>{hospital}</span>
-            </div>
-
-            {/* Contact Number */}
-            <div style={{ ...rowBase, top: '88%' }}>
-              <span style={labelSt}>Contact</span>
-              <span style={colonSt}>:</span>
-              <span style={valueSt('#111827')}>{phone}</span>
-            </div>
           </div>
         </div>
 
-        {/* ── Action Buttons ── */}
-        <div style={{ display: 'flex', gap: '10px', marginTop: '18px', flexWrap: 'wrap' }}>
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 mt-6">
           <button
             onClick={handleDownloadPNG}
             disabled={downloading}
-            style={{
-              flex: 1, padding: '12px 16px',
-              background: '#dc2626', color: '#fff',
-              fontWeight: 800, fontSize: '13px',
-              border: 'none', borderRadius: '16px',
-              cursor: downloading ? 'default' : 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              opacity: downloading ? 0.7 : 1,
-              boxShadow: '0 4px 14px rgba(220,38,38,0.30)',
-            }}
+            className="flex-1 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition cursor-pointer text-sm disabled:opacity-50"
           >
-            {downloading
-              ? <><RefreshCw size={14} className="animate-spin" /> Rendering...</>
-              : <><Download size={14} /> Download Poster (PNG)</>}
+            {downloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {downloading ? 'Rendering HD Poster...' : 'Download Poster (PNG Image)'}
           </button>
 
           <button
             onClick={handleShare}
-            style={{
-              padding: '12px 16px', background: '#f1f5f9',
-              color: '#1e293b', fontWeight: 700, fontSize: '13px',
-              border: 'none', borderRadius: '16px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px',
-            }}
+            className="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-2xl transition flex items-center gap-2 text-sm cursor-pointer"
           >
-            <Share2 size={14} /> Share
+            <Share2 className="w-4 h-4" />
+            Share Link
           </button>
 
           <button
             onClick={onClose}
-            style={{
-              padding: '12px 16px', background: '#0f172a',
-              color: '#fff', fontWeight: 700, fontSize: '13px',
-              border: 'none', borderRadius: '16px', cursor: 'pointer',
-            }}
+            className="px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition text-sm cursor-pointer"
           >
             Close
           </button>
