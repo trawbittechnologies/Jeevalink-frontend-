@@ -68,7 +68,7 @@ export default function Landing() {
       />
 
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
-      <section className="relative min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] flex items-center overflow-hidden">
+      <section className="relative min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
 
         {/* Full-bleed background image */}
         <motion.div
@@ -79,7 +79,7 @@ export default function Landing() {
         >
           <img
             src="/image.png"
-            alt=""
+            alt="DYFI JeevaLink blood donation hero"
             style={{
               width: '100%', height: '100%',
               objectFit: 'cover', objectPosition: 'center',
@@ -88,196 +88,201 @@ export default function Landing() {
           />
         </motion.div>
 
-        {/* Layered overlays — seamless blend, no hard edges */}
+        {/* Layered overlays — centered soft spotlight so centered text is 100% crisp while bg image shines through */}
         <div className="absolute inset-0 pointer-events-none">
-          {/* Primary: strong white on left, fades across */}
+          {/* Central translucent vignette overlay */}
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(105deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.98) 28%, rgba(255,255,255,0.82) 42%, rgba(255,255,255,0.35) 58%, rgba(255,255,255,0.08) 72%, transparent 85%)',
+            background: 'radial-gradient(ellipse 75% 75% at 50% 50%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.82) 48%, rgba(255,255,255,0.45) 75%, rgba(255,255,255,0.15) 100%)',
           }} />
           {/* Bottom fade into next section */}
           <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%',
-            background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.65) 25%, transparent 100%)',
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '35%',
+            background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 25%, transparent 100%)',
           }} />
           {/* Top subtle fade */}
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: '12%',
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 100%)',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, transparent 100%)',
           }} />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 w-full px-6 sm:px-10 lg:px-16 xl:px-24 pt-5 pb-8 sm:pt-6 sm:pb-10 lg:py-0">
-          <div className="w-full max-w-lg lg:max-w-[560px] xl:max-w-[590px]">
+        {/* Foreground Content — Centered & Enlarged */}
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 pt-5 pb-8 sm:pt-6 sm:pb-10 lg:py-2 flex flex-col items-center text-center">
 
-            {/* Organization label */}
-            <motion.div
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              style={{ marginBottom: '0.85rem' }}
-            >
-              <span style={{
+          {/* Organization label */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            style={{ marginBottom: '0.85rem' }}
+          >
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              padding: '5px 16px', borderRadius: '9999px',
+              background: 'rgba(254,242,242,0.85)', border: '1px solid rgba(254,202,202,0.7)',
+              fontSize: '0.72rem', fontWeight: 800,
+              letterSpacing: '0.2em', color: '#dc2626',
+              textTransform: 'uppercase',
+              boxShadow: '0 2px 8px rgba(220,38,38,0.06)',
+            }}>
+              <span style={{ width: 6, height: 6, background: '#dc2626', display: 'inline-block', borderRadius: '50%', flexShrink: 0 }} />
+              DYFI Kasaragod · JeevaLink
+            </span>
+          </motion.div>
+
+          {/* iDonate wordmark */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            style={{ marginBottom: '0.85rem' }}
+          >
+            <div style={{
+              fontSize: 'clamp(0.85rem, 1.4vw, 1.05rem)',
+              fontWeight: 700, color: '#94a3b8',
+              marginBottom: '0.25rem', letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+            }}>
+              Introducing
+            </div>
+            <h1 style={{
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: 'clamp(4.2rem, 7.8vw, 6.4rem)',
+              fontWeight: 900,
+              letterSpacing: '-0.045em',
+              lineHeight: 0.9,
+              color: '#0f172a',
+              margin: 0,
+            }}>
+              <span style={{ color: '#dc2626' }}>i</span>Donate
+            </h1>
+          </motion.div>
+
+          {/* Tagline */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{ marginBottom: '0.85rem' }}
+          >
+            <p style={{
+              fontSize: 'clamp(1.25rem, 2.4vw, 1.7rem)',
+              fontWeight: 800, color: '#1e293b',
+              lineHeight: 1.25, letterSpacing: '-0.02em',
+              margin: 0,
+            }}>
+              Be someone's reason{' '}
+              <span style={{ color: '#dc2626' }}>to live.</span>
+            </p>
+          </motion.div>
+
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{
+              fontSize: 'clamp(0.92rem, 1.2vw, 1.05rem)',
+              fontWeight: 500,
+              color: '#475569', lineHeight: 1.7,
+              maxWidth: '560px', marginBottom: '1.5rem',
+            }}
+          >
+            Connecting voluntary blood donors with patients in urgent need —
+            verified by DYFI Block Committee coordinators across Kerala.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.38 }}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'center', marginBottom: '1.6rem' }}
+          >
+            <button
+              type="button"
+              onClick={() => setIsCommunityModalOpen(true)}
+              style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
-                fontSize: '0.62rem', fontWeight: 800,
-                letterSpacing: '0.22em', color: '#dc2626',
-                textTransform: 'uppercase',
-              }}>
-                <span style={{ width: 22, height: 2, background: '#dc2626', display: 'inline-block', borderRadius: 2, flexShrink: 0 }} />
-                DYFI Kasaragod · JeevaLink
-              </span>
-            </motion.div>
-
-            {/* iDonate wordmark */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              style={{ marginBottom: '0.85rem' }}
+                padding: '13px 26px',
+                background: '#dc2626', color: '#fff',
+                fontWeight: 800, fontSize: '0.9rem',
+                letterSpacing: '0.01em', borderRadius: '13px', border: 'none',
+                boxShadow: '0 8px 24px rgba(220,38,38,0.32)',
+                cursor: 'pointer', transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(220,38,38,0.42)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.32)'; }}
             >
-              <div style={{
-                fontSize: '0.78rem',
-                fontWeight: 600, color: '#94a3b8',
-                marginBottom: '0.25rem', letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-              }}>
-                Introducing
+              <Users style={{ width: 16, height: 16 }} />
+              Enter Community
+              <ArrowRight style={{ width: 15, height: 15 }} />
+            </button>
+
+            <Link
+              to="/donor/search"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '7px',
+                padding: '13px 22px',
+                background: 'rgba(255,255,255,0.92)', color: '#0f172a',
+                fontWeight: 700, fontSize: '0.9rem',
+                borderRadius: '13px', border: '1.5px solid rgba(226,232,240,0.9)',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 14px rgba(15,23,42,0.06)',
+                textDecoration: 'none', transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#dc2626'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(226,232,240,0.9)'; e.currentTarget.style.color = '#0f172a'; }}
+            >
+              <Search style={{ width: 15, height: 15, color: '#dc2626' }} />
+              Search Donors
+            </Link>
+
+            <Link
+              to="/requests"
+              style={{
+                display: 'inline-flex', alignItems: 'center',
+                padding: '13px 20px',
+                background: 'rgba(255,255,255,0.85)', color: '#334155',
+                fontWeight: 700, fontSize: '0.9rem',
+                borderRadius: '13px', border: '1.5px solid rgba(226,232,240,0.85)',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 14px rgba(15,23,42,0.04)',
+                textDecoration: 'none', transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#334155'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.85)'; }}
+            >
+              Request Blood
+            </Link>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            style={{
+              display: 'flex', gap: '3rem', justifyContent: 'center',
+              paddingTop: '1.25rem', borderTop: '1px solid rgba(226,232,240,0.85)',
+              width: '100%', maxWidth: '520px',
+            }}
+          >
+            {[
+              { val: 'Kerala-wide', label: 'Donor Reach' },
+              { val: 'Verified', label: 'Block Committees' },
+              { val: 'Real-time', label: 'SOS Response' },
+            ].map(s => (
+              <div key={s.label} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 'clamp(0.95rem, 1.3vw, 1.15rem)', fontWeight: 800, color: '#dc2626', marginBottom: 2, lineHeight: 1.2 }}>{s.val}</div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.label}</div>
               </div>
-              <h1 style={{
-                fontFamily: "'Inter', system-ui, sans-serif",
-                fontSize: 'clamp(3.2rem, 5.8vw, 4.8rem)',
-                fontWeight: 900,
-                letterSpacing: '-0.04em',
-                lineHeight: 0.92,
-                color: '#0f172a',
-                margin: 0,
-              }}>
-                <span style={{ color: '#dc2626' }}>i</span>Donate
-              </h1>
-            </motion.div>
-
-            {/* Tagline */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              style={{ marginBottom: '0.85rem' }}
-            >
-              <p style={{
-                fontSize: 'clamp(1.05rem, 1.8vw, 1.3rem)',
-                fontWeight: 700, color: '#1e293b',
-                lineHeight: 1.25, letterSpacing: '-0.02em',
-                margin: 0,
-              }}>
-                Be someone's reason{' '}
-                <span style={{ color: '#dc2626' }}>to live.</span>
-              </p>
-            </motion.div>
-
-            {/* Description */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              style={{
-                fontSize: '0.85rem', fontWeight: 500,
-                color: '#64748b', lineHeight: 1.7,
-                maxWidth: '440px', marginBottom: '1.35rem',
-              }}
-            >
-              Connecting voluntary blood donors with patients in urgent need —
-              verified by DYFI Block Committee coordinators across Kerala.
-            </motion.p>
-
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.38 }}
-              style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '1.6rem' }}
-            >
-              <button
-                type="button"
-                onClick={() => setIsCommunityModalOpen(true)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '7px',
-                  padding: '11px 22px',
-                  background: '#dc2626', color: '#fff',
-                  fontWeight: 800, fontSize: '0.82rem',
-                  letterSpacing: '0.01em', borderRadius: '12px', border: 'none',
-                  boxShadow: '0 6px 20px rgba(220,38,38,0.28)',
-                  cursor: 'pointer', transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 26px rgba(220,38,38,0.36)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(220,38,38,0.28)'; }}
-              >
-                <Users style={{ width: 14, height: 14 }} />
-                Enter Community
-                <ArrowRight style={{ width: 13, height: 13 }} />
-              </button>
-
-              <Link
-                to="/donor/search"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  padding: '11px 18px',
-                  background: 'rgba(255,255,255,0.9)', color: '#0f172a',
-                  fontWeight: 700, fontSize: '0.82rem',
-                  borderRadius: '12px', border: '1.5px solid rgba(226,232,240,0.85)',
-                  backdropFilter: 'blur(8px)',
-                  textDecoration: 'none', transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#dc2626'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(226,232,240,0.85)'; e.currentTarget.style.color = '#0f172a'; }}
-              >
-                <Search style={{ width: 13, height: 13, color: '#dc2626' }} />
-                Search Donors
-              </Link>
-
-              <Link
-                to="/requests"
-                style={{
-                  display: 'inline-flex', alignItems: 'center',
-                  padding: '11px 16px',
-                  background: 'rgba(255,255,255,0.75)', color: '#475569',
-                  fontWeight: 700, fontSize: '0.82rem',
-                  borderRadius: '12px', border: '1.5px solid rgba(226,232,240,0.75)',
-                  backdropFilter: 'blur(8px)',
-                  textDecoration: 'none', transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.75)'; }}
-              >
-                Request Blood
-              </Link>
-            </motion.div>
-
-            {/* Stats row */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              style={{
-                display: 'flex', gap: '2rem',
-                paddingTop: '1.1rem', borderTop: '1px solid rgba(226,232,240,0.8)',
-              }}
-            >
-              {[
-                { val: 'Kerala-wide', label: 'Donor Reach' },
-                { val: 'Verified', label: 'Block Committees' },
-                { val: 'Real-time', label: 'SOS Response' },
-              ].map(s => (
-                <div key={s.label}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#dc2626', marginBottom: 2, lineHeight: 1.2 }}>{s.val}</div>
-                  <div style={{ fontSize: '0.58rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.label}</div>
-                </div>
-              ))}
-            </motion.div>
-          </div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
