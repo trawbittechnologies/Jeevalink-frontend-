@@ -1032,12 +1032,12 @@ export default function UserManagement() {
               <div className="bg-red-600 p-6 relative overflow-hidden shrink-0">
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center text-white">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
                       <Plus className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-white text-lg font-black tracking-tight">Add New Member / User</h3>
-                      <p className="text-red-100 text-[10px] font-medium">Password credentials will be generated and emailed directly to the member</p>
+                      <h3 className="text-white text-lg font-black tracking-tight">Add New Donor / Member</h3>
+                      <p className="text-red-100 text-[10px] font-medium">Verify donor email via OTP to confirm credentials & activate account</p>
                     </div>
                   </div>
                   <button 
@@ -1091,12 +1091,27 @@ export default function UserManagement() {
                       </label>
                     )}
                   </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Role *</label>
+                    <select
+                      value={form.role || 'donor'}
+                      onChange={e => setForm({ ...form, role: e.target.value })}
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-semibold"
+                    >
+                      <option value="donor">Donor (Voluntary Blood Donor)</option>
+                      <option value="user">User / Regular Member</option>
+                      <option value="receiver">Receiver / Patient</option>
+                    </select>
+                  </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Blood Group *</label>
                     <select value={form.blood_group || 'A+'} onChange={e => setForm({ ...form, blood_group: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
                       {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => <option key={bg} value={bg}>{bg}</option>)}
                     </select>
                   </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Gender / Sex *</label>
                     <select value={form.sex || 'male'} onChange={e => setForm({ ...form, sex: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
@@ -1105,6 +1120,7 @@ export default function UserManagement() {
                       <option value="transgender">Transgender</option>
                     </select>
                   </div>
+
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <label className="block text-[10px] font-bold text-gray-500 uppercase">Date of Birth *</label>
@@ -1118,20 +1134,140 @@ export default function UserManagement() {
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" 
                       required 
                     />
-                    <p className="text-[9px] text-slate-400 mt-0.5">Only 18+ years old allowed (Compared against current year & month)</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">Only 18+ years old allowed</p>
                   </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Primary Name *</label>
                     <input type="text" value={form.primary_name || ''} onChange={e => setForm({ ...form, primary_name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="Enter primary name" />
                   </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Mobile *</label>
                     <input type="tel" value={form.mobile || ''} onChange={e => setForm({ ...form, mobile: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="10-digit mobile number" />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Email *</label>
-                    <input type="email" value={form.email || ''} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="user@example.com" />
+
+                  {/* Donor Email Field with Integrated OTP Verification */}
+                  <div className="col-span-2 bg-slate-50/90 border border-slate-200/90 p-4 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-[10px] font-extrabold text-gray-600 uppercase tracking-wider">
+                        Donor Email Address *
+                      </label>
+                      {addOtpVerified && form.email && form.email.trim().toLowerCase() === verifiedEmail.toLowerCase() ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Email Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                          <AlertTriangle className="w-3 h-3 text-amber-600" /> OTP Verification Required
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type="email"
+                          value={form.email || ''}
+                          disabled={addOtpVerified}
+                          onChange={(e) => {
+                            const newEmail = e.target.value;
+                            setForm({ ...form, email: newEmail });
+                            if (addOtpVerified && newEmail.trim().toLowerCase() !== verifiedEmail.toLowerCase()) {
+                              setAddOtpVerified(false);
+                              setAddOtpSent(false);
+                              setVerifiedEmail('');
+                            }
+                          }}
+                          className={`w-full pl-10 pr-3 py-2.5 bg-white border rounded-xl text-sm font-semibold outline-none transition-all ${
+                            addOtpVerified
+                              ? 'border-emerald-300 text-emerald-900 bg-emerald-50/40 cursor-not-allowed'
+                              : 'border-slate-200 text-slate-900 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                          }`}
+                          required
+                          placeholder="donor@example.com"
+                        />
+                      </div>
+
+                      {!addOtpVerified ? (
+                        <button
+                          type="button"
+                          onClick={handleSendAddOtp}
+                          disabled={addOtpLoading || addOtpCooldown > 0 || !form.email?.trim()}
+                          className="px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer disabled:cursor-not-allowed"
+                          title={addOtpCooldown > 0 ? `Wait ${addOtpCooldown}s before resending` : 'Send OTP to donor email'}
+                        >
+                          {addOtpLoading ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <KeyRound className="w-3.5 h-3.5" />
+                          )}
+                          {addOtpCooldown > 0
+                            ? `Resend (${addOtpCooldown}s)`
+                            : (addOtpSent ? 'Resend OTP' : 'Send OTP')}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAddOtpVerified(false);
+                            setAddOtpSent(false);
+                            setAddOtpCode('');
+                            setVerifiedEmail('');
+                          }}
+                          className="px-3 py-2 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition cursor-pointer"
+                        >
+                          Change
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Interactive OTP Entry Box */}
+                    {addOtpSent && !addOtpVerified && (
+                      <div className="p-3.5 bg-red-50/80 border border-red-200 rounded-xl space-y-2.5 animate-fade-in-up">
+                        <div className="flex items-center justify-between text-xs">
+                          <p className="font-bold text-red-900">
+                            Enter the 6-digit OTP sent to <span className="font-mono underline">{form.email}</span>
+                          </p>
+                          <span className="text-[10px] text-red-600 font-semibold">Expires in 10m</span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            maxLength={6}
+                            value={addOtpCode}
+                            onChange={(e) => setAddOtpCode(e.target.value.replace(/\D/g, ''))}
+                            placeholder="6-digit OTP"
+                            className="w-full text-center tracking-[0.4em] font-mono text-base font-bold py-2 bg-white border border-red-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleVerifyAddOtp}
+                            disabled={addOtpLoading || addOtpCode.trim().length !== 6}
+                            className="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                          >
+                            {addOtpLoading ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            )}
+                            Verify OTP
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Verification Success Box */}
+                    {addOtpVerified && (
+                      <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 animate-fade-in-up">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Donor email verified successfully! You can now complete and submit registration.</span>
+                      </div>
+                    )}
                   </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Place / City *</label>
                     <input type="text" value={form.place || form.city || ''} onChange={e => setForm({ ...form, place: e.target.value, city: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Enter place / city" required />
@@ -1162,10 +1298,21 @@ export default function UserManagement() {
                     className="flex-1 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
                     Cancel
                   </button>
-                  <button type="submit" disabled={loading}
-                    className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} 
-                    Create User
+                  <button
+                    type="submit"
+                    disabled={loading || !addOtpVerified}
+                    className={`flex-1 py-3 text-white text-xs font-bold rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm ${
+                      addOtpVerified
+                        ? 'bg-red-600 hover:bg-red-700 cursor-pointer shadow-red-600/20'
+                        : 'bg-slate-400 cursor-not-allowed opacity-70'
+                    }`}
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )} 
+                    {addOtpVerified ? 'Create User / Donor' : 'Verify Email OTP to Create'}
                   </button>
                 </div>
               </form>
