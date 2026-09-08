@@ -7,6 +7,7 @@ import {
   BarChart, Bar, Legend
 } from 'recharts';
 import api from '../store/api.js';
+import { useAuthStore } from '../store/authStore.js';
 
 const growthOverviewData = [
   { name: 'Jan', users: 0, vols: 0 },
@@ -28,6 +29,7 @@ const weeklyActivityData = [
 ];
 
 export default function AdminDashboard() {
+  const { user } = useAuthStore();
   const [blockData, setBlockData] = useState({
     blockCommitteeName: 'Central',
     total_users: 0,
@@ -61,7 +63,7 @@ export default function AdminDashboard() {
 
       if (resMetrics.data?.success) {
         setBlockData({
-          blockCommitteeName: resMetrics.data.data?.city || 'Block Committee',
+          blockCommitteeName: resMetrics.data.data?.city || user?.city || user?.block || 'Block Committee',
           total_users: resMetrics.data.data?.total_users || 0,
           total_volunteers: resMetrics.data.data?.total_volunteers || 0,
           volunteers: resVolunteers.data?.data || [],
@@ -94,7 +96,7 @@ export default function AdminDashboard() {
         email: email,
         mobile: person1Contact,
         city: meghalaName || 'Local Unit',
-        district: 'Ernakulam',
+        district: user?.district || 'Kasaragod',
       });
 
       if (res.data?.success) {
@@ -159,25 +161,49 @@ export default function AdminDashboard() {
     ...meghalaAdmins.map(ba => ba.meghala).filter(Boolean)
   ]));
 
+  const rawBlock = blockData.blockCommitteeName || user?.city || user?.block || 'Block Committee';
+  const cleanBlock = rawBlock.replace(/^dyfi\s*/i, '').replace(/\s*block(\s*committee)?$/i, '').trim() || rawBlock;
+  const formattedBlock = cleanBlock.charAt(0).toUpperCase() + cleanBlock.slice(1);
+  const displayBlock = `DYFI ${formattedBlock}`;
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-red-50 border border-red-200 rounded-full text-red-800 text-xs font-bold uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-4 h-4 text-red-600" /> Block Admin Portal ({blockData.blockCommitteeName})
+      {/* Modern Minimal Header */}
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-700 text-[11px] font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
+                {displayBlock} Block Admin
+              </span>
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                {displayBlock}
+              </h1>
+              <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-medium">
+                Manage Meghala Committees and Block Analytics
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-black text-slate-900">Block Administration</h1>
-          <p className="text-slate-500 text-xs mt-1">Manage Meghala Committees and Block Analytics</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setHidePasswords(!hidePasswords)} className="px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold shadow-sm flex items-center gap-1.5 cursor-pointer hover:bg-slate-50 transition">
-            {hidePasswords ? <EyeOff className="w-4 h-4 text-amber-600" /> : <Eye className="w-4 h-4 text-emerald-600" />}
-            {hidePasswords ? 'Hide Passwords' : 'Show Passwords'}
-          </button>
-          <button onClick={loadData} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold shadow-sm flex items-center gap-2 cursor-pointer hover:bg-slate-50 transition">
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
-          </button>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setHidePasswords(!hidePasswords)}
+              className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold shadow-xs hover:shadow-sm flex items-center gap-1.5 cursor-pointer hover:bg-slate-50 transition"
+            >
+              {hidePasswords ? <EyeOff className="w-4 h-4 text-amber-600" /> : <Eye className="w-4 h-4 text-emerald-600" />}
+              {hidePasswords ? 'Hide Passwords' : 'Show Passwords'}
+            </button>
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="p-2.5 bg-slate-50 hover:bg-slate-100 active:scale-95 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center cursor-pointer disabled:opacity-50"
+              title="Refresh Data"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 

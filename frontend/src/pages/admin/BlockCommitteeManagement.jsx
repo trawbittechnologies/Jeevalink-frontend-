@@ -4,6 +4,7 @@ import {
   CheckCircle2, Download, ShieldCheck
 } from 'lucide-react';
 import api from '../../store/api.js';
+import { useAuthStore } from '../../store/authStore.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 
 function parseBlockAdminContacts(ba) {
@@ -30,8 +31,9 @@ function parseBlockAdminContacts(ba) {
 }
 
 export default function BlockCommitteeManagement() {
+  const { user } = useAuthStore();
   const [blockAdmins, setBlockAdmins] = useState([]);
-  const [district, setDistrict] = useState('Kozhikode');
+  const [district, setDistrict] = useState(user?.district || 'Kasaragod');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -233,6 +235,10 @@ export default function BlockCommitteeManagement() {
   const activeCount = blockAdmins.filter(ba => ba.status === 'Active').length;
   const suspendedCount = blockAdmins.filter(ba => ba.status === 'Suspended').length;
 
+  const rawDistrict = district || user?.district || 'Kasaragod';
+  const cleanDistrict = rawDistrict.replace(/^dyfi\s*/i, '').trim();
+  const displayDistrict = `DYFI ${cleanDistrict}`;
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 select-none">
 
@@ -240,10 +246,10 @@ export default function BlockCommitteeManagement() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-6 rounded-3xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 rounded-full text-red-700 dark:text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Building2 className="w-4 h-4 text-red-600" /> District Block Committees ({district})
+            <Building2 className="w-4 h-4 text-red-600" /> {displayDistrict} Block Committees
           </div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100">Block Committee Management</h1>
-          <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">Register, configure, and oversee Block Committees across {district} District</p>
+          <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">Register, configure, and oversee Block Committees across {displayDistrict} District</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
