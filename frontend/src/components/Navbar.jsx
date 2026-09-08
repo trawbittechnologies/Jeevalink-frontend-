@@ -10,6 +10,7 @@ import JeevaLinkLogo from './JeevaLinkLogo.jsx';
 
 const publicLinks = [
   { label: 'Home', to: '/' },
+  { label: 'Partnerships', to: '/#partnerships' },
   { label: 'Find Donors', to: '/donor/search' },
   { label: 'Requests', to: '/requests' },
   { label: 'Directory', to: '/volunteer-directory' },
@@ -52,6 +53,20 @@ export default function Navbar() {
     navigate('/login');
   };
 
+  const handleLinkClick = (e, linkTo) => {
+    if (linkTo.startsWith('/#')) {
+      const targetId = linkTo.replace('/#', '');
+      if (location.pathname === '/') {
+        e.preventDefault();
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+    setMobileMenuOpen(false);
+  };
+
   const dashboardLink =
     user?.role === 'technical_admin' ? '/technical-admin/dashboard' :
       user?.role === 'super_admin' ? '/super-admin/dashboard' :
@@ -60,7 +75,12 @@ export default function Navbar() {
             user?.role === 'unit_squad' ? '/unit-squad/dashboard' :
               '/dashboard';
 
-  const isActive = (to) => location.pathname === to;
+  const isActive = (to) => {
+    if (to.includes('#')) {
+      return location.pathname === '/' && location.hash === to.substring(1);
+    }
+    return location.pathname === to && !location.hash;
+  };
 
   const getMiniIcon = (type) => {
     switch (type) {
@@ -116,6 +136,7 @@ export default function Navbar() {
             <Link
               key={link.to}
               to={link.to}
+              onClick={(e) => handleLinkClick(e, link.to)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 ${isActive(link.to)
                   ? 'text-red-600 bg-red-50'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -301,7 +322,7 @@ export default function Navbar() {
                   <Link
                     key={link.to}
                     to={link.to}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={(e) => handleLinkClick(e, link.to)}
                     className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                       isActive(link.to)
                         ? 'text-red-600 bg-red-50'

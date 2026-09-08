@@ -5,7 +5,7 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, Megaphone, HeartHandshake, X
+  Building2, Megaphone, HeartHandshake, Handshake, X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
@@ -43,6 +43,7 @@ const volunteerLinks = [
 
 const blockAdminLinks = [
   { to: '/block-admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
+  { to: '/admin/partners', label: 'Manage Partners', icon: Handshake },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/admin/volunteers', label: 'Add & Manage Volunteers', icon: Users },
@@ -56,6 +57,7 @@ const blockAdminLinks = [
 
 const superAdminLinks = [
   { to: '/super-admin/dashboard', label: 'District Dashboard', icon: LayoutDashboard },
+  { to: '/admin/partners', label: 'Manage Partners', icon: Handshake },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/super-admin/blocks', label: 'Manage Block Committees', icon: Building2 },
@@ -68,6 +70,7 @@ const superAdminLinks = [
 
 const technicalAdminLinks = [
   { to: '/technical-admin/dashboard', label: 'Technical Dashboard', icon: LayoutDashboard },
+  { to: '/admin/partners', label: 'Manage Partners', icon: Handshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/technical-reports', label: 'Tech Reports Queue', icon: ShieldAlert },
   { to: '/profile', label: 'My Profile', icon: User },

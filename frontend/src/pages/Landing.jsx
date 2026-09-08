@@ -196,6 +196,17 @@ export default function Landing() {
     fetchPartners();
     fetchRequests();
     fetchAwarenessSettings();
+
+    // Check if URL has hash (e.g. #partnerships)
+    if (window.location.hash) {
+      const id = window.location.hash.replace('#', '');
+      const elem = document.getElementById(id);
+      if (elem) {
+        setTimeout(() => {
+          elem.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    }
   }, [fetchPartners, fetchRequests, fetchAwarenessSettings]);
 
   // Extract active real requests for display
@@ -299,7 +310,7 @@ export default function Landing() {
       </section>
 
       {/* ── PARTNERSHIP DETAILS SECTION (AFTER HERO SECTION) ─────────────── */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-white via-slate-50/60 to-white border-b border-slate-100 relative overflow-hidden">
+      <section id="partnerships" className="py-16 sm:py-20 bg-gradient-to-b from-white via-slate-50/60 to-white border-b border-slate-100 relative overflow-hidden scroll-mt-16">
         {/* Ambient Decorative Backlight */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[320px] bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
 

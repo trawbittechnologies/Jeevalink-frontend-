@@ -209,6 +209,11 @@ export default function App() {
                     <SuperAdminManagement />
                   </ProtectedRoute>
                 } />
+                <Route path="/technical-admin/partners" element={
+                  <ProtectedRoute roles={['technical_admin', 'super_admin', 'block_admin']}>
+                    <PartnerManagement />
+                  </ProtectedRoute>
+                } />
 
                 {/* Super Admin Dashboard */}
                 <Route path="/super-admin/dashboard" element={

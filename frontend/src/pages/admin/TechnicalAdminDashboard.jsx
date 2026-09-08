@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ShieldAlert, RefreshCw, ExternalLink,
   TrendingUp, Activity, BarChart3, PieChart as PieIcon,
-  Video, Upload, Save, Film, CheckCircle2, Image, Sparkles
+  Video, Upload, Save, Film, CheckCircle2, Image, Sparkles, Handshake
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -221,6 +221,12 @@ export default function TechnicalAdminDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to="/admin/partners"
+              className="px-4 sm:px-5 py-2.5 sm:py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"
+            >
+              <Handshake className="w-4 h-4 stroke-[2.5]" /> Manage Partners
+            </Link>
             <Link
               to="/technical-admin/super-admins"
               className="px-4 sm:px-5 py-2.5 sm:py-3 bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl text-xs font-black shadow-lg transition flex items-center gap-2 cursor-pointer transform hover:scale-105"

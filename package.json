@@ -4,9 +4,9 @@
   "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx --yes concurrently \"npm --prefix frontend run dev\" \"php -S 127.0.0.1:8000 -t backend/public\"",
+    "dev": "npx --yes concurrently \"npm --prefix frontend run dev\" \"npm run server\"",
     "client": "npm --prefix frontend run dev",
-    "server": "php -S 127.0.0.1:8000 -t backend/public",
+    "server": "cd jeevalink-backend-laravel && php artisan serve --port=8000",
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint",
     "preview": "npm --prefix frontend run preview"
