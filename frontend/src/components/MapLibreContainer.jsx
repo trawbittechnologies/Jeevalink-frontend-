@@ -98,12 +98,14 @@ export default function MapLibreContainer({
       map.remove();
       mapRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update Tile Style dynamically
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
     mapRef.current.setStyle(TILE_STYLES[tileStyle]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tileStyle]);
 
   // Recenter map if center changes
@@ -290,6 +292,7 @@ export default function MapLibreContainer({
     }
 
     updateOSRMRoute();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeStart?.lat, routeStart?.lng, routeEnd?.lat, routeEnd?.lng, mapLoaded]);
 
   return (

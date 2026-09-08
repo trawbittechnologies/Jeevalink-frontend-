@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { BellRing, AlertCircle, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { requestNotificationPermission, removeNotificationToken } from '../services/firebaseMessaging';
+import { useState } from 'react';
+import { BellRing, XCircle, Loader2 } from 'lucide-react';
+import { requestNotificationPermission } from '../services/firebaseMessaging';
 
 const STATUS_STATES = {
   UNSUPPORTED: 'unsupported',
@@ -14,27 +14,22 @@ const STATUS_STATES = {
 };
 
 export default function NotificationPermissionBanner({ onPermissionGranted }) {
-  const [status, setStatus] = useState(STATUS_STATES.LOADING);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  useEffect(() => {
-    checkInitialState();
-  }, []);
-
-  const checkInitialState = () => {
+  const getInitialState = () => {
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setStatus(STATUS_STATES.UNSUPPORTED);
-      return;
+      return STATUS_STATES.UNSUPPORTED;
     }
 
     if (Notification.permission === 'granted') {
-      setStatus(STATUS_STATES.GRANTED);
+      return STATUS_STATES.GRANTED;
     } else if (Notification.permission === 'denied') {
-      setStatus(STATUS_STATES.DENIED);
+      return STATUS_STATES.DENIED;
     } else {
-      setStatus(STATUS_STATES.NOT_REQUESTED);
+      return STATUS_STATES.NOT_REQUESTED;
     }
   };
+
+  const [status, setStatus] = useState(getInitialState);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleEnableNotifications = async () => {
     setStatus(STATUS_STATES.LOADING);

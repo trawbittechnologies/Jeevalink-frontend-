@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { normalizeRole } from '../utils/rbac.js';
-import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import BloodHeroAssistant from '../components/BloodHeroAssistant.jsx';
