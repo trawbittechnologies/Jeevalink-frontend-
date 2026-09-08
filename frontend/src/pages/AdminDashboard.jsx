@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  ShieldCheck, RefreshCw, Eye, EyeOff, X, Users, HeartPulse, Activity, Plus, Key, Trash2
+  ShieldCheck, RefreshCw, Eye, X, Users, HeartPulse, Activity, Plus, Key, Trash2
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -41,7 +41,6 @@ export default function AdminDashboard() {
 
   const [meghalaAdmins, setMeghalaAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hidePasswords, setHidePasswords] = useState(true);
   const [viewUser, setViewUser] = useState(null);
 
   // New Meghala Admin Form state
@@ -188,13 +187,6 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              onClick={() => setHidePasswords(!hidePasswords)}
-              className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold shadow-xs hover:shadow-sm flex items-center gap-1.5 cursor-pointer hover:bg-slate-50 transition"
-            >
-              {hidePasswords ? <EyeOff className="w-4 h-4 text-amber-600" /> : <Eye className="w-4 h-4 text-emerald-600" />}
-              {hidePasswords ? 'Hide Passwords' : 'Show Passwords'}
-            </button>
             <button
               onClick={loadData}
               disabled={loading}
