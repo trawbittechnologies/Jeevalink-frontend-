@@ -15,21 +15,21 @@ const app = initializeApp(firebaseConfig);
 
 let messaging = null;
 
+// A promise that resolves to the messaging instance (or null).
+// Stored so any caller can await it instead of reading a potentially-null variable.
+let messagingReady = Promise.resolve(null);
+
 // Auto-initialize if notification permission is already granted
 // so foreground message listeners work on page load without needing
 // the user to click "Allow Notifications" again.
-(async () => {
-  try {
-    if (typeof window !== 'undefined' && Notification.permission === 'granted') {
-      const supported = await isSupported();
-      if (supported) {
-        messaging = getMessaging(app);
-      }
+if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+  messagingReady = isSupported().then((supported) => {
+    if (supported) {
+      messaging = getMessaging(app);
     }
-  } catch (_) {
-    // silently ignore — will be initialized later when user grants permission
-  }
-})();
+    return messaging;
+  }).catch(() => null);
+}
 
 export const initializeMessaging = async () => {
   try {
@@ -102,7 +102,9 @@ export const removeNotificationToken = async () => {
   }
 };
 
-export const onForegroundMessage = (callback) => {
-  if (!messaging) return () => {};
-  return onMessage(messaging, callback);
+export const onForegroundMessage = async (callback) => {
+  // Wait for messaging to be initialized (handles the async init race condition)
+  const msg = messaging || await messagingReady || await initializeMessaging();
+  if (!msg) return () => {};
+  return onMessage(msg, callback);
 };

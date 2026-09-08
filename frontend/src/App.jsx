@@ -161,30 +161,30 @@ export default function App() {
   }, [token, loadProfile]);
 
   useEffect(() => {
-    // Small delay to allow messaging to auto-initialize after permission check
-    const timer = setTimeout(() => {
-      const unsubscribe = onForegroundMessage((payload) => {
-        console.log('Foreground message received:', payload);
-        const title = payload.notification?.title || 'New Notification';
-        const body = payload.notification?.body || '';
+    let unsubscribe = null;
 
-        // Show rich toast with title + body
-        triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
+    onForegroundMessage((payload) => {
+      console.log('[FCM] Foreground message received:', payload);
+      const title = payload.notification?.title || 'New Notification';
+      const body = payload.notification?.body || '';
 
-        // Also show a native browser notification (works even when tab is in focus)
-        if (Notification.permission === 'granted') {
-          new Notification(title, {
-            body,
-            icon: '/logo.png',
-          });
-        }
-      });
-      return () => {
-        if (unsubscribe) unsubscribe();
-      };
-    }, 1500);
-    return () => clearTimeout(timer);
+      // Show toast with title + body
+      triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
+
+      // Also show a native browser notification
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon: '/logo.png' });
+      }
+    }).then((unsub) => {
+      unsubscribe = unsub;
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, [triggerToast]);
+
+
 
   return (
     <BrowserRouter>
