@@ -275,7 +275,12 @@ export default function UserManagement() {
       return;
     }
     if (!form.email?.trim()) {
-      triggerToast('Email address is required.', 'warning');
+      triggerToast('Donor email address is required.', 'warning');
+      return;
+    }
+    const emailTrimmed = (form.email || '').trim().toLowerCase();
+    if (!addOtpVerified || emailTrimmed !== verifiedEmail.toLowerCase()) {
+      triggerToast('Email verification required. Please click "Send OTP", enter the code, and confirm verification before adding the donor.', 'warning');
       return;
     }
     if (!form.place?.trim() && !form.city?.trim()) {
@@ -307,6 +312,11 @@ export default function UserManagement() {
     if (res.success) {
       setShowAddModal(false);
       setForm({});
+      setAddOtpSent(false);
+      setAddOtpCode('');
+      setAddOtpVerified(false);
+      setVerifiedEmail('');
+      setAddOtpCooldown(0);
     }
     setLoading(false);
   };
@@ -332,7 +342,7 @@ export default function UserManagement() {
           onClick={() => {
             const autoDistrict = currentUser?.district || 'Kozhikode';
             setForm({
-              role: 'user',
+              role: 'donor',
               blood_group: 'A+',
               sex: 'male',
               dob: '',
@@ -345,11 +355,16 @@ export default function UserManagement() {
               district: autoDistrict,
               profile_picture: null,
             });
+            setAddOtpSent(false);
+            setAddOtpCode('');
+            setAddOtpVerified(false);
+            setVerifiedEmail('');
+            setAddOtpCooldown(0);
             setShowAddModal(true);
           }}
           className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md shadow-red-600/20"
         >
-          <Plus className="w-4 h-4" /> Add User
+          <Plus className="w-4 h-4" /> Add Donor / Member
         </button>
       </div>
 
