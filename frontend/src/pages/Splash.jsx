@@ -60,7 +60,7 @@ export default function Splash({ onComplete }) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
         className="flex items-center justify-center"
-        style={{ width: 'min(70vw, 240px)', height: 'min(70vw, 240px)' }}
+        style={{ width: 'min(75vw, 280px)', height: 'min(75vw, 280px)' }}
       >
         <div ref={lottieContainerRef} style={{ width: '100%', height: '100%', overflow: 'visible' }} />
       </motion.div>

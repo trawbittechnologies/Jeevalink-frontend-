@@ -48,6 +48,27 @@ export default function BloodHeroAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isThinking]);
 
+  // Lock body scroll on mobile when chat is open
+  useEffect(() => {
+    if (isOpen) {
+      const handleResize = () => {
+        if (window.innerWidth < 640) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      };
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('resize', handleResize);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isOpen]);
+
   // Hide initial greeting tooltip after 7 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -174,21 +195,21 @@ export default function BloodHeroAssistant() {
         onClose={() => setIsCommunityModalOpen(false)}
       />
 
-      <div className="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 z-[9990] flex flex-col items-end pointer-events-none select-none">
+      <div className={`fixed bottom-0 right-0 z-[9990] flex flex-col items-end pointer-events-none select-none ${isOpen ? 'inset-0 sm:inset-auto' : ''}`}>
         <AnimatePresence>
           {/* Expanded Assistant Chatbox Dialog */}
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-              className="pointer-events-auto mb-4 w-80 sm:w-[410px] rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-2xl shadow-slate-900/20 overflow-hidden flex flex-col h-[540px] max-h-[85vh]"
+              className="pointer-events-auto fixed inset-0 sm:static sm:inset-auto w-full h-[100dvh] sm:w-[410px] sm:h-[540px] sm:max-h-[85vh] sm:rounded-3xl bg-white sm:bg-white/95 sm:backdrop-blur-xl border-0 sm:border sm:border-slate-200/90 shadow-2xl sm:shadow-slate-900/20 overflow-hidden flex flex-col z-[9999] sm:z-auto sm:mb-2 sm:mr-3"
             >
               {/* Creative Glass Header */}
-              <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0 shadow-md">
+              <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0 shadow-md pt-[max(1rem,env(safe-area-inset-top))]">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/40 shadow-md flex items-center justify-center bg-white">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/40 shadow-md flex items-center justify-center bg-white">
                     <img src="/hemo_avatar.png" alt="Hemo Profile" className="w-full h-full object-cover" />
                   </div>
                   <div>
@@ -203,30 +224,28 @@ export default function BloodHeroAssistant() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={handleClearChat}
                     title="Reset Chat"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 transition-all cursor-pointer"
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white/90 transition-all cursor-pointer"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
+                    <RotateCcw className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
                     title="Close"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 transition-all cursor-pointer ml-1"
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white/90 transition-all cursor-pointer ml-1"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>
 
               {/* Chatbox Body */}
-              <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs bg-slate-50/50 scrollbar-thin">
-
-
+              <div className="p-4 space-y-4 overflow-y-auto overscroll-contain flex-1 text-xs bg-slate-50/50 scrollbar-thin">
                 {/* Quick Topic Prompts */}
                 {messages.length <= 2 && (
                   <div className="space-y-1.5">
@@ -237,10 +256,10 @@ export default function BloodHeroAssistant() {
                           key={pIdx}
                           type="button"
                           onClick={() => handleSendMessage(prompt.query)}
-                          className="w-full text-left p-2.5 rounded-xl bg-white hover:bg-red-50/60 border border-slate-200/70 hover:border-red-200 text-slate-700 hover:text-red-700 font-semibold text-[11px] transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
+                          className="w-full text-left p-3 sm:p-2.5 rounded-xl bg-white hover:bg-red-50/60 active:bg-red-100/60 border border-slate-200/70 hover:border-red-200 text-slate-700 hover:text-red-700 font-semibold text-[12px] sm:text-[11px] transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
                         >
                           <span>{prompt.label}</span>
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5" />
+                          <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5" />
                         </button>
                       ))}
                     </div>
@@ -255,14 +274,14 @@ export default function BloodHeroAssistant() {
                       className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[88%] p-3.5 rounded-2xl shadow-2xs ${msg.sender === 'user'
+                        className={`max-w-[88%] sm:max-w-[85%] p-3.5 rounded-2xl shadow-2xs ${msg.sender === 'user'
                           ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-tr-xs'
                           : msg.isError
                             ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-tl-xs'
                             : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs'
                           }`}
                       >
-                        <div className="text-[12px] whitespace-pre-wrap leading-relaxed">
+                        <div className="text-[13px] sm:text-[12px] whitespace-pre-wrap leading-relaxed">
                           {msg.sender === 'assistant' ? renderFormattedText(msg.text) : msg.text}
                         </div>
 
@@ -291,7 +310,7 @@ export default function BloodHeroAssistant() {
                     <div className="flex justify-start">
                       <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 text-slate-600 rounded-tl-xs shadow-2xs flex items-center gap-2.5">
                         <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
-                        <span className="text-[11px] font-semibold text-slate-700">Hemo is typing...</span>
+                        <span className="text-[12px] sm:text-[11px] font-semibold text-slate-700">Hemo is typing...</span>
                       </div>
                     </div>
                   )}
@@ -305,23 +324,23 @@ export default function BloodHeroAssistant() {
                 <button
                   type="button"
                   onClick={() => handleAction('/donor/search')}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 border border-slate-200 text-slate-700 hover:text-red-600 text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200 text-slate-700 hover:text-red-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  <Search className="w-3 h-3 text-red-600" />
+                  <Search className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
                   <span>Find Donors</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAction('/requests')}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 border border-slate-200 text-slate-700 hover:text-red-600 text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200 text-slate-700 hover:text-red-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  <Droplets className="w-3 h-3 text-red-600" />
+                  <Droplets className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
                   <span>Blood Requests</span>
                 </button>
               </div>
 
               {/* Chat Input Form */}
-              <div className="p-3 border-t border-slate-200/80 bg-white shrink-0">
+              <div className="p-3 border-t border-slate-200/80 bg-white shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -339,7 +358,7 @@ export default function BloodHeroAssistant() {
                   <button
                     type="submit"
                     disabled={!inputQuery.trim() || isThinking}
-                    className="p-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+                    className="p-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-95 cursor-pointer shrink-0"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -350,7 +369,7 @@ export default function BloodHeroAssistant() {
         </AnimatePresence>
 
         {/* Floating Mascot Trigger Button */}
-        <div className="relative pointer-events-auto flex items-center gap-3">
+        <div className={`relative pointer-events-auto flex items-center gap-3 ${isOpen ? 'hidden sm:flex' : 'flex'}`}>
           <AnimatePresence>
             {showTooltip && !isOpen && (
               <motion.div
@@ -377,9 +396,9 @@ export default function BloodHeroAssistant() {
               setIsOpen(!isOpen);
               setShowTooltip(false);
             }}
-            whileTap={{ scale: 0.94 }}
-            className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-xl"
-            style={{ width: 190, height: 190 }}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
+            className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-xl w-[170px] h-[145px] sm:w-[200px] sm:h-[170px] transition-transform"
           >
             <MascotVideo showBubble={!isOpen} />
           </motion.button>

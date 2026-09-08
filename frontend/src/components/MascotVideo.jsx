@@ -15,7 +15,7 @@ const creativeMessages = [
   "How can I help? 💬"
 ];
 
-export default function MascotVideo({ showBubble = true }) {
+export default function MascotVideo({ showBubble = true, className = "" }) {
   // Two separate container divs — both loaded at mount, only one visible at a time
   const containerRefs = useRef([null, null]);
   const animRefs    = useRef([null, null]);
@@ -44,6 +44,10 @@ export default function MascotVideo({ showBubble = true }) {
         loop: false,
         autoplay: idx === 0, // only the first one auto-plays
         path,
+        rendererSettings: {
+          preserveAspectRatio: 'xMidYMid meet',
+          progressiveLoad: true,
+        },
       });
       animRefs.current[idx] = anim;
 
@@ -51,7 +55,7 @@ export default function MascotVideo({ showBubble = true }) {
         const next = (idx + 1) % CHARACTER_FILES.length;
 
         // Reset the NEXT animation to frame 0, then play it
-        animRefs.current[next].goToAndPlay(0, true);
+        animRefs.current[next]?.goToAndPlay(0, true);
 
         // Instantly swap visibility — zero gap
         activeRef.current = next;
@@ -66,11 +70,11 @@ export default function MascotVideo({ showBubble = true }) {
   }, []);
 
   return (
-    <div className="relative w-full h-full overflow-visible flex items-center justify-center">
+    <div className={`relative w-full h-full overflow-visible flex items-center justify-center ${className}`}>
       {/* Speech bubble */}
       {showBubble && (
         <motion.div
-          className="absolute -top-[70px] sm:-top-[80px] left-[30%] sm:left-[20%] -translate-x-1/2 z-30 pointer-events-none w-max drop-shadow-md"
+          className="absolute -top-[55px] sm:-top-[62px] left-[32%] sm:left-[28%] -translate-x-1/2 z-30 pointer-events-none w-max drop-shadow-md"
           animate={{ y: [0, -4, 0] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         >
@@ -81,17 +85,17 @@ export default function MascotVideo({ showBubble = true }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -5, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="relative bg-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl flex flex-col items-center whitespace-nowrap cursor-pointer pointer-events-auto"
+              className="relative bg-white/95 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex flex-col items-center whitespace-nowrap cursor-pointer pointer-events-auto border border-slate-100 shadow-md"
             >
-              <p className="text-[13px] sm:text-[14px] font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1.5">
+              <p className="text-[12px] sm:text-[13px] font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1">
                 {creativeMessages[msgIdx]}
               </p>
-              <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full">
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 px-2.5 py-0.5 rounded-full shadow-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                <span className="text-[10px] font-bold text-white tracking-wider">CLICK TO CHAT</span>
+                <span className="text-[9px] font-bold text-white tracking-wider">CLICK TO CHAT</span>
               </div>
               {/* Tail */}
-              <div className="absolute -bottom-[8px] right-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-white" />
+              <div className="absolute -bottom-[7px] right-5 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-white" />
             </motion.div>
           </AnimatePresence>
         </motion.div>
@@ -102,13 +106,14 @@ export default function MascotVideo({ showBubble = true }) {
         <div
           key={idx}
           ref={el => (containerRefs.current[idx] = el)}
+          className="w-full h-full flex items-center justify-center scale-100 sm:scale-105 origin-bottom transition-transform"
           style={{
             position: 'absolute',
             inset: 0,
             overflow: 'visible',
             opacity: active === idx ? 1 : 0,
             // No transition delay — swap is instantaneous
-            transition: 'none',
+            transition: 'opacity 0.1s ease',
             pointerEvents: active === idx ? 'auto' : 'none',
           }}
         />

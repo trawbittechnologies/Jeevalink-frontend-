@@ -34,6 +34,18 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const handleLogout = () => {
     logout();
     triggerToast('Logged out successfully.', 'success');
@@ -272,9 +284,9 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[280px] bg-white z-[70] shadow-2xl flex flex-col md:hidden border-l border-slate-100"
+              className="fixed top-0 right-0 bottom-0 h-[100dvh] w-[280px] max-w-[85vw] bg-white z-[70] shadow-2xl flex flex-col md:hidden border-l border-slate-100"
             >
-              <div className="p-4 flex items-center justify-between border-b border-slate-100">
+              <div className="p-4 flex items-center justify-between border-b border-slate-100 shrink-0">
                 <JeevaLinkLogo size={32} textClassName="text-lg" showSubtitle={false} />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
@@ -284,7 +296,7 @@ export default function Navbar() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
+              <div className="flex-1 overflow-y-auto overscroll-contain py-4 px-3 flex flex-col gap-1 pb-[max(1rem,env(safe-area-inset-bottom))] scrollbar-thin">
                 {publicLinks.map((link) => (
                   <Link
                     key={link.to}
