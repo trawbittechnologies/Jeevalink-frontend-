@@ -176,13 +176,14 @@ export default function App() {
 
     // Channel 2: Raw push relay from service worker — ALWAYS fires regardless of focus state
     const handleSwMessage = (event) => {
-      const { type, title, body } = event.data || {};
-      if (type === 'FCM_PUSH' && title) {
-        console.log('[App] FCM push received via SW relay:', title, body);
-        triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
-        // Native browser notification
-        if (Notification.permission === 'granted') {
-          new Notification(title, { body, icon: '/logo.png' });
+      const { type, title, body, raw } = event.data || {};
+      if (type === 'FCM_PUSH') {
+        console.log('[App] FCM_PUSH received — title:', title, '| body:', body, '| raw:', raw);
+        if (title && title !== '(no title)') {
+          triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
+          if (Notification.permission === 'granted') {
+            new Notification(title, { body, icon: '/logo.png' });
+          }
         }
       }
     };

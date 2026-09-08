@@ -32,41 +32,46 @@ messaging.onBackgroundMessage((payload) => {
 });
 
 // ─── Raw push relay (ALWAYS fires — foreground AND background) ───────────────
-// This runs for every incoming push, regardless of page focus state.
-// It relays the notification data to all open page windows via postMessage,
-// so the React app can display an in-app toast even when onMessage doesn't fire.
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
-
+  let rawText = null;
   let payload = null;
-  try { payload = event.data.json(); } catch (_) {
-    try { payload = JSON.parse(event.data.text()); } catch (__) { return; }
+
+  // Try to read event data in all formats for debugging
+  try { rawText = event.data?.text(); } catch (_) {}
+  try { payload = event.data?.json(); } catch (_) {
+    try { payload = JSON.parse(rawText); } catch (__) {}
   }
+
+  console.log('[SW] Push event fired. raw:', rawText, 'parsed:', payload);
 
   // Extract title/body from any known FCM format
   const title = payload?.notification?.title
     || payload?.data?.title
     || payload?.title
+    || payload?.aps?.alert?.title
     || '';
   const body  = payload?.notification?.body
     || payload?.data?.body
     || payload?.body
+    || payload?.aps?.alert?.body
     || '';
 
-  if (!title && !body) return; // skip internal Firebase keep-alive pings
-
+  // Always relay to page (even without title) so we can debug in console
   event.waitUntil(
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then((clients) => {
+        console.log('[SW] Relaying to', clients.length, 'client(s)');
         clients.forEach((client) => {
           client.postMessage({
             type: 'FCM_PUSH',
-            title,
+            title: title || '(no title)',
             body,
+            raw: rawText,
             data: payload?.data || {},
           });
         });
       })
   );
 });
+
