@@ -48,11 +48,29 @@ const processSteps = [
 export default function Landing() {
   const { requests, fetchRequests, awarenessSettings, fetchAwarenessSettings } = useAppStore();
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
+  const [slideIdx, setSlideIdx] = useState(0);
 
-  const subtitleLines = [
-    { text: 'രക്തദാന സേന', lang: 'ml' },
+  const heroSlides = [
+    {
+      lang: 'ml',
+      taglinePrefix: 'ഒരാളുടെ ജീവൻ നിലനിർത്താനുള്ള ',
+      taglineHighlight: 'കാരണമാകൂ.',
+      description: 'അടിയന്തരമായി രക്തം ആവശ്യമുള്ള രോഗികളുമായി സന്നദ്ധ രക്തദാതാക്കളെ ബന്ധിപ്പിക്കുന്നു — DYFI കാസർഗോഡ് ജില്ലാ കമ്മിറ്റിയുടെ നേതൃത്വത്തിൽ സ്ഥിരീകരിച്ച രക്തദാന ശൃംഖല.',
+    },
+    {
+      lang: 'en',
+      taglinePrefix: "Be someone's reason ",
+      taglineHighlight: 'to live.',
+      description: 'Connecting voluntary blood donors with patients in urgent need — verified blood donation network led by DYFI Kasaragod District Committee.',
+    },
   ];
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIdx((prev) => (prev + 1) % heroSlides.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
 
   useEffect(() => {
     fetchRequests();
@@ -147,41 +165,85 @@ export default function Landing() {
           </motion.div>
 
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.34, ease: [0.16, 1, 0.3, 1] }}
+          {/* Rotating Tagline and Description (Malayalam ↔ English every 4 seconds) */}
+          <div
             style={{
-              fontSize: 'clamp(1.2rem, 2.5vw, 1.65rem)',
-              fontWeight: 800,
-              color: '#1e293b',
-              lineHeight: 1.4,
-              letterSpacing: '0.01em',
-              marginBottom: '0.75rem',
+              minHeight: 'clamp(115px, 16vw, 145px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '1.75rem',
+              width: '100%',
             }}
-            lang="ml"
           >
-            ഒരാളുടെ ജീവൻ നിലനിർത്താനുള്ള{' '}
-            <span style={{ color: '#dc2626' }}>കാരണമാകൂ.</span>
-          </motion.p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={slideIdx}
+                initial={{ opacity: 0, y: 8, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -8, filter: 'blur(4px)' }}
+                transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 'clamp(1.2rem, 2.5vw, 1.65rem)',
+                    fontWeight: 800,
+                    color: '#1e293b',
+                    lineHeight: heroSlides[slideIdx].lang === 'ml' ? 1.4 : 1.25,
+                    letterSpacing: heroSlides[slideIdx].lang === 'ml' ? '0.01em' : '-0.02em',
+                    marginBottom: '0.65rem',
+                  }}
+                  lang={heroSlides[slideIdx].lang}
+                >
+                  {heroSlides[slideIdx].taglinePrefix}
+                  <span style={{ color: '#dc2626' }}>{heroSlides[slideIdx].taglineHighlight}</span>
+                </p>
 
-          {/* Description */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.42 }}
-            style={{
-              fontSize: 'clamp(0.9rem, 1.3vw, 1.05rem)',
-              fontWeight: 500,
-              color: '#475569',
-              lineHeight: 1.85,
-              maxWidth: '520px',
-              marginBottom: '2rem',
-            }}
-            lang="ml"
-          >
-            അടിയന്തരമായി രക്തം ആവശ്യമുള്ള രോഗികളുമായി സന്നദ്ധ രക്തദാതാക്കളെ ബന്ധിപ്പിക്കുന്നു — DYFI കാസർഗോഡ് ജില്ലാ കമ്മിറ്റിയുടെ നേതൃത്വത്തിൽ സ്ഥിരീകരിച്ച രക്തദാന ശൃംഖല.
-          </motion.p>
+                <p
+                  style={{
+                    fontSize: 'clamp(0.9rem, 1.3vw, 1.05rem)',
+                    fontWeight: 500,
+                    color: '#475569',
+                    lineHeight: heroSlides[slideIdx].lang === 'ml' ? 1.85 : 1.7,
+                    maxWidth: '540px',
+                    margin: 0,
+                  }}
+                  lang={heroSlides[slideIdx].lang}
+                >
+                  {heroSlides[slideIdx].description}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Subtle Language Indicator dots */}
+            <div style={{ display: 'flex', gap: '6px', marginTop: '0.85rem' }}>
+              {heroSlides.map((slide, idx) => (
+                <button
+                  key={slide.lang}
+                  type="button"
+                  onClick={() => setSlideIdx(idx)}
+                  aria-label={`Switch to ${slide.lang === 'ml' ? 'Malayalam' : 'English'}`}
+                  style={{
+                    width: slideIdx === idx ? '20px' : '6px',
+                    height: '6px',
+                    borderRadius: '3px',
+                    backgroundColor: slideIdx === idx ? '#dc2626' : '#cbd5e1',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
 
           {/* CTA Buttons */}
           <motion.div
