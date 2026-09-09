@@ -272,7 +272,7 @@ export default function SuperAdminDashboard() {
               </span>
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-red-600 uppercase">
                 {displayDistrict}
               </h1>
               <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-medium">

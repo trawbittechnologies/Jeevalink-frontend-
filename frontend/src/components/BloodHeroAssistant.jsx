@@ -16,8 +16,8 @@ import MascotVideo from './MascotVideo.jsx';
 
 export default function BloodHeroAssistant() {
   const location = useLocation();
-  const allowedPaths = ['/', '/login'];
 
+  if (location.pathname === '/login') return null;
 
 
   const [isOpen, setIsOpen] = useState(false);

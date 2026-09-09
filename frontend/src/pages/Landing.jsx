@@ -325,7 +325,7 @@ export default function Landing() {
             }}
           >
             {[
-              { val: 'Kerala-wide', label: 'Donor Reach' },
+              { val: 'Kasaragod', label: 'Donor Reach' },
               { val: 'Verified', label: 'Block Committees' },
               { val: 'Real-time', label: 'SOS Response' },
             ].map(s => (
