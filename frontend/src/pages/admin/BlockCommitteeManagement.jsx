@@ -248,7 +248,7 @@ export default function BlockCommitteeManagement() {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 rounded-full text-red-700 dark:text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
             <Building2 className="w-4 h-4 text-red-600" /> {displayDistrict} Block Committees
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100">Block Committee Management</h1>
+          <h1 className="text-2xl font-black text-red-600 uppercase tracking-tight">Block Committee Management</h1>
           <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">Register, configure, and oversee Block Committees across {displayDistrict} District</p>
         </div>
 

@@ -37,7 +37,7 @@ export default function ActivityLogs() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-slate-900 text-xl font-black">Activity Logs</h1>
+          <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">Activity Logs</h1>
           <p className="text-slate-500 text-xs mt-0.5">Complete audit trail of admin actions and system events</p>
         </div>
         <div className="flex items-center gap-2 text-[10px]">

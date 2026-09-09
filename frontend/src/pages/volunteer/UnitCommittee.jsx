@@ -134,7 +134,7 @@ export default function UnitCommittee() {
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-slate-900 text-xl font-black tracking-tight">Unit Squad Management</h1>
+              <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">Unit Squad Management</h1>
               <p className="text-slate-500 text-xs mt-0.5">
                 Add local Unit Squad accounts, set manual login passwords, and track account status.
               </p>

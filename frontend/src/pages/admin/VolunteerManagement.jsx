@@ -122,7 +122,7 @@ export default function VolunteerManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all p-6 rounded-3xl border /80 shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-slate-900 text-xl font-black tracking-tight">Volunteer Management (Meghala Committee)</h1>
+            <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">Volunteer Management (Meghala Committee)</h1>
             <span className="px-2.5 py-0.5 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
               {volunteers.length} Total
             </span>

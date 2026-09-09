@@ -102,7 +102,7 @@ export default function SupportCenter() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-slate-900 text-xl font-black">Support Center</h1>
+          <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">Support Center</h1>
           <p className="text-slate-500 text-xs mt-0.5">{tickets.length} total tickets · {openCount} open</p>
         </div>
         {criticalCount > 0 && (

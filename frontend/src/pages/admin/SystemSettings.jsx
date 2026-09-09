@@ -96,7 +96,7 @@ export default function SystemSettings() {
     <div className="space-y-4 max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="text-slate-900 text-xl font-black">System Settings</h1>
+        <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">System Settings</h1>
         <p className="text-slate-500 text-xs mt-0.5">Configure admin credentials, contact info, and platform preferences</p>
       </div>
 
