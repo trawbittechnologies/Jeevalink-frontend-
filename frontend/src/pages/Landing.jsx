@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../jl-landing.css";
 import MascotVideo from "../components/MascotVideo.jsx";
 import { useAppStore } from "../store/appStore.js";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
   ArrowRight,
@@ -48,6 +48,17 @@ const processSteps = [
 export default function Landing() {
   const { requests, fetchRequests, awarenessSettings, fetchAwarenessSettings } = useAppStore();
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
+  const [langIdx, setLangIdx] = useState(0);
+
+  const subtitleLines = [
+    { text: 'രക്തദാന സേന', lang: 'ml' },
+    { text: 'Blood Donation Army', lang: 'en' },
+  ];
+
+  useEffect(() => {
+    const id = setInterval(() => setLangIdx(i => (i + 1) % subtitleLines.length), 2800);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     fetchRequests();
@@ -141,24 +152,39 @@ export default function Landing() {
             </h1>
           </motion.div>
 
-          {/* Malayalam subtitle */}
-          <motion.p
-            lang="ml"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
+          {/* Cycling Malayalam ↔ English subtitle */}
+          <div
             style={{
-              fontSize: 'clamp(1.15rem, 2.8vw, 1.6rem)',
-              fontWeight: 700,
-              color: '#dc2626',
-              lineHeight: 1.35,
-              marginBottom: '1.5rem',
+              height: 'clamp(2rem, 4vw, 2.8rem)',
+              overflow: 'hidden',
+              marginBottom: '1.4rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            രക്തദാന സേന
-          </motion.p>
-
-          {/* Tagline */}
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={langIdx}
+                lang={subtitleLines[langIdx].lang}
+                initial={{ y: 28, opacity: 0, filter: 'blur(4px)' }}
+                animate={{ y: 0,  opacity: 1, filter: 'blur(0px)' }}
+                exit={{   y: -28, opacity: 0, filter: 'blur(4px)' }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  fontSize:      'clamp(1.1rem, 2.6vw, 1.55rem)',
+                  fontWeight:    700,
+                  color:         '#dc2626',
+                  lineHeight:    1.2,
+                  letterSpacing: langIdx === 0 ? '0.01em' : '-0.01em',
+                  margin:        0,
+                  whiteSpace:    'nowrap',
+                }}
+              >
+                {subtitleLines[langIdx].text}
+              </motion.p>
+            </AnimatePresence>
+          </div>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
