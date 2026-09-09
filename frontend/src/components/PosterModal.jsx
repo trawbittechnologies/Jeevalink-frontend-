@@ -7,8 +7,8 @@ const POSTER_CONFIG = {
   patientName: { top: '42%', left: '38%', fontSize: '4.5cqi', color: '#0f172a', fontWeight: '900', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
   hospital: { top: '50%', left: '38%', fontSize: '3.2cqi', color: '#334155', fontWeight: '700', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
   phone: { top: '58%', left: '38%', fontSize: '4.2cqi', color: '#b91c1c', fontWeight: '900', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  bloodGroup: { top: '48.5%', left: '68%', fontSize: '7cqi', color: '#dc2626', fontWeight: 'black', width: '15%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  units: { top: '60%', left: '68%', fontSize: '3cqi', color: '#ffffff', fontWeight: 'bold', width: '25%', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
+  bloodGroup: { top: '50.5%', left: '75.5%', fontSize: '7cqi', color: '#dc2626', fontWeight: 'black', width: '15%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
+  units: { top: '61%', left: '75.5%', fontSize: '3.2cqi', color: '#ffffff', fontWeight: 'bold', width: '25%', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
   location: { top: '72%', left: '50%', fontSize: '3.5cqi', color: '#ffffff', fontWeight: '700', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' }
 };
 
