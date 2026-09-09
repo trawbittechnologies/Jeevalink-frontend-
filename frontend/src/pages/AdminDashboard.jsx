@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  ShieldCheck, RefreshCw, Eye, X, Users, HeartPulse, Activity, Plus, Key, Trash2
+  ShieldCheck, RefreshCw, Eye, X, Users, HeartPulse, Activity, Plus, Trash2
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -134,21 +134,6 @@ export default function AdminDashboard() {
       }
     } catch {
       alert("Failed to update status.");
-    }
-  };
-
-  const handleResetPassword = async (ba) => {
-    const customPass = window.prompt(`Set new password for ${ba.primary_name || ba.name} (${ba.email}):\n(Leave empty to auto-generate)`, 'admin123');
-    if (customPass === null) return;
-
-    try {
-      const res = await api.put(`/block-admin/volunteers/${ba.id}`, { password: customPass || undefined });
-      if (res.data?.success) {
-        alert(`Password for ${ba.email} successfully updated.`);
-        loadData();
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update password');
     }
   };
 
@@ -340,7 +325,7 @@ export default function AdminDashboard() {
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
               </div>
               <button type="submit" className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer mt-2 transition">
-                <Key className="w-4 h-4" /> Create Committee
+                <Plus className="w-4 h-4" /> Create Committee
               </button>
             </form>
           </div>
@@ -373,9 +358,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                    <button onClick={() => handleResetPassword(ba)} className="px-2.5 py-1.5 text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 rounded-xl transition cursor-pointer flex items-center gap-1" title="Reset Password">
-                      <Key className="w-3.5 h-3.5" />
-                    </button>
                     <button onClick={() => setViewUser(ba)} className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-xl transition cursor-pointer" title="View Profile">
                       <Eye className="w-4 h-4" />
                     </button>
