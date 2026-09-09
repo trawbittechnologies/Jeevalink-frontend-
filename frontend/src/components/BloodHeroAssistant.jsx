@@ -17,7 +17,6 @@ import MascotVideo from './MascotVideo.jsx';
 export default function BloodHeroAssistant() {
   const location = useLocation();
 
-  if (location.pathname === '/login') return null;
 
 
   const [isOpen, setIsOpen] = useState(false);
@@ -184,7 +183,7 @@ export default function BloodHeroAssistant() {
     });
   };
 
-  if (!allowedPaths.includes(location.pathname)) {
+  if (location.pathname === '/login') {
     return null;
   }
 
