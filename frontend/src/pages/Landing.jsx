@@ -102,7 +102,7 @@ export default function Landing() {
         >
           <img
             src="/image.png"
-            alt="DYFI JeevaLink blood donation hero"
+            alt="DYFI iDonate blood donation hero"
             style={{
               width: '100%', height: '100%',
               objectFit: 'cover', objectPosition: 'center',
@@ -371,7 +371,7 @@ export default function Landing() {
                   {awarenessSettings?.quoteTitle || "“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”"}
                 </blockquote>
                 <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-                  {awarenessSettings?.quoteDescription || "Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala."}
+                  {awarenessSettings?.quoteDescription || "Every second counts when a patient requires blood. iDonate connects you directly with verified voluntary donors and regional coordinators across Kasaragod."}
                 </p>
               </div>
 
@@ -486,7 +486,7 @@ export default function Landing() {
         <div className="jl-container max-w-5xl mx-auto px-4">
           <div className="text-center space-y-3 mb-14">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
-              How JeevaLink Works
+              How iDonate Works
             </h2>
             <p className="text-slate-500 text-sm max-w-md mx-auto font-medium">
               Simple steps connecting voluntary donors directly with patients.

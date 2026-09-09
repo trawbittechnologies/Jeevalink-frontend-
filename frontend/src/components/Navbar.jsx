@@ -128,12 +128,12 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-2 shrink-0 select-none">
           <img
             src="/idonate.png"
-            alt="DYFI iDonate"
-            style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '8px', flexShrink: 0 }}
+            alt="iDonate"
+            style={{ width: '34px', height: '34px', objectFit: 'contain', borderRadius: '8px', flexShrink: 0 }}
           />
-          <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>
-            <span style={{ color: '#dc2626' }}>DYFI </span>
-            <span style={{ color: '#111827' }}>iDonate</span>
+          <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.3rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <span style={{ color: '#dc2626' }}>i</span>
+            <span style={{ color: '#0f172a' }}>Donate</span>
           </span>
         </Link>
 
@@ -318,12 +318,12 @@ export default function Navbar() {
                 <Link to="/" className="flex items-center gap-2 select-none">
                   <img
                     src="/idonate.png"
-                    alt="DYFI iDonate"
-                    style={{ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '7px', flexShrink: 0 }}
+                    alt="iDonate"
+                    style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '7px', flexShrink: 0 }}
                   />
-                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>
-                    <span style={{ color: '#dc2626' }}>DYFI </span>
-                    <span style={{ color: '#111827' }}>iDonate</span>
+                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1 }}>
+                    <span style={{ color: '#dc2626' }}>i</span>
+                    <span style={{ color: '#0f172a' }}>Donate</span>
                   </span>
                 </Link>
                 <button
