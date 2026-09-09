@@ -4,12 +4,12 @@ import { toPng } from 'html-to-image';
 import posterTemplate from '../assets/poster-template.png';
 
 const POSTER_CONFIG = {
-  patientName: { top: '42%', left: '38%', fontSize: '4.5cqi', color: '#0f172a', fontWeight: '900', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
-  hospital: { top: '50%', left: '38%', fontSize: '3.2cqi', color: '#334155', fontWeight: '700', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
-  phone: { top: '58%', left: '38%', fontSize: '4.2cqi', color: '#b91c1c', fontWeight: '900', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  bloodGroup: { top: '47.5%', left: '72%', fontSize: '7cqi', color: '#dc2626', fontWeight: 'black', width: '20%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  units: { top: '59%', left: '72%', fontSize: '3.2cqi', color: '#ffffff', fontWeight: 'bold', width: '25%', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
-  location: { top: '72%', left: '50%', fontSize: '3.5cqi', color: '#ffffff', fontWeight: '700', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' }
+  patientName: { top: '47.25mm', left: '34.2mm', fontSize: '4.05mm', color: '#0f172a', fontWeight: '900', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
+  hospital: { top: '56.25mm', left: '34.2mm', fontSize: '2.88mm', color: '#334155', fontWeight: '700', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
+  phone: { top: '65.25mm', left: '34.2mm', fontSize: '3.78mm', color: '#b91c1c', fontWeight: '900', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
+  bloodGroup: { top: '53.44mm', left: '64.8mm', fontSize: '6.3mm', color: '#dc2626', fontWeight: 'black', width: '18mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
+  units: { top: '66.38mm', left: '64.8mm', fontSize: '2.88mm', color: '#ffffff', fontWeight: 'bold', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
+  location: { top: '81mm', left: '45mm', fontSize: '3.15mm', color: '#ffffff', fontWeight: '700', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' }
 };
 
 export default function PosterModal({ isOpen, onClose, data }) {
@@ -93,15 +93,15 @@ export default function PosterModal({ isOpen, onClose, data }) {
         </div>
 
         {/* POSTER RENDER CONTAINER */}
-        <div className="mx-auto w-full shadow-lg rounded-xl overflow-hidden border border-slate-200">
-          {/* Container Queries enabled for perfectly responsive font sizes using 'cqi' */}
-          <div ref={posterRef} className="relative w-full bg-white m-0 p-0" style={{ containerType: 'inline-size' }}>
+        <div className="mx-auto w-full shadow-lg rounded-xl overflow-x-auto overflow-y-hidden border border-slate-200 flex justify-center bg-slate-50">
+          {/* Explicit physical sizing in mm as requested by user */}
+          <div ref={posterRef} className="relative bg-white shrink-0 m-0 p-0" style={{ width: '90mm', height: '112.5mm' }}>
             
             {/* Background Template */}
             <img 
               src={posterTemplate} 
               alt="Blood Request Poster Template" 
-              className="w-full h-auto block"
+              className="w-full h-full object-cover block"
               crossOrigin="anonymous"
             />
 
