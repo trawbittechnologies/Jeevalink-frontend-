@@ -125,12 +125,15 @@ export default function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo — iDonate brand */}
-        <Link to="/" className="flex flex-col items-start shrink-0 leading-none select-none">
-          <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a', lineHeight: 1 }}>
-            <span style={{ color: '#dc2626' }}>i</span>Donate
-          </span>
-          <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.14em', color: '#dc2626', textTransform: 'uppercase', marginTop: '2px' }}>
-            by DYFI Kasaragod
+        <Link to="/" className="flex items-center gap-2 shrink-0 select-none">
+          <img
+            src="/idonate.png"
+            alt="DYFI iDonate"
+            style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '8px', flexShrink: 0 }}
+          />
+          <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>
+            <span style={{ color: '#dc2626' }}>DYFI </span>
+            <span style={{ color: '#111827' }}>iDonate</span>
           </span>
         </Link>
 
@@ -312,12 +315,15 @@ export default function Navbar() {
               className="fixed top-0 right-0 bottom-0 h-[100dvh] w-[280px] max-w-[85vw] bg-white z-[70] shadow-2xl flex flex-col md:hidden border-l border-slate-100"
             >
               <div className="p-4 flex items-center justify-between border-b border-slate-100 shrink-0">
-                <Link to="/" className="flex flex-col items-start leading-none select-none">
-                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a', lineHeight: 1 }}>
-                    <span style={{ color: '#dc2626' }}>i</span>Donate
-                  </span>
-                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '0.5rem', fontWeight: 800, letterSpacing: '0.14em', color: '#dc2626', textTransform: 'uppercase', marginTop: '2px' }}>
-                    by DYFI Kasaragod
+                <Link to="/" className="flex items-center gap-2 select-none">
+                  <img
+                    src="/idonate.png"
+                    alt="DYFI iDonate"
+                    style={{ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '7px', flexShrink: 0 }}
+                  />
+                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>
+                    <span style={{ color: '#dc2626' }}>DYFI </span>
+                    <span style={{ color: '#111827' }}>iDonate</span>
                   </span>
                 </Link>
                 <button

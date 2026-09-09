@@ -107,75 +107,87 @@ export default function Landing() {
           }} />
         </div>
 
-        {/* Foreground Content — Centered & Enlarged */}
-        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 pt-5 pb-8 sm:pt-6 sm:pb-10 lg:py-2 flex flex-col items-center text-center">
+        {/* Foreground Content */}
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 pt-6 pb-10 lg:py-4 flex flex-col items-center text-center">
 
-          {/* iDonate wordmark */}
+          {/* DYFI iDonate main wordmark */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            style={{ marginBottom: '0.95rem' }}
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            style={{ marginBottom: '0.7rem' }}
           >
-            <div style={{
-              fontSize: 'clamp(0.85rem, 1.4vw, 1.05rem)',
-              fontWeight: 700, color: '#94a3b8',
-              marginBottom: '0.25rem', letterSpacing: '0.14em',
+            {/* DYFI KASARAGOD label above */}
+            <p style={{
+              fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)',
+              fontWeight: 800,
+              letterSpacing: '0.12em',
+              color: '#dc2626',
               textTransform: 'uppercase',
+              marginBottom: '0.5rem',
             }}>
-              Introducing
-            </div>
+              DYFI KASARAGOD
+            </p>
             <h1 style={{
               fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: 'clamp(4.2rem, 7.8vw, 6.4rem)',
+              fontSize: 'clamp(2.8rem, 6vw, 4.8rem)',
               fontWeight: 900,
-              letterSpacing: '-0.045em',
-              lineHeight: 0.9,
+              letterSpacing: '-0.04em',
+              lineHeight: 0.95,
               color: '#0f172a',
               margin: 0,
             }}>
               <span style={{ color: '#dc2626' }}>i</span>Donate
             </h1>
-            <div style={{
-              fontSize: 'clamp(0.75rem, 1.2vw, 0.92rem)',
-              fontWeight: 800,
-              letterSpacing: '0.22em',
-              color: '#dc2626',
-              textTransform: 'uppercase',
-              marginTop: '0.5rem',
-            }}>
-              by DYFI Kasaragod
-            </div>
           </motion.div>
 
-          {/* Tagline */}
-          <motion.div
+          {/* Malayalam subtitle */}
+          <motion.p
+            lang="ml"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            style={{ marginBottom: '0.85rem' }}
+            transition={{ duration: 0.6, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              fontSize: 'clamp(1.15rem, 2.8vw, 1.6rem)',
+              fontWeight: 700,
+              color: '#dc2626',
+              lineHeight: 1.35,
+              marginBottom: '1.5rem',
+            }}
           >
-            <p style={{
-              fontSize: 'clamp(1.25rem, 2.4vw, 1.7rem)',
-              fontWeight: 800, color: '#1e293b',
-              lineHeight: 1.25, letterSpacing: '-0.02em',
-              margin: 0,
-            }}>
-              Be someone's reason{' '}
-              <span style={{ color: '#dc2626' }}>to live.</span>
-            </p>
-          </motion.div>
+            രക്തദാന സേന
+          </motion.p>
+
+          {/* Tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.34, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              fontSize: 'clamp(1.2rem, 2.5vw, 1.65rem)',
+              fontWeight: 800,
+              color: '#1e293b',
+              lineHeight: 1.25,
+              letterSpacing: '-0.02em',
+              marginBottom: '0.75rem',
+            }}
+          >
+            Be someone's reason{' '}
+            <span style={{ color: '#dc2626' }}>to live.</span>
+          </motion.p>
 
           {/* Description */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.42 }}
             style={{
-              fontSize: 'clamp(0.92rem, 1.2vw, 1.05rem)',
+              fontSize: 'clamp(0.9rem, 1.3vw, 1.05rem)',
               fontWeight: 500,
-              color: '#475569', lineHeight: 1.7,
-              maxWidth: '560px', marginBottom: '1.5rem',
+              color: '#475569',
+              lineHeight: 1.75,
+              maxWidth: '520px',
+              marginBottom: '2rem',
             }}
           >
             Connecting voluntary blood donors with patients in urgent need —
@@ -186,8 +198,8 @@ export default function Landing() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.38 }}
-            style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'center', marginBottom: '1.6rem' }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'center' }}
           >
             <button
               type="button"

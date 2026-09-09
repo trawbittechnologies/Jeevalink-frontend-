@@ -4,7 +4,6 @@ import { useAuthStore } from '../store/authStore.js';
 import { useNavigate } from 'react-router-dom';
 
 // ── Assets ────────────────────────────────────────────────────────────────────
-import jeevalinkLogo from '../assets/logo.png';
 const DYFI_LOGO_SRC = '/idonate.png';
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -109,10 +108,10 @@ export default function Splash({ onComplete }) {
             initial="hidden"
             animate="visible"
             style={{
-              fontSize:      'clamp(0.85rem, 2.8vw, 1rem)',
-              fontWeight:    600,
-              letterSpacing: '0.18em',
-              color:         '#6B7280',
+              fontSize:      'clamp(1rem, 3.5vw, 1.2rem)',
+              fontWeight:    700,
+              letterSpacing: '0.15em',
+              color:         '#4B5563',
               textTransform: 'uppercase',
               marginBottom:  '2.5rem',
             }}
@@ -174,37 +173,28 @@ export default function Splash({ onComplete }) {
           initial="hidden"
           animate="visible"
           aria-label="Partner credits"
-          style={{
-            width:          '100%',
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: 'center',
-            paddingBottom:  'clamp(1.25rem, 5vw, 2rem)',
-            paddingLeft:    '1.5rem',
-            paddingRight:   '1.5rem',
-          }}
+          className="w-full flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-0 px-6 pb-7 sm:pb-9"
         >
           {/* associated with jeevalink */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.5rem', fontWeight: 500, letterSpacing: '0.18em', color: '#D1D5DB', textTransform: 'uppercase' }}>
+          <div className="flex flex-col items-center gap-1">
+            <span style={{ fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.18em', color: '#C4C8D0', textTransform: 'uppercase' }}>
               associated with
             </span>
-            <img
-              src={jeevalinkLogo}
-              alt="JeevaLink"
-              draggable={false}
-              style={{ height: '18px', width: 'auto', objectFit: 'contain', opacity: 0.30, filter: 'grayscale(100%) brightness(0.5)' }}
-            />
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ABABBA', letterSpacing: '0.02em' }}>
+              JeevaLink
+            </span>
           </div>
 
-          <div aria-hidden="true" style={{ width: '1px', height: '28px', backgroundColor: '#E5E7EB', margin: '0 1.2rem' }} />
+          {/* Divider: horizontal on mobile, vertical on sm+ */}
+          <div aria-hidden="true" className="block sm:hidden" style={{ width: '32px', height: '1px', backgroundColor: '#E9ECEF' }} />
+          <div aria-hidden="true" className="hidden sm:block" style={{ width: '1px', height: '32px', backgroundColor: '#E9ECEF', margin: '0 1.5rem' }} />
 
           {/* developed by trawbit */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.5rem', fontWeight: 500, letterSpacing: '0.18em', color: '#D1D5DB', textTransform: 'uppercase' }}>
+          <div className="flex flex-col items-center gap-1">
+            <span style={{ fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.18em', color: '#C4C8D0', textTransform: 'uppercase' }}>
               developed by
             </span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#BABEC8', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ABABBA', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               Trawbit Technologies
             </span>
           </div>
