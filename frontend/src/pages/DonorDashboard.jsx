@@ -215,7 +215,7 @@ export default function DonorDashboard() {
     const contact = req.contactNumber || req.contact_number || 'Emergency Desk';
     const units = req.unitsRequired || req.units_required || 1;
 
-    const text = `*URGENT BLOOD REQUEST — JeevaLink Network*\n\nBlood Group: ${bg}\nPatient: ${patient}\nHospital: ${hospital}, ${city}\nUnits: ${units} Unit(s)\nContact: ${contact}\n\nPlease share and save a life.\nhttps://jeevalink.org/requests`;
+    const text = `*URGENT BLOOD REQUEST — iDonate Network*\n\nBlood Group: ${bg}\nPatient: ${patient}\nHospital: ${hospital}, ${city}\nUnits: ${units} Unit(s)\nContact: ${contact}\n\nPlease share and save a life.\n${window.location.origin}/requests`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };

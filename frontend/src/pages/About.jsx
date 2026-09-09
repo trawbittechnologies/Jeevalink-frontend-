@@ -44,13 +44,13 @@ export default function About() {
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-red-600 bg-red-50 border border-red-200/70 px-4 py-2 rounded-full mb-5">
               <Droplets className="w-3 h-3" />
-              About JeevaLink
+              About iDonate
             </span>
             <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.08] mb-5 mt-2">
               We <span className="text-primary">Connect</span> Life
             </h1>
             <p className="text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
-              JeevaLink is India's premier blood donation platform — built by donors, for donors.
+              iDonate is Kasaragod's premier voluntary blood donation platform by DYFI — built by donors, for donors.
               Our mission is simple: <strong className="text-slate-700 font-semibold">no one should die waiting for blood.</strong>
             </p>
           </motion.div>
@@ -187,7 +187,7 @@ export default function About() {
           <motion.div className="text-center mb-12" variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
             <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-red-600 bg-red-50 border border-red-200/70 px-4 py-2 rounded-full mb-4">
               <Users className="w-3 h-3" />
-              The People Behind JeevaLink
+              The People Behind iDonate
             </span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Meet the Team</h2>
             <p className="text-slate-500 mt-3 text-sm">The passionate people who make it all happen.</p>
@@ -225,8 +225,8 @@ export default function About() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <h2 className="text-2xl font-black mb-3 tracking-tight">Built with Purpose</h2>
             <p className="text-red-200 max-w-lg mx-auto text-sm leading-relaxed">
-              JeevaLink was born from a personal mission to solve the blood shortage crisis using modern technology.
-              Started in 2025, it has grown to serve thousands of donors and patients across India.
+              iDonate was born from a mission to solve the blood shortage crisis using modern technology.
+              Organized by DYFI Kasaragod District Committee, connecting donors with verified recipients.
             </p>
             <div className="flex flex-wrap justify-center gap-8 mt-10">
               {[['2025', 'Founded'], ['12K+', 'Donors'], ['4.5K+', 'Lives Saved']].map(([v, l]) => (

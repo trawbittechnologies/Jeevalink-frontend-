@@ -338,7 +338,7 @@ export default function Login() {
             <div className="flex items-center gap-1.5 opacity-60">
               <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
               <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">
-                Secured by JeevaLink Enterprise
+                Secured by iDonate Enterprise
               </p>
             </div>
             

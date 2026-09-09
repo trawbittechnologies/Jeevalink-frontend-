@@ -78,9 +78,9 @@ export default function Leaderboard() {
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-red-50 border border-red-200 rounded-full text-red-700 text-xs font-bold uppercase tracking-wider mb-2">
               <Trophy className="w-4 h-4 text-red-600" /> Monthly Hall of Fame
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-slate-900">JeevaLink Leaderboard & Badges</h1>
+            <h1 className="text-2xl md:text-3xl font-black text-red-600 uppercase tracking-tight">iDonate Leaderboard & Badges</h1>
             <p className="text-slate-500 text-xs md:text-sm mt-1">
-              Recognizing our highest blood donors, highest block committees, and highest meghala committees driving life-saving impact across Kerala.
+              Recognizing our highest blood donors, highest block committees, and highest meghala committees driving life-saving impact across Kasaragod.
             </p>
           </div>
 

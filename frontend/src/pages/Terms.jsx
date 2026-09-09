@@ -21,14 +21,14 @@ export default function Terms() {
           <div className="card p-8 md:p-12 space-y-8 text-gray-600">
             <div>
               <p className="text-lg leading-relaxed mb-8">
-                Welcome to JeevaLink. By accessing or using our platform, you agree to be bound by these Terms of Service. Please read them carefully.
+                Welcome to iDonate. By accessing or using our platform, you agree to be bound by these Terms of Service. Please read them carefully.
               </p>
             </div>
 
             <div className="space-y-4">
               <h2 className="text-2xl font-black text-gray-900">1. Acceptance of Terms</h2>
               <p className="leading-relaxed">
-                By creating an account and using JeevaLink, you confirm that you are at least 18 years old and capable of forming a binding contract. If you do not agree to these terms, you must not use our services.
+                By creating an account and using iDonate, you confirm that you are at least 18 years old and capable of forming a binding contract. If you do not agree to these terms, you must not use our services.
               </p>
             </div>
 
@@ -42,7 +42,7 @@ export default function Terms() {
             <div className="space-y-4">
               <h2 className="text-2xl font-black text-gray-900">3. Blood Donation and Requests</h2>
               <p className="leading-relaxed">
-                JeevaLink acts as a facilitator to connect donors with recipients. We do not guarantee the availability, quality, or safety of any blood donations. All medical procedures and donations should be conducted at certified hospitals or blood banks under medical supervision.
+                iDonate acts as a facilitator to connect donors with recipients. We do not guarantee the availability, quality, or safety of any blood donations. All medical procedures and donations should be conducted at certified hospitals or blood banks under medical supervision.
               </p>
             </div>
 
@@ -56,7 +56,7 @@ export default function Terms() {
             <div className="space-y-4">
               <h2 className="text-2xl font-black text-gray-900">5. Limitation of Liability</h2>
               <p className="leading-relaxed">
-                JeevaLink is provided "as is" without any warranties. We shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use or inability to use our platform or from any blood donation activities.
+                iDonate is provided "as is" without any warranties. We shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use or inability to use our platform or from any blood donation activities.
               </p>
             </div>
 

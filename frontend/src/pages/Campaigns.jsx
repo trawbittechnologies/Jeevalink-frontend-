@@ -226,7 +226,7 @@ export default function Campaigns() {
   };
 
   const handleShare = async (post) => {
-    const text = `🩸 *${post.title}* 🩸\n\n📌 *Category:* ${post.category.replace('_', ' ').toUpperCase()}\n📅 *Date:* ${post.event_date || 'TBA'}\n📍 *Venue:* ${post.venue}\n📞 *Contact:* ${post.contact_phone}\n\n${post.description}\n\n*Organized by:* ${post.organizer_name}\n\nJoin us on JeevaLink: ${window.location.origin}/campaigns`;
+    const text = `🩸 *${post.title}* 🩸\n\n📌 *Category:* ${post.category.replace('_', ' ').toUpperCase()}\n📅 *Date:* ${post.event_date || 'TBA'}\n📍 *Venue:* ${post.venue}\n📞 *Contact:* ${post.contact_phone}\n\n${post.description}\n\n*Organized by:* ${post.organizer_name}\n\nJoin us on iDonate: ${window.location.origin}/campaigns`;
     
     // Attempt native share to include the image
     try {

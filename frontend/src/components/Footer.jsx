@@ -166,18 +166,21 @@ export default function Footer() {
             <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100 space-y-4 relative overflow-hidden">
               <Heart className="absolute -right-4 -bottom-4 w-24 h-24 text-red-100 opacity-50" />
               
-              <div className="space-y-2 relative z-10">
-                <a href="mailto:support@jeevalink.in" className="flex items-center gap-3 text-sm text-slate-600 hover:text-red-600 transition-colors group">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-red-100 group-hover:border-red-300">
+              <div className="space-y-3">
+                <a
+                  href="mailto:help@idonate.org"
+                  className="flex items-center gap-3 text-sm text-slate-600 hover:text-red-600 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-red-100">
                     <Mail className="w-4 h-4 text-red-500" />
                   </div>
-                  support@jeevalink.in
+                  help@idonate.org
                 </a>
                 <div className="flex items-center gap-3 text-sm text-slate-600">
                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-red-100">
                     <MapPin className="w-4 h-4 text-red-500" />
                   </div>
-                  Kerala, India
+                  Kasaragod, Kerala, India
                 </div>
               </div>
             </div>
@@ -189,10 +192,10 @@ export default function Footer() {
       <div className="border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} JeevaLink. All rights reserved.
+            © {new Date().getFullYear()} iDonate by DYFI. All rights reserved.
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-500">
-            Made with <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" /> for Kerala
+            Made with <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" /> for Kasaragod
           </div>
         </div>
       </div>

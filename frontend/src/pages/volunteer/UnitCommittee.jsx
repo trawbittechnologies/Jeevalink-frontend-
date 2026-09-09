@@ -549,7 +549,7 @@ export default function UnitCommittee() {
               <div className="flex gap-3">
                 <button
                   onClick={() => {
-                    const text = `JeevaLink Unit Squad Credentials\nEmail: ${credentialsModal.email}\nPassword: ${credentialsModal.password}\nLogin: ${window.location.origin}/login`;
+                    const text = `iDonate Unit Squad Credentials\nEmail: ${credentialsModal.email}\nPassword: ${credentialsModal.password}\nLogin: ${window.location.origin}/login`;
                     navigator.clipboard.writeText(text);
                     triggerToast('Credentials copied to clipboard!', 'success');
                   }}

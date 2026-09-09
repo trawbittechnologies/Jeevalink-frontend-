@@ -578,7 +578,7 @@ export default function Profile() {
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="w-full max-w-sm bg-gradient-to-b from-gray-900 to-gray-950 text-white rounded-3xl p-7 shadow-2xl text-center">
             <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-red-900/30 px-3 py-1.5 rounded-full border border-red-800/30">
-              JeevaLink Donor Passport
+              iDonate Donor Passport
             </span>
             <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all p-4 rounded-2xl inline-block mt-6 mb-4 qr-container">
               <QRCodeSVG value={qrData} size={140} fgColor="#111111" bgColor="#ffffff" level="M" />

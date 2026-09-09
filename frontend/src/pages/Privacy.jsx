@@ -21,7 +21,7 @@ export default function Privacy() {
           <div className="card p-8 md:p-12 space-y-8 text-gray-600">
             <div>
               <p className="text-lg leading-relaxed mb-8">
-                Welcome to JeevaLink. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our web application and services.
+                Welcome to iDonate. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our web application and services.
               </p>
             </div>
 
@@ -49,7 +49,7 @@ export default function Privacy() {
             <div className="space-y-4">
               <h2 className="text-2xl font-black text-gray-900">4. Location Services</h2>
               <p className="leading-relaxed">
-                JeevaLink requires access to your device's location to function correctly. You can enable or disable location tracking at any time through your browser or device settings, although disabling it may limit your ability to receive local donation alerts.
+                iDonate requires access to your device's location to function correctly. You can enable or disable location tracking at any time through your browser or device settings, although disabling it may limit your ability to receive local donation alerts.
               </p>
             </div>
 
