@@ -26,7 +26,7 @@ export default function PosterModal({ isOpen, onClose, data }) {
   const units = data.units_required || data.unitsRequired || '1';
 
   // Extract and format the Meghala Name
-  const rawLocation = data.meghala_name || data.meghala || data.unit || '';
+  const rawLocation = data.requester_meghala || data.meghala_name || data.meghala || data.unit || '';
   const location = rawLocation
     ? (rawLocation.toLowerCase().includes('meghala') ? rawLocation : `${rawLocation} Meghala`)
     : 'DYFI Meghala Committee';

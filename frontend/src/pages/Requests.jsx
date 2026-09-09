@@ -106,7 +106,7 @@ export default function Requests() {
           hospital_name: data.hospitalName,
           venue: data.hospitalName,
           location: data.location,
-          meghala_name: res.request?.meghala_name || res.request?.meghala || user?.meghala || user?.organization_name || user?.unit || '',
+          meghala_name: res.request?.requester_meghala || res.request?.meghala_name || res.request?.meghala || user?.meghala || user?.city || user?.organization_name || user?.unit || '',
           contact_phone: data.contactNumber,
           urgency_level: data.urgencyLevel,
           required_date: new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
