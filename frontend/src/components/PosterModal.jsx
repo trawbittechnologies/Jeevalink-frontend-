@@ -3,16 +3,13 @@ import { X, Download, Share2, RefreshCw } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import posterTemplate from '../assets/poster-template.png';
 
-// Configuration object for positioning dynamic fields on the poster template.
-// These use percentages to remain responsive as the image scales.
-// Adjust top, left, fontSize (using cqi for container-relative scaling), color, etc.
 const POSTER_CONFIG = {
-  hospital: { top: '35%', left: '50%', fontSize: '4.5cqi', color: '#1e293b', fontWeight: 'bold', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  patientName: { top: '45%', left: '50%', fontSize: '6cqi', color: '#0f172a', fontWeight: '900', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
-  phone: { top: '55%', left: '50%', fontSize: '5cqi', color: '#1e293b', fontWeight: 'bold', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  bloodGroup: { top: '65%', left: '50%', fontSize: '10cqi', color: '#dc2626', fontWeight: 'black', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  units: { top: '75%', left: '50%', fontSize: '5cqi', color: '#e11d48', fontWeight: 'bold', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  location: { top: '85%', left: '50%', fontSize: '4cqi', color: '#475569', fontWeight: '600', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' }
+  patientName: { top: '42%', left: '38%', fontSize: '4.5cqi', color: '#0f172a', fontWeight: '900', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
+  hospital: { top: '50%', left: '38%', fontSize: '3.2cqi', color: '#334155', fontWeight: '700', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
+  phone: { top: '58%', left: '38%', fontSize: '4.2cqi', color: '#b91c1c', fontWeight: '900', width: '34%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
+  bloodGroup: { top: '48.5%', left: '68%', fontSize: '7cqi', color: '#dc2626', fontWeight: 'black', width: '15%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
+  units: { top: '60%', left: '68%', fontSize: '3cqi', color: '#ffffff', fontWeight: 'bold', width: '25%', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
+  location: { top: '72%', left: '50%', fontSize: '3.5cqi', color: '#ffffff', fontWeight: '700', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' }
 };
 
 export default function PosterModal({ isOpen, onClose, data }) {
@@ -104,11 +101,11 @@ export default function PosterModal({ isOpen, onClose, data }) {
 
             {/* Dynamic Text Overlay */}
             <div className="absolute inset-0 z-10 pointer-events-none">
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.hospital }}>{hospital}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.patientName }}>{patientName}</span>
+              <span style={{ position: 'absolute', ...POSTER_CONFIG.hospital }}>{hospital}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.phone }}>{phone}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.bloodGroup }}>{bloodGroup}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.units }}>{units} Units Required</span>
+              <span style={{ position: 'absolute', ...POSTER_CONFIG.units }}>{units} Unit(s)</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.location }}>{location}</span>
             </div>
             
