@@ -6,7 +6,7 @@ import posterTemplate from '../assets/poster-template.png';
 // Configuration object for positioning dynamic fields on the poster template.
 // These use percentages to remain responsive as the image scales.
 // Adjust top, left, fontSize (using cqi for container-relative scaling), color, etc.
-export const POSTER_CONFIG = {
+const POSTER_CONFIG = {
   hospital: { top: '35%', left: '50%', fontSize: '4.5cqi', color: '#1e293b', fontWeight: 'bold', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
   patientName: { top: '45%', left: '50%', fontSize: '6cqi', color: '#0f172a', fontWeight: '900', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
   phone: { top: '55%', left: '50%', fontSize: '5cqi', color: '#1e293b', fontWeight: 'bold', width: '80%', transform: 'translate(-50%, -50%)', textAlign: 'center' },
