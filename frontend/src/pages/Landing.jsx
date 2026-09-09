@@ -48,17 +48,11 @@ const processSteps = [
 export default function Landing() {
   const { requests, fetchRequests, awarenessSettings, fetchAwarenessSettings } = useAppStore();
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
-  const [langIdx, setLangIdx] = useState(0);
 
   const subtitleLines = [
     { text: 'രക്തദാന സേന', lang: 'ml' },
-    { text: 'Blood Donation Army', lang: 'en' },
   ];
 
-  useEffect(() => {
-    const id = setInterval(() => setLangIdx(i => (i + 1) % subtitleLines.length), 2800);
-    return () => clearInterval(id);
-  }, []);
 
   useEffect(() => {
     fetchRequests();
@@ -152,39 +146,7 @@ export default function Landing() {
             </h1>
           </motion.div>
 
-          {/* Cycling Malayalam ↔ English subtitle */}
-          <div
-            style={{
-              height: 'clamp(2rem, 4vw, 2.8rem)',
-              overflow: 'hidden',
-              marginBottom: '1.4rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={langIdx}
-                lang={subtitleLines[langIdx].lang}
-                initial={{ y: 28, opacity: 0, filter: 'blur(4px)' }}
-                animate={{ y: 0,  opacity: 1, filter: 'blur(0px)' }}
-                exit={{   y: -28, opacity: 0, filter: 'blur(4px)' }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                style={{
-                  fontSize:      'clamp(1.1rem, 2.6vw, 1.55rem)',
-                  fontWeight:    700,
-                  color:         '#dc2626',
-                  lineHeight:    1.2,
-                  letterSpacing: langIdx === 0 ? '0.01em' : '-0.01em',
-                  margin:        0,
-                  whiteSpace:    'nowrap',
-                }}
-              >
-                {subtitleLines[langIdx].text}
-              </motion.p>
-            </AnimatePresence>
-          </div>
+
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -193,13 +155,14 @@ export default function Landing() {
               fontSize: 'clamp(1.2rem, 2.5vw, 1.65rem)',
               fontWeight: 800,
               color: '#1e293b',
-              lineHeight: 1.25,
-              letterSpacing: '-0.02em',
+              lineHeight: 1.4,
+              letterSpacing: '0.01em',
               marginBottom: '0.75rem',
             }}
+            lang="ml"
           >
-            Be someone's reason{' '}
-            <span style={{ color: '#dc2626' }}>to live.</span>
+            ഒരാളുടെ ജീവൻ നിലനിർത്താനുള്ള{' '}
+            <span style={{ color: '#dc2626' }}>കാരണമാകൂ.</span>
           </motion.p>
 
           {/* Description */}
@@ -211,13 +174,13 @@ export default function Landing() {
               fontSize: 'clamp(0.9rem, 1.3vw, 1.05rem)',
               fontWeight: 500,
               color: '#475569',
-              lineHeight: 1.75,
+              lineHeight: 1.85,
               maxWidth: '520px',
               marginBottom: '2rem',
             }}
+            lang="ml"
           >
-            Connecting voluntary blood donors with patients in urgent need —
-            verified by DYFI Block Committee coordinators across Kerala.
+            അടിയന്തരമായി രക്തം ആവശ്യമുള്ള രോഗികളുമായി സന്നദ്ധ രക്തദാതാക്കളെ ബന്ധിപ്പിക്കുന്നു — DYFI കാസർഗോഡ് ജില്ലാ കമ്മിറ്റിയുടെ നേതൃത്വത്തിൽ സ്ഥിരീകരിച്ച രക്തദാന ശൃംഖല.
           </motion.p>
 
           {/* CTA Buttons */}
