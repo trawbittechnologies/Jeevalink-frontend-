@@ -8,7 +8,7 @@ const POSTER_CONFIG = {
   hospital: { top: '56.25mm', left: '34.2mm', fontSize: '2.88mm', color: '#334155', fontWeight: '700', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
   phone: { top: '65.25mm', left: '34.2mm', fontSize: '3.78mm', color: '#b91c1c', fontWeight: '900', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
   bloodGroup: { top: '55mm', left: '67mm', fontSize: '6.3mm', color: '#dc2626', fontWeight: 'black', width: '18mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  units: { top: '95mm', left: '69mm', fontSize: '2.88mm', color: '#ffffff', fontWeight: 'bold', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
+  units: { top: '92mm', left: '69mm', fontSize: '2.88mm', color: '#ffffff', fontWeight: 'bold', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
   location: { top: '81mm', left: '45mm', fontSize: '3.15mm', color: '#ffffff', fontWeight: '700', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' }
 };
 
