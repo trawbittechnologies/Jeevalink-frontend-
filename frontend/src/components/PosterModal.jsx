@@ -24,7 +24,13 @@ export default function PosterModal({ isOpen, onClose, data }) {
   const phone = data.contact_phone || data.contact_number || data.contactNumber || data.mobile || 'Contact Number';
   const bloodGroup = data.blood_group || data.bloodGroup || 'O+';
   const units = data.units_required || data.unitsRequired || '1';
-  const location = data.location || data.city || 'Location';
+  
+  // Extract and format the Meghala Name
+  const rawLocation = data.meghala_name || data.meghala || data.unit || data.location || data.city || '';
+  const location = rawLocation 
+    ? (rawLocation.toLowerCase().includes('meghala') ? rawLocation : `${rawLocation} Meghala`)
+    : 'Meghala Name';
+    
   const requestId = data.request_id || data.id || data._id || 'JL-REQ';
 
   const handleDownloadPNG = async () => {
