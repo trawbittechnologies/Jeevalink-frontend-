@@ -4,12 +4,12 @@ import { toPng } from 'html-to-image';
 import posterTemplate from '../assets/poster-template.png';
 
 const POSTER_CONFIG = {
-  patientName: { top: '47.25mm', left: '34.2mm', fontSize: '4.05mm', color: '#0f172a', fontWeight: '900', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
-  hospital: { top: '56.25mm', left: '34.2mm', fontSize: '2.88mm', color: '#334155', fontWeight: '700', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
-  phone: { top: '65.25mm', left: '34.2mm', fontSize: '3.78mm', color: '#b91c1c', fontWeight: '900', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  bloodGroup: { top: '50mm', left: '67mm', fontSize: '6.3mm', color: '#dc2626', fontWeight: 'black', width: '18mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  units: { top: '92mm', left: '69mm', fontSize: '2.88mm', color: '#ffffff', fontWeight: 'bold', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
-  location: { top: '81mm', left: '45mm', fontSize: '3.15mm', color: '#ffffff', fontWeight: '700', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' }
+  patientName: { top: '47.25mm', left: '34.2mm', fontSize: '3.6mm', color: '#0f172a', fontWeight: '800', fontFamily: "'Syne', sans-serif", textTransform: 'uppercase', letterSpacing: '-0.01em', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
+  hospital: { top: '56.25mm', left: '34.2mm', fontSize: '2.6mm', color: '#475569', fontWeight: '600', fontFamily: "'Outfit', sans-serif", width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
+  phone: { top: '65.25mm', left: '34.2mm', fontSize: '3.6mm', color: '#b91c1c', fontWeight: '700', fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '0.05em', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
+  bloodGroup: { top: '55mm', left: '68.5mm', fontSize: '6.5mm', color: '#dc2626', fontWeight: '400', fontFamily: "'Righteous', display", letterSpacing: '0.02em', width: '18mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '1px 1px 0px rgba(220,38,38,0.2)' },
+  units: { top: '65mm', left: '68.5mm', fontSize: '2.6mm', color: '#ffffff', fontWeight: '700', fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '0.05em', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 4px rgba(0,0,0,0.8)' },
+  location: { top: '81mm', left: '45mm', fontSize: '2.8mm', color: '#ffffff', fontWeight: '800', fontFamily: "'Syne', sans-serif", textTransform: 'uppercase', letterSpacing: '0.1em', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 2px 6px rgba(0,0,0,0.9)' }
 };
 
 export default function PosterModal({ isOpen, onClose, data }) {
