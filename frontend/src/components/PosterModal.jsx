@@ -7,7 +7,7 @@ const POSTER_CONFIG = {
   patientName: { top: '47.25mm', left: '34.2mm', fontSize: '4.05mm', color: '#0f172a', fontWeight: '900', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
   hospital: { top: '56.25mm', left: '34.2mm', fontSize: '2.88mm', color: '#334155', fontWeight: '700', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.2' },
   phone: { top: '65.25mm', left: '34.2mm', fontSize: '3.78mm', color: '#b91c1c', fontWeight: '900', width: '30.6mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  bloodGroup: { top: '55mm', left: '67mm', fontSize: '6.3mm', color: '#dc2626', fontWeight: 'black', width: '18mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
+  bloodGroup: { top: '50mm', left: '67mm', fontSize: '6.3mm', color: '#dc2626', fontWeight: 'black', width: '18mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
   units: { top: '92mm', left: '69mm', fontSize: '2.88mm', color: '#ffffff', fontWeight: 'bold', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' },
   location: { top: '81mm', left: '45mm', fontSize: '3.15mm', color: '#ffffff', fontWeight: '700', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.6)' }
 };
@@ -24,13 +24,13 @@ export default function PosterModal({ isOpen, onClose, data }) {
   const phone = data.contact_phone || data.contact_number || data.contactNumber || data.mobile || 'Contact Number';
   const bloodGroup = data.blood_group || data.bloodGroup || 'O+';
   const units = data.units_required || data.unitsRequired || '1';
-  
+
   // Extract and format the Meghala Name
   const rawLocation = data.meghala_name || data.meghala || data.unit || '';
-  const location = rawLocation 
+  const location = rawLocation
     ? (rawLocation.toLowerCase().includes('meghala') ? rawLocation : `${rawLocation} Meghala`)
     : 'DYFI Meghala Committee';
-    
+
   const requestId = data.request_id || data.id || data._id || 'JL-REQ';
 
   const handleDownloadPNG = async () => {
@@ -78,7 +78,7 @@ export default function PosterModal({ isOpen, onClose, data }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 overflow-y-auto select-none">
       <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative text-slate-900 border border-slate-200 animate-in fade-in zoom-in duration-200">
-        
+
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -96,11 +96,11 @@ export default function PosterModal({ isOpen, onClose, data }) {
         <div className="mx-auto w-full shadow-lg rounded-xl overflow-x-auto overflow-y-hidden border border-slate-200 flex justify-center bg-slate-50">
           {/* Explicit physical sizing in mm as requested by user */}
           <div ref={posterRef} className="relative bg-white shrink-0 m-0 p-0" style={{ width: '90mm', height: '112.5mm' }}>
-            
+
             {/* Background Template */}
-            <img 
-              src={posterTemplate} 
-              alt="Blood Request Poster Template" 
+            <img
+              src={posterTemplate}
+              alt="Blood Request Poster Template"
               className="w-full h-full object-cover block"
               crossOrigin="anonymous"
             />
@@ -114,7 +114,7 @@ export default function PosterModal({ isOpen, onClose, data }) {
               <span style={{ position: 'absolute', ...POSTER_CONFIG.units }}>{units} Unit(s)</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.location }}>{location}</span>
             </div>
-            
+
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export default function PosterModal({ isOpen, onClose, data }) {
             Share
           </button>
         </div>
-        
+
       </div>
     </div>
   );
