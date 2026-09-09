@@ -133,6 +133,26 @@ export default function Landing() {
         {/* Foreground Content */}
         <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 pt-6 pb-10 lg:py-4 flex flex-col items-center text-center">
 
+          {/* iDonate Logo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+            style={{ marginBottom: '1.5rem' }}
+          >
+            <img
+              src="/idonate.png"
+              alt="iDonate Logo"
+              style={{
+                width: 'clamp(72px, 10vw, 100px)',
+                height: 'clamp(72px, 10vw, 100px)',
+                objectFit: 'contain',
+                borderRadius: '22px',
+                boxShadow: '0 8px 32px rgba(220,38,38,0.18), 0 2px 8px rgba(0,0,0,0.08)',
+              }}
+            />
+          </motion.div>
+
           {/* DYFI iDonate main wordmark */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
