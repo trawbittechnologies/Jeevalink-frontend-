@@ -37,6 +37,21 @@ function toTitleCase(str) {
     .join(' ');
 }
 
+function formatUnits(raw) {
+  if (raw === undefined || raw === null || raw === '') return '1 UNIT';
+  const str = String(raw).trim();
+  if (!str || str.toLowerCase() === 'null' || str.toLowerCase() === 'undefined') {
+    return '1 UNIT';
+  }
+  if (/units?/i.test(str) || /bags?/i.test(str) || /ml/i.test(str)) {
+    return str.toUpperCase();
+  }
+  const digits = str.replace(/[^\d.]/g, '');
+  if (!digits) return `${str.toUpperCase()} UNITS`;
+  const num = Number(digits);
+  return `${digits} ${num === 1 ? 'UNIT' : 'UNITS'}`;
+}
+
 function formatPhoneNumber(num) {
   if (!num) return '79026 19430';
   const digits = String(num).replace(/\D/g, '');
@@ -85,9 +100,8 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   const rawPhone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || '79026 19430';
   const phone = formatPhoneNumber(rawPhone);
   const bloodGroup = (posterData.blood_group || posterData.bloodGroup || 'B+').toUpperCase();
-  const rawUnits = posterData.units_required || posterData.unitsRequired || '2';
-  const unitsNumber = String(rawUnits).replace(/\D/g, '') || '2';
-  const unitsText = `${unitsNumber} UNITS`;
+  const rawUnits = posterData.units_required || posterData.unitsRequired || posterData.units || posterData.unit || posterData.quantity || '1';
+  const unitsText = formatUnits(rawUnits);
 
   const rawLocation =
     posterData.meghala_committee_name ||
@@ -293,49 +307,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               </div>
 
               {/* ------------------------------------------------------------
-                  B. BLOOD BAG LABEL DYNAMIC CONTENT
-                  (Centered over the white label on the blood bag)
-                 ------------------------------------------------------------ */}
-              <div
-                className="absolute flex flex-col items-center justify-between text-center"
-                style={{
-                  top: '42.8%',
-                  left: '65.2%',
-                  width: '14.2%',
-                  height: '8.4%',
-                  padding: '2px 0',
-                }}
-              >
-                {/* Red Droplet Icon */}
-                <div className="w-2.5 h-2.5 flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" fill="#d31818" className="w-full h-full">
-                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-                  </svg>
-                </div>
-
-                {/* GIVE BLOOD GIVE LIFE Text */}
-                <div className="leading-[1.1] text-[#334155]">
-                  <div className="text-[5.2px] font-black tracking-wider uppercase">GIVE</div>
-                  <div className="text-[5.2px] font-black tracking-wider uppercase">BLOOD</div>
-                  <div className="text-[5.2px] font-black tracking-wider uppercase">GIVE LIFE</div>
-                </div>
-
-                {/* Barcode Graphic */}
-                <div className="w-[85%] h-[4.5px] flex justify-between items-center opacity-85">
-                  <span className="w-[1px] h-full bg-slate-800"></span>
-                  <span className="w-[1.8px] h-full bg-slate-800"></span>
-                  <span className="w-[0.8px] h-full bg-slate-800"></span>
-                  <span className="w-[2.2px] h-full bg-slate-800"></span>
-                  <span className="w-[1px] h-full bg-slate-800"></span>
-                  <span className="w-[1.6px] h-full bg-slate-800"></span>
-                  <span className="w-[0.8px] h-full bg-slate-800"></span>
-                  <span className="w-[1.8px] h-full bg-slate-800"></span>
-                  <span className="w-[1px] h-full bg-slate-800"></span>
-                </div>
-              </div>
-
-              {/* ------------------------------------------------------------
-                  C. COMMITTEE SECTION (Dark Translucent Bar)
+                  B. COMMITTEE SECTION (Dark Translucent Bar)
                  ------------------------------------------------------------ */}
               <div
                 className="absolute flex items-center justify-center"
