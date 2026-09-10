@@ -319,6 +319,7 @@ export default function UserManagement() {
     fd.set('district', autoDistrict);
     fd.set('place', placeVal);
     fd.set('city', placeVal);
+    fd.set('role', 'donor');
 
     const res = await volunteerAddUser(fd);
     if (res.success) {
@@ -1110,19 +1111,6 @@ export default function UserManagement() {
                         />
                       </label>
                     )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Role *</label>
-                    <select
-                      value={form.role || 'donor'}
-                      onChange={e => setForm({ ...form, role: e.target.value })}
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-semibold"
-                    >
-                      <option value="donor">Donor (Voluntary Blood Donor)</option>
-                      <option value="user">User / Regular Member</option>
-                      <option value="receiver">Receiver / Patient</option>
-                    </select>
                   </div>
 
                   <div>
