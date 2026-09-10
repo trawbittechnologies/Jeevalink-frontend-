@@ -389,14 +389,14 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               <div
                 className="absolute select-none pointer-events-none text-left leading-tight"
                 style={{
-                  bottom: '1.8%',
+                  bottom: '1.6%',
                   left: '4.5%',
                 }}
               >
-                <div className="text-[6.8px] font-semibold text-slate-400 tracking-wide leading-none">
+                <div className="text-[9.5px] font-bold text-slate-600 tracking-wide leading-none">
                   {generatedDateTime.date}
                 </div>
-                <div className="text-[6.5px] font-medium text-slate-400 tracking-wide leading-none mt-0.5">
+                <div className="text-[9px] font-semibold text-slate-500 tracking-wide leading-none mt-0.5">
                   {generatedDateTime.time}
                 </div>
               </div>
