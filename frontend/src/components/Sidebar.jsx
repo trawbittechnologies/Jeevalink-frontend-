@@ -5,7 +5,7 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, Megaphone, HeartHandshake, X
+  Building2, Megaphone, HeartHandshake, X, Headphones
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
@@ -15,7 +15,7 @@ const userLinks = [
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/donor/eligibility', label: 'Health Eligibility', icon: ShieldCheck },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
-  { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
+  { to: '/support', label: 'Support & Help', icon: Headphones },
   { to: '/profile', label: 'My Profile', icon: User },
 ];
 

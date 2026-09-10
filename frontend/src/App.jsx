@@ -71,6 +71,7 @@ const Leaderboard = safeLazy(() => import('./pages/Leaderboard.jsx'));
 const VolunteerDirectory = safeLazy(() => import('./pages/VolunteerDirectory.jsx'));
 const TechnicalReports = safeLazy(() => import('./pages/TechnicalReports.jsx'));
 const Campaigns = safeLazy(() => import('./pages/Campaigns.jsx'));
+const UserSupport = safeLazy(() => import('./pages/UserSupport.jsx'));
 
 function PageLoader() {
   return (
@@ -364,7 +365,9 @@ export default function App() {
                     <BloodRequests />
                   </ProtectedRoute>
                 } />
-                <Route path="/blood-requests" element={<Navigate to="/requests" replace />} />
+                <Route path="/support" element={<UserSupport />} />
+                <Route path="/user/support" element={<Navigate to="/support" replace />} />
+                <Route path="/help" element={<Navigate to="/support" replace />} />
                 <Route path="/campaigns" element={<Campaigns />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />

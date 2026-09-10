@@ -6,7 +6,7 @@ import api from '../store/api.js';
 import {
   Loader2, X, Phone, RefreshCw,
   Heart, Siren, Droplet, Send, ShieldAlert, ShieldCheck,
-  Share2, MapPin
+  Share2, MapPin, Headphones
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Modal from '../components/Modal.jsx';
@@ -320,17 +320,23 @@ export default function DonorDashboard() {
           <span className="text-[11px] font-semibold text-emerald-600">{eligibility.text}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <Link
+            to="/support"
+            className="py-2.5 px-3 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-bold rounded-xl text-center transition flex items-center justify-center gap-1.5"
+          >
+            <Headphones className="w-3.5 h-3.5" /> Support & AI Help
+          </Link>
           <Link
             to="/donor/eligibility"
-            className="py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl text-center transition"
+            className="py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl text-center transition flex items-center justify-center"
           >
-            Health Questionnaire
+            Health Check
           </Link>
           <button
             type="button"
             onClick={() => setShowReportModal(true)}
-            className="py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl text-center transition cursor-pointer"
+            className="py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl text-center transition cursor-pointer flex items-center justify-center"
           >
             Report Issue
           </button>
