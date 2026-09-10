@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Bot, Phone, Send, Headphones,
   CheckCircle2, Loader2, ArrowLeft,
@@ -12,10 +12,10 @@ import { queryJeevaLinkAI } from '../utils/aiService.js';
 import api from '../store/api.js';
 
 const QUICK_PROMPTS = [
-  '🩸 How to request blood?',
-  '🩺 Donor eligibility rules',
-  '📍 Find donors near me',
-  '🏆 What are JeevaPoints?'
+  'How to request blood?',
+  'Donor eligibility rules',
+  'Find donors near me',
+  'What are JeevaPoints?'
 ];
 
 // Clean text & markdown renderer
@@ -56,7 +56,7 @@ export default function UserSupport() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: `👋 Hi ${user?.primaryName || user?.name || ''}! How can I help you today? Ask me anything about blood requests, donation rules, or finding donors.`
+      text: `Hi ${user?.primaryName || user?.name || ''}! How can I help you today? Ask me anything about blood requests, donation rules, or finding donors.`
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -100,7 +100,7 @@ export default function UserSupport() {
         ...prev,
         {
           sender: 'assistant',
-          text: `⚠️ ${err.message || 'Unable to connect to AI server. Please switch to "Contact Human" for help.'}`
+          text: err.message || 'Unable to connect to AI server. Please switch to "Contact Human" for help.'
         }
       ]);
     } finally {
@@ -112,7 +112,7 @@ export default function UserSupport() {
     setMessages([
       {
         sender: 'assistant',
-        text: `👋 Chat reset. How can I help you?`
+        text: `Chat reset. How can I help you?`
       }
     ]);
   };
@@ -157,7 +157,7 @@ export default function UserSupport() {
   };
 
   const handleWhatsAppContact = () => {
-    const text = `*URGENT HELP — JeevaLink*\nUser: ${user?.primaryName || user?.name || 'User'}\nPhone: ${user?.mobile || 'N/A'}\nDistrict: ${user?.district || 'Kerala'}\n\nHello, I need urgent assistance regarding JeevaLink.`;
+    const text = `URGENT HELP — JeevaLink\nUser: ${user?.primaryName || user?.name || 'User'}\nPhone: ${user?.mobile || 'N/A'}\nDistrict: ${user?.district || 'Kerala'}\n\nHello, I need urgent assistance regarding JeevaLink.`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -316,7 +316,7 @@ export default function UserSupport() {
               onClick={() => setActiveTab('human')}
               className="text-xs text-red-600 hover:underline font-bold cursor-pointer"
             >
-              Need urgent human help? Click here to call hotline or message coordinator →
+              Need urgent human help? Click here to call hotline or message coordinator
             </button>
           </div>
         </motion.div>
@@ -378,7 +378,7 @@ export default function UserSupport() {
                   onChange={(e) => setTicketForm({ ...ticketForm, category: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-red-500 text-slate-900"
                 >
-                  <option value="Urgent Blood Assistance">🚨 Urgent Blood Request</option>
+                  <option value="Urgent Blood Assistance">Urgent Blood Request</option>
                   <option value="Donor Eligibility Dispute">Health Check / Eligibility</option>
                   <option value="Account & Profile Error">Account / Profile Issue</option>
                   <option value="Technical App Bug">App Error / Bug</option>
