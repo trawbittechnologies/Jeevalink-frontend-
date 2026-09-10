@@ -205,12 +205,13 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  // Block Summary Mapping
+  // Block Summary Mapping with Case-Insensitive keys
   const availableBlocksMap = new Map();
 
   (districtData.block_summary || []).forEach(b => {
     if (b.block) {
-      availableBlocksMap.set(b.block, {
+      const key = b.block.toLowerCase().trim();
+      availableBlocksMap.set(key, {
         block: b.block,
         users: b.users || 0,
         volunteers: b.volunteers || 0
@@ -220,12 +221,15 @@ export default function SuperAdminDashboard() {
 
   blockAdmins.forEach(ba => {
     const bName = ba.blockCommitteeName || ba.city || ba.block;
-    if (bName && !availableBlocksMap.has(bName)) {
-      availableBlocksMap.set(bName, {
-        block: bName,
-        users: 0,
-        volunteers: 0
-      });
+    if (bName) {
+      const key = bName.toLowerCase().trim();
+      if (!availableBlocksMap.has(key)) {
+        availableBlocksMap.set(key, {
+          block: bName,
+          users: 0,
+          volunteers: 0
+        });
+      }
     }
   });
 
@@ -250,7 +254,8 @@ export default function SuperAdminDashboard() {
   const bgCountMap = new Map();
   (districtData.blood_group_distribution || []).forEach(item => {
     if (item.blood_group) {
-      bgCountMap.set(item.blood_group.toUpperCase(), item.count || 0);
+      const cleanBg = item.blood_group.toUpperCase().replace(/\s+/g, '').replace(/VE$/i, '');
+      bgCountMap.set(cleanBg, item.count || 0);
     }
   });
 
