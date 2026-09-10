@@ -98,10 +98,11 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   const rawPatientName = posterData.patient_name || posterData.patientName || 'Pradeep';
   const patientName = toTitleCase(rawPatientName);
   const rawPhone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || '79026 19430';
-  const phone = formatPhoneNumber(rawPhone);
   const bloodGroup = (posterData.blood_group || posterData.bloodGroup || 'B+').toUpperCase();
   const rawUnits = posterData.units_required || posterData.unitsRequired || posterData.units || posterData.unit || posterData.quantity || '1';
   const unitsText = formatUnits(rawUnits);
+  const unitsDigits = String(rawUnits).replace(/[^\d.]/g, '');
+  const unitsNumber = unitsDigits || '1';
 
   const rawLocation =
     posterData.meghala_committee_name ||
@@ -281,33 +282,41 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
                 {/* Thin Divider */}
                 <div className="h-[1px] bg-slate-200/90 w-full"></div>
 
-                {/* 4. Contact & Units Row */}
-                <div className="flex items-center justify-between gap-1">
-                  {/* Contact Number */}
-                  <div className="shrink-0">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wide leading-none">
-                      Contact
-                    </div>
-                    <div className="text-[13px] font-black text-[#d31818] flex items-center gap-1 mt-0.5 tracking-tight leading-none whitespace-nowrap">
-                      <Phone className="w-3 h-3 text-slate-800 fill-slate-800 shrink-0" />
-                      <span>{phone}</span>
-                    </div>
+                {/* 4. Contact Section */}
+                <div>
+                  <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wide leading-none">
+                    Contact
                   </div>
-
-                  {/* Vertical Divider */}
-                  <div className="h-5 w-[1px] bg-slate-200/90 shrink-0 mx-0.5"></div>
-
-                  {/* Units Red Rounded Badge */}
-                  <div className="bg-[#d31818] text-white px-2 py-1 rounded-xl shadow-xs shrink-0 flex items-center justify-center">
-                    <span className="text-[9.5px] font-black tracking-wide leading-none whitespace-nowrap">
-                      {unitsText}
-                    </span>
+                  <div className="text-[14px] font-black text-[#d31818] flex items-center gap-1.5 mt-0.5 tracking-tight leading-none whitespace-nowrap">
+                    <Phone className="w-3.5 h-3.5 text-slate-800 fill-slate-800 shrink-0" />
+                    <span>{phone}</span>
                   </div>
                 </div>
               </div>
 
               {/* ------------------------------------------------------------
-                  B. COMMITTEE SECTION (Dark Translucent Bar)
+                  B. BLOOD PACK DYNAMIC UNITS DISPLAY
+                  (Positioned cleanly in the white label of the blood pack)
+                 ------------------------------------------------------------ */}
+              <div
+                className="absolute flex flex-col items-center justify-center text-center select-none pointer-events-none"
+                style={{
+                  top: '43.0%',
+                  left: '65.2%',
+                  width: '14.2%',
+                  height: '8.4%',
+                }}
+              >
+                <div className="text-[19px] font-black text-[#d31818] tracking-tight leading-none">
+                  {unitsNumber}
+                </div>
+                <div className="text-[7.5px] font-black text-slate-700 tracking-wider uppercase mt-0.5 leading-none">
+                  {Number(unitsNumber) === 1 ? 'UNIT' : 'UNITS'}
+                </div>
+              </div>
+
+              {/* ------------------------------------------------------------
+                  C. COMMITTEE SECTION (Dark Translucent Bar)
                  ------------------------------------------------------------ */}
               <div
                 className="absolute flex items-center justify-center"
