@@ -39,16 +39,119 @@ export default function DistrictPointsTable() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get('/super-admin/points-table');
-      if (res.data?.success && res.data.data) {
+      // 1. Try dedicated points-table endpoint
+      let res = await api.get('/super-admin/points-table').catch(() => null);
+
+      if (res?.data?.success && res.data.data?.blocks?.length > 0) {
         setData(res.data.data);
+        return;
       }
+
+      // 2. Dynamic fallback from real database metrics and block-admins
+      const [resDist, resAdmins] = await Promise.all([
+        api.get('/super-admin/metrics').catch(() => null),
+        api.get('/super-admin/block-admins').catch(() => null)
+      ]);
+
+      const dData = resDist?.data?.data || resDist?.data || {};
+      const adminsList = Array.isArray(resAdmins?.data?.data)
+        ? resAdmins.data.data
+        : (Array.isArray(resAdmins?.data) ? resAdmins.data : []);
+
+      const blockSummary = Array.isArray(dData.block_summary) ? dData.block_summary : [];
+
+      // Compile unique blocks from real database block_admins and block_summary
+      const blockMap = new Map();
+
+      adminsList.forEach((ba, idx) => {
+        const bName = ba.blockCommitteeName || ba.city || ba.block || ba.blockName || ba.name;
+        if (bName && String(bName).trim() && String(bName).trim() !== 'N/A') {
+          const key = String(bName).toLowerCase().trim();
+          blockMap.set(key, {
+            rank: idx + 1,
+            block_name: bName.trim(),
+            admin_name: ba.primary_name || ba.primaryContactName || ba.name || 'Block Coordinator',
+            admin_mobile: ba.mobile || ba.phone || '',
+            admin_email: ba.email || '',
+            total_points: Number(ba.reward_points) || 0,
+            donors_count: 0,
+            volunteers_count: 0,
+            fulfilled_requests: 0,
+            total_requests: 0,
+            meghala_count: 0
+          });
+        }
+      });
+
+      blockSummary.forEach((bs) => {
+        const bName = bs.block || bs.city || bs.name;
+        if (bName && String(bName).trim()) {
+          const key = String(bName).toLowerCase().trim();
+          if (blockMap.has(key)) {
+            const existing = blockMap.get(key);
+            existing.donors_count = bs.users || bs.donors || existing.donors_count;
+            existing.volunteers_count = bs.volunteers || existing.volunteers_count;
+          } else {
+            blockMap.set(key, {
+              rank: blockMap.size + 1,
+              block_name: bName.trim(),
+              admin_name: 'Block Coordinator',
+              admin_mobile: '',
+              admin_email: '',
+              total_points: 0,
+              donors_count: bs.users || bs.donors || 0,
+              volunteers_count: bs.volunteers || 0,
+              fulfilled_requests: 0,
+              total_requests: 0,
+              meghala_count: 0
+            });
+          }
+        }
+      });
+
+      const compiledBlocks = Array.from(blockMap.values()).map((b, idx) => ({
+        ...b,
+        rank: idx + 1
+      }));
+
+      const totalDistPoints = compiledBlocks.reduce((acc, b) => acc + (b.total_points || 0), 0);
+      const topBlockName = compiledBlocks.length > 0 ? compiledBlocks[0].block_name : 'N/A';
+
+      setData({
+        district: dData.district || user?.district || 'Kasaragod',
+        summary: {
+          total_district_points: totalDistPoints,
+          total_blocks: compiledBlocks.length,
+          total_meghalas: 0,
+          total_donors: dData.total_users || 0,
+          total_volunteers: dData.total_volunteers || 0,
+          top_block: topBlockName,
+          top_donor: 'N/A',
+        },
+        blocks: compiledBlocks,
+        meghalas: [],
+        top_donors: [],
+        top_volunteers: [],
+        point_rules: [
+          { action: 'Blood Donation Completed', target: 'Donor', badge: '🩸 +100 Pts' },
+          { action: 'Meghala Volunteer Verification', target: 'Meghala Volunteer', badge: '🛡️ +20 Pts' },
+          { action: 'Block Committee Coordination', target: 'Block Admin', badge: '🏢 +20 Pts' },
+          { action: 'Emergency SOS Acceptance', target: 'Donor / Responder', badge: '⚡ +20 Pts' },
+        ],
+        badges_guide: [
+          { name: 'First Drop', points: 100, desc: 'Completed 1st verified blood donation.' },
+          { name: 'Life Saver', points: 500, desc: 'Earned 500 points rescuing lives.' },
+          { name: 'Blood Hero', points: 1000, desc: 'Reached 1,000 points milestone.' },
+          { name: 'Red Guardian', points: 2500, desc: 'Reached 2,500 points champion status.' },
+          { name: 'Legend Donor', points: 5000, desc: 'Attained highest 5,000 points tier.' },
+        ]
+      });
     } catch (err) {
       console.error('Failed to load district points table:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchData();
@@ -62,20 +165,30 @@ export default function DistrictPointsTable() {
     let list = [...(data.blocks || [])];
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      list = list.filter(b =>
-        (b.block_name || '').toLowerCase().includes(q) ||
-        (b.admin_name || '').toLowerCase().includes(q)
-      );
+      list = list.filter(b => {
+        const name = b.block_name || b.block || b.city || b.blockCommitteeName || '';
+        const admin = b.admin_name || b.primary_name || '';
+        return name.toLowerCase().includes(q) || admin.toLowerCase().includes(q);
+      });
     }
     if (sortBy === 'donors') {
-      list.sort((a, b) => (b.donors_count || 0) - (a.donors_count || 0));
+      list.sort((a, b) => (Number(b.donors_count) || 0) - (Number(a.donors_count) || 0));
     } else if (sortBy === 'fulfilled') {
-      list.sort((a, b) => (b.fulfilled_requests || 0) - (a.fulfilled_requests || 0));
+      list.sort((a, b) => (Number(b.fulfilled_requests) || 0) - (Number(a.fulfilled_requests) || 0));
     } else {
-      list.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+      list.sort((a, b) => (Number(b.total_points) || 0) - (Number(a.total_points) || 0));
     }
     return list;
   }, [data.blocks, searchQuery, sortBy]);
+
+  const maxBlockPoints = useMemo(() => {
+    let max = 0;
+    (filteredBlocks || []).forEach(b => {
+      const pts = Number(b.total_points) || 0;
+      if (pts > max) max = pts;
+    });
+    return max;
+  }, [filteredBlocks]);
 
   // Filtered Meghalas
   const filteredMeghalas = useMemo(() => {
@@ -83,8 +196,8 @@ export default function DistrictPointsTable() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(m =>
-        (m.meghala_name || '').toLowerCase().includes(q) ||
-        (m.block_name || '').toLowerCase().includes(q)
+        (m.meghala_name || m.meghala || '').toLowerCase().includes(q) ||
+        (m.block_name || m.block || '').toLowerCase().includes(q)
       );
     }
     return list;
@@ -96,10 +209,10 @@ export default function DistrictPointsTable() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(d =>
-        (d.primary_name || '').toLowerCase().includes(q) ||
+        (d.primary_name || d.name || '').toLowerCase().includes(q) ||
         (d.jeevalink_id || '').toLowerCase().includes(q) ||
         (d.blood_group || '').toLowerCase().includes(q) ||
-        (d.block || '').toLowerCase().includes(q)
+        (d.block || d.city || '').toLowerCase().includes(q)
       );
     }
     return list;
@@ -111,9 +224,9 @@ export default function DistrictPointsTable() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(v =>
-        (v.primary_name || '').toLowerCase().includes(q) ||
+        (v.primary_name || v.name || '').toLowerCase().includes(q) ||
         (v.jeevalink_id || '').toLowerCase().includes(q) ||
-        (v.block || '').toLowerCase().includes(q)
+        (v.block || v.city || '').toLowerCase().includes(q)
       );
     }
     return list;
@@ -214,21 +327,21 @@ export default function DistrictPointsTable() {
           <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">#1 Block</span>
             <span className="text-sm font-black text-slate-900 block mt-1 truncate">
-              {data.summary?.top_block || 'N/A'}
+              {data.summary?.top_block || (filteredBlocks.length > 0 ? (filteredBlocks[0].block_name || filteredBlocks[0].city) : 'N/A')}
             </span>
           </div>
 
           <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">#1 Donor</span>
             <span className="text-sm font-black text-slate-900 block mt-1 truncate">
-              {data.summary?.top_donor || 'N/A'}
+              {data.summary?.top_donor || (filteredDonors.length > 0 ? filteredDonors[0].primary_name : 'N/A')}
             </span>
           </div>
 
           <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Committees</span>
             <span className="text-lg font-black text-slate-950 block mt-0.5">
-              {(data.summary?.total_blocks || 0) + (data.summary?.total_meghalas || 0)} <span className="text-[10px] text-slate-400 font-normal">units</span>
+              {filteredBlocks.length + (data.meghalas?.length || 0)} <span className="text-[10px] text-slate-400 font-normal">units</span>
             </span>
           </div>
         </div>
@@ -239,10 +352,10 @@ export default function DistrictPointsTable() {
         {/* Segmented Pills */}
         <div className="bg-slate-200/60 p-1 rounded-xl inline-flex items-center gap-1 overflow-x-auto max-w-full">
           {[
-            { id: 'blocks', label: 'Block Committees', count: data.blocks?.length },
-            { id: 'meghalas', label: 'Meghala Units', count: data.meghalas?.length },
-            { id: 'donors', label: 'Top Donors', count: data.top_donors?.length },
-            { id: 'volunteers', label: 'Volunteers', count: data.top_volunteers?.length },
+            { id: 'blocks', label: 'Block Committees', count: filteredBlocks.length },
+            { id: 'meghalas', label: 'Meghala Units', count: filteredMeghalas.length },
+            { id: 'donors', label: 'Top Donors', count: filteredDonors.length },
+            { id: 'volunteers', label: 'Volunteers', count: filteredVolunteers.length },
             { id: 'rules', label: 'Point Rules', count: null },
           ].map(tab => {
             const isActive = activeTab === tab.id;
@@ -309,7 +422,7 @@ export default function DistrictPointsTable() {
             <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
               {filteredBlocks.length === 0 ? (
                 <div className="p-12 text-center text-slate-400 text-xs">
-                  No block committees found.
+                  No block committees found in {cleanDistrict}.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -327,52 +440,61 @@ export default function DistrictPointsTable() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {filteredBlocks.map((b) => (
-                        <tr
-                          key={b.block_name}
-                          className="hover:bg-slate-50/70 transition-colors cursor-pointer"
-                          onClick={() => setSelectedBlockDetail(b)}
-                        >
-                          <td className="py-3 px-4 text-center">
-                            {getRankBadge(b.rank)}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-bold text-slate-900">{b.block_name}</div>
-                            <span className="text-[10px] text-slate-400 font-normal">
-                              {b.meghala_count ? `${b.meghala_count} Meghalas` : 'District Unit'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="text-slate-700 font-medium">{b.admin_name}</div>
-                            {b.admin_mobile && (
-                              <span className="text-[10px] text-slate-400">{b.admin_mobile}</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-center font-semibold text-slate-700">
-                            {b.donors_count || 0}
-                          </td>
-                          <td className="py-3 px-4 text-center font-semibold text-slate-700">
-                            {b.volunteers_count || 0}
-                          </td>
-                          <td className="py-3 px-4 text-center font-semibold text-slate-700">
-                            {b.fulfilled_requests || 0}
-                          </td>
-                          <td className="py-3 px-4 min-w-[120px]">
-                            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                              <div
-                                className="bg-red-600 h-full rounded-full"
-                                style={{ width: `${Math.max(6, b.percentage || 100)}%` }}
-                              />
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <span className="font-black text-slate-900">
-                              {(b.total_points || 0).toLocaleString()}
-                            </span>
-                            <span className="text-[10px] text-slate-400 ml-1">pts</span>
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredBlocks.map((b, idx) => {
+                        const blockName = b.block_name || b.blockCommitteeName || b.city || b.block || b.name || `Block ${idx + 1}`;
+                        const adminName = b.admin_name || b.primary_name || b.primaryContactName || b.name || 'Block Coordinator';
+                        const currentPts = Number(b.total_points) || 0;
+                        const percent = maxBlockPoints > 0 && currentPts > 0
+                          ? Math.min(100, Math.round((currentPts / maxBlockPoints) * 100))
+                          : 0;
+
+                        return (
+                          <tr
+                            key={b.block_name || idx}
+                            className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                            onClick={() => setSelectedBlockDetail({ ...b, block_name: blockName, admin_name: adminName })}
+                          >
+                            <td className="py-3 px-4 text-center">
+                              {getRankBadge(idx + 1)}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="font-bold text-slate-900">{blockName}</div>
+                              <span className="text-[10px] text-slate-400 font-normal">
+                                {b.meghala_count ? `${b.meghala_count} Meghalas` : 'District Committee'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="text-slate-700 font-medium">{adminName}</div>
+                              {b.admin_mobile && (
+                                <span className="text-[10px] text-slate-400">{b.admin_mobile}</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-center font-semibold text-slate-700">
+                              {b.donors_count || 0}
+                            </td>
+                            <td className="py-3 px-4 text-center font-semibold text-slate-700">
+                              {b.volunteers_count || 0}
+                            </td>
+                            <td className="py-3 px-4 text-center font-semibold text-slate-700">
+                              {b.fulfilled_requests || 0}
+                            </td>
+                            <td className="py-3 px-4 min-w-[120px]">
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div
+                                  className="bg-red-600 h-full rounded-full transition-all duration-300"
+                                  style={{ width: `${percent}%` }}
+                                />
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <span className="font-black text-slate-900">
+                                {currentPts.toLocaleString()}
+                              </span>
+                              <span className="text-[10px] text-slate-400 ml-1">pts</span>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -389,16 +511,16 @@ export default function DistrictPointsTable() {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
-                  {filteredMeghalas.map((m) => (
+                  {filteredMeghalas.map((m, idx) => (
                     <div
-                      key={m.meghala_name}
+                      key={m.meghala_name || idx}
                       className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {getRankBadge(m.rank)}
+                        {getRankBadge(idx + 1)}
                         <div className="min-w-0">
-                          <h4 className="font-bold text-slate-900 truncate">{m.meghala_name}</h4>
-                          <p className="text-[11px] text-slate-400 font-normal">Block: {m.block_name}</p>
+                          <h4 className="font-bold text-slate-900 truncate">{m.meghala_name || m.meghala || 'Meghala Unit'}</h4>
+                          <p className="text-[11px] text-slate-400 font-normal">Block: {m.block_name || m.block || cleanDistrict}</p>
                         </div>
                       </div>
 
@@ -427,25 +549,25 @@ export default function DistrictPointsTable() {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
-                  {filteredDonors.map((donor) => (
+                  {filteredDonors.map((donor, idx) => (
                     <div
-                      key={donor.id}
+                      key={donor.id || idx}
                       className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {getRankBadge(donor.rank)}
+                        {getRankBadge(idx + 1)}
                         <span className="w-8 h-8 rounded-lg bg-red-50 text-red-700 border border-red-100 font-black text-xs flex items-center justify-center shrink-0">
-                          {donor.blood_group}
+                          {donor.blood_group || 'O+'}
                         </span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 truncate">{donor.primary_name}</span>
-                            <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${getDonorTierStyle(donor.badge)}`}>
-                              {donor.badge}
+                            <span className="font-bold text-slate-900 truncate">{donor.primary_name || donor.name}</span>
+                            <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${getDonorTierStyle(donor.badge || 'First Drop')}`}>
+                              {donor.badge || 'First Drop'}
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-400 font-normal truncate">
-                            {donor.jeevalink_id} • {donor.block} {donor.meghala ? `(${donor.meghala})` : ''}
+                            {donor.jeevalink_id || `JL-${donor.id}`} • {donor.block || donor.city || cleanDistrict} {donor.meghala ? `(${donor.meghala})` : ''}
                           </p>
                         </div>
                       </div>
@@ -477,22 +599,22 @@ export default function DistrictPointsTable() {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
-                  {filteredVolunteers.map((vol) => (
+                  {filteredVolunteers.map((vol, idx) => (
                     <div
-                      key={vol.id}
+                      key={vol.id || idx}
                       className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {getRankBadge(vol.rank)}
+                        {getRankBadge(idx + 1)}
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 truncate">{vol.primary_name}</span>
+                            <span className="font-bold text-slate-900 truncate">{vol.primary_name || vol.name}</span>
                             <span className="text-[10px] font-semibold px-2 py-0.2 bg-slate-100 text-slate-600 rounded-md">
-                              {vol.role}
+                              {vol.role || 'Volunteer'}
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-400 font-normal truncate">
-                            {vol.jeevalink_id} • {vol.block}
+                            {vol.jeevalink_id || `JL-VOL-${vol.id}`} • {vol.block || vol.city || cleanDistrict}
                           </p>
                         </div>
                       </div>
