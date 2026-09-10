@@ -4,12 +4,11 @@ import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import api from '../store/api.js';
 import {
-  ClipboardList, Download, Loader2, X, Search, Phone, RefreshCw,
+  Loader2, X, Phone, RefreshCw,
   Heart, Siren, Droplet, Send, ShieldAlert, ShieldCheck,
   Share2, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import PosterModal from '../components/PosterModal.jsx';
 import Modal from '../components/Modal.jsx';
 import NotificationPermissionBanner from '../components/NotificationPermissionBanner.jsx';
 
@@ -19,10 +18,7 @@ export default function DonorDashboard() {
     requests, fetchRequests, fetchNotifications, triggerToast
   } = useAppStore();
 
-  const [tab, setTab] = useState('matching'); // 'matching' | 'sos' | 'all'
-  const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [posterModal, setPosterModal] = useState(null);
 
   // Health popup
   const [showPopup, setShowPopup] = useState(false);
@@ -34,7 +30,6 @@ export default function DonorDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportForm, setReportForm] = useState({ title: '', description: '', type: 'Bug Report' });
   const [submittingReport, setSubmittingReport] = useState(false);
-
 
   // Ineligible warning modal
   const [showIneligibleModal, setShowIneligibleModal] = useState(false);
@@ -115,7 +110,6 @@ export default function DonorDashboard() {
     }
   };
 
-
   const toggleAvailability = async () => {
     const next = !user?.availableForDonation;
     if (next && user?.eligibilityStatus === 'Ineligible') {
@@ -153,61 +147,12 @@ export default function DonorDashboard() {
 
   const eligibility = getEligibility();
 
-  // Requests filtering
+  // Requests filtering for SOS
   const currentUserId = user ? String(user._id || user.id) : null;
   const isNotOwner = (r) => currentUserId !== String(r.requested_by || r.requestedBy);
-
-  const pending = requests.filter((r) => ['Pending', 'Waiting', 'Accepted'].includes(r.status) && isNotOwner(r));
   const sos = requests.filter((r) => (r.urgencyLevel === 'Immediate' || r.urgency_level === 'Immediate') && ['Pending', 'Waiting', 'Accepted'].includes(r.status) && isNotOwner(r));
 
   const userBg = (user?.bloodGroup || user?.blood_group || 'O+').toUpperCase();
-
-  const matchingRequests = requests.filter(r => {
-    if (!['Pending', 'Waiting', 'Accepted'].includes(r.status)) return false;
-    if (!isNotOwner(r)) return false;
-    const reqBg = (r.bloodGroup || r.blood_group || '').toUpperCase();
-    if (reqBg === userBg) return true;
-    if (userBg === 'O-') return true;
-    if (userBg === 'O+' && reqBg.endsWith('+')) return true;
-    return false;
-  });
-
-  const tabRequests = (tab === 'matching'
-    ? matchingRequests
-    : tab === 'sos'
-      ? sos
-      : pending
-  ).filter((r) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      (r.patientName || r.patient_name || '').toLowerCase().includes(q) ||
-      (r.hospitalName || r.hospital_name || r.hospital || '').toLowerCase().includes(q) ||
-      (r.city || '').toLowerCase().includes(q) ||
-      (r.bloodGroup || r.blood_group || '').toLowerCase().includes(q)
-    );
-  });
-
-  const handlePoster = (req) => {
-    setPosterModal({
-      reqId: req._id || req.id,
-      data: {
-        ...req,
-        patientName: req.patientName || req.patient_name || 'Patient',
-        bloodGroup: req.bloodGroup || req.blood_group || 'O+',
-        unitsRequired: req.unitsRequired || req.units_required || 1,
-        hospitalName: req.hospitalName || req.hospital_name || 'Hospital',
-        city: req.city || user?.city || 'Kasaragod',
-        district: req.district || user?.district || 'Kasaragod',
-        meghala_name: req.meghala_name || req.requester_meghala || req.meghala || req.city || user?.city || user?.meghala || '',
-        requester_meghala: req.requester_meghala || req.meghala_name || req.meghala || req.city || user?.city || user?.meghala || '',
-        bystanderName: req.bystanderName || req.bystander_name || user?.primaryName || 'Contact',
-        bystanderPhone: req.contactNumber || req.bystanderPhone || user?.mobile || '',
-        urgencyLevel: req.urgencyLevel || req.urgency_level || 'Immediate',
-        requiredDate: req.requiredDate || req.required_date || 'ASAP',
-      }
-    });
-  };
 
   // WhatsApp SOS Share
   const handleShareWhatsApp = (req) => {
@@ -368,124 +313,7 @@ export default function DonorDashboard() {
         </div>
       </div>
 
-      {/* ─── 5. ACTIVE BLOOD REQUESTS QUEUE ─── */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-2xs space-y-3.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Active Blood Requests</h3>
-            <p className="text-[11px] text-slate-500">Voluntary requests near your location</p>
-          </div>
-
-          <div className="relative w-full sm:w-44">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-red-500 text-slate-900"
-            />
-          </div>
-        </div>
-
-        {/* Clean Filter Tabs */}
-        <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-          {[
-            ['matching', 'Matching', matchingRequests.length],
-            ['sos', 'Urgent SOS', sos.length],
-            ['all', 'All', pending.length],
-          ].map(([val, label, count]) => (
-            <button
-              key={val}
-              type="button"
-              onClick={() => setTab(val)}
-              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${tab === val
-                  ? 'bg-red-600 text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-                }`}
-            >
-              <span>{label}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${tab === val ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                {count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Requests List */}
-        <div className="space-y-3 max-h-[440px] overflow-y-auto pr-1 custom-scrollbar">
-          {tabRequests.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 space-y-1">
-              <ClipboardList className="w-8 h-8 mx-auto opacity-30" />
-              <p className="text-xs font-medium">No blood requests in this view</p>
-            </div>
-          ) : (
-            tabRequests.map((req) => {
-              const reqId = req.id || req._id;
-              const bg = req.blood_group || req.bloodGroup || '—';
-              const patient = req.patient_name || req.patientName || 'Patient';
-              const hospital = req.hospital_name || req.hospitalName || 'Hospital';
-              const city = req.city || 'Location';
-              const units = req.units_required || req.unitsRequired || 1;
-              const contact = req.contact_number || req.contactNumber || '—';
-              const urgency = req.urgency_level || req.urgencyLevel || 'Normal';
-
-              return (
-                <div key={reqId} className="border border-slate-200 rounded-2xl p-3.5 space-y-3 hover:border-slate-300 transition bg-white shadow-2xs">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-red-600 text-white font-black text-xs rounded">
-                          {bg}
-                        </span>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900">{patient}</h4>
-                      </div>
-                      <p className="text-[11px] text-slate-600 font-medium">
-                        {hospital}, {city} • <strong>{units} Unit(s)</strong>
-                      </p>
-                    </div>
-
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${urgency === 'Immediate' || urgency === 'SOS'
-                        ? 'bg-red-50 text-red-700 border-red-200 font-bold'
-                        : 'bg-slate-100 text-slate-700 border-slate-200'
-                      }`}>
-                      {urgency}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                    {contact !== '—' && (
-                      <a
-                        href={`tel:${contact}`}
-                        className="flex-1 py-2 px-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs"
-                      >
-                        <Phone className="w-3.5 h-3.5 fill-white" /> Call
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleShareWhatsApp(req)}
-                      className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                    >
-                      <Share2 className="w-3.5 h-3.5" /> Share
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handlePoster(req)}
-                      className="py-2 px-3 border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold rounded-xl transition flex items-center justify-center cursor-pointer"
-                      title="Download Poster"
-                    >
-                      <Download className="w-3.5 h-3.5 text-red-600" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* ─── 6. CLEAN ACCOUNT & SUPPORT UTILITIES ─── */}
+      {/* ─── 5. CLEAN ACCOUNT & SUPPORT UTILITIES ─── */}
       <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-2xs space-y-3 text-xs">
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <h3 className="font-bold text-slate-900">Health Status & Support</h3>
@@ -510,15 +338,6 @@ export default function DonorDashboard() {
       </div>
 
       {/* ─── MODALS ─── */}
-
-      {/* Poster Modal */}
-      {posterModal && (
-        <PosterModal
-          isOpen={!!posterModal}
-          onClose={() => setPosterModal(null)}
-          requestData={posterModal.data}
-        />
-      )}
 
       {/* Health Info Popup */}
       <AnimatePresence>
