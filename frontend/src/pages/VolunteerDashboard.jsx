@@ -153,18 +153,17 @@ export default function VolunteerDashboard() {
   };
 
   // ── Poster download ────────────────────────────────────────────────
-  const handlePoster = async (reqId) => {
-    try {
-      const res = await api.get(`/posters/blood-request/${reqId}`);
-      if (res.data.success) {
-        setPosterModal({ data: res.data.data, reqId });
-      } else {
-        const reqObj = requests.find(r => (r.id || r._id) === reqId) || pendingFromServer.find(r => (r.id || r._id) === reqId);
-        setPosterModal({ data: reqObj, reqId });
-      }
-    } catch {
-      const reqObj = requests.find(r => (r.id || r._id) === reqId) || pendingFromServer.find(r => (r.id || r._id) === reqId);
-      setPosterModal({ data: reqObj, reqId });
+  const handlePoster = (reqId) => {
+    const reqObj = requests.find(r => (r.id || r._id) === reqId) || pendingFromServer.find(r => (r.id || r._id) === reqId);
+    if (reqObj) {
+      setPosterModal({
+        data: {
+          ...reqObj,
+          meghala_name: reqObj.meghala_name || reqObj.requester_meghala || reqObj.meghala || reqObj.city || user?.city || user?.meghala || '',
+          requester_meghala: reqObj.requester_meghala || reqObj.meghala_name || reqObj.meghala || reqObj.city || user?.city || user?.meghala || '',
+        },
+        reqId
+      });
     }
   };
 

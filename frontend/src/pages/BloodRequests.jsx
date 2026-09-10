@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import RequestCard from '../components/RequestCard.jsx';
@@ -67,16 +67,22 @@ export default function BloodRequests() {
       setMapPos(null);
       setMapPickedAddress('');
 
+      const createdRequest = res.request || res.data?.request || res.data || {};
       const newReq = {
+        ...createdRequest,
         patient_name: form.patientName,
         blood_group: form.bloodGroup,
         units_required: form.unitsRequired,
         hospital_name: form.hospitalName,
         venue: form.hospitalName,
         location: form.city || form.district || 'Kerala',
+        city: form.city || user?.city || 'Kasaragod',
+        district: form.district || user?.district || 'Kasaragod',
+        meghala_name: createdRequest.meghala_name || createdRequest.requester_meghala || form.city || user?.city || user?.meghala || '',
+        requester_meghala: createdRequest.requester_meghala || createdRequest.meghala_name || form.city || user?.city || user?.meghala || '',
         contact_phone: form.contactNumber,
         urgency_level: form.urgencyLevel,
-        request_id: res.data?.id || res.data?._id || `JL-${Date.now().toString().slice(-4)}`
+        request_id: createdRequest.id || createdRequest._id || res.data?.id || `JL-${Date.now().toString().slice(-4)}`
       };
       setPosterReq(newReq);
       setForm({ ...form, patientName: '', hospitalName: '', city: '', district: '' });

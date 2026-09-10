@@ -192,12 +192,15 @@ export default function DonorDashboard() {
     setPosterModal({
       reqId: req._id || req.id,
       data: {
+        ...req,
         patientName: req.patientName || req.patient_name || 'Patient',
         bloodGroup: req.bloodGroup || req.blood_group || 'O+',
         unitsRequired: req.unitsRequired || req.units_required || 1,
         hospitalName: req.hospitalName || req.hospital_name || 'Hospital',
-        city: req.city || 'City',
-        district: req.district || user?.district || 'District',
+        city: req.city || user?.city || 'Kasaragod',
+        district: req.district || user?.district || 'Kasaragod',
+        meghala_name: req.meghala_name || req.requester_meghala || req.meghala || req.city || user?.city || user?.meghala || '',
+        requester_meghala: req.requester_meghala || req.meghala_name || req.meghala || req.city || user?.city || user?.meghala || '',
         bystanderName: req.bystanderName || req.bystander_name || user?.primaryName || 'Contact',
         bystanderPhone: req.contactNumber || req.bystanderPhone || user?.mobile || '',
         urgencyLevel: req.urgencyLevel || req.urgency_level || 'Immediate',

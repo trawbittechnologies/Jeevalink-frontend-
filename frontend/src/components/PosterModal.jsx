@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { X, Download, Share2, RefreshCw } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import posterTemplate from '../assets/poster-template.png';
+import { useAuthStore } from '../store/authStore';
 
 const POSTER_CONFIG = {
   patientName: { top: '47mm', left: '34.2mm', fontSize: '4.2mm', color: '#0f172a', fontWeight: '800', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
@@ -9,9 +10,37 @@ const POSTER_CONFIG = {
   phone: { top: '64mm', left: '34.2mm', fontSize: '3.6mm', color: '#dc2626', fontWeight: '700', fontFamily: "'Inter', sans-serif", letterSpacing: '0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
   bloodGroup: { top: '53mm', left: '67.2mm', fontSize: '7mm', color: '#dc2626', fontWeight: '900', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', width: '20mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: 'none' },
   units: { top: '68.1mm', left: '67.8mm', fontSize: '2.2mm', color: '#ffffff', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.03em', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: '0px 1px 2px rgba(0,0,0,0.4)' },
-  location: { top: '82mm', left: '45mm', fontSize: '2.8mm', color: '#ffffff', fontWeight: '700', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.15em', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.5)' },
+  location: { top: '82mm', left: '45mm', fontSize: '2.8mm', color: '#ffffff', fontWeight: '700', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.12em', width: '74mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.5)' },
   generatedAt: { top: '88mm', left: '45mm', fontSize: '2.0mm', color: '#ffffff', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.03em', width: '80mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 2px rgba(0,0,0,0.7)', opacity: 0.95 }
 };
+
+export function formatMeghalaCommittee(raw) {
+  if (!raw || typeof raw !== 'string') return 'DYFI Meghala Committee';
+  const clean = raw.trim();
+  if (!clean || clean.toLowerCase() === 'n/a' || clean.toLowerCase() === 'null') {
+    return 'DYFI Meghala Committee';
+  }
+
+  const lower = clean.toLowerCase();
+
+  // If clean already contains both meghala and committee
+  if (lower.includes('meghala') && lower.includes('committee')) {
+    return clean;
+  }
+
+  // If clean ends with / contains "meghala" (e.g. "Cheemeni Meghala")
+  if (lower.includes('meghala')) {
+    return `${clean} Committee`;
+  }
+
+  // If clean contains "committee"
+  if (lower.includes('committee')) {
+    return clean;
+  }
+
+  // Pure area / meghala name (e.g. "Cheemeni", "Kanhangad", "Nileshwar")
+  return `${clean} Meghala Committee`;
+}
 
 function formatGeneratedDateTime(dateVal) {
   const d = dateVal ? new Date(dateVal) : new Date();
@@ -40,6 +69,8 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
   if (!isOpen || !posterData) return null;
 
+  const currentUser = useAuthStore.getState().user;
+
   // Extract fields based on existing data structure variations
   const hospital = posterData.hospital_name || posterData.hospitalName || posterData.venue || 'Hospital Name';
   const patientName = posterData.patient_name || posterData.patientName || 'Patient Name';
@@ -47,11 +78,29 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   const bloodGroup = posterData.blood_group || posterData.bloodGroup || 'O+';
   const units = posterData.units_required || posterData.unitsRequired || '1';
 
-  // Extract and format the Meghala Name
-  const rawLocation = posterData.requester_meghala || posterData.meghala_name || posterData.meghala || posterData.unit || '';
-  const location = rawLocation
-    ? (rawLocation.toLowerCase().includes('meghala') ? rawLocation : `${rawLocation} Meghala`)
-    : 'DYFI Meghala Committee';
+  // Extract and format the Meghala Name accurately
+  const rawLocation =
+    posterData.meghala_committee_name ||
+    posterData.meghalaCommitteeName ||
+    posterData.meghala_name ||
+    posterData.meghalaName ||
+    posterData.requester_meghala ||
+    posterData.requesterMeghala ||
+    posterData.meghala ||
+    posterData.requester?.meghalaCommitteeName ||
+    posterData.requester?.meghala_committee_name ||
+    posterData.requester?.meghala_name ||
+    posterData.requester?.meghala ||
+    posterData.requester?.city ||
+    posterData.requester?.organization_name ||
+    posterData.unit ||
+    posterData.city ||
+    currentUser?.meghala ||
+    currentUser?.city ||
+    currentUser?.organization_name ||
+    '';
+
+  const location = formatMeghalaCommittee(rawLocation);
 
   const requestId = posterData.request_id || posterData.id || posterData._id || 'JL-REQ';
   const generatedTimeText = formatGeneratedDateTime(posterData.generated_at || new Date());

@@ -128,6 +128,10 @@ export const useAppStore = create((set, get) => ({
         mappedUrgency = 'Urgent';
       }
 
+      const currentUser = useAuthStore.getState().user;
+      const userCity = currentUser?.city || currentUser?.meghala || currentUser?.organization_name || currentUser?.unit || '';
+      const userDistrict = currentUser?.district || 'Kasaragod';
+
       // Backend expects snake_case field names
       const payload = {
         patient_name: requestData.patientName,
@@ -136,8 +140,8 @@ export const useAppStore = create((set, get) => ({
         hospital_name: requestData.hospitalName,
         hospital_address: requestData.hospitalAddress,
         location: requestData.location,
-        city: requestData.city || 'Bengaluru',
-        district: requestData.district || 'Bengaluru Urban',
+        city: requestData.city || requestData.meghala || userCity || 'Kasaragod',
+        district: requestData.district || userDistrict,
         contact_number: requestData.contactNumber,
         contact_person_name: requestData.contactPersonName,
         required_by_date: requestData.requiredByDate || new Date().toISOString().split('T')[0],
