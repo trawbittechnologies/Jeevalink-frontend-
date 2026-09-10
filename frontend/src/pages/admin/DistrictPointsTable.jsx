@@ -68,11 +68,11 @@ export default function DistrictPointsTable() {
       );
     }
     if (sortBy === 'donors') {
-      list.sort((a, b) => b.donors_count - a.donors_count);
+      list.sort((a, b) => (b.donors_count || 0) - (a.donors_count || 0));
     } else if (sortBy === 'fulfilled') {
-      list.sort((a, b) => b.fulfilled_requests - a.fulfilled_requests);
+      list.sort((a, b) => (b.fulfilled_requests || 0) - (a.fulfilled_requests || 0));
     } else {
-      list.sort((a, b) => b.total_points - a.total_points);
+      list.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
     }
     return list;
   }, [data.blocks, searchQuery, sortBy]);
@@ -122,29 +122,29 @@ export default function DistrictPointsTable() {
   const getRankBadge = (rank) => {
     if (rank === 1) {
       return (
-        <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-400/40 text-amber-600 flex items-center justify-center font-black text-sm shadow-xs shrink-0" title="1st Place - Gold">
-          <Crown className="w-4 h-4 fill-amber-500/20 text-amber-600" />
-        </div>
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/10 text-amber-700 text-xs font-black border border-amber-300/50">
+          1
+        </span>
       );
     }
     if (rank === 2) {
       return (
-        <div className="w-8 h-8 rounded-xl bg-slate-200/80 border border-slate-300 text-slate-700 flex items-center justify-center font-black text-sm shadow-xs shrink-0" title="2nd Place - Silver">
-          <Medal className="w-4 h-4 fill-slate-300 text-slate-600" />
-        </div>
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+          2
+        </span>
       );
     }
     if (rank === 3) {
       return (
-        <div className="w-8 h-8 rounded-xl bg-amber-700/10 border border-amber-600/30 text-amber-800 flex items-center justify-center font-black text-sm shadow-xs shrink-0" title="3rd Place - Bronze">
-          <Medal className="w-4 h-4 fill-amber-700/20 text-amber-800" />
-        </div>
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-700/10 text-amber-800 text-xs font-bold border border-amber-600/20">
+          3
+        </span>
       );
     }
     return (
-      <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-500 flex items-center justify-center font-bold text-xs shrink-0">
-        #{rank}
-      </div>
+      <span className="inline-flex items-center justify-center w-6 h-6 text-xs text-slate-400 font-semibold">
+        {rank}
+      </span>
     );
   };
 
@@ -159,191 +159,106 @@ export default function DistrictPointsTable() {
       case 'Life Saver':
         return 'bg-rose-50 text-rose-700 border-rose-200';
       default:
-        return 'bg-red-50 text-red-700 border-red-200';
+        return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 max-w-6xl mx-auto pb-16">
 
-      {/* ─── Creative Minimal Header & Hero ─── */}
-      <div className="relative overflow-hidden bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xs">
-        {/* Subtle decorative glowing corner accent */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-red-500/8 via-amber-500/5 to-transparent rounded-bl-full pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2.5 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-700 text-[11px] font-bold uppercase tracking-wider">
-                <Trophy className="w-3.5 h-3.5 text-red-600" />
-                DYFI {cleanDistrict} District League
+      {/* ─── Minimal Header ─── */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                DYFI {cleanDistrict}
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-full text-slate-600 text-[11px] font-medium">
-                <Sparkles className="w-3 h-3 text-amber-500" /> Live Point System
-              </span>
+              <span className="text-slate-400 text-xs">• Points League</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight uppercase">
-              District Points Table
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              Points & Performance Table
             </h1>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed">
-              Performance index, gamified reward rankings, and contribution tracking for all Block Committees, Meghala units, and blood heroes across {cleanDistrict}.
+            <p className="text-slate-500 text-xs font-medium">
+              Rankings and gamified milestones across all Block Committees and blood heroes in {cleanDistrict}.
             </p>
           </div>
 
-          {/* Action Bar */}
-          <div className="flex items-center gap-2.5 shrink-0 self-start md:self-auto">
+          <div className="flex items-center gap-2 shrink-0">
             <Link
               to="/super-admin/dashboard"
-              className="px-3.5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+              className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition"
             >
               Dashboard
             </Link>
             <button
               onClick={fetchData}
               disabled={loading}
-              className="px-4 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs hover:shadow-sm transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              Refresh Rankings
+              Refresh
             </button>
           </div>
         </div>
 
-        {/* 4 Minimal Metric Highlights */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-slate-100">
-          <div className="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">District Point Pool</span>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-2xl font-black text-slate-950">{(data.summary?.total_district_points || 0).toLocaleString()}</span>
-              <span className="text-[10px] font-bold text-red-600 uppercase">Pts</span>
-            </div>
+        {/* 4 Minimal Metric Tiles */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-100 text-xs">
+          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">District Pool</span>
+            <span className="text-lg font-black text-slate-950 block mt-0.5">
+              {(data.summary?.total_district_points || 0).toLocaleString()} <span className="text-[10px] text-red-600 font-bold uppercase">pts</span>
+            </span>
           </div>
 
-          <div className="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Top Block Committee</span>
-            <div className="flex items-center gap-1.5 mt-1">
-              <Crown className="w-4 h-4 text-amber-500 fill-amber-500/20 shrink-0" />
-              <span className="text-sm font-black text-slate-900 truncate">{data.summary?.top_block || 'N/A'}</span>
-            </div>
+          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">#1 Block</span>
+            <span className="text-sm font-black text-slate-900 block mt-1 truncate">
+              {data.summary?.top_block || 'N/A'}
+            </span>
           </div>
 
-          <div className="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Top Ranked Donor</span>
-            <div className="flex items-center gap-1.5 mt-1">
-              <Flame className="w-4 h-4 text-red-600 fill-red-100 shrink-0" />
-              <span className="text-sm font-black text-slate-900 truncate">{data.summary?.top_donor || 'N/A'}</span>
-            </div>
+          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">#1 Donor</span>
+            <span className="text-sm font-black text-slate-900 block mt-1 truncate">
+              {data.summary?.top_donor || 'N/A'}
+            </span>
           </div>
 
-          <div className="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Active Units</span>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-2xl font-black text-emerald-700">{(data.summary?.total_blocks || 0) + (data.summary?.total_meghalas || 0)}</span>
-              <span className="text-[10px] font-semibold text-slate-500">Committees</span>
-            </div>
+          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Committees</span>
+            <span className="text-lg font-black text-slate-950 block mt-0.5">
+              {(data.summary?.total_blocks || 0) + (data.summary?.total_meghalas || 0)} <span className="text-[10px] text-slate-400 font-normal">units</span>
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ─── Top 3 Podium Cards (when in Block View) ─── */}
-      {activeTab === 'blocks' && data.blocks && data.blocks.length >= 3 && !searchQuery && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* 2nd Place */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between order-2 md:order-1 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-slate-100/50 rounded-bl-full pointer-events-none" />
-            <div className="flex items-start justify-between">
-              <div className="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center font-black text-sm">
-                🥈 2nd
-              </div>
-              <span className="text-xs font-black text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full">
-                {data.blocks[1]?.total_points || 0} Pts
-              </span>
-            </div>
-            <div className="mt-4">
-              <h3 className="font-extrabold text-slate-900 text-base">{data.blocks[1]?.block_name}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Admin: {data.blocks[1]?.admin_name}</p>
-              <div className="flex items-center gap-3 mt-3 text-xs text-slate-600 font-medium">
-                <span>🩸 {data.blocks[1]?.donors_count || 0} Donors</span>
-                <span>🛡️ {data.blocks[1]?.volunteers_count || 0} Squads</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 1st Place - Gold Champion */}
-          <div className="bg-gradient-to-b from-amber-500/10 via-white to-white border-2 border-amber-400/60 rounded-3xl p-6 shadow-sm flex flex-col justify-between order-1 md:order-2 relative overflow-hidden md:-mt-2">
-            <div className="absolute top-0 right-0 w-28 h-28 bg-amber-400/10 rounded-bl-full pointer-events-none" />
-            <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-base shadow-sm shadow-amber-500/30">
-                <Crown className="w-6 h-6 fill-white" />
-              </div>
-              <div className="text-right">
-                <span className="inline-block px-3 py-1 bg-amber-500/15 border border-amber-400/30 text-amber-900 font-black text-sm rounded-full">
-                  👑 {data.blocks[0]?.total_points || 0} Points
-                </span>
-                <span className="block text-[10px] font-bold text-amber-700 uppercase mt-0.5">Rank #1 Champion</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="font-black text-slate-950 text-xl tracking-tight">{data.blocks[0]?.block_name}</h3>
-              <p className="text-xs text-amber-800 font-semibold mt-0.5">Admin: {data.blocks[0]?.admin_name}</p>
-              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-amber-100 text-xs font-bold text-slate-700">
-                <span className="flex items-center gap-1">🩸 <strong className="text-slate-950">{data.blocks[0]?.donors_count || 0}</strong> Donors</span>
-                <span className="flex items-center gap-1">✅ <strong className="text-slate-950">{data.blocks[0]?.fulfilled_requests || 0}</strong> Fulfilled</span>
-                <span className="flex items-center gap-1">🛡️ <strong className="text-slate-950">{data.blocks[0]?.volunteers_count || 0}</strong> Squads</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 3rd Place */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between order-3 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-700/5 rounded-bl-full pointer-events-none" />
-            <div className="flex items-start justify-between">
-              <div className="w-10 h-10 rounded-2xl bg-amber-700/10 border border-amber-600/20 text-amber-800 flex items-center justify-center font-black text-sm">
-                🥉 3rd
-              </div>
-              <span className="text-xs font-black text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                {data.blocks[2]?.total_points || 0} Pts
-              </span>
-            </div>
-            <div className="mt-4">
-              <h3 className="font-extrabold text-slate-900 text-base">{data.blocks[2]?.block_name}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Admin: {data.blocks[2]?.admin_name}</p>
-              <div className="flex items-center gap-3 mt-3 text-xs text-slate-600 font-medium">
-                <span>🩸 {data.blocks[2]?.donors_count || 0} Donors</span>
-                <span>🛡️ {data.blocks[2]?.volunteers_count || 0} Squads</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Minimal Segmented Tabs & Filters ─── */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-3 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+      {/* ─── Minimal Segmented Tab Filter & Search ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Segmented Pills */}
+        <div className="bg-slate-200/60 p-1 rounded-xl inline-flex items-center gap-1 overflow-x-auto max-w-full">
           {[
-            { id: 'blocks', label: 'Block Committees', icon: Building2, count: data.blocks?.length },
-            { id: 'meghalas', label: 'Meghala Units', icon: MapPin, count: data.meghalas?.length },
-            { id: 'donors', label: 'Top Donors', icon: Flame, count: data.top_donors?.length },
-            { id: 'volunteers', label: 'Volunteers', icon: Shield, count: data.top_volunteers?.length },
-            { id: 'rules', label: 'Point Rules', icon: Info, count: null },
+            { id: 'blocks', label: 'Block Committees', count: data.blocks?.length },
+            { id: 'meghalas', label: 'Meghala Units', count: data.meghalas?.length },
+            { id: 'donors', label: 'Top Donors', count: data.top_donors?.length },
+            { id: 'volunteers', label: 'Volunteers', count: data.top_volunteers?.length },
+            { id: 'rules', label: 'Point Rules', count: null },
           ].map(tab => {
-            const TabIcon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <TabIcon className={`w-3.5 h-3.5 ${isActive ? 'text-red-400' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
                 {tab.count !== null && (
-                  <span className={`px-1.5 py-0.2 text-[10px] rounded-md font-extrabold ${isActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-200/80 text-slate-600'}`}>
+                  <span className={`ml-1.5 text-[10px] font-bold ${isActive ? 'text-slate-400' : 'text-slate-400'}`}>
                     {tab.count}
                   </span>
                 )}
@@ -352,17 +267,17 @@ export default function DistrictPointsTable() {
           })}
         </div>
 
-        {/* Search & Sort Controls (Hidden on Rules Tab) */}
+        {/* Search & Sort Controls (Hidden on Rules) */}
         {activeTab !== 'rules' && (
           <div className="flex items-center gap-2">
-            <div className="relative flex-1 sm:w-56">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${activeTab}...`}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition"
+                placeholder="Search..."
+                className="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 w-48 text-slate-900"
               />
             </div>
 
@@ -370,137 +285,91 @@ export default function DistrictPointsTable() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-2.5 py-1.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 text-slate-700 cursor-pointer"
+                className="px-2.5 py-1.5 text-xs font-medium bg-white border border-slate-200 rounded-xl focus:outline-none text-slate-700 cursor-pointer"
               >
-                <option value="points">Sort: Total Points</option>
+                <option value="points">Sort: Points</option>
                 <option value="donors">Sort: Donors</option>
-                <option value="fulfilled">Sort: Fulfilled Units</option>
+                <option value="fulfilled">Sort: Fulfilled</option>
               </select>
             )}
           </div>
         )}
       </div>
 
-      {/* ─── Main Content Views ─── */}
+      {/* ─── Content Views ─── */}
       {loading ? (
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-16 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-600 mb-3 animate-pulse">
-            <Trophy className="w-6 h-6 animate-bounce" />
-          </div>
-          <p className="text-slate-900 font-bold text-sm">Computing District Rankings & Points...</p>
-          <p className="text-slate-400 text-xs mt-1">Aggregating real-time stats across all block committees</p>
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center text-slate-400 text-xs font-medium">
+          Loading rankings...
         </div>
       ) : (
         <div className="space-y-4">
 
           {/* ═════════ 1. BLOCK COMMITTEES TAB ═════════ */}
           {activeTab === 'blocks' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-red-600" />
-                    Block Committees Points Table
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Ranked by points generated, verified donations, and active volunteer squads</p>
-                </div>
-                <span className="text-xs font-bold text-slate-500">{filteredBlocks.length} Committees</span>
-              </div>
-
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
               {filteredBlocks.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs font-semibold">
-                  No block committees matching &quot;{searchQuery}&quot;.
+                <div className="p-12 text-center text-slate-400 text-xs">
+                  No block committees found.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        <th className="py-3 px-4 w-16">Rank</th>
+                      <tr className="bg-slate-50/60 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th className="py-3 px-4 w-12 text-center">#</th>
                         <th className="py-3 px-4">Block Committee</th>
-                        <th className="py-3 px-4">Admin Coordinator</th>
+                        <th className="py-3 px-4">Admin Lead</th>
                         <th className="py-3 px-4 text-center">Donors</th>
                         <th className="py-3 px-4 text-center">Volunteers</th>
-                        <th className="py-3 px-4 text-center">Fulfilled Units</th>
-                        <th className="py-3 px-4">Points & Share</th>
-                        <th className="py-3 px-4 text-right">Total Score</th>
+                        <th className="py-3 px-4 text-center">Fulfilled</th>
+                        <th className="py-3 px-4">Points Share</th>
+                        <th className="py-3 px-4 text-right">Points</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filteredBlocks.map((b) => (
                         <tr
                           key={b.block_name}
-                          className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
+                          className="hover:bg-slate-50/70 transition-colors cursor-pointer"
                           onClick={() => setSelectedBlockDetail(b)}
                         >
-                          {/* Rank */}
-                          <td className="py-3.5 px-4 font-black">
+                          <td className="py-3 px-4 text-center">
                             {getRankBadge(b.rank)}
                           </td>
-
-                          {/* Block Name */}
-                          <td className="py-3.5 px-4">
-                            <div className="font-extrabold text-slate-900 text-sm group-hover:text-red-600 transition-colors">
-                              {b.block_name}
-                            </div>
-                            <span className="text-[10px] text-slate-400 font-medium">
-                              {b.meghala_count > 0 ? `${b.meghala_count} Meghala Units` : 'Central District Unit'}
+                          <td className="py-3 px-4">
+                            <div className="font-bold text-slate-900">{b.block_name}</div>
+                            <span className="text-[10px] text-slate-400 font-normal">
+                              {b.meghala_count ? `${b.meghala_count} Meghalas` : 'District Unit'}
                             </span>
                           </td>
-
-                          {/* Admin Details */}
-                          <td className="py-3.5 px-4">
-                            <div className="font-semibold text-slate-800">{b.admin_name}</div>
+                          <td className="py-3 px-4">
+                            <div className="text-slate-700 font-medium">{b.admin_name}</div>
                             {b.admin_mobile && (
-                              <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                                <Phone className="w-2.5 h-2.5 text-slate-400" />
-                                {b.admin_mobile}
-                              </div>
+                              <span className="text-[10px] text-slate-400">{b.admin_mobile}</span>
                             )}
                           </td>
-
-                          {/* Donors Count */}
-                          <td className="py-3.5 px-4 text-center font-bold text-slate-700">
-                            <span className="px-2 py-1 bg-red-50 text-red-700 rounded-lg border border-red-100">
-                              {b.donors_count}
-                            </span>
+                          <td className="py-3 px-4 text-center font-semibold text-slate-700">
+                            {b.donors_count || 0}
                           </td>
-
-                          {/* Volunteers Count */}
-                          <td className="py-3.5 px-4 text-center font-bold text-slate-700">
-                            <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100">
-                              {b.volunteers_count}
-                            </span>
+                          <td className="py-3 px-4 text-center font-semibold text-slate-700">
+                            {b.volunteers_count || 0}
                           </td>
-
-                          {/* Fulfilled Units */}
-                          <td className="py-3.5 px-4 text-center">
-                            <span className="font-black text-slate-900">{b.fulfilled_requests}</span>
-                            {b.total_requests > 0 && (
-                              <span className="block text-[9px] text-slate-400 font-semibold">{b.fulfillment_rate}% rate</span>
-                            )}
+                          <td className="py-3 px-4 text-center font-semibold text-slate-700">
+                            {b.fulfilled_requests || 0}
                           </td>
-
-                          {/* Progress Bar Share */}
-                          <td className="py-3.5 px-4 min-w-[140px]">
-                            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-1">
-                              <span>Share</span>
-                              <span>{b.percentage || 100}%</span>
-                            </div>
+                          <td className="py-3 px-4 min-w-[120px]">
                             <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                               <div
-                                className="bg-gradient-to-r from-red-600 to-amber-500 h-full rounded-full transition-all duration-500"
+                                className="bg-red-600 h-full rounded-full"
                                 style={{ width: `${Math.max(6, b.percentage || 100)}%` }}
                               />
                             </div>
                           </td>
-
-                          {/* Total Score */}
-                          <td className="py-3.5 px-4 text-right">
-                            <span className="text-base font-black text-red-600 block">
+                          <td className="py-3 px-4 text-right">
+                            <span className="font-black text-slate-900">
                               {(b.total_points || 0).toLocaleString()}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase">Points</span>
+                            <span className="text-[10px] text-slate-400 ml-1">pts</span>
                           </td>
                         </tr>
                       ))}
@@ -513,42 +382,34 @@ export default function DistrictPointsTable() {
 
           {/* ═════════ 2. MEGHALA COMMITTEES TAB ═════════ */}
           {activeTab === 'meghalas' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-red-600" />
-                    Meghala Committees Points Table
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Ward & Village-level performance ranking</p>
-                </div>
-                <span className="text-xs font-bold text-slate-500">{filteredMeghalas.length} Meghalas</span>
-              </div>
-
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
               {filteredMeghalas.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs font-semibold">
-                  No Meghala committees found.
+                <div className="p-12 text-center text-slate-400 text-xs">
+                  No Meghala units found.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 p-4 sm:p-5">
+                <div className="divide-y divide-slate-100">
                   {filteredMeghalas.map((m) => (
                     <div
                       key={m.meghala_name}
-                      className="bg-slate-50/70 hover:bg-white border border-slate-200/80 hover:border-red-200 hover:shadow-xs rounded-2xl p-4 transition-all"
+                      className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
                         {getRankBadge(m.rank)}
-                        <span className="text-xs font-black text-red-600 bg-red-50 border border-red-100 px-2.5 py-0.5 rounded-full">
-                          {m.total_points} Pts
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-slate-900 truncate">{m.meghala_name}</h4>
+                          <p className="text-[11px] text-slate-400 font-normal">Block: {m.block_name}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-6 shrink-0">
+                        <span className="text-slate-500 font-medium text-[11px]">
+                          {m.total_members || 0} members • {m.volunteers_count || 0} squads
                         </span>
-                      </div>
-                      <div className="mt-3">
-                        <h3 className="font-extrabold text-slate-900 text-sm truncate">{m.meghala_name}</h3>
-                        <p className="text-xs text-slate-400 font-medium">Block: {m.block_name}</p>
-                      </div>
-                      <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-200/60 text-xs font-bold text-slate-600">
-                        <span>👥 {m.total_members} Total Members</span>
-                        <span className="text-emerald-700">🛡️ {m.volunteers_count} Volunteers</span>
+                        <div className="text-right min-w-[60px]">
+                          <span className="font-black text-slate-900">{m.total_points || 0}</span>
+                          <span className="text-[10px] text-slate-400 ml-1">pts</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -559,20 +420,9 @@ export default function DistrictPointsTable() {
 
           {/* ═════════ 3. TOP DONORS TAB ═════════ */}
           {activeTab === 'donors' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-red-600" />
-                    District Top Blood Donors
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Recognizing individuals with highest verified blood donations</p>
-                </div>
-                <span className="text-xs font-bold text-slate-500">{filteredDonors.length} Donors</span>
-              </div>
-
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
               {filteredDonors.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs font-semibold">
+                <div className="p-12 text-center text-slate-400 text-xs">
                   No donors found matching &quot;{searchQuery}&quot;.
                 </div>
               ) : (
@@ -580,42 +430,35 @@ export default function DistrictPointsTable() {
                   {filteredDonors.map((donor) => (
                     <div
                       key={donor.id}
-                      className="p-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/60 transition-colors"
+                      className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         {getRankBadge(donor.rank)}
-
-                        {/* Blood Group Badge */}
-                        <div className="w-10 h-10 rounded-xl bg-red-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs shadow-red-600/20">
+                        <span className="w-8 h-8 rounded-lg bg-red-50 text-red-700 border border-red-100 font-black text-xs flex items-center justify-center shrink-0">
                           {donor.blood_group}
-                        </div>
-
+                        </span>
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-extrabold text-slate-900 text-sm truncate">{donor.primary_name}</span>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getDonorTierStyle(donor.badge)}`}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900 truncate">{donor.primary_name}</span>
+                            <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${getDonorTierStyle(donor.badge)}`}>
                               {donor.badge}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2 truncate">
-                            <span className="font-semibold text-slate-600">{donor.jeevalink_id}</span>
-                            <span>•</span>
-                            <span>{donor.block}</span>
-                            {donor.meghala && <span>({donor.meghala})</span>}
+                          <p className="text-[11px] text-slate-400 font-normal truncate">
+                            {donor.jeevalink_id} • {donor.block} {donor.meghala ? `(${donor.meghala})` : ''}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-6 shrink-0 pl-11 sm:pl-0">
+                      <div className="flex items-center gap-6 shrink-0">
                         {donor.total_donations > 0 && (
-                          <div className="text-right">
-                            <span className="text-xs font-bold text-slate-700">{donor.total_donations} Donations</span>
-                            <span className="block text-[10px] text-emerald-600 font-bold">{donor.lives_saved} Lives Saved</span>
-                          </div>
+                          <span className="text-[11px] text-slate-500 hidden sm:inline font-medium">
+                            {donor.total_donations} donations
+                          </span>
                         )}
-                        <div className="text-right">
-                          <span className="text-base font-black text-red-600 block">{donor.reward_points}</span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Points</span>
+                        <div className="text-right min-w-[60px]">
+                          <span className="font-black text-red-600">{donor.reward_points || 0}</span>
+                          <span className="text-[10px] text-slate-400 ml-1">pts</span>
                         </div>
                       </div>
                     </div>
@@ -627,20 +470,9 @@ export default function DistrictPointsTable() {
 
           {/* ═════════ 4. TOP VOLUNTEERS TAB ═════════ */}
           {activeTab === 'volunteers' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-emerald-600" />
-                    Top Volunteer Squad Coordinators
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Volunteers driving field engagements, verifications, and drives</p>
-                </div>
-                <span className="text-xs font-bold text-slate-500">{filteredVolunteers.length} Volunteers</span>
-              </div>
-
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
               {filteredVolunteers.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs font-semibold">
+                <div className="p-12 text-center text-slate-400 text-xs">
                   No volunteers found matching &quot;{searchQuery}&quot;.
                 </div>
               ) : (
@@ -648,40 +480,32 @@ export default function DistrictPointsTable() {
                   {filteredVolunteers.map((vol) => (
                     <div
                       key={vol.id}
-                      className="p-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/60 transition-colors"
+                      className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         {getRankBadge(vol.rank)}
-
-                        <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-black text-xs flex items-center justify-center shrink-0">
-                          🛡️
-                        </div>
-
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-extrabold text-slate-900 text-sm truncate">{vol.primary_name}</span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900 truncate">{vol.primary_name}</span>
+                            <span className="text-[10px] font-semibold px-2 py-0.2 bg-slate-100 text-slate-600 rounded-md">
                               {vol.role}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2 truncate">
-                            <span className="font-semibold text-slate-600">{vol.jeevalink_id}</span>
-                            <span>•</span>
-                            <span>{vol.block}</span>
-                            {vol.meghala && <span>({vol.meghala})</span>}
+                          <p className="text-[11px] text-slate-400 font-normal truncate">
+                            {vol.jeevalink_id} • {vol.block}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-6 shrink-0 pl-11 sm:pl-0">
+                      <div className="flex items-center gap-6 shrink-0">
                         {vol.mobile && vol.mobile !== 'N/A' && (
-                          <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
-                            <Phone className="w-3 h-3" /> {vol.mobile}
+                          <span className="text-[11px] text-slate-400 hidden sm:inline">
+                            {vol.mobile}
                           </span>
                         )}
-                        <div className="text-right">
-                          <span className="text-base font-black text-emerald-700 block">{vol.reward_points}</span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Points</span>
+                        <div className="text-right min-w-[60px]">
+                          <span className="font-black text-slate-900">{vol.reward_points || 0}</span>
+                          <span className="text-[10px] text-slate-400 ml-1">pts</span>
                         </div>
                       </div>
                     </div>
@@ -693,58 +517,44 @@ export default function DistrictPointsTable() {
 
           {/* ═════════ 5. POINT RULES & BADGES GUIDE TAB ═════════ */}
           {activeTab === 'rules' && (
-            <div className="space-y-6">
-              {/* Rules Cards */}
-              <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
-                <div className="border-b border-slate-100 pb-4">
-                  <h3 className="text-base font-black text-slate-950 uppercase tracking-tight flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    How Points Are Credited in JeevaLink
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Every verified life-saving action automatically credits points across the hierarchy.
-                  </p>
-                </div>
+            <div className="space-y-4">
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-slate-900 mb-1">
+                  Point Allocation Mechanics
+                </h3>
+                <p className="text-xs text-slate-500 mb-4">
+                  Points are credited automatically upon verification of blood donations and coordination events.
+                </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {(data.point_rules || []).map((rule, idx) => (
-                    <div key={idx} className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-red-600">{rule.badge}</span>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">{rule.target}</span>
+                    <div key={idx} className="p-3.5 bg-slate-50/80 border border-slate-100 rounded-xl flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-slate-900">{rule.action}</h4>
+                        <span className="text-[10px] text-slate-400 font-medium">{rule.target}</span>
                       </div>
-                      <h4 className="font-extrabold text-slate-900 text-sm">{rule.action}</h4>
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
-                        Credited instantly upon system or volunteer verification.
-                      </p>
+                      <span className="text-xs font-black text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-md">
+                        {rule.badge}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Badges Milestone Guide */}
-              <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
-                <div className="border-b border-slate-100 pb-4">
-                  <h3 className="text-base font-black text-slate-950 uppercase tracking-tight flex items-center gap-2">
-                    <Award className="w-4 h-4 text-red-600" />
-                    Donor Milestone Badges & Tiers
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Donors automatically unlock digital badges and digital certificates as they accumulate JeevaPoints.
-                  </p>
-                </div>
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-slate-900 mb-1">
+                  Milestone Badges
+                </h3>
+                <p className="text-xs text-slate-500 mb-4">
+                  Donors unlock certificates and milestone badges based on their lifetime points.
+                </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs text-center">
                   {(data.badges_guide || []).map((badge, idx) => (
-                    <div key={idx} className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 text-center space-y-2">
-                      <div className="w-10 h-10 mx-auto rounded-2xl bg-white border border-slate-200 flex items-center justify-center font-black text-base shadow-xs">
-                        {idx === 0 ? '🩸' : idx === 1 ? '💖' : idx === 2 ? '⚡' : idx === 3 ? '🛡️' : '👑'}
-                      </div>
-                      <h4 className="font-black text-slate-900 text-sm">{badge.name}</h4>
-                      <span className="inline-block px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[10px] font-bold">
-                        {badge.points}+ Pts
-                      </span>
-                      <p className="text-[11px] text-slate-500 leading-normal">{badge.desc}</p>
+                    <div key={idx} className="p-3 bg-slate-50/80 border border-slate-100 rounded-xl space-y-1">
+                      <span className="text-xs font-bold text-slate-900 block">{badge.name}</span>
+                      <span className="inline-block text-[10px] font-semibold text-slate-500">{badge.points}+ pts</span>
+                      <p className="text-[10px] text-slate-400 line-clamp-2">{badge.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -755,57 +565,57 @@ export default function DistrictPointsTable() {
         </div>
       )}
 
-      {/* ─── Detail Modal for Selected Block Committee ─── */}
+      {/* ─── Minimal Detail Modal ─── */}
       {selectedBlockDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-xs">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/30 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 max-w-sm w-full shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-100 text-xs">
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider block">
-                  Rank #{selectedBlockDetail.rank} • Block Committee
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Rank #{selectedBlockDetail.rank}
                 </span>
-                <h3 className="text-xl font-black text-slate-950 mt-0.5">{selectedBlockDetail.block_name}</h3>
+                <h3 className="text-base font-bold text-slate-900 mt-0.5">{selectedBlockDetail.block_name}</h3>
               </div>
               <button
                 onClick={() => setSelectedBlockDetail(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-4 space-y-2.5 text-xs">
-              <div className="flex justify-between font-bold text-slate-700">
-                <span>Total Accumulated Points:</span>
-                <span className="text-red-600 font-black text-sm">{selectedBlockDetail.total_points} Pts</span>
+            <div className="bg-slate-50 rounded-xl p-3 space-y-2 border border-slate-100">
+              <div className="flex justify-between font-bold text-slate-900">
+                <span>Total Points:</span>
+                <span className="text-red-600 font-black">{(selectedBlockDetail.total_points || 0).toLocaleString()} pts</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Registered Donors:</span>
-                <span className="font-bold text-slate-900">{selectedBlockDetail.donors_count}</span>
+                <span className="font-semibold text-slate-900">{selectedBlockDetail.donors_count || 0}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Active Volunteers & Squads:</span>
-                <span className="font-bold text-slate-900">{selectedBlockDetail.volunteers_count}</span>
+                <span>Active Squads:</span>
+                <span className="font-semibold text-slate-900">{selectedBlockDetail.volunteers_count || 0}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Fulfilled Blood Requests:</span>
-                <span className="font-bold text-slate-900">{selectedBlockDetail.fulfilled_requests}</span>
+                <span>Fulfilled Units:</span>
+                <span className="font-semibold text-slate-900">{selectedBlockDetail.fulfilled_requests || 0}</span>
               </div>
             </div>
 
-            <div className="border-t border-slate-100 pt-3 text-xs space-y-1">
-              <p className="font-bold text-slate-900">Admin Lead:</p>
-              <p className="text-slate-600">{selectedBlockDetail.admin_name}</p>
+            <div className="text-slate-600">
+              <span className="font-semibold text-slate-900 block">Admin:</span>
+              <span>{selectedBlockDetail.admin_name}</span>
               {selectedBlockDetail.admin_mobile && (
-                <p className="text-slate-500 font-medium">{selectedBlockDetail.admin_mobile}</p>
+                <span className="block text-slate-400">{selectedBlockDetail.admin_mobile}</span>
               )}
             </div>
 
             <button
               onClick={() => setSelectedBlockDetail(null)}
-              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold transition cursor-pointer"
             >
-              Close Details
+              Close
             </button>
           </div>
         </div>
