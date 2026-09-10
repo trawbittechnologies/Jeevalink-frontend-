@@ -98,6 +98,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   const rawPatientName = posterData.patient_name || posterData.patientName || 'Pradeep';
   const patientName = toTitleCase(rawPatientName);
   const rawPhone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || '79026 19430';
+  const phone = formatPhoneNumber(rawPhone);
   const bloodGroup = (posterData.blood_group || posterData.bloodGroup || 'B+').toUpperCase();
   const rawUnits = posterData.units_required || posterData.unitsRequired || posterData.units || posterData.unit || posterData.quantity || '1';
   const unitsText = formatUnits(rawUnits);
