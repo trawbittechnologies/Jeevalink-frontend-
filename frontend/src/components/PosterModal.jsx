@@ -117,10 +117,7 @@ function formatDateTime(dateVal) {
   hours = hours ? hours : 12;
   const formattedHours = String(hours).padStart(2, '0');
 
-  return {
-    date: `${day} ${month} ${year}`,
-    time: `${formattedHours}:${minutes} ${ampm}`
-  };
+  return `${day} ${month} ${year} • ${formattedHours}:${minutes} ${ampm}`;
 }
 
 export default function PosterModal({ isOpen, onClose, data, requestData }) {
@@ -168,7 +165,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
   const committeeName = formatMeghalaCommittee(rawLocation);
   const requestId = posterData.request_id || posterData.id || posterData._id || 'JL-REQ';
-  const generatedDateTime = formatRequestDateTime(posterData);
+  const timestampText = formatRequestDateTime(posterData);
 
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
@@ -337,21 +334,21 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
               {/* ------------------------------------------------------------
                   B. BLOOD PACK DYNAMIC UNITS DISPLAY
-                  (Centered perfectly in the white label of the blood pack)
+                  (Positioned cleanly in the white label of the blood pack)
                  ------------------------------------------------------------ */}
               <div
                 className="absolute flex flex-col items-center justify-center text-center select-none pointer-events-none"
                 style={{
-                  top: '47.2%',
-                  left: '73.5%',
-                  width: '14.5%',
-                  transform: 'translate(-50%, -50%)',
+                  top: '43.0%',
+                  left: '65.2%',
+                  width: '14.2%',
+                  height: '8.4%',
                 }}
               >
-                <div className="text-[20px] font-black text-[#d31818] tracking-tight leading-none text-center">
+                <div className="text-[19px] font-black text-[#d31818] tracking-tight leading-none">
                   {unitsNumber}
                 </div>
-                <div className="text-[7.5px] font-black text-slate-700 tracking-wider uppercase mt-0.5 leading-none text-center">
+                <div className="text-[7.5px] font-black text-slate-700 tracking-wider uppercase mt-0.5 leading-none">
                   {Number(unitsNumber) === 1 ? 'UNIT' : 'UNITS'}
                 </div>
               </div>
@@ -362,7 +359,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               <div
                 className="absolute flex items-center justify-center text-center select-none pointer-events-none"
                 style={{
-                  top: '68.5%',
+                  top: '66.2%',
                   left: '15.0%',
                   width: '70.0%',
                 }}
@@ -384,20 +381,21 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               </div>
 
               {/* ------------------------------------------------------------
-                  D. CREATED DATE & TIME (Bottom Left - Stacked Date & Time)
+                  D. TIMESTAMP (Clean text without background box)
                  ------------------------------------------------------------ */}
               <div
-                className="absolute select-none pointer-events-none text-left leading-tight"
+                className="absolute flex items-center justify-center text-center select-none pointer-events-none"
                 style={{
-                  bottom: '1.6%',
-                  left: '4.5%',
+                  top: '72.4%',
+                  left: '20.0%',
+                  width: '60.0%',
                 }}
               >
-                <div className="text-[9.5px] font-bold text-slate-600 tracking-wide leading-none">
-                  {generatedDateTime.date}
-                </div>
-                <div className="text-[9px] font-semibold text-slate-500 tracking-wide leading-none mt-0.5">
-                  {generatedDateTime.time}
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-sm"></span>
+                  <span className="text-[7.5px] font-semibold text-teal-100/90 whitespace-nowrap leading-none tracking-wide drop-shadow-sm">
+                    {timestampText}
+                  </span>
                 </div>
               </div>
 
