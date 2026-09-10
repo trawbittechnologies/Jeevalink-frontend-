@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import {
@@ -39,7 +39,7 @@ export default function Campaigns() {
     venue: '',
     event_date: '',
     event_time: '',
-    organizer_name: user?.primary_name || 'JeevaLink Squad',
+    organizer_name: user?.primary_name || 'iDonate Squad',
     contact_phone: user?.phone_number || '',
     image_url: 'https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000',
     district: user?.district || '',
@@ -142,7 +142,7 @@ export default function Campaigns() {
       venue: '',
       event_date: '',
       event_time: '',
-      organizer_name: user?.primary_name || 'JeevaLink Squad',
+      organizer_name: user?.primary_name || 'iDonate Squad',
       contact_phone: user?.phone_number || '',
       image_url: presetImages.blood_donation,
       district: user?.district || '',
@@ -160,7 +160,7 @@ export default function Campaigns() {
       venue: post.venue || '',
       event_date: post.event_date || '',
       event_time: post.event_time || '',
-      organizer_name: post.organizer_name || user?.primary_name || 'JeevaLink Squad',
+      organizer_name: post.organizer_name || user?.primary_name || 'iDonate Squad',
       contact_phone: post.contact_phone || user?.phone_number || '',
       image_url: post.image_url || presetImages[post.category] || presetImages.blood_donation,
       district: post.district || user?.district || '',
@@ -195,7 +195,7 @@ export default function Campaigns() {
         venue: '',
         event_date: '',
         event_time: '',
-        organizer_name: user?.primary_name || 'JeevaLink Squad',
+        organizer_name: user?.primary_name || 'iDonate Squad',
         contact_phone: user?.phone_number || '',
         image_url: presetImages.blood_donation,
         district: user?.district || '',
@@ -422,7 +422,7 @@ export default function Campaigns() {
 
                       {/* Author Pill */}
                       <div className="absolute bottom-3 left-3 right-3 text-white text-xs font-semibold drop-shadow">
-                        <span>{post.author_name || 'JeevaLink Squad'}</span>
+                        <span>{post.author_name || 'iDonate Squad'}</span>
                       </div>
                     </div>
 

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   ShieldAlert, Plus, Key, RefreshCw, Edit, Trash2, Search,
   Building2, UserCheck, Mail, Phone, Copy, Check, AlertCircle,
@@ -512,7 +512,7 @@ export default function SuperAdminManagement() {
 
                     return (
                       <tr key={sa.id} className="hover:bg-red-50/30 transition">
-                        {/* JeevaLink Employee ID */}
+                        {/* iDonate ID */}
                         <td className="py-4 px-6 whitespace-nowrap">
                           {(() => {
                             const sId = getDisplayJeevalinkId(sa);
@@ -852,7 +852,7 @@ export default function SuperAdminManagement() {
                   </label>
                   <input
                     type="email"
-                    placeholder="superadmin.district@jeevalink.org"
+                    placeholder="superadmin.district@idonate.org"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required

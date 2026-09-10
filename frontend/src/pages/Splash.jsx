@@ -175,13 +175,13 @@ export default function Splash({ onComplete }) {
           aria-label="Partner credits"
           className="w-full flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-0 px-6 pb-7 sm:pb-9"
         >
-          {/* associated with jeevalink */}
+          {/* associated with idonate */}
           <div className="flex flex-col items-center gap-1">
             <span style={{ fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.18em', color: '#C4C8D0', textTransform: 'uppercase' }}>
-              associated with
+              powered by
             </span>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ABABBA', letterSpacing: '0.02em' }}>
-              JeevaLink
+              iDonate
             </span>
           </div>
 

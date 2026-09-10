@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore.js';
 import { useAppStore } from '../../store/appStore.js';
 import {
@@ -65,9 +65,9 @@ export default function SystemSettings() {
   const { user } = useAuthStore();
   const { triggerToast } = useAppStore();
 
-  const [profile, setProfile] = useState({ username: user?.email || 'admin@jeevalink.org', displayName: user?.primaryName || 'System Admin' });
+  const [profile, setProfile] = useState({ username: user?.email || 'admin@idonate.org', displayName: user?.primaryName || 'System Admin' });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
-  const [contact, setContact] = useState({ email: 'support@jeevalink.org', phone: '+91 98765 43210', address: 'JeevaLink HQ, Kochi, Kerala 682001', website: 'https://jeevalink.org' });
+  const [contact, setContact] = useState({ email: 'support@idonate.org', phone: '+91 98765 43210', address: 'iDonate HQ, Kasaragod, Kerala 671121', website: 'https://idonate.org' });
   const [notifSettings, setNotifSettings] = useState({ emailOnLogin: true, emailOnStatusChange: true, emailOnComplaint: true, pushNotifications: true, emergencyAlerts: true, weeklyReport: false });
   const [saving, setSaving] = useState(false);
   const [savedSection, setSavedSection] = useState('');
@@ -114,7 +114,7 @@ export default function SystemSettings() {
         </div>
         <div className="space-y-3">
           <InputField label="Display Name" value={profile.displayName} onChange={e => setProfile(p => ({ ...p, displayName: e.target.value }))} placeholder="Administrator Name" />
-          <InputField label="Admin Username / Email" type="email" value={profile.username} onChange={e => setProfile(p => ({ ...p, username: e.target.value }))} placeholder="admin@jeevalink.org" />
+          <InputField label="Admin Username / Email" type="email" value={profile.username} onChange={e => setProfile(p => ({ ...p, username: e.target.value }))} placeholder="admin@idonate.org" />
         </div>
         {renderSaveBtn("Profile")}
       </Section>

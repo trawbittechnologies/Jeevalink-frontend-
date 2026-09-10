@@ -20,13 +20,13 @@ const messaging = firebase.messaging();
 // ─── Background handler (tab not open / not focused) ─────────────────────────
 messaging.onBackgroundMessage((payload) => {
   console.log('[SW] onBackgroundMessage:', payload);
-  const title = payload.notification?.title || 'JeevaLink Alert';
+  const title = payload.notification?.title || 'iDonate Alert';
   const body  = payload.notification?.body  || '';
   self.registration.showNotification(title, {
     body,
-    icon: '/logo.png',
-    badge: '/favicon.png',
-    tag: 'jeevalink-notification',
+    icon: '/idonate.png',
+    badge: '/idonate.png',
+    tag: 'idonate-notification',
     data: payload.data,
   });
 });

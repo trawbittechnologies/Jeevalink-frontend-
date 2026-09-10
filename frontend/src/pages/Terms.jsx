@@ -63,7 +63,7 @@ export default function Terms() {
             <div className="space-y-4">
               <h2 className="text-2xl font-black text-gray-900">6. Contact Us</h2>
               <p className="leading-relaxed">
-                If you have any questions or concerns about these Terms, please contact us at <a href="mailto:support@jeevalink.org" className="text-primary font-bold hover:underline">support@jeevalink.org</a>.
+                If you have any questions or concerns about these Terms, please contact us at <a href="mailto:support@idonate.org" className="text-primary font-bold hover:underline">support@idonate.org</a>.
               </p>
             </div>
           </div>

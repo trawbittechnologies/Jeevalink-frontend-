@@ -15,7 +15,7 @@ export const useAppStore = create((set, get) => ({
       posterUrl: '',
       badgeText: 'Lifesaving Dialogue',
       quoteTitle: '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
-      quoteDescription: 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
+      quoteDescription: 'Every second counts when a patient requires blood. iDonate connects you directly with verified voluntary donors and regional coordinators across Kerala.',
       buttonLabel: 'Join Our Community'
     };
     try {
@@ -876,7 +876,7 @@ export const useAppStore = create((set, get) => ({
           posterUrl: d.posterUrl || d.poster_url || '',
           badgeText: d.badgeText || d.badge_text || 'Lifesaving Dialogue',
           quoteTitle: d.quoteTitle || d.quote_title || '“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”',
-          quoteDescription: d.quoteDescription || d.quote_description || 'Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala.',
+          quoteDescription: d.quoteDescription || d.quote_description || 'Every second counts when a patient requires blood. iDonate connects you directly with verified voluntary donors and regional coordinators across Kerala.',
           buttonLabel: d.buttonLabel || d.button_label || 'Join Our Community'
         };
         set({ awarenessSettings: fetched });

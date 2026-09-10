@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -212,7 +212,7 @@ export default function VolunteerManagement() {
                       animate={{ opacity: 1 }}
                       className="hover:bg-red-50/20 transition"
                     >
-                      {/* JeevaLink Employee ID */}
+                      {/* iDonate ID */}
                       <td className="py-4 px-6 whitespace-nowrap">
                         {(() => {
                           const vId = getDisplayJeevalinkId(vol);
@@ -517,7 +517,7 @@ export default function VolunteerManagement() {
 
                       <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">PRIMARY VOLUNTEER EMAIL *</label>
-                        <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required placeholder="volunteer@jeevalink.org"
+                        <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required placeholder="volunteer@idonate.org"
                           className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-xs" />
                       </div>
                     </div>

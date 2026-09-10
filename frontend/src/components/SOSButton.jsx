@@ -165,7 +165,7 @@ export default function SOSButton() {
 
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Broadcasting SOS</h3>
             <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed">
-              JeevaLink will send emergency alerts to matching blood donors nearby in:
+              iDonate will send emergency alerts to matching blood donors nearby in:
             </p>
 
             <div className="text-6xl font-black text-red-600 mb-8 tracking-tighter animate-ping scale-90">

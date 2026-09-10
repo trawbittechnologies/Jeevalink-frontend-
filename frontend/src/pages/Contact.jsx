@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { Mail, Phone, MapPin, ChevronDown, ChevronUp, Send, Droplets, MessageSquare, Siren } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,14 +7,14 @@ const faqs = [
   { q: 'Who can donate blood?', a: 'Anyone between 18–65 years, weighing at least 50kg, and in good health can donate blood. You should not have donated in the last 3 months.' },
   { q: 'Is blood donation safe?', a: 'Yes, completely. All equipment is sterilized and single-use. The process takes 30–45 minutes and is medically supervised.' },
   { q: 'How do I register as a donor?', a: 'Click on "Register" in the top navigation, fill in your details including blood group and location, and you\'ll be part of our network instantly.' },
-  { q: 'How does JeevaLink match donors?', a: 'Our system uses blood group compatibility, location proximity, and donor availability to find the best matches for each request.' },
-  { q: 'What are JeevaPoints?', a: 'JeevaPoints are reward points earned for each donation milestone. They can be redeemed for health benefits and recognition certificates.' },
+  { q: 'How does iDonate match donors?', a: 'Our system uses blood group compatibility, location proximity, and donor availability to find the best matches for each request.' },
+  { q: 'What are iDonate Reward Points?', a: 'Reward points are earned for each donation milestone and active participation. They can be redeemed for health recognition certificates and honors.' },
 ];
 
 const contactCards = [
-  { icon: Mail, title: 'Email Us', detail: 'support@jeevalink.org', sub: 'We reply within 24 hours', colorClass: 'bg-blue-50 text-blue-600 border-blue-100' },
+  { icon: Mail, title: 'Email Us', detail: 'support@idonate.org', sub: 'We reply within 24 hours', colorClass: 'bg-blue-50 text-blue-600 border-blue-100' },
   { icon: Phone, title: 'Call Us', detail: '+91 98765 43210', sub: 'Mon–Sat, 9am–6pm IST', colorClass: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-  { icon: MapPin, title: 'Our Office', detail: 'Bengaluru, Karnataka', sub: 'India — 560001', colorClass: 'bg-amber-50 text-amber-600 border-amber-100' },
+  { icon: MapPin, title: 'Our Office', detail: 'Kasaragod, Kerala', sub: 'India — 671121', colorClass: 'bg-amber-50 text-amber-600 border-amber-100' },
 ];
 
 const fadeUp = {

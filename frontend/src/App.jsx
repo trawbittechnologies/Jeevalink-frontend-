@@ -184,7 +184,7 @@ export default function App() {
         if (title && title !== '(no title)') {
           triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
           if (Notification.permission === 'granted') {
-            new Notification(title, { body, icon: '/logo.png' });
+            new Notification(title, { body, icon: '/idonate.png' });
           }
         }
       }

@@ -118,7 +118,7 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const mobile = userData.mobileNumber || userData.mobile || '';
-      const email = userData.email || (mobile ? `${mobile}@jeevalink.org` : '');
+      const email = userData.email || (mobile ? `${mobile}@idonate.org` : '');
 
       const formData = new FormData();
       formData.append('primary_name', userData.primaryName || '');

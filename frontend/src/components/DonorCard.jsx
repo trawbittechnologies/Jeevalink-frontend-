@@ -104,7 +104,7 @@ export default function DonorCard({ donor }) {
   if (!volunteerPhone) volunteerPhone = donor.secondaryContactNumber || donor.secondary_phone || '9998593194';
   if (!volunteerRole) volunteerRole = 'volunteer';
 
-  const whatsappMessage = encodeURIComponent(`Hello ${volunteerName}, I found blood donor ${donorName} (${bg}) on JeevaLink in ${city}, ${district}. Please help connect for an urgent donation.`);
+  const whatsappMessage = encodeURIComponent(`Hello ${volunteerName}, I found blood donor ${donorName} (${bg}) on iDonate in ${city}, ${district}. Please help connect for an urgent donation.`);
 
   return (
     <div className="group relative bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">

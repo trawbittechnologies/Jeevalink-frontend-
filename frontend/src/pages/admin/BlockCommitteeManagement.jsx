@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
   CheckCircle2, Download, ShieldCheck
@@ -580,7 +580,7 @@ export default function BlockCommitteeManagement() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      placeholder="kozhikode.north@jeevalink.org"
+                      placeholder="kozhikode.north@idonate.org"
                       className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                     />
                     <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -722,7 +722,7 @@ export default function BlockCommitteeManagement() {
                         value={editEmail}
                         onChange={(e) => setEditEmail(e.target.value)}
                         required
-                        placeholder="kozhikode.north@jeevalink.org"
+                        placeholder="kozhikode.north@idonate.org"
                         className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-slate-900 dark:text-zinc-100 font-semibold"
                       />
                       <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

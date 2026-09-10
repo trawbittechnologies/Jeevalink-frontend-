@@ -28,7 +28,7 @@ export default function BloodHeroAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 **Hello!** I am **Hemo**, your assistant for JeevaLink blood donation platform.\n\nI am here to help you with donor eligibility, blood group matching, emergency requests, and platform services.\n\nHow can I help you today?"
+      text: "👋 **Hello!** I am **Hemo**, your assistant for iDonate blood donation platform.\n\nI am here to help you with donor eligibility, blood group matching, emergency requests, and platform services.\n\nHow can I help you today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -41,7 +41,7 @@ export default function BloodHeroAssistant() {
   const SUGGESTED_PROMPTS = [
     { label: "🩸 Am I eligible to donate?", query: "Am I eligible to donate blood? What are the key requirements?" },
     { label: "🧪 O- Blood compatibility", query: "Which blood groups can receive O- negative blood?" },
-    { label: "🚑 How emergency requests work", query: "How do emergency blood requests work on JeevaLink?" },
+    { label: "🚑 How emergency requests work", query: "How do emergency blood requests work on iDonate?" },
     { label: "📍 Find donors in Kerala", query: "How can I find registered voluntary donors across Kerala?" }
   ];
 
@@ -222,7 +222,7 @@ export default function BloodHeroAssistant() {
                         Online
                       </span>
                     </div>
-                    <p className="text-[11px] text-red-100 font-medium">JeevaLink Blood Companion</p>
+                    <p className="text-[11px] text-red-100 font-medium">iDonate Blood Companion</p>
                   </div>
                 </div>
 

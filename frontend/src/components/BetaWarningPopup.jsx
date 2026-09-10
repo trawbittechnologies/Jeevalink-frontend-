@@ -50,7 +50,7 @@ export default function BetaWarningPopup() {
             <ShieldAlert className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 tracking-tight">JeevaLink Beta Notice</h2>
+            <h2 className="text-lg font-extrabold text-gray-900 tracking-tight">iDonate Beta Notice</h2>
             <div className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">
               © 2026 Trawbit Technologies
             </div>

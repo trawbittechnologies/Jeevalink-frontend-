@@ -66,7 +66,7 @@ export default function Login() {
           <>
             <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Privacy Policy</h3>
             <div className="text-slate-500 text-sm font-medium mb-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar">
-              <p className="mb-4">Welcome to JeevaLink. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our web application and services.</p>
+              <p className="mb-4">Welcome to iDonate. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our web application and services.</p>
               <h4 className="font-bold text-slate-800 mb-2">1. Information Collection</h4>
               <p className="mb-4">We collect information such as your name, contact details, blood group, and precise location data when you register or use the service to coordinate life-saving blood donations. Your location is strictly used for emergency SOS proximity matching.</p>
               <h4 className="font-bold text-slate-800 mb-2">2. How We Use Your Data</h4>
@@ -83,7 +83,7 @@ export default function Login() {
           <>
             <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Terms of Service</h3>
             <div className="text-slate-500 text-sm font-medium mb-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar">
-              <p className="mb-4">By accessing JeevaLink, you agree to be bound by these Terms of Service. Please read them carefully as they govern your use of the platform.</p>
+              <p className="mb-4">By accessing iDonate, you agree to be bound by these Terms of Service. Please read them carefully as they govern your use of the platform.</p>
               <h4 className="font-bold text-slate-800 mb-2">1. Platform Usage</h4>
               <p className="mb-4">You must use the platform responsibly and solely for coordinating and finding blood donations. Any misuse, false emergency requests, or spamming will result in immediate permanent account suspension.</p>
               <h4 className="font-bold text-slate-800 mb-2">2. User Responsibility</h4>
@@ -91,7 +91,7 @@ export default function Login() {
               <h4 className="font-bold text-slate-800 mb-2">3. Emergency SOS Feature</h4>
               <p className="mb-4">The Emergency SOS feature is for critical life-threatening situations only. Abuse of the SOS siren or rapid-alert system is strictly prohibited.</p>
               <h4 className="font-bold text-slate-800 mb-2">4. Limitation of Liability</h4>
-              <p>JeevaLink is a coordination platform. We do not guarantee the availability of blood or the medical suitability of donors. All medical procedures are the sole responsibility of the certified healthcare providers.</p>
+              <p>iDonate is a coordination platform. We do not guarantee the availability of blood or the medical suitability of donors. All medical procedures are the sole responsibility of the certified healthcare providers.</p>
             </div>
           </>
         );
@@ -100,14 +100,14 @@ export default function Login() {
           <>
             <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Help Center</h3>
             <div className="text-slate-500 text-sm font-medium mb-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar">
-              <p className="mb-6">Need assistance with your JeevaLink account or facing a technical issue? Our support teams are ready to help you.</p>
+              <p className="mb-6">Need assistance with your iDonate account or facing a technical issue? Our support teams are ready to help you.</p>
               
               <div className="bg-red-50 p-5 rounded-2xl border border-red-100 mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Heart className="w-4 h-4 text-red-600" />
-                  <p className="font-bold text-slate-900">JeevaLink Support</p>
+                  <p className="font-bold text-slate-900">iDonate Support</p>
                 </div>
-                <p className="text-red-600 font-bold mb-1">support@jeevalink.com</p>
+                <p className="text-red-600 font-bold mb-1">support@idonate.org</p>
                 <p className="text-xs text-red-800/70 font-medium">For general inquiries and platform assistance.</p>
               </div>
 
@@ -252,7 +252,7 @@ export default function Login() {
                   onChange={(e) => setCredential(e.target.value)}
                   autoComplete="off"
                   className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 focus:border-red-500 rounded-2xl transition-all duration-300 py-4 pl-12 pr-4 text-slate-900 font-medium text-sm outline-none shadow-sm"
-                  placeholder="you@jeevalink.org"
+                  placeholder="you@idonate.org"
                 />
               </div>
             </div>
@@ -387,7 +387,7 @@ export default function Login() {
                       type="email"
                       value={forgotInput}
                       onChange={(e) => setForgotInput(e.target.value)}
-                      placeholder="you@jeevalink.org"
+                      placeholder="you@idonate.org"
                       autoComplete="off"
                       className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 focus:border-red-500 rounded-2xl transition-all duration-300 py-4 pl-12 pr-4 text-slate-900 font-medium text-sm outline-none shadow-sm"
                     />

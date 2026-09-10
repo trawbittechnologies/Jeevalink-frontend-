@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { useNavigate } from 'react-router-dom';
@@ -149,7 +149,7 @@ export default function Profile() {
     navigate('/login');
   };
 
-  const qrData = JSON.stringify({ n: user?.primaryName, b: user?.bloodGroup, p: user?.mobile, c: user?.city, v: 'JeevaLink' });
+  const qrData = JSON.stringify({ n: user?.primaryName, b: user?.bloodGroup, p: user?.mobile, c: user?.city, v: 'iDonate' });
 
   const handleDownload = () => {
     const svgEl = document.querySelector('.qr-container svg');
@@ -356,7 +356,7 @@ export default function Profile() {
               </div>
               <button
                 onClick={handleCopyEmployeeId}
-                title="Copy JeevaLink ID"
+                title="Copy iDonate ID"
                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer border"
                 style={idCopied
                   ? { color: '#059669', background: '#ecfdf5', borderColor: '#a7f3d0' }
