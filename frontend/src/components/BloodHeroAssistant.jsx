@@ -8,13 +8,16 @@ import {
   Send,
   RefreshCw,
   RotateCcw,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck
 } from 'lucide-react';
+import { useAuthStore } from '../store/authStore.js';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
 import { queryJeevaLinkAI } from '../utils/aiService.js';
 import MascotVideo from './MascotVideo.jsx';
 
 export default function BloodHeroAssistant() {
+  const { user } = useAuthStore();
   const location = useLocation();
 
 
@@ -320,14 +323,25 @@ export default function BloodHeroAssistant() {
 
               {/* Quick Action Navigation Links */}
               <div className="px-3 py-2 bg-slate-100/70 border-t border-slate-200/60 flex items-center justify-between gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => handleAction('/donor/search')}
-                  className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200 text-slate-700 hover:text-red-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                >
-                  <Search className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
-                  <span>Find Donors</span>
-                </button>
+                {user?.role === 'user' ? (
+                  <button
+                    type="button"
+                    onClick={() => handleAction('/donor/eligibility')}
+                    className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-emerald-50 active:bg-emerald-100 border border-slate-200 text-slate-700 hover:text-emerald-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-emerald-600" />
+                    <span>Eligibility</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleAction('/donor/search')}
+                    className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200 text-slate-700 hover:text-red-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <Search className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
+                    <span>Find Donors</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => handleAction('/requests')}

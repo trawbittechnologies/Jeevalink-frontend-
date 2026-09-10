@@ -5,7 +5,7 @@ import { useAppStore } from '../store/appStore.js';
 import api from '../store/api.js';
 import {
   ClipboardList, Download, Loader2, X, Search, Phone, RefreshCw,
-  Heart, Siren, Droplet, Send, ShieldAlert,
+  Heart, Siren, Droplet, Send, ShieldAlert, ShieldCheck,
   Share2, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -337,17 +337,17 @@ export default function DonorDashboard() {
         </Link>
 
         <Link
-          to="/donor/search"
+          to="/donor/eligibility"
           className="p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl shadow-2xs transition-all flex flex-col items-start gap-3 group cursor-pointer"
         >
-          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center">
-            <Search className="w-5 h-5 text-slate-700" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-red-600 transition-colors">
-              Find Donors
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">
+              Health Eligibility
             </h3>
-            <p className="text-[11px] text-slate-500">Search voluntary network</p>
+            <p className="text-[11px] text-slate-500">Check donation readiness</p>
           </div>
         </Link>
       </div>

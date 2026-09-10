@@ -14,7 +14,6 @@ const userLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/donor/eligibility', label: 'Health Eligibility', icon: ShieldCheck },
-  { to: '/donor/search', label: 'Find Donors', icon: Search },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
   { to: '/profile', label: 'My Profile', icon: User },

@@ -350,7 +350,7 @@ export default function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/donor/search" element={
-                  <ProtectedRoute roles={['user', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
+                  <ProtectedRoute roles={['volunteer', 'unit_squad', 'block_admin', 'super_admin', 'technical_admin']}>
                     <DonorSearch />
                   </ProtectedRoute>
                 } />
