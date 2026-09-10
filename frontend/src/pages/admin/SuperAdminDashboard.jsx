@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import {
   ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
   UserCheck, BarChart3, TrendingUp, Search, Phone,
-  Droplets, Flame, CheckCircle2, Award, ArrowUpRight
+  Droplets, Flame, CheckCircle2, Award, ArrowUpRight,
+  Trophy, Crown, Medal, Sparkles
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -71,6 +72,12 @@ export default function SuperAdminDashboard() {
     block_summary: []
   });
 
+  const [pointsLeaderboard, setPointsLeaderboard] = useState({
+    summary: { total_district_points: 0, top_block: 'N/A', top_donor: 'N/A' },
+    blocks: [],
+    top_donors: []
+  });
+
   const [blockAdmins, setBlockAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,9 +102,10 @@ export default function SuperAdminDashboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resDist, resAdmins] = await Promise.all([
+      const [resDist, resAdmins, resPoints] = await Promise.all([
         api.get('/super-admin/metrics'),
-        api.get('/super-admin/block-admins')
+        api.get('/super-admin/block-admins'),
+        api.get('/super-admin/points-table').catch(() => ({ data: null }))
       ]);
 
       if (resDist.data?.success) {
@@ -126,6 +134,10 @@ export default function SuperAdminDashboard() {
         else if (Array.isArray(raw?.data)) list = raw.data;
         else if (Array.isArray(raw?.data?.data)) list = raw.data.data;
         setBlockAdmins(list);
+      }
+
+      if (resPoints.data?.success && resPoints.data.data) {
+        setPointsLeaderboard(resPoints.data.data);
       }
     } catch (err) {
       console.error("Super Admin Load error:", err);
@@ -287,6 +299,12 @@ export default function SuperAdminDashboard() {
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <Link
+              to="/super-admin/points"
+              className="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 active:scale-95 border border-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Trophy className="w-4 h-4 text-amber-600" /> Points Table
+            </Link>
             <Link
               to="/super-admin/blocks"
               className="px-4 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs hover:shadow-sm transition flex items-center gap-2 cursor-pointer"
@@ -483,6 +501,88 @@ export default function SuperAdminDashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ─── Creative Minimal Points Table & League Widget ─── */}
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-300 text-amber-600 flex items-center justify-center font-black">
+              <Trophy className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+                District Points League
+                <span className="px-2 py-0.5 bg-amber-100 text-amber-900 text-[10px] font-bold rounded-full">
+                  {(pointsLeaderboard.summary?.total_district_points || 0).toLocaleString()} Pts Pool
+                </span>
+              </h3>
+              <p className="text-[11px] text-slate-400">Block Committee performance rankings & gamified milestones</p>
+            </div>
+          </div>
+
+          <Link
+            to="/super-admin/points"
+            className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 bg-red-50 hover:bg-red-100/70 px-3 py-1.5 rounded-xl transition self-start sm:self-auto"
+          >
+            View Full Points Table & Meghala Rankings <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {(!pointsLeaderboard.blocks || pointsLeaderboard.blocks.length === 0) ? (
+          <div className="p-6 text-center text-slate-400 text-xs font-semibold bg-slate-50/50 rounded-2xl">
+            Points rankings will appear automatically as donations and block engagements are recorded.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {pointsLeaderboard.blocks.slice(0, 4).map((b, idx) => (
+              <div
+                key={b.block_name || idx}
+                className={`p-4 rounded-2xl border transition-all ${
+                  idx === 0
+                    ? 'bg-amber-50/40 border-amber-200/80 shadow-xs'
+                    : idx === 1
+                    ? 'bg-slate-50/70 border-slate-200 shadow-2xs'
+                    : 'bg-white border-slate-200/70'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center ${
+                    idx === 0
+                      ? 'bg-amber-500 text-white'
+                      : idx === 1
+                      ? 'bg-slate-300 text-slate-800'
+                      : idx === 2
+                      ? 'bg-amber-700/20 text-amber-900'
+                      : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {idx === 0 ? '👑' : `#${idx + 1}`}
+                  </span>
+                  <span className="text-xs font-black text-red-600">
+                    {b.total_points} Pts
+                  </span>
+                </div>
+
+                <div className="mt-2.5">
+                  <h4 className="font-extrabold text-slate-900 text-sm truncate">{b.block_name}</h4>
+                  <p className="text-[11px] text-slate-400 truncate">Admin: {b.admin_name}</p>
+                </div>
+
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-3">
+                  <div
+                    className="bg-gradient-to-r from-red-600 to-amber-500 h-full rounded-full"
+                    style={{ width: `${Math.max(8, b.percentage || 100)}%` }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] text-slate-500 font-semibold mt-2">
+                  <span>🩸 {b.donors_count} Donors</span>
+                  <span>🛡️ {b.volunteers_count} Squads</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Registered Block Committees Table */}

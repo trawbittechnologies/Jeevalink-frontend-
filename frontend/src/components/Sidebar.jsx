@@ -5,7 +5,7 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, Megaphone, HeartHandshake, X, Headphones
+  Building2, Megaphone, HeartHandshake, X, Headphones, Trophy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
@@ -57,6 +57,7 @@ const blockAdminLinks = [
 
 const superAdminLinks = [
   { to: '/super-admin/dashboard', label: 'District Dashboard', icon: LayoutDashboard },
+  { to: '/super-admin/points', label: 'District Points Table', icon: Trophy },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/super-admin/blocks', label: 'Manage Block Committees', icon: Building2 },
