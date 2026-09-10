@@ -180,7 +180,7 @@ export default function UserManagement() {
     if (activeTab === 'verified' && !isUserVerified) return false;
 
     const q = search.toLowerCase();
-    const matchSearch = !q || [v.primaryName, v.name, v.email, v.mobile, v.city, v.district].some(f => String(f || '').toLowerCase().includes(q));
+    const matchSearch = !q || [v.primaryName, v.primary_name, v.name, v.email, v.mobile, v.city, v.district, v.bloodGroup, v.blood_group].some(f => String(f || '').toLowerCase().includes(q));
     const matchStatus = filters.status === 'all' || (v.status || '').toLowerCase() === filters.status.toLowerCase();
     const matchRole = filters.role === 'all' || (v.role || '').toLowerCase() === filters.role.toLowerCase();
     return matchSearch && matchStatus && matchRole;
@@ -330,6 +330,7 @@ export default function UserManagement() {
       setAddOtpVerified(false);
       setVerifiedEmail('');
       setAddOtpCooldown(0);
+      await fetchUsers();
     }
     setLoading(false);
   };

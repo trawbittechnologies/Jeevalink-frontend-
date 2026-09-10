@@ -1169,9 +1169,23 @@ export const useAppStore = create((set, get) => ({
     try {
       const res = await api.post('/volunteer/users', data);
       if (res.data.success) {
-        const emailSent = res.data.data.emailSent;
-        const generatedPassword = res.data.data.generatedPassword;
-        const newUser = res.data.data.user;
+        const emailSent = res.data.data?.emailSent ?? res.data.data?.email_sent;
+        const generatedPassword = res.data.data?.generatedPassword ?? res.data.data?.generated_password;
+        const rawUser = res.data.data?.user || {};
+        const newUser = {
+          ...rawUser,
+          _id: rawUser.id || rawUser._id,
+          id: rawUser.id || rawUser._id,
+          primaryName: rawUser.primary_name || rawUser.primaryName || rawUser.name || 'User',
+          primary_name: rawUser.primary_name || rawUser.primaryName || rawUser.name || 'User',
+          name: rawUser.primary_name || rawUser.primaryName || rawUser.name || 'User',
+          bloodGroup: rawUser.blood_group || rawUser.bloodGroup || 'N/A',
+          blood_group: rawUser.blood_group || rawUser.bloodGroup || 'N/A',
+          isVerified: Boolean(rawUser.is_verified ?? rawUser.isVerified ?? (rawUser.status === 'Active')),
+          is_verified: Boolean(rawUser.is_verified ?? rawUser.isVerified ?? (rawUser.status === 'Active')),
+          status: rawUser.status || 'Active',
+          role: rawUser.role || 'donor',
+        };
         set((state) => ({
           allUsers: [newUser, ...state.allUsers.filter(u => String(u._id || u.id) !== String(newUser.id || newUser._id))]
         }));
@@ -1179,7 +1193,7 @@ export const useAppStore = create((set, get) => ({
         const msg = res.data.message || 'User added successfully!';
         const emailFailed = msg.toLowerCase().includes('failed to send');
         get().triggerToast(msg, emailFailed ? 'warning' : 'success');
-        return { success: true, emailSent, generatedPassword, user: res.data.data.user };
+        return { success: true, emailSent, generatedPassword, user: newUser };
       }
       return { success: false };
     } catch (err) {
