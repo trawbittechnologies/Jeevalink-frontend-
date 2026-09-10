@@ -9,29 +9,52 @@ const POSTER_CONFIG = {
   phone: { top: '64mm', left: '34.2mm', fontSize: '3.6mm', color: '#dc2626', fontWeight: '700', fontFamily: "'Inter', sans-serif", letterSpacing: '0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
   bloodGroup: { top: '53mm', left: '67.2mm', fontSize: '7mm', color: '#dc2626', fontWeight: '900', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', width: '20mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: 'none' },
   units: { top: '68.1mm', left: '67.8mm', fontSize: '2.2mm', color: '#ffffff', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.03em', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: '0px 1px 2px rgba(0,0,0,0.4)' },
-  location: { top: '82mm', left: '45mm', fontSize: '2.8mm', color: '#ffffff', fontWeight: '700', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.15em', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.5)' }
+  location: { top: '82mm', left: '45mm', fontSize: '2.8mm', color: '#ffffff', fontWeight: '700', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.15em', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.5)' },
+  generatedAt: { top: '88mm', left: '45mm', fontSize: '2.0mm', color: '#ffffff', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.03em', width: '80mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 2px rgba(0,0,0,0.7)', opacity: 0.95 }
 };
 
-export default function PosterModal({ isOpen, onClose, data }) {
+function formatGeneratedDateTime(dateVal) {
+  const d = dateVal ? new Date(dateVal) : new Date();
+  const valid = !isNaN(d.getTime()) ? d : new Date();
+
+  const day = String(valid.getDate()).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[valid.getMonth()];
+  const year = valid.getFullYear();
+
+  let hours = valid.getHours();
+  const minutes = String(valid.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const formattedHours = String(hours).padStart(2, '0');
+
+  return `Generated: ${day} ${month} ${year} • ${formattedHours}:${minutes} ${ampm}`;
+}
+
+export default function PosterModal({ isOpen, onClose, data, requestData }) {
   const posterRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
 
-  if (!isOpen || !data) return null;
+  const posterData = data || requestData;
+
+  if (!isOpen || !posterData) return null;
 
   // Extract fields based on existing data structure variations
-  const hospital = data.hospital_name || data.hospitalName || data.venue || 'Hospital Name';
-  const patientName = data.patient_name || data.patientName || 'Patient Name';
-  const phone = data.contact_phone || data.contact_number || data.contactNumber || data.mobile || 'Contact Number';
-  const bloodGroup = data.blood_group || data.bloodGroup || 'O+';
-  const units = data.units_required || data.unitsRequired || '1';
+  const hospital = posterData.hospital_name || posterData.hospitalName || posterData.venue || 'Hospital Name';
+  const patientName = posterData.patient_name || posterData.patientName || 'Patient Name';
+  const phone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || 'Contact Number';
+  const bloodGroup = posterData.blood_group || posterData.bloodGroup || 'O+';
+  const units = posterData.units_required || posterData.unitsRequired || '1';
 
   // Extract and format the Meghala Name
-  const rawLocation = data.requester_meghala || data.meghala_name || data.meghala || data.unit || '';
+  const rawLocation = posterData.requester_meghala || posterData.meghala_name || posterData.meghala || posterData.unit || '';
   const location = rawLocation
     ? (rawLocation.toLowerCase().includes('meghala') ? rawLocation : `${rawLocation} Meghala`)
     : 'DYFI Meghala Committee';
 
-  const requestId = data.request_id || data.id || data._id || 'JL-REQ';
+  const requestId = posterData.request_id || posterData.id || posterData._id || 'JL-REQ';
+  const generatedTimeText = formatGeneratedDateTime(posterData.generated_at || new Date());
 
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
@@ -113,6 +136,7 @@ export default function PosterModal({ isOpen, onClose, data }) {
               <span style={{ position: 'absolute', ...POSTER_CONFIG.bloodGroup }}>{bloodGroup}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.units }}>{units} Unit(s)</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.location }}>{location}</span>
+              <span style={{ position: 'absolute', ...POSTER_CONFIG.generatedAt }}>{generatedTimeText}</span>
             </div>
 
           </div>
