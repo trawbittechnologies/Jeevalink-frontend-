@@ -328,8 +328,45 @@ export default function VolunteerDirectory() {
               {filteredVolunteers.map((vol, idx) => {
                 const primaryPhone = vol.mobile || vol.phone || vol.primaryPhone || '';
                 const secondaryPhone = vol.secondary_phone || vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || vol.secondaryPhone || '';
-                const primaryName = vol.primary_name || vol.primaryName || vol.name || vol.person1Name || 'DYFI Volunteer';
-                const secondaryName = vol.secondary_name || vol.secondaryName || vol.secondary_contact_name || vol.person2Name || '';
+                
+                // Name resolution: ensure Person 1 and Person 2 names are cleanly separated
+                const rawFullName = vol.full_name || vol.name || vol.primary_name || vol.primaryName || vol.person1Name || 'DYFI Volunteer';
+                let secondaryName = vol.secondary_name || vol.secondaryName || vol.secondary_contact_name || vol.person2Name || '';
+                let primaryName = vol.person1Name || vol.person1_name || vol.primaryContactName || '';
+
+                if (!primaryName) {
+                  if (rawFullName.includes('&')) {
+                    const parts = rawFullName.split('&').map(s => s.trim()).filter(Boolean);
+                    primaryName = parts[0] || rawFullName;
+                    if (!secondaryName && parts[1]) {
+                      secondaryName = parts[1];
+                    }
+                  } else if (/\band\b/i.test(rawFullName)) {
+                    const parts = rawFullName.split(/\band\b/i).map(s => s.trim()).filter(Boolean);
+                    primaryName = parts[0] || rawFullName;
+                    if (!secondaryName && parts[1]) {
+                      secondaryName = parts[1];
+                    }
+                  } else {
+                    primaryName = rawFullName;
+                  }
+                } else if (primaryName.includes('&') || /\band\b/i.test(primaryName)) {
+                  const parts = primaryName.split(/[&]|(?:\band\b)/i).map(s => s.trim()).filter(Boolean);
+                  primaryName = parts[0] || primaryName;
+                  if (!secondaryName && parts[1]) {
+                    secondaryName = parts[1];
+                  }
+                }
+
+                // If secondaryName is already isolated, clean up any residual '& <name>' from primaryName
+                if (secondaryName && primaryName.toLowerCase().includes(secondaryName.toLowerCase())) {
+                  primaryName = primaryName.replace(new RegExp(`[&,]?\\s*${secondaryName}`, 'gi'), '').trim();
+                }
+
+                const cardHeaderTitle = (secondaryName && !rawFullName.includes('&') && !/\band\b/i.test(rawFullName))
+                  ? `${primaryName} & ${secondaryName}`
+                  : rawFullName;
+
                 const volJeevalinkId = getDisplayJeevalinkId(vol);
                 const roleText = vol.roleText || vol.role_title || vol.role_name || (vol.role ? getRoleLabel(vol.role) : 'Volunteer Coordinator');
 
@@ -354,7 +391,7 @@ export default function VolunteerDirectory() {
                             </span>
                           )}
                         </div>
-                        <h3 className="text-base font-bold text-slate-900 truncate">{primaryName}</h3>
+                        <h3 className="text-base font-bold text-slate-900 truncate">{cardHeaderTitle}</h3>
                         <p className="text-xs text-slate-500 font-medium">
                           {selectedDistrict} &bull; {vol.city || selectedBlock}
                         </p>
