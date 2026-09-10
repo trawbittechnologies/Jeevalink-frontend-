@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -223,6 +223,13 @@ export default function UserManagement() {
 
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
+    if (form.mobile) {
+      const cleanMobile = String(form.mobile).replace(/^(\+91|0)/, '').replace(/\D/g, '');
+      if (!cleanMobile || !/^[6-9]\d{9}$/.test(cleanMobile)) {
+        triggerToast('Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.', 'warning');
+        return;
+      }
+    }
     setLoading(true);
     const userId = selectedUser._id || selectedUser.id;
     const res = await volunteerUpdateUser(userId, form);
@@ -272,6 +279,11 @@ export default function UserManagement() {
     }
     if (!form.mobile?.trim()) {
       triggerToast('Mobile number is required.', 'warning');
+      return;
+    }
+    const cleanMobile = form.mobile.replace(/^(\+91|0)/, '').replace(/\D/g, '');
+    if (!cleanMobile || !/^[6-9]\d{9}$/.test(cleanMobile)) {
+      triggerToast('Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9 (e.g. 9876543210).', 'warning');
       return;
     }
     if (!form.email?.trim()) {
@@ -996,7 +1008,15 @@ export default function UserManagement() {
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Mobile</label>
-                        <input type="tel" value={form.mobile || ''} onChange={e => setForm({ ...form, mobile: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required />
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          value={form.mobile || ''}
+                          onChange={e => setForm({ ...form, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono"
+                          required
+                          placeholder="10-digit mobile number"
+                        />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Email</label>
@@ -1144,7 +1164,15 @@ export default function UserManagement() {
 
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Mobile *</label>
-                    <input type="tel" value={form.mobile || ''} onChange={e => setForm({ ...form, mobile: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="10-digit mobile number" />
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={form.mobile || ''}
+                      onChange={e => setForm({ ...form, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono"
+                      required
+                      placeholder="10-digit mobile number (e.g. 9876543210)"
+                    />
                   </div>
 
                   {/* Donor Email Field with Integrated OTP Verification */}
