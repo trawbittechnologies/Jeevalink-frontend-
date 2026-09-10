@@ -36,7 +36,9 @@ export default function VolunteerDirectory() {
     try {
       const res = await api.get('/public/volunteer-options');
       if (res.data?.success && res.data?.data) {
-        const { blocksByDistrict = {}, meghalasByBlock = {} } = res.data.data;
+        const rawData = res.data.data;
+        const blocksByDistrict = rawData.blocksByDistrict || rawData.blocks_by_district || {};
+        const meghalasByBlock   = rawData.meghalasByBlock || rawData.meghalas_by_block || {};
         setDbBlocksByDistrict(blocksByDistrict);
         setDbMeghalasByBlock(meghalasByBlock);
 
@@ -44,7 +46,7 @@ export default function VolunteerDirectory() {
         const kasargodKey = Object.keys(blocksByDistrict).find(
           k => k.toLowerCase() === 'kasaragod' || k.toLowerCase() === 'kasargod'
         ) || DEFAULT_DISTRICT;
-        const blocks = blocksByDistrict[kasargodKey] || [];
+        const blocks = blocksByDistrict[kasargodKey] || Object.keys(meghalasByBlock) || [];
         if (blocks.length > 0) {
           setSelectedBlock((prev) => (prev && blocks.includes(prev) ? prev : blocks[0]));
         }
@@ -64,13 +66,22 @@ export default function VolunteerDirectory() {
     const key = Object.keys(dbBlocksByDistrict).find(
       k => k.toLowerCase() === 'kasaragod' || k.toLowerCase() === 'kasargod'
     );
-    return (key && dbBlocksByDistrict[key]) || dbBlocksByDistrict[DEFAULT_DISTRICT] || [];
-  }, [dbBlocksByDistrict]);
+    const districtBlocks = (key && dbBlocksByDistrict[key]) || dbBlocksByDistrict[DEFAULT_DISTRICT] || [];
+    if (districtBlocks.length > 0) return districtBlocks;
+    return Object.keys(dbMeghalasByBlock);
+  }, [dbBlocksByDistrict, dbMeghalasByBlock]);
 
   // 3. Available Meghala Units for the selected block (DB only)
   const availableMeghalas = useMemo(() => {
     if (!selectedBlock) return ['All Meghalas'];
-    const dbMeghalas = dbMeghalasByBlock[selectedBlock] || [];
+    const direct = dbMeghalasByBlock[selectedBlock];
+    if (direct && Array.isArray(direct) && direct.length > 0) {
+      return ['All Meghalas', ...direct];
+    }
+    const matchingKey = Object.keys(dbMeghalasByBlock).find(
+      k => k.toLowerCase().trim() === selectedBlock.toLowerCase().trim()
+    );
+    const dbMeghalas = (matchingKey && dbMeghalasByBlock[matchingKey]) || [];
     return ['All Meghalas', ...dbMeghalas];
   }, [selectedBlock, dbMeghalasByBlock]);
 
@@ -240,11 +251,15 @@ export default function VolunteerDirectory() {
                 id="meghala-select"
                 value={selectedMeghala}
                 onChange={(e) => setSelectedMeghala(e.target.value)}
-                disabled={availableMeghalas.length <= 1}
+                disabled={!selectedBlock}
                 className="w-full bg-slate-50 border border-slate-200 hover:border-red-400 rounded-xl px-3.5 py-3 text-slate-900 text-xs font-bold focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 transition cursor-pointer shadow-xs disabled:opacity-60"
               >
                 {availableMeghalas.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                  <option key={m} value={m}>
+                    {m === 'All Meghalas'
+                      ? (availableMeghalas.length > 1 ? `All Meghalas (${availableMeghalas.length - 1} Units)` : `All Meghalas (${selectedBlock || 'Block'})`)
+                      : m}
+                  </option>
                 ))}
               </select>
             </div>
