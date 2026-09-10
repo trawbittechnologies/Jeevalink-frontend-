@@ -161,6 +161,133 @@ export default function RequestCard({ request, showActions = true }) {
   const requestBloodGroup = request.bloodGroup || request.blood_group;
   const isBloodGroupMatch = userBloodGroup === requestBloodGroup;
 
+  // Meghala-based permission for "Approve Request":
+  // Only allowed if user is super_admin/technical_admin OR if the request, requester, or accepted donor is under the volunteer's Meghala
+  const canApprove = (() => {
+    if (!user || isOwner) return false;
+    const status = (request.status || '').toLowerCase();
+    if (!['pending', 'waiting', 'accepted'].includes(status)) return false;
+
+    // Super Admin & Technical Admin have system-wide approval rights
+    if (['super_admin', 'technical_admin'].includes(user.role)) {
+      return true;
+    }
+
+    // Only volunteers, admins, and block admins can approve
+    if (!['volunteer', 'admin', 'block_admin'].includes(user.role)) {
+      return false;
+    }
+
+    const clean = (val) => {
+      if (!val || typeof val !== 'string') return '';
+      return val.toLowerCase()
+        .replace(/meghala/g, '')
+        .replace(/committee/g, '')
+        .replace(/unit/g, '')
+        .replace(/squad/g, '')
+        .replace(/[\s\-_,]+/g, ' ')
+        .trim();
+    };
+
+    const userMeghala = clean(
+      user.meghalaCommitteeName ||
+      user.meghala_committee_name ||
+      user.meghala ||
+      user.meghalaName ||
+      user.meghala_name ||
+      user.city ||
+      user.unit ||
+      ''
+    );
+
+    const userBlock = clean(
+      user.blockCommitteeName ||
+      user.block_committee_name ||
+      user.organization_name ||
+      user.organizationName ||
+      user.block ||
+      user.block_name ||
+      user.blockName ||
+      ''
+    );
+
+    // If volunteer doesn't have any specific meghala/block assigned, fallback to true
+    if (!userMeghala && !userBlock) {
+      return true;
+    }
+
+    const reqMeghala = clean(
+      request.meghala ||
+      request.meghala_name ||
+      request.meghalaName ||
+      request.requester_meghala ||
+      request.requesterMeghala ||
+      request.city ||
+      request.location ||
+      ''
+    );
+
+    const reqBlock = clean(
+      request.block ||
+      request.block_name ||
+      request.blockName ||
+      request.organization_name ||
+      ''
+    );
+
+    // 1. Direct match with request's location / meghala / block
+    if (userMeghala && reqMeghala && (reqMeghala.includes(userMeghala) || userMeghala.includes(reqMeghala))) {
+      return true;
+    }
+    if (userBlock && reqBlock && (reqBlock.includes(userBlock) || userBlock.includes(reqBlock))) {
+      return true;
+    }
+
+    // 2. Check if the user who requested this blood request belongs to volunteer's meghala
+    const requesterId = String(request.requested_by || request.requestedBy || '');
+    if (requesterId) {
+      const requester = (allUsers || []).find((u) => String(u._id || u.id) === requesterId);
+      if (requester) {
+        const requesterMeghala = clean(
+          requester.meghalaCommitteeName ||
+          requester.meghala_committee_name ||
+          requester.meghala ||
+          requester.meghalaName ||
+          requester.meghala_name ||
+          requester.city ||
+          requester.unit ||
+          ''
+        );
+        if (userMeghala && requesterMeghala && (requesterMeghala.includes(userMeghala) || userMeghala.includes(requesterMeghala))) {
+          return true;
+        }
+      }
+    }
+
+    // 3. Check if any accepted donor for this request belongs to volunteer's meghala
+    if (acceptedList.length > 0) {
+      const isAnyDonorInMeghala = acceptedList.some((donorId) => {
+        const donor = (allUsers || []).find((u) => String(u._id || u.id) === String(donorId));
+        if (!donor) return false;
+        const donorMeghala = clean(
+          donor.meghalaCommitteeName ||
+          donor.meghala_committee_name ||
+          donor.meghala ||
+          donor.meghalaName ||
+          donor.meghala_name ||
+          donor.city ||
+          donor.unit ||
+          ''
+        );
+        return Boolean(userMeghala && donorMeghala && (donorMeghala.includes(userMeghala) || userMeghala.includes(donorMeghala)));
+      });
+
+      if (isAnyDonorInMeghala) return true;
+    }
+
+    return false;
+  })();
+
   const handleAcceptRequest = async () => {
     if (!user) {
       alert("Please login to accept blood requests.");
@@ -399,7 +526,7 @@ export default function RequestCard({ request, showActions = true }) {
               )}
 
               {/* Approve — Admin/Volunteer full width */}
-              {(user?.role === 'volunteer' || user?.role === 'admin') && ['pending', 'waiting', 'accepted'].includes((request.status || '').toLowerCase()) && !isOwner && (
+              {canApprove && (
                 <button
                   onClick={() => fulfillRequest(reqId)}
                   className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm cursor-pointer"

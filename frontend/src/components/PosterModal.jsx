@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
-import { X, Download, Share2, RefreshCw, MapPin, Phone, Users, Calendar } from 'lucide-react';
+import { X, Download, Share2, RefreshCw, MapPin, Phone, Users } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import posterTemplate from '../assets/poster-template.png';
 import { useAuthStore } from '../store/authStore';
 
-export function formatMeghalaCommittee(raw) {
+function formatMeghalaCommittee(raw) {
   if (!raw || typeof raw !== 'string') return 'TEST MEGHALA COMMITTEE';
   const clean = raw.trim();
   if (!clean || clean.toLowerCase() === 'n/a' || clean.toLowerCase() === 'null') {
