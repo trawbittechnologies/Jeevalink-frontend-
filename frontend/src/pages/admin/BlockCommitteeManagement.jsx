@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
   CheckCircle2, Download, ShieldCheck
@@ -243,7 +243,7 @@ export default function BlockCommitteeManagement() {
     <div className="space-y-6 max-w-7xl mx-auto pb-16 select-none">
 
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-6 rounded-3xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-6 rounded-3xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 rounded-full text-red-700 dark:text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
             <Building2 className="w-4 h-4 text-red-600" /> {displayDistrict} Block Committees
@@ -276,7 +276,7 @@ export default function BlockCommitteeManagement() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Block Committees</p>
@@ -288,7 +288,7 @@ export default function BlockCommitteeManagement() {
           </div>
         </div>
 
-        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Active Committees</p>
@@ -300,7 +300,7 @@ export default function BlockCommitteeManagement() {
           </div>
         </div>
 
-        <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Suspended Committees</p>
@@ -314,7 +314,7 @@ export default function BlockCommitteeManagement() {
       </div>
 
       {/* Main List Section */}
-      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 border /80 dark:border-zinc-800/80 rounded-3xl p-6 space-y-6">
+      <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 rounded-3xl p-6 space-y-6">
 
         {/* Filters & Search Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-zinc-800/60 pb-4">
@@ -469,11 +469,11 @@ export default function BlockCommitteeManagement() {
       {/* Add Block Committee Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm select-none animate-fade-in">
-          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 rounded-3xl w-full max-w-lg shadow-xl overflow-hidden border dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 rounded-3xl w-full max-w-lg shadow-xl overflow-hidden border dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
             <div className="bg-red-600 p-6 relative overflow-hidden">
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center text-white font-bold">
+                  <div className="w-10 h-10 bg-white border-slate-200 shadow-sm/20 rounded-xl flex items-center justify-center text-white font-bold">
                     <Plus className="w-5 h-5" />
                   </div>
                   <div>
@@ -612,11 +612,11 @@ export default function BlockCommitteeManagement() {
       {/* Edit Block Committee Modal */}
       {editingAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm select-none animate-fade-in">
-          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 rounded-3xl w-full max-w-lg shadow-xl overflow-hidden border dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 rounded-3xl w-full max-w-lg shadow-xl overflow-hidden border dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
             <div className="bg-red-600 p-6 relative overflow-hidden">
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center text-white">
+                  <div className="w-10 h-10 bg-white border-slate-200 shadow-sm/20 rounded-xl flex items-center justify-center text-white">
                     <Edit3 className="w-5 h-5" />
                   </div>
                   <div>
@@ -767,7 +767,7 @@ export default function BlockCommitteeManagement() {
       {/* Credentials Created Confirmation Modal */}
       {credentialsModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm select-none animate-fade-in">
-          <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all dark:bg-zinc-900 rounded-3xl w-full max-w-md shadow-xl overflow-hidden border dark:border-zinc-800 p-6 space-y-4">
+          <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 rounded-3xl w-full max-w-md shadow-xl overflow-hidden border dark:border-zinc-800 p-6 space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>

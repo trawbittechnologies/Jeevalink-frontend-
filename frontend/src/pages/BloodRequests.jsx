@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import RequestCard from '../components/RequestCard.jsx';
@@ -109,7 +109,7 @@ export default function BloodRequests() {
           animate={{ opacity: 1, y: 0 }}
           className="hero-gradient rounded-2xl p-4 flex items-center gap-4 text-white"
         >
-          <div className="w-10 h-10 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all/20 rounded-xl flex items-center justify-center animate-heartbeat shrink-0">
+          <div className="w-10 h-10 bg-white border-slate-200 shadow-sm/20 rounded-xl flex items-center justify-center animate-heartbeat shrink-0">
             <Siren className="w-5 h-5" />
           </div>
           <div className="min-w-0">

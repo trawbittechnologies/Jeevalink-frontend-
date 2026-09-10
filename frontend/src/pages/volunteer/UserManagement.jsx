@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -325,7 +325,7 @@ export default function UserManagement() {
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all p-6 rounded-3xl border /80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border-slate-200 shadow-sm p-6 rounded-3xl border /80 shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">User Management (Meghala Scope)</h1>
@@ -455,7 +455,7 @@ export default function UserManagement() {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl border /80 shadow-xs overflow-hidden">
+      <div className="bg-white border-slate-200 shadow-sm rounded-3xl border /80 shadow-xs overflow-hidden">
         {/* Categorized Filter Tabs Bar */}
         <div className="flex items-center gap-2 p-3 bg-slate-50/80 border-b border-slate-200/80 overflow-x-auto">
           <button
@@ -720,7 +720,7 @@ export default function UserManagement() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-              className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border"
+              className="bg-white border-slate-200 shadow-sm rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border"
             >
               {/* Creative Crimson Header Banner */}
               <div className="h-32 bg-gradient-to-r from-red-600 via-rose-600 to-red-800 relative overflow-hidden p-6 flex justify-between items-start">
@@ -793,7 +793,7 @@ export default function UserManagement() {
               {/* User Details Grid */}
               <div className="px-6 pb-6 pt-3 space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover: transition-all shadow-xs">
+                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white border-slate-200 shadow-sm hover: transition-all shadow-xs">
                     <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                       <Mail className="w-3 h-3 text-red-500" /> Email Address
                     </p>
@@ -802,7 +802,7 @@ export default function UserManagement() {
                     </p>
                   </div>
 
-                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover: transition-all shadow-xs">
+                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white border-slate-200 shadow-sm hover: transition-all shadow-xs">
                     <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                       <Phone className="w-3 h-3 text-red-500" /> Contact Number
                     </p>
@@ -815,7 +815,7 @@ export default function UserManagement() {
                     )}
                   </div>
 
-                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover: transition-all shadow-xs">
+                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white border-slate-200 shadow-sm hover: transition-all shadow-xs">
                     <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                       <MapPin className="w-3 h-3 text-red-500" /> District
                     </p>
@@ -824,7 +824,7 @@ export default function UserManagement() {
                     </p>
                   </div>
 
-                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all hover: transition-all shadow-xs">
+                  <div className="bg-slate-50/80 border p-3 rounded-2xl hover:bg-white border-slate-200 shadow-sm hover: transition-all shadow-xs">
                     <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                       <MapPin className="w-3 h-3 text-red-500" /> City / Location
                     </p>
@@ -885,7 +885,7 @@ export default function UserManagement() {
 
                 {!otpVerified ? (
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center">
-                    <div className="w-16 h-16 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-full flex items-center justify-center mx-auto mb-4 border">
+                    <div className="w-16 h-16 bg-white border-slate-200 shadow-sm rounded-full flex items-center justify-center mx-auto mb-4 border">
                       <KeyRound className="w-8 h-8 text-amber-500" />
                     </div>
                     <h4 className="font-bold text-gray-900 mb-2">Authorization Required</h4>
@@ -913,7 +913,7 @@ export default function UserManagement() {
                           placeholder="Enter 6-digit OTP"
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full text-center tracking-[0.5em] font-mono text-xl py-4 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          className="w-full text-center tracking-[0.5em] font-mono text-xl py-4 bg-white border-slate-200 shadow-sm border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                         />
                         <button
                           onClick={handleVerifyOtp}
@@ -1027,7 +1027,7 @@ export default function UserManagement() {
       <AnimatePresence>
         {showAddModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all rounded-2xl w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border relative">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white border-slate-200 shadow-sm rounded-2xl w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border relative">
               {/* Modal Header Red Banner */}
               <div className="bg-red-600 p-6 relative overflow-hidden shrink-0">
                 <div className="relative z-10 flex items-center justify-between">
@@ -1295,7 +1295,7 @@ export default function UserManagement() {
 
                 <div className="flex gap-3 pt-3 mt-4 border-t border-slate-100">
                   <button type="button" onClick={() => setShowAddModal(false)}
-                    className="flex-1 py-3 bg-white/60 backdrop-blur-3xl border-white shadow-[0_8px_30px_rgb(220,38,38,0.04)] hover:shadow-[0_8px_40px_rgb(220,38,38,0.08)] transition-all border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
+                    className="flex-1 py-3 bg-white border-slate-200 shadow-sm border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
                     Cancel
                   </button>
                   <button
