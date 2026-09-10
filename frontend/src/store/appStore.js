@@ -905,7 +905,16 @@ export const useAppStore = create((set, get) => ({
 
   updateAwarenessSettings: async (payloadOrFormData) => {
     try {
-      const res = await api.post('/technical-admin/awareness-settings', payloadOrFormData);
+      let res;
+      try {
+        res = await api.post('/technical-admin/awareness-settings', payloadOrFormData);
+      } catch (e) {
+        if (e.response?.status === 403 || e.response?.status === 404) {
+          res = await api.post('/super-admin/awareness-settings', payloadOrFormData);
+        } else {
+          throw e;
+        }
+      }
       if (res.data?.success) {
         const d = res.data.data;
         const updated = {
