@@ -207,17 +207,28 @@ export default function VolunteerDashboard() {
             <p className="text-red-100 text-sm mt-1">
               Welcome, <span className="font-semibold text-white">
                 {(() => {
-                  const raw = user?.primary_name || user?.name || 'Volunteer';
-                  const parts = raw.split(/[&,]+/).map(s => s.trim()).filter(Boolean);
-                  return Array.from(new Set(parts)).join(' & ') || 'Volunteer';
+                  const rawMeghala = user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
+                  if (!rawMeghala || rawMeghala.toLowerCase() === 'n/a') return 'Meghala Committee';
+                  if (/meghala\s+committee/i.test(rawMeghala)) return rawMeghala;
+                  if (/committee/i.test(rawMeghala)) return rawMeghala;
+                  if (/meghala/i.test(rawMeghala)) return `${rawMeghala} Committee`;
+                  return `${rawMeghala} Meghala Committee`;
                 })()}
               </span>
-              {user?.meghala ? ` — ${user.meghala} Meghala` : ''}
             </p>
             <div className="flex items-center gap-3 text-xs text-red-100 mt-3 pt-3 border-t border-red-500/50">
-              <span>District: <strong className="text-white">{user?.district || 'Kasaragod'}</strong></span>
+              <span>District: <strong className="text-white">{user?.district || user?.district_name || 'Kasaragod'}</strong></span>
               <span>•</span>
-              <span>Block: <strong className="text-white">{user?.blockCommitteeName || user?.block_committee_name || 'Central'}</strong></span>
+              <span>Block: <strong className="text-white">
+                {(() => {
+                  const rawBlock = user?.blockCommitteeName || user?.block_committee_name || user?.organization_name || user?.organizationName || user?.block || user?.block_name || user?.blockName || (user?.role === 'block_admin' ? user?.city : '') || '';
+                  if (!rawBlock || rawBlock.toLowerCase() === 'n/a' || rawBlock.toLowerCase() === 'central') {
+                    return user?.district ? `${user.district} Block` : 'Block Committee';
+                  }
+                  if (/block\s+committee/i.test(rawBlock) || /block/i.test(rawBlock) || /committee/i.test(rawBlock)) return rawBlock;
+                  return `${rawBlock} Block`;
+                })()}
+              </strong></span>
             </div>
           </div>
 
@@ -575,11 +586,29 @@ export default function VolunteerDashboard() {
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800">
                 <span className="text-slate-400">Block Committee</span>
-                <span className="font-bold">{user?.blockCommitteeName || user?.block_committee_name || user?.block_committee || user?.block || 'Central'}</span>
+                <span className="font-bold">
+                  {(() => {
+                    const rawBlock = user?.blockCommitteeName || user?.block_committee_name || user?.organization_name || user?.organizationName || user?.block || user?.block_name || user?.blockName || (user?.role === 'block_admin' ? user?.city : '') || '';
+                    if (!rawBlock || rawBlock.toLowerCase() === 'n/a' || rawBlock.toLowerCase() === 'central') {
+                      return user?.district ? `${user.district} Block` : 'Block Committee';
+                    }
+                    if (/block\s+committee/i.test(rawBlock) || /block/i.test(rawBlock) || /committee/i.test(rawBlock)) return rawBlock;
+                    return `${rawBlock} Block`;
+                  })()}
+                </span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-slate-400">Meghala</span>
-                <span className="font-bold">{user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || 'All Meghalas'}</span>
+                <span className="text-slate-400">Meghala Committee</span>
+                <span className="font-bold">
+                  {(() => {
+                    const rawMeghala = user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
+                    if (!rawMeghala || rawMeghala.toLowerCase() === 'n/a') return 'Meghala Committee';
+                    if (/meghala\s+committee/i.test(rawMeghala)) return rawMeghala;
+                    if (/committee/i.test(rawMeghala)) return rawMeghala;
+                    if (/meghala/i.test(rawMeghala)) return `${rawMeghala} Committee`;
+                    return `${rawMeghala} Meghala Committee`;
+                  })()}
+                </span>
               </div>
             </div>
           </div>

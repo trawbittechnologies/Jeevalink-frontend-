@@ -3,10 +3,33 @@ import { useAppStore } from './appStore.js';
 import api from './api.js';
 import { normalizeRole } from '../utils/rbac.js';
 
+export const formatUserData = (rawUser) => {
+  if (!rawUser) return null;
+  const normalizedRole = normalizeRole(rawUser.role);
+  const rawCity = rawUser.city || '';
+  const rawOrg = rawUser.organization_name || rawUser.organizationName || '';
+  const rawMeghala = rawUser.meghala || rawUser.meghalaName || rawUser.meghala_name || rawCity || '';
+  const rawBlock = rawUser.blockCommitteeName || rawUser.block_committee_name || rawUser.blockName || rawUser.block_name || rawUser.block || (normalizedRole === 'block_admin' ? rawCity : rawOrg) || '';
+
+  return {
+    ...rawUser,
+    role: normalizedRole,
+    meghala: rawMeghala,
+    meghalaName: rawMeghala,
+    block: rawBlock,
+    blockCommitteeName: rawBlock,
+  };
+};
+
 export const useAuthStore = create((set, get) => ({
   token: localStorage.getItem('jeevalink_token') || null,
   user: (() => {
-    try { return JSON.parse(localStorage.getItem('jeevalink_user') || 'null'); } catch { return null; }
+    try {
+      const u = JSON.parse(localStorage.getItem('jeevalink_user') || 'null');
+      return formatUserData(u);
+    } catch {
+      return null;
+    }
   })(),
   loading: false,
   error: null,
@@ -37,15 +60,14 @@ export const useAuthStore = create((set, get) => ({
         throw new Error('Invalid authentication response structure.');
       }
 
-      const normalizedRole = normalizeRole(rawUser.role);
-      const user = { ...rawUser, role: normalizedRole };
+      const user = formatUserData(rawUser);
 
       localStorage.setItem('jeevalink_token', token);
       localStorage.setItem('jeevalink_user', JSON.stringify(user));
       set({ token, user, loading: false });
 
-      console.log('[DEBUG authStore] Login successful, saved token & user role:', normalizedRole);
-      return { success: true, role: normalizedRole };
+      console.log('[DEBUG authStore] Login successful, saved token & user role:', user.role);
+      return { success: true, role: user.role };
     } catch (err) {
       console.error('[DEBUG authStore] Catch block caught login error:', err);
       const errMsg = err.response?.data?.message || err.message || 'Invalid credentials. Try again.';
@@ -331,9 +353,14 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true });
     try {
       const res = await api.get('/auth/me');
-      const { user } = res.data.data;
-      localStorage.setItem('jeevalink_user', JSON.stringify(user));
-      set({ user, loading: false });
+      const rawUser = res.data.data?.user || res.data.user;
+      const user = formatUserData(rawUser);
+      if (user) {
+        localStorage.setItem('jeevalink_user', JSON.stringify(user));
+        set({ user, loading: false });
+      } else {
+        set({ loading: false });
+      }
     } catch {
       set({ loading: false });
     }
@@ -343,10 +370,13 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true });
     try {
       const res = await api.patch('/auth/profile', updates);
-      const { user } = res.data.data;
-      localStorage.setItem('jeevalink_user', JSON.stringify(user));
-      set({ user, loading: false });
-      useAppStore.getState().updateUserInLists(user._id, user);
+      const rawUser = res.data.data?.user || res.data.user;
+      const user = formatUserData(rawUser);
+      if (user) {
+        localStorage.setItem('jeevalink_user', JSON.stringify(user));
+        set({ user, loading: false });
+        useAppStore.getState().updateUserInLists(user._id || user.id, user);
+      }
       return { success: true, user };
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Profile update failed.';
