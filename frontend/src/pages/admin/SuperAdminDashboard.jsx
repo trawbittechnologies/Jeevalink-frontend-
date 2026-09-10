@@ -272,8 +272,8 @@ export default function SuperAdminDashboard() {
               </span>
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-red-600 uppercase">
-                {displayDistrict}
+              <h1 className="text-2xl sm:text-3xl font-black tracking-wide text-slate-950 uppercase">
+                DYFI {cleanDistrict}
               </h1>
               <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-medium">
                 Real-time donor status, emergency requests & block administration

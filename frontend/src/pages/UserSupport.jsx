@@ -20,28 +20,36 @@ const QUICK_ACTIONS = [
   {
     id: 'blood_information',
     label: 'Blood Donation',
-    icon: '🩸',
+    icon: Droplets,
+    iconColor: 'text-rose-600',
+    iconBg: 'bg-rose-50 border-rose-100',
     description: 'Ask blood donation and compatibility questions',
     prompt: 'Tell me about blood donation eligibility rules and blood group compatibility.'
   },
   {
     id: 'technical_support',
     label: 'Technical Problem',
-    icon: '🛠️',
+    icon: Wrench,
+    iconColor: 'text-blue-600',
+    iconBg: 'bg-blue-50 border-blue-100',
     description: 'Report login, OTP, profile, request, or app bugs',
     prompt: 'I am experiencing a technical issue with the application.'
   },
   {
     id: 'report_complaint',
     label: 'Report / Complaint',
-    icon: '🚨',
+    icon: ShieldAlert,
+    iconColor: 'text-amber-600',
+    iconBg: 'bg-amber-50 border-amber-100',
     description: 'Report fake requests, harassment, or misconduct',
     prompt: 'I want to file a formal complaint or safety report.'
   },
   {
     id: 'my_support',
     label: 'My Support',
-    icon: '📋',
+    icon: ClipboardList,
+    iconColor: 'text-emerald-600',
+    iconBg: 'bg-emerald-50 border-emerald-100',
     description: 'View support tickets, status, and responses',
     prompt: null
   }
@@ -105,7 +113,7 @@ export default function UserSupport() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: `👋 **Hi ${user?.primaryName || user?.name || 'there'}!** I am your **Support AI** assistant.\n\nI can help you with:\n- **Blood Donation**: Guidelines, eligibility, blood compatibility.\n- **Technical Support**: Login, OTP, GPS, profile, or app issues.\n- **Complaints & Safety**: Reporting fake requests, suspicious activity, or misconduct.\n\nHow can I help you today? (English, മലയാളം, or Manglish supported)`
+      text: `**Hello ${user?.primaryName || user?.name || 'there'}!** I am your **Support AI** assistant.\n\nI can help you with:\n- **Blood Donation**: Guidelines, eligibility, blood compatibility.\n- **Technical Support**: Login, OTP, GPS, profile, or app issues.\n- **Complaints & Safety**: Reporting fake requests, suspicious activity, or misconduct.\n\nHow can I help you today? (English, മലയാളം, or Manglish supported)`
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -318,25 +326,32 @@ export default function UserSupport() {
 
       {/* ─── 2. 4 QUICK ACTION CARDS ─── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {QUICK_ACTIONS.map((action) => (
-          <button
-            key={action.id}
-            type="button"
-            onClick={() => handleQuickAction(action)}
-            className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-left transition cursor-pointer shadow-2xs space-y-1 group"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-base">{action.icon}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5" />
-            </div>
-            <div className="text-xs font-bold text-slate-900 group-hover:text-red-600 transition-colors">
-              {action.label}
-            </div>
-            <p className="text-[10px] text-slate-500 leading-tight line-clamp-2">
-              {action.description}
-            </p>
-          </button>
-        ))}
+        {QUICK_ACTIONS.map((action) => {
+          const IconComp = action.icon;
+          return (
+            <button
+              key={action.id}
+              type="button"
+              onClick={() => handleQuickAction(action)}
+              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-left transition cursor-pointer shadow-2xs space-y-2 group"
+            >
+              <div className="flex items-center justify-between">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${action.iconBg} ${action.iconColor} transition-transform group-hover:scale-105`}>
+                  <IconComp className="w-4 h-4" />
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-red-600 transition-colors">
+                  {action.label}
+                </div>
+                <p className="text-[10px] text-slate-500 leading-tight line-clamp-2 mt-0.5">
+                  {action.description}
+                </p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* ─── 3. TAB 1: SUPPORT AI CHAT ─── */}
