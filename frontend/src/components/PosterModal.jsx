@@ -205,16 +205,16 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
               {/* ------------------------------------------------------------
                   A. MAIN WHITE CARD DYNAMIC CONTENT
-                  (Fitted cleanly inside the white rounded box: Left ~13.8%, Width ~47.0%, Top ~31.8%, Height ~32.6%)
+                  (Shifted slightly right to left: 17.2% to completely clear hand/fingers)
                  ------------------------------------------------------------ */}
               <div
                 className="absolute flex flex-col justify-between overflow-hidden"
                 style={{
-                  top: '31.8%',
-                  left: '13.8%',
-                  width: '47.0%',
-                  height: '32.6%',
-                  padding: '7px 10px 8px 10px',
+                  top: '32.2%',
+                  left: '17.2%',
+                  width: '43.2%',
+                  height: '32.2%',
+                  padding: '6px 8px 6px 8px',
                 }}
               >
                 {/* 1. Blood Group Header Row */}
@@ -222,19 +222,19 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
                   {/* Blood Group Red Rounded Box */}
                   <div
                     className="bg-[#d31818] rounded-xl text-white flex items-center justify-center shrink-0 shadow-sm"
-                    style={{ width: '56px', height: '36px' }}
+                    style={{ width: '58px', height: '38px' }}
                   >
-                    <span className="text-[20px] font-black tracking-tight leading-none">
+                    <span className="text-[21px] font-black tracking-tight leading-none">
                       {bloodGroup}
                     </span>
                   </div>
 
                   {/* BLOOD NEEDED Bold Text */}
                   <div className="leading-tight">
-                    <div className="text-[13px] font-black text-[#d31818] tracking-tight leading-none">
+                    <div className="text-[13.5px] font-black text-[#d31818] tracking-tight leading-none">
                       BLOOD
                     </div>
-                    <div className="text-[13px] font-black text-[#d31818] tracking-tight leading-none mt-0.5">
+                    <div className="text-[13.5px] font-black text-[#d31818] tracking-tight leading-none mt-0.5">
                       NEEDED
                     </div>
                   </div>
@@ -242,10 +242,10 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
                 {/* 2. Patient Name Section */}
                 <div className="pt-0.5">
-                  <div className="text-[8.5px] font-medium text-slate-500 leading-none">
+                  <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wide leading-none">
                     Patient
                   </div>
-                  <div className="text-[17px] font-black text-[#0f172a] tracking-tight leading-tight truncate mt-0.5">
+                  <div className="text-[18px] font-black text-[#0f172a] tracking-tight leading-tight truncate mt-0.5">
                     {patientName}
                   </div>
                 </div>
@@ -255,10 +255,10 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
                 {/* 3. Hospital Section */}
                 <div>
-                  <div className="text-[8.5px] font-medium text-slate-500 leading-none">
+                  <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wide leading-none">
                     Hospital
                   </div>
-                  <div className="text-[11px] font-bold text-[#0f172a] flex items-center gap-1 mt-0.5 tracking-tight truncate">
+                  <div className="text-[11.5px] font-bold text-[#0f172a] flex items-center gap-1 mt-0.5 tracking-tight truncate">
                     <MapPin className="w-3 h-3 text-slate-700 shrink-0 inline-block fill-slate-700/20" />
                     <span className="truncate">{hospital}</span>
                   </div>
@@ -271,21 +271,21 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
                 <div className="flex items-center justify-between gap-1">
                   {/* Contact Number */}
                   <div className="min-w-0 flex-1">
-                    <div className="text-[8.5px] font-medium text-slate-500 leading-none">
+                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wide leading-none">
                       Contact
                     </div>
-                    <div className="text-[13px] font-black text-[#d31818] flex items-center gap-1 mt-0.5 font-mono tracking-tight leading-none truncate">
+                    <div className="text-[13.5px] font-black text-[#d31818] flex items-center gap-1.5 mt-0.5 tracking-tight leading-none truncate">
                       <Phone className="w-3 h-3 text-slate-800 fill-slate-800 shrink-0" />
                       <span className="truncate">{phone}</span>
                     </div>
                   </div>
 
                   {/* Vertical Divider */}
-                  <div className="h-5 w-[1px] bg-slate-200/90 shrink-0 mx-0.5"></div>
+                  <div className="h-5 w-[1px] bg-slate-200/90 shrink-0 mx-1"></div>
 
                   {/* Units Red Rounded Badge */}
-                  <div className="bg-[#d31818] text-white px-2 py-1 rounded-lg shadow-xs shrink-0 flex items-center justify-center">
-                    <span className="text-[9.5px] font-black tracking-wide leading-none whitespace-nowrap">
+                  <div className="bg-[#d31818] text-white px-2.5 py-1 rounded-xl shadow-xs shrink-0 flex items-center justify-center">
+                    <span className="text-[10px] font-black tracking-wide leading-none whitespace-nowrap">
                       {unitsText}
                     </span>
                   </div>
