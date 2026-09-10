@@ -74,28 +74,28 @@ export default function MascotVideo({ showBubble = true, className = "" }) {
       {/* Speech bubble */}
       {showBubble && (
         <motion.div
-          className="absolute -top-[55px] sm:-top-[62px] left-[32%] sm:left-[28%] -translate-x-1/2 z-30 pointer-events-none w-max drop-shadow-md"
-          animate={{ y: [0, -4, 0] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-[102%] right-0 sm:right-2 z-30 pointer-events-none w-max drop-shadow-md mb-1"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         >
           <AnimatePresence mode="wait">
             <motion.div
               key={msgIdx}
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -5, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className="relative bg-white/95 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex flex-col items-center whitespace-nowrap cursor-pointer pointer-events-auto border border-slate-100 shadow-md"
+              exit={{ opacity: 0, y: -4, scale: 0.95 }}
+              transition={{ duration: 0.25 }}
+              className="relative bg-white/95 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex flex-col items-center whitespace-nowrap cursor-pointer pointer-events-auto border border-red-100 shadow-md shadow-red-500/10"
             >
-              <p className="text-[12px] sm:text-[13px] font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1">
+              <p className="text-[11.5px] sm:text-[12.5px] font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1">
                 {creativeMessages[msgIdx]}
               </p>
               <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 px-2.5 py-0.5 rounded-full shadow-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <span className="text-[9px] font-bold text-white tracking-wider">CLICK TO CHAT</span>
               </div>
-              {/* Tail */}
-              <div className="absolute -bottom-[7px] right-5 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-white" />
+              {/* Tail pointing down to mascot */}
+              <div className="absolute -bottom-[7px] right-8 sm:right-10 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
             </motion.div>
           </AnimatePresence>
         </motion.div>

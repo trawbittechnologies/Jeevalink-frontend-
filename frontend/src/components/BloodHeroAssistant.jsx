@@ -197,226 +197,252 @@ export default function BloodHeroAssistant() {
         onClose={() => setIsCommunityModalOpen(false)}
       />
 
-      <div className={`fixed bottom-0 right-0 z-[9990] flex flex-col items-end pointer-events-none select-none ${isOpen ? 'inset-0 sm:inset-auto' : ''}`}>
-        <AnimatePresence>
-          {/* Expanded Assistant Chatbox Dialog */}
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-              className="pointer-events-auto fixed inset-0 sm:static sm:inset-auto w-full h-[100dvh] sm:w-[410px] sm:h-[540px] sm:max-h-[85vh] sm:rounded-3xl bg-white sm:bg-white/95 sm:backdrop-blur-xl border-0 sm:border sm:border-slate-200/90 shadow-2xl sm:shadow-slate-900/20 overflow-hidden flex flex-col z-[9999] sm:z-auto sm:mb-2 sm:mr-3"
-            >
-              {/* Creative Glass Header */}
-              <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-4 text-white flex items-center justify-between shrink-0 shadow-md pt-[max(1rem,env(safe-area-inset-top))]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/40 shadow-md flex items-center justify-center bg-white">
-                    <img src="/hemo_avatar.png" alt="Hemo Profile" className="w-full h-full object-cover" />
+      {/* ── Fixed Assistant Chatbox Dialog (Cleanly Anchored at bottom-right) ── */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 16 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            className="fixed inset-0 sm:inset-auto sm:bottom-5 sm:right-5 z-[9999] w-full h-[100dvh] sm:w-[390px] sm:h-[580px] sm:max-h-[min(88vh,620px)] sm:rounded-3xl bg-white shadow-2xl sm:shadow-slate-900/25 border-0 sm:border sm:border-slate-200/90 overflow-hidden flex flex-col select-text"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 px-4 py-3.5 sm:py-3 text-white flex items-center justify-between shrink-0 shadow-md pt-[max(0.875rem,env(safe-area-inset-top))]">
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 border-white/60 shadow-md flex items-center justify-center bg-white">
+                    <img src="/hemo_avatar.png" alt="Hemo Avatar" className="w-full h-full object-cover" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-black tracking-tight">Hemo</h3>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 border border-emerald-300/30 text-emerald-100 px-2 py-0.5 rounded-full">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Online
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-red-100 font-medium">iDonate Blood Companion</p>
-                  </div>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full animate-pulse" />
                 </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={handleClearChat}
-                    title="Reset Chat"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white/90 transition-all cursor-pointer"
-                  >
-                    <RotateCcw className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsOpen(false)}
-                    title="Close"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white/90 transition-all cursor-pointer ml-1"
-                  >
-                    <X className="w-5 h-5 sm:w-4 sm:h-4" />
-                  </button>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-sm font-black tracking-tight leading-none">Hemo</h3>
+                    <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full leading-none">
+                      AI Companion
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-red-100 font-medium mt-0.5">iDonate Blood Network</p>
                 </div>
               </div>
 
-              {/* Chatbox Body */}
-              <div className="p-4 space-y-4 overflow-y-auto overscroll-contain flex-1 text-xs bg-slate-50/50 scrollbar-thin">
-                {/* Quick Topic Prompts */}
-                {messages.length <= 2 && (
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Suggested Questions</p>
-                    <div className="grid grid-cols-1 gap-1.5">
-                      {SUGGESTED_PROMPTS.map((prompt, pIdx) => (
-                        <button
-                          key={pIdx}
-                          type="button"
-                          onClick={() => handleSendMessage(prompt.query)}
-                          className="w-full text-left p-3 sm:p-2.5 rounded-xl bg-white hover:bg-red-50/60 active:bg-red-100/60 border border-slate-200/70 hover:border-red-200 text-slate-700 hover:text-red-700 font-semibold text-[12px] sm:text-[11px] transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
-                        >
-                          <span>{prompt.label}</span>
-                          <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Conversation History */}
-                <div className="space-y-3 pt-1">
-                  {messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[88%] sm:max-w-[85%] p-3.5 rounded-2xl shadow-2xs ${msg.sender === 'user'
-                          ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-tr-xs'
-                          : msg.isError
-                            ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-tl-xs'
-                            : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs'
-                          }`}
-                      >
-                        <div className="text-[13px] sm:text-[12px] whitespace-pre-wrap leading-relaxed">
-                          {msg.sender === 'assistant' ? renderFormattedText(msg.text) : msg.text}
-                        </div>
-
-                        {/* Language Selection Buttons after first AI reply */}
-                        {msg.sender === 'assistant' && idx === 2 && !languageSelected && (
-                          <div className="mt-3 flex gap-2 pt-2 border-t border-slate-100">
-                            <button
-                              onClick={() => handleLanguageSelect('Malayalam')}
-                              className="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-[11px] font-bold transition-all shadow-sm"
-                            >
-                              മലയാളം
-                            </button>
-                            <button
-                              onClick={() => handleLanguageSelect('English')}
-                              className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all shadow-sm"
-                            >
-                              English
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {isThinking && (
-                    <div className="flex justify-start">
-                      <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 text-slate-600 rounded-tl-xs shadow-2xs flex items-center gap-2.5">
-                        <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
-                        <span className="text-[12px] sm:text-[11px] font-semibold text-slate-700">Hemo is typing...</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
-              </div>
-
-              {/* Quick Action Navigation Links */}
-              <div className="px-3 py-2 bg-slate-100/70 border-t border-slate-200/60 flex items-center justify-between gap-2 shrink-0">
-                {user?.role === 'user' ? (
-                  <button
-                    type="button"
-                    onClick={() => handleAction('/donor/eligibility')}
-                    className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-emerald-50 active:bg-emerald-100 border border-slate-200 text-slate-700 hover:text-emerald-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-emerald-600" />
-                    <span>Eligibility</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleAction('/donor/search')}
-                    className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200 text-slate-700 hover:text-red-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                  >
-                    <Search className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
-                    <span>Find Donors</span>
-                  </button>
-                )}
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => handleAction('/requests')}
-                  className="flex-1 py-2 sm:py-1.5 px-3 rounded-lg bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200 text-slate-700 hover:text-red-600 text-[11px] sm:text-[10px] font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  onClick={handleClearChat}
+                  title="Reset Chat"
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all cursor-pointer"
                 >
-                  <Droplets className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
-                  <span>Blood Requests</span>
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  title="Close"
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
+            </div>
 
-              {/* Chat Input Form */}
-              <div className="p-3 border-t border-slate-200/80 bg-white shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }}
-                  className="flex items-center gap-2"
+            {/* Chatbox Messages Body */}
+            <div className="p-4 space-y-3.5 overflow-y-auto overscroll-contain flex-1 text-xs bg-slate-50/70 scrollbar-thin">
+              {/* Quick Topic Prompts if few messages */}
+              {messages.length <= 2 && (
+                <div className="space-y-1.5 mb-2">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
+                    Suggested Topics
+                  </p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {SUGGESTED_PROMPTS.map((prompt, pIdx) => (
+                      <button
+                        key={pIdx}
+                        type="button"
+                        onClick={() => handleSendMessage(prompt.query)}
+                        className="w-full text-left p-2.5 rounded-xl bg-white hover:bg-red-50/60 active:bg-red-100/60 border border-slate-200/80 hover:border-red-200 text-slate-700 hover:text-red-700 font-semibold text-[11.5px] transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
+                      >
+                        <span className="truncate">{prompt.label}</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5 shrink-0 ml-2" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Messages List */}
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <input
-                    type="text"
-                    value={inputQuery}
-                    onChange={(e) => setInputQuery(e.target.value)}
-                    placeholder="Ask Hemo about blood donation..."
-                    className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!inputQuery.trim() || isThinking}
-                    className="p-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-95 cursor-pointer shrink-0"
+                  {msg.sender === 'assistant' && (
+                    <img
+                      src="/hemo_avatar.png"
+                      alt="Hemo"
+                      className="w-6 h-6 rounded-full object-cover border border-red-200 shrink-0 mb-1"
+                    />
+                  )}
+                  <div
+                    className={`max-w-[85%] p-3.5 rounded-2xl shadow-2xs ${
+                      msg.sender === 'user'
+                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-br-xs'
+                        : msg.isError
+                          ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-bl-xs'
+                          : 'bg-white text-slate-800 border border-slate-200/90 rounded-bl-xs'
+                    }`}
                   >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    <div className="text-[12.5px] whitespace-pre-wrap leading-relaxed">
+                      {msg.sender === 'assistant' ? renderFormattedText(msg.text) : msg.text}
+                    </div>
 
-        {/* Floating Mascot Trigger Button */}
-        <div className={`relative pointer-events-auto flex items-center gap-3 ${isOpen ? 'hidden sm:flex' : 'flex'}`}>
-          <AnimatePresence>
-            {showTooltip && !isOpen && (
+                    {/* Language buttons */}
+                    {msg.sender === 'assistant' && idx === 2 && !languageSelected && (
+                      <div className="mt-3 flex gap-2 pt-2 border-t border-slate-100">
+                        <button
+                          onClick={() => handleLanguageSelect('Malayalam')}
+                          className="px-3 py-1 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-xs"
+                        >
+                          മലയാളം
+                        </button>
+                        <button
+                          onClick={() => handleLanguageSelect('English')}
+                          className="px-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-xs"
+                        >
+                          English
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Typing indicator with 3 bouncing dots */}
+              {isThinking && (
+                <div className="flex items-end gap-2">
+                  <img
+                    src="/hemo_avatar.png"
+                    alt="Hemo"
+                    className="w-6 h-6 rounded-full object-cover border border-red-200 shrink-0 mb-1"
+                  />
+                  <div className="bg-white border border-slate-200/90 rounded-2xl rounded-bl-xs px-3.5 py-2.5 shadow-2xs flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" />
+                    <span className="text-[11px] font-medium text-slate-500 ml-1">Hemo is typing...</span>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Quick Action Shortcuts Bar */}
+            <div className="px-3 py-2 bg-slate-100/80 border-t border-slate-200/70 flex items-center justify-between gap-2 shrink-0">
+              {user?.role === 'user' ? (
+                <button
+                  type="button"
+                  onClick={() => handleAction('/donor/eligibility')}
+                  className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-emerald-50 active:bg-emerald-100 border border-slate-200/80 text-slate-700 hover:text-emerald-700 text-[10.5px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Eligibility</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleAction('/donor/search')}
+                  className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200/80 text-slate-700 hover:text-red-700 text-[10.5px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                >
+                  <Search className="w-3.5 h-3.5 text-red-600" />
+                  <span>Find Donors</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleAction('/requests')}
+                className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200/80 text-slate-700 hover:text-red-700 text-[10.5px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+              >
+                <Droplets className="w-3.5 h-3.5 text-red-600" />
+                <span>Blood Requests</span>
+              </button>
+            </div>
+
+            {/* Chat Input Form */}
+            <div className="p-3 border-t border-slate-200/80 bg-white shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  value={inputQuery}
+                  onChange={(e) => setInputQuery(e.target.value)}
+                  placeholder="Ask Hemo about blood donation..."
+                  className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:bg-white transition-all font-medium"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputQuery.trim() || isThinking}
+                  className="p-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-95 cursor-pointer shrink-0"
+                  aria-label="Send message"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Floating Mascot Trigger Button (Visible only when chat is closed) ── */}
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-1 right-1 sm:bottom-3 sm:right-3 z-[9990] flex items-end select-none"
+          >
+            {showTooltip && (
               <motion.div
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl border border-slate-800 flex items-center gap-2 whitespace-nowrap"
+                className="bg-slate-900/95 backdrop-blur-md text-white text-xs font-semibold px-3.5 py-2 rounded-2xl shadow-xl border border-slate-800 flex items-center gap-2 whitespace-nowrap mb-8 mr-[-10px] z-10"
               >
                 <span>Chat with Hemo</span>
                 <button
                   type="button"
                   onClick={() => setShowTooltip(false)}
-                  className="text-slate-400 hover:text-white ml-1 cursor-pointer"
+                  className="text-slate-400 hover:text-white cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </motion.div>
             )}
-          </AnimatePresence>
 
-          <motion.button
-            type="button"
-            onClick={() => {
-              setIsOpen(!isOpen);
-              setShowTooltip(false);
-            }}
-            whileTap={{ scale: 0.95 }}
-            whileHover={{ scale: 1.03 }}
-            className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-xl w-[170px] h-[145px] sm:w-[200px] sm:h-[170px] transition-transform"
-          >
-            <MascotVideo showBubble={!isOpen} />
-          </motion.button>
-        </div>
-      </div>
+            <motion.button
+              type="button"
+              onClick={() => {
+                setIsOpen(true);
+                setShowTooltip(false);
+              }}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-xl w-[150px] h-[130px] sm:w-[175px] sm:h-[150px] transition-transform"
+              aria-label="Open AI Blood Assistant"
+            >
+              <MascotVideo showBubble={true} />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
