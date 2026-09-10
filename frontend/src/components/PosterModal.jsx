@@ -322,7 +322,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               <div
                 className="absolute flex items-center justify-center text-center select-none pointer-events-none"
                 style={{
-                  top: '66.2%',
+                  top: '68.5%',
                   left: '15.0%',
                   width: '70.0%',
                 }}
@@ -344,22 +344,18 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               </div>
 
               {/* ------------------------------------------------------------
-                  D. TIMESTAMP (Clean text without background box)
+                  D. CREATED DATE & TIME (Bottom Left in White Area of Poster)
                  ------------------------------------------------------------ */}
               <div
-                className="absolute flex items-center justify-center text-center select-none pointer-events-none"
+                className="absolute select-none pointer-events-none"
                 style={{
-                  top: '72.4%',
-                  left: '20.0%',
-                  width: '60.0%',
+                  bottom: '2.0%',
+                  left: '4.5%',
                 }}
               >
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-sm"></span>
-                  <span className="text-[7.5px] font-semibold text-teal-100/90 whitespace-nowrap leading-none tracking-wide drop-shadow-sm">
-                    {timestampText}
-                  </span>
-                </div>
+                <span className="text-[6.8px] font-semibold text-slate-400 tracking-wide">
+                  {timestampText}
+                </span>
               </div>
 
             </div>
