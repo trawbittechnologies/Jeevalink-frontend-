@@ -394,7 +394,7 @@ export default function Landing() {
                   {awarenessSettings?.quoteTitle || "“In critical emergency moments, one voluntary donor’s courage turns fear into hope for an entire family.”"}
                 </blockquote>
                 <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-                  {awarenessSettings?.quoteDescription || "Every second counts when a patient requires blood. iDonate connects you directly with verified voluntary donors and regional coordinators across Kasaragod."}
+                  {awarenessSettings?.quoteDescription || "Every second counts when a patient requires blood. JeevaLink connects you directly with verified voluntary donors and regional coordinators across Kerala."}
                 </p>
               </div>
 
