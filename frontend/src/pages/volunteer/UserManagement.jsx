@@ -1347,12 +1347,15 @@ export default function UserManagement() {
         onConfirm={async () => {
           if (!confirmModal.item) return;
           setLoading(true);
-          await deleteUser(confirmModal.item._id || confirmModal.item.id);
+          const res = await deleteUser(confirmModal.item._id || confirmModal.item.id);
+          if (res?.success) {
+            await fetchUsers();
+          }
           setLoading(false);
           setConfirmModal({ open: false, item: null });
         }}
         title="Delete User Account"
-        message={`Are you sure you want to permanently delete user "${confirmModal.item?.primaryName || confirmModal.item?.name || 'this user'}"? This action cannot be undone.`}
+        message={`Are you sure you want to permanently delete user "${confirmModal.item?.primaryName || confirmModal.item?.primary_name || confirmModal.item?.name || 'this user'}"? This action cannot be undone.`}
         confirmLabel="Delete Permanently"
         variant="danger"
       />
