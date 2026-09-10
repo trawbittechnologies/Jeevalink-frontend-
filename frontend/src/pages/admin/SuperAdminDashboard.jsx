@@ -141,28 +141,34 @@ export default function SuperAdminDashboard() {
     e.preventDefault();
     setSavingAwareness(true);
 
-    const formData = new FormData();
-    if (videoFile) {
-      formData.append('video_file', videoFile);
-    } else if (awarenessForm.videoUrl) {
-      formData.append('video_url', awarenessForm.videoUrl);
+    try {
+      const formData = new FormData();
+      if (videoFile) {
+        formData.append('video_file', videoFile);
+      } else if (awarenessForm.videoUrl) {
+        formData.append('video_url', awarenessForm.videoUrl);
+      }
+
+      if (posterFile) {
+        formData.append('poster_file', posterFile);
+      } else if (awarenessForm.posterUrl) {
+        formData.append('poster_url', awarenessForm.posterUrl);
+      }
+
+      formData.append('badge_text', awarenessForm.badgeText || '');
+      formData.append('quote_title', awarenessForm.quoteTitle || '');
+      formData.append('quote_description', awarenessForm.quoteDescription || '');
+      formData.append('button_label', awarenessForm.buttonLabel || '');
+
+      const res = await updateAwarenessSettings(formData);
+      if (res?.success) {
+        setVideoFile(null);
+        setPosterFile(null);
+        await fetchAwarenessSettings();
+      }
+    } finally {
+      setSavingAwareness(false);
     }
-
-    if (posterFile) {
-      formData.append('poster_file', posterFile);
-    } else if (awarenessForm.posterUrl) {
-      formData.append('poster_url', awarenessForm.posterUrl);
-    }
-
-    formData.append('badge_text', awarenessForm.badgeText);
-    formData.append('quote_title', awarenessForm.quoteTitle);
-    formData.append('quote_description', awarenessForm.quoteDescription);
-    formData.append('button_label', awarenessForm.buttonLabel);
-
-    await updateAwarenessSettings(formData);
-    setSavingAwareness(false);
-    setVideoFile(null);
-    setPosterFile(null);
   };
 
   const loadData = useCallback(async () => {
