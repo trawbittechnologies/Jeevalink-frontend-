@@ -186,7 +186,6 @@ export const useAuthStore = create((set, get) => ({
         .map(s => s.trim())
         .filter(Boolean)));
 
-      const cleanFullName = nameParts.length > 0 ? nameParts.join(' & ') : 'Volunteer';
       const cleanP1 = nameParts[0] || rawP1;
       const cleanP2 = nameParts[1] || rawP2;
 
@@ -197,8 +196,10 @@ export const useAuthStore = create((set, get) => ({
         person1Contact: p1Contact,
         person2Name: cleanP2,
         person2Contact: p2Contact,
-        primary_name: cleanFullName,
+        primary_name: cleanP1,
+        name: cleanP1,
         mobile: p1Contact,
+        secondary_name: cleanP2,
         secondaryName: cleanP2,
         secondaryContactNumber: p2Contact,
         secondary_phone: p2Contact,
@@ -240,7 +241,6 @@ export const useAuthStore = create((set, get) => ({
         .map(s => s.trim())
         .filter(Boolean)));
 
-      const cleanFullName = nameParts.length > 0 ? nameParts.join(' & ') : 'Volunteer';
       const cleanP1 = nameParts[0] || rawP1;
       const cleanP2 = nameParts[1] || rawP2;
 
@@ -250,8 +250,10 @@ export const useAuthStore = create((set, get) => ({
         person1Contact: p1Contact,
         person2Name: cleanP2,
         person2Contact: p2Contact,
-        primary_name: cleanFullName,
+        primary_name: cleanP1,
+        name: cleanP1,
         mobile: p1Contact,
+        secondary_name: cleanP2,
         secondaryName: cleanP2,
         secondaryContactNumber: p2Contact,
         email: volunteerData.email,
