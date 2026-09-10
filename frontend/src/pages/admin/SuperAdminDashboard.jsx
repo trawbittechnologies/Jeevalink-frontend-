@@ -4,7 +4,7 @@ import {
   ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
   UserCheck, BarChart3, TrendingUp, Search, Phone,
   Droplets, Flame, CheckCircle2, Award, ArrowUpRight,
-  Trophy, Crown, Medal, Sparkles
+  Trophy
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
