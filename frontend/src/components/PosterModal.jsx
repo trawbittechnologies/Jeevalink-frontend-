@@ -1,102 +1,9 @@
 import { useRef, useState } from 'react';
-import { X, Download, Share2, RefreshCw } from 'lucide-react';
+import { X, Download, Share2, RefreshCw, MapPin, Phone, Users, Calendar } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import posterTemplate from '../assets/poster-template.png';
 import { useAuthStore } from '../store/authStore';
 
-const POSTER_CONFIG = {
-  patientName: {
-    top: '45mm',
-    left: '34.2mm',
-    fontSize: '4.6mm',
-    color: '#0f172a',
-    fontWeight: '900',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    letterSpacing: '-0.02em',
-    width: '36mm',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center',
-    lineHeight: '1.15'
-  },
-  hospital: {
-    top: '53.8mm',
-    left: '34.2mm',
-    fontSize: '2.8mm',
-    color: '#334155',
-    fontWeight: '700',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    letterSpacing: '0.01em',
-    width: '36mm',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center',
-    lineHeight: '1.25'
-  },
-  phone: {
-    top: '63.2mm',
-    left: '34.2mm',
-    fontSize: '4.2mm',
-    color: '#dc2626',
-    fontWeight: '900',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    letterSpacing: '0.04em',
-    width: '36mm',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center'
-  },
-  bloodGroup: {
-    top: '53mm',
-    left: '67.2mm',
-    fontSize: '7.8mm',
-    color: '#dc2626',
-    fontWeight: '900',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    letterSpacing: '-0.03em',
-    width: '22mm',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center',
-    lineHeight: '1',
-    textShadow: 'none'
-  },
-  units: {
-    top: '68.5mm',
-    left: '67.8mm',
-    fontSize: '3.4mm',
-    color: '#ffffff',
-    fontWeight: '900',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    letterSpacing: '0.04em',
-    width: '28mm',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center',
-    lineHeight: '1',
-    textShadow: '0px 1px 4px rgba(0,0,0,0.9), 0px 0px 6px rgba(0,0,0,0.7)',
-    textTransform: 'uppercase'
-  },
-  location: {
-    top: '81.5mm',
-    left: '45mm',
-    fontSize: '3.0mm',
-    color: '#ffffff',
-    fontWeight: '900',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    textTransform: 'uppercase',
-    letterSpacing: '0.12em',
-    width: '80mm',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center',
-    textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.6)'
-  },
-  generatedAt: {
-    top: '88.5mm',
-    left: '45mm',
-    fontSize: '1.9mm',
-    color: '#ffffff',
-    fontWeight: '700',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    letterSpacing: '0.04em',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center',
-    background: 'rgba(15, 23, 42, 0.65)',
 export function formatMeghalaCommittee(raw) {
   if (!raw || typeof raw !== 'string') return 'TEST MEGHALA COMMITTEE';
   const clean = raw.trim();
@@ -180,7 +87,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   const bloodGroup = (posterData.blood_group || posterData.bloodGroup || 'B+').toUpperCase();
   const rawUnits = posterData.units_required || posterData.unitsRequired || '2';
   const unitsNumber = String(rawUnits).replace(/\D/g, '') || '2';
-  const unitsText = `${unitsNumber} UNIT${Number(unitsNumber) > 1 ? 'S' : ''}`;
+  const unitsText = `${unitsNumber} UNITS`;
 
   const rawLocation =
     posterData.meghala_committee_name ||
@@ -250,43 +157,266 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   };
 
   return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto select-none">
+      <div className="bg-slate-900 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl relative text-white border border-slate-800 animate-in fade-in zoom-in duration-200">
 
-            {/* Background Template */}
+        {/* Modal Header & Close */}
+        <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-800">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Generated Blood Request Poster
+            </h2>
+            <p className="text-[11px] text-slate-400">Preview with live dynamic patient data</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* POSTER VIEWPORT CONTAINER */}
+        <div className="mx-auto w-full flex justify-center items-center rounded-2xl overflow-hidden shadow-2xl border border-teal-900/60 bg-[#072422]">
+          
+          {/* ============================================================
+              MASTER POSTER CONTAINER (Matching 992 x 1280 Template Aspect Ratio)
+             ============================================================ */}
+          <div
+            ref={posterRef}
+            className="relative bg-white shrink-0 overflow-hidden select-none"
+            style={{
+              width: '400px',
+              height: '516px',
+              fontFamily: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+            }}
+          >
+            {/* 1. Base Template Image (Preserved exactly) */}
             <img
               src={posterTemplate}
-              alt="Blood Request Poster Template"
-              className="w-full h-full object-cover block"
+              alt="Poster Template"
+              className="w-full h-full object-cover block absolute inset-0 pointer-events-none"
               crossOrigin="anonymous"
             />
 
-            {/* Dynamic Text Overlay */}
+            {/* 2. DYNAMIC CONTENT OVERLAY */}
             <div className="absolute inset-0 z-10 pointer-events-none">
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.patientName }}>{patientName}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.hospital }}>{hospital}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.phone }}>{phone}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.bloodGroup }}>{bloodGroup}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.units }}>{unitsText}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.location }}>{location}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.generatedAt }}>{generatedTimeText}</span>
+
+              {/* ------------------------------------------------------------
+                  A. MAIN WHITE CARD DYNAMIC CONTENT
+                  (Matches the white rounded rectangle on the template)
+                 ------------------------------------------------------------ */}
+              <div
+                className="absolute flex flex-col justify-between"
+                style={{
+                  top: '32.0%',
+                  left: '14.2%',
+                  width: '56.8%',
+                  height: '35.8%',
+                  padding: '7px 12px 10px 12px',
+                }}
+              >
+                {/* 1. Blood Group Header Row */}
+                <div className="flex items-center gap-2.5 pt-0.5">
+                  {/* Blood Group Red Rounded Box */}
+                  <div
+                    className="bg-[#d31818] rounded-2xl text-white flex items-center justify-center shrink-0 shadow-sm"
+                    style={{ width: '78px', height: '46px' }}
+                  >
+                    <span className="text-[25px] font-black tracking-tight leading-none">
+                      {bloodGroup}
+                    </span>
+                  </div>
+
+                  {/* BLOOD NEEDED Bold Text */}
+                  <div className="leading-tight">
+                    <div className="text-[17px] font-black text-[#d31818] tracking-tight leading-none">
+                      BLOOD
+                    </div>
+                    <div className="text-[17px] font-black text-[#d31818] tracking-tight leading-none mt-0.5">
+                      NEEDED
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Patient Name Section */}
+                <div className="pt-1">
+                  <div className="text-[10px] font-medium text-slate-500 leading-none">
+                    Patient
+                  </div>
+                  <div className="text-[22px] font-black text-[#0f172a] tracking-tight leading-tight truncate mt-0.5">
+                    {patientName}
+                  </div>
+                </div>
+
+                {/* Thin Divider */}
+                <div className="h-[1px] bg-slate-200/90 w-full my-0.5"></div>
+
+                {/* 3. Hospital Section */}
+                <div>
+                  <div className="text-[10px] font-medium text-slate-500 leading-none">
+                    Hospital
+                  </div>
+                  <div className="text-[12.5px] font-bold text-[#0f172a] flex items-center gap-1 mt-0.5 tracking-tight truncate">
+                    <MapPin className="w-3.5 h-3.5 text-slate-700 shrink-0 inline-block fill-slate-700/20" />
+                    <span className="truncate">{hospital}</span>
+                  </div>
+                </div>
+
+                {/* Thin Divider */}
+                <div className="h-[1px] bg-slate-200/90 w-full my-0.5"></div>
+
+                {/* 4. Contact & Units Row */}
+                <div className="flex items-center justify-between gap-1 pb-0.5">
+                  {/* Contact Number */}
+                  <div>
+                    <div className="text-[10px] font-medium text-slate-500 leading-none">
+                      Contact
+                    </div>
+                    <div className="text-[16.5px] font-black text-[#d31818] flex items-center gap-1.5 mt-0.5 font-mono tracking-tight leading-none">
+                      <Phone className="w-3.5 h-3.5 text-slate-800 fill-slate-800 shrink-0" />
+                      <span>{phone}</span>
+                    </div>
+                  </div>
+
+                  {/* Vertical Divider */}
+                  <div className="h-6 w-[1px] bg-slate-200/90 mx-1"></div>
+
+                  {/* Units Red Rounded Badge */}
+                  <div className="bg-[#d31818] text-white px-2.5 py-1.5 rounded-xl shadow-xs shrink-0 flex items-center justify-center">
+                    <span className="text-[11.5px] font-black tracking-wide leading-none whitespace-nowrap">
+                      {unitsText}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ------------------------------------------------------------
+                  B. BLOOD BAG LABEL DYNAMIC CONTENT
+                  (Centered over the white label on the blood bag image)
+                 ------------------------------------------------------------ */}
+              <div
+                className="absolute flex flex-col items-center justify-between text-center"
+                style={{
+                  top: '43.2%',
+                  left: '68.0%',
+                  width: '11.8%',
+                  height: '7.8%',
+                  padding: '2px 0',
+                }}
+              >
+                {/* Red Droplet Icon */}
+                <div className="w-3 h-3 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="#d31818" className="w-full h-full">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                  </svg>
+                </div>
+
+                {/* GIVE BLOOD GIVE LIFE Text */}
+                <div className="leading-[1.05] text-[#334155]">
+                  <div className="text-[5.5px] font-black tracking-wider uppercase">GIVE</div>
+                  <div className="text-[5.5px] font-black tracking-wider uppercase">BLOOD</div>
+                  <div className="text-[5.5px] font-black tracking-wider uppercase">GIVE LIFE</div>
+                </div>
+
+                {/* Barcode Graphic */}
+                <div className="w-4/5 h-[5px] flex justify-between items-center opacity-85">
+                  <span className="w-[1px] h-full bg-slate-800"></span>
+                  <span className="w-[1.8px] h-full bg-slate-800"></span>
+                  <span className="w-[0.8px] h-full bg-slate-800"></span>
+                  <span className="w-[2.2px] h-full bg-slate-800"></span>
+                  <span className="w-[1px] h-full bg-slate-800"></span>
+                  <span className="w-[1.6px] h-full bg-slate-800"></span>
+                  <span className="w-[0.8px] h-full bg-slate-800"></span>
+                  <span className="w-[1.8px] h-full bg-slate-800"></span>
+                  <span className="w-[1px] h-full bg-slate-800"></span>
+                </div>
+              </div>
+
+              {/* ------------------------------------------------------------
+                  C. COMMITTEE SECTION (Dark Translucent Bar)
+                 ------------------------------------------------------------ */}
+              <div
+                className="absolute flex items-center justify-center"
+                style={{
+                  top: '72.3%',
+                  left: '24.8%',
+                  width: '50.6%',
+                  height: '5.2%',
+                }}
+              >
+                <div className="w-full h-full bg-[#053733]/90 backdrop-blur-md rounded-2xl border border-teal-400/25 px-3 flex items-center justify-center gap-2.5 shadow-md">
+                  {/* Users Icon */}
+                  <Users className="w-4 h-4 text-white shrink-0 fill-white" />
+
+                  {/* Text */}
+                  <div className="leading-tight text-left min-w-0">
+                    <div className="text-[7.2px] font-semibold text-teal-200/90 tracking-wider uppercase leading-none">
+                      REQUESTED BY
+                    </div>
+                    <div className="text-[9.8px] font-black text-white tracking-wide uppercase truncate leading-snug mt-0.5">
+                      {committeeName}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ------------------------------------------------------------
+                  D. TIMESTAMP PILL
+                 ------------------------------------------------------------ */}
+              <div
+                className="absolute flex items-center justify-center"
+                style={{
+                  top: '79.2%',
+                  left: '32.0%',
+                  width: '36.2%',
+                  height: '2.8%',
+                }}
+              >
+                <div className="w-full h-full bg-[#042825]/90 border border-teal-400/25 rounded-full px-2 flex items-center justify-center gap-1.5 shadow-sm">
+                  <Calendar className="w-2.5 h-2.5 text-teal-300 shrink-0" />
+                  <span className="text-[7.5px] font-medium text-teal-100 whitespace-nowrap leading-none">
+                    Generated: {timestampText}
+                  </span>
+                </div>
+              </div>
+
+              {/* ------------------------------------------------------------
+                  E. RIGHT MOTIVATIONAL SLOGAN
+                 ------------------------------------------------------------ */}
+              <div
+                className="absolute text-right"
+                style={{
+                  top: '82.8%',
+                  right: '5.8%',
+                  width: '20%',
+                }}
+              >
+                <div className="text-[7.2px] font-bold text-teal-100/70 tracking-wider leading-[1.25] uppercase">
+                  A SMALL<br />ACT MAKES<br />A BIG DIFFERENCE
+                </div>
+              </div>
+
             </div>
 
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3 mt-6">
+        {/* Modal Actions */}
+        <div className="flex flex-wrap gap-2.5 mt-4">
           <button
             onClick={handleDownloadPNG}
             disabled={downloading}
-            className="flex-1 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition cursor-pointer text-sm disabled:opacity-50"
+            className="flex-1 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 transition cursor-pointer text-xs sm:text-sm disabled:opacity-50"
           >
             {downloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {downloading ? 'Rendering HD Poster...' : 'Download Poster'}
+            {downloading ? 'Rendering HD Poster...' : 'Download Poster (HD)'}
           </button>
 
           <button
             onClick={handleShare}
-            className="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-2xl transition flex items-center gap-2 text-sm cursor-pointer"
+            className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition flex items-center gap-2 text-xs sm:text-sm cursor-pointer border border-slate-700"
           >
             <Share2 className="w-4 h-4" />
             Share
@@ -297,4 +427,3 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
     </div>
   );
 }
-
