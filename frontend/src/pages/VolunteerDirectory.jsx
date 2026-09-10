@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Search, Phone, User, MessageSquare, MapPin,
   Building2, Copy, PhoneCall,
@@ -9,12 +9,8 @@ import api from '../store/api.js';
 import { useAppStore } from '../store/appStore.js';
 import { getDisplayJeevalinkId } from '../utils/jeevalinkId.js';
 
-// Fallback: Kerala's 14 official districts (shown only if DB returns none)
-const KERALA_DISTRICTS = [
-  'Kasaragod', 'Kannur', 'Wayanad', 'Kozhikode', 'Malappuram',
-  'Palakkad', 'Thrissur', 'Ernakulam', 'Idukki', 'Kottayam',
-  'Alappuzha', 'Pathanamthitta', 'Kollam', 'Thiruvananthapuram',
-];
+// Fixed District: Kasaragod (DYFI Kasaragod Blood Network)
+const DEFAULT_DISTRICT = 'Kasaragod';
 
 export default function VolunteerDirectory() {
   const { triggerToast } = useAppStore();
@@ -24,8 +20,8 @@ export default function VolunteerDirectory() {
   const [dbMeghalasByBlock, setDbMeghalasByBlock]   = useState({});
 
   // --- Selection states ---
-  // Initialize to first Kerala district so the select always has a valid value
-  const [selectedDistrict, setSelectedDistrict] = useState(KERALA_DISTRICTS[0]);
+  // District is locked strictly to Kasaragod by default
+  const selectedDistrict = DEFAULT_DISTRICT;
   const [selectedBlock,    setSelectedBlock]    = useState('');
   const [selectedMeghala,  setSelectedMeghala]  = useState('All Meghalas');
   const [searchFilter,     setSearchFilter]     = useState('');
@@ -35,8 +31,7 @@ export default function VolunteerDirectory() {
   const [loading,    setLoading]    = useState(false);
   const [copiedId,   setCopiedId]   = useState(null);
 
-  // 1. Fetch hierarchy options then atomically set the initial district + block selection.
-  //    Doing it here (not in separate useEffects) eliminates all race conditions.
+  // 1. Fetch hierarchy options for Kasaragod
   const fetchDbOptions = async () => {
     try {
       const res = await api.get('/public/volunteer-options');
@@ -45,29 +40,17 @@ export default function VolunteerDirectory() {
         setDbBlocksByDistrict(blocksByDistrict);
         setDbMeghalasByBlock(meghalasByBlock);
 
-        // Pick the best district to show by default:
-        // 1. If currently selected district has blocks, keep it.
-        // 2. Otherwise pick the first district that has blocks.
-        setSelectedDistrict((currentDistrict) => {
-          const hasBlocksForCurrent =
-            blocksByDistrict[currentDistrict]?.length > 0;
-          if (hasBlocksForCurrent) return currentDistrict;
-          const firstWithBlocks = Object.keys(blocksByDistrict)[0];
-          return firstWithBlocks || currentDistrict;
-        });
-
-        // Auto-set first block for whatever district is selected
-        setSelectedDistrict((currentDistrict) => {
-          const blocks = blocksByDistrict[currentDistrict] || [];
-          if (blocks.length > 0) {
-            setSelectedBlock(blocks[0]);
-          }
-          return currentDistrict; // keep district unchanged
-        });
-
+        // Find blocks specifically for Kasaragod (case-insensitive fallback)
+        const kasargodKey = Object.keys(blocksByDistrict).find(
+          k => k.toLowerCase() === 'kasaragod' || k.toLowerCase() === 'kasargod'
+        ) || DEFAULT_DISTRICT;
+        const blocks = blocksByDistrict[kasargodKey] || [];
+        if (blocks.length > 0) {
+          setSelectedBlock((prev) => (prev && blocks.includes(prev) ? prev : blocks[0]));
+        }
       }
     } catch {
-      // API unavailable — UI stays with Kerala 14 districts, no blocks
+      // API unavailable
     }
   };
 
@@ -76,37 +59,20 @@ export default function VolunteerDirectory() {
     fetchDbOptions();
   }, []);
 
-  // 2. Compute districts list — DB districts first, then the fixed Kerala 14 as fallback
-  const districtsList = useMemo(() => {
-    const dbDistricts = Object.keys(dbBlocksByDistrict);
-    const merged = [...dbDistricts];
-    KERALA_DISTRICTS.forEach((d) => {
-      if (!merged.includes(d)) merged.push(d);
-    });
-    return merged;
+  // 2. Available Block Committees for Kasaragod (DB only)
+  const availableBlocks = useMemo(() => {
+    const key = Object.keys(dbBlocksByDistrict).find(
+      k => k.toLowerCase() === 'kasaragod' || k.toLowerCase() === 'kasargod'
+    );
+    return (key && dbBlocksByDistrict[key]) || dbBlocksByDistrict[DEFAULT_DISTRICT] || [];
   }, [dbBlocksByDistrict]);
 
-  // 3. Available Block Committees for the selected district (DB only)
-  const availableBlocks = useMemo(() => {
-    return dbBlocksByDistrict[selectedDistrict] || [];
-  }, [selectedDistrict, dbBlocksByDistrict]);
-
-  // When district changes (user-driven), reset block to first available
-  // NOTE: we do NOT reset when the component first mounts — fetchDbOptions handles that.
-  const handleDistrictChange = (d) => {
-    const blocks = dbBlocksByDistrict[d] || [];
-    setSelectedDistrict(d);
-    setSelectedBlock(blocks[0] || '');
-    setSelectedMeghala('All Meghalas');
-  };
-
-  // 4. Available Meghala Units for the selected block (DB only)
+  // 3. Available Meghala Units for the selected block (DB only)
   const availableMeghalas = useMemo(() => {
     if (!selectedBlock) return ['All Meghalas'];
     const dbMeghalas = dbMeghalasByBlock[selectedBlock] || [];
     return ['All Meghalas', ...dbMeghalas];
   }, [selectedBlock, dbMeghalasByBlock]);
-
 
   // Handle Block change
   const handleBlockChange = (b) => {
@@ -201,68 +167,51 @@ export default function VolunteerDirectory() {
         </div>
 
         {/* ── 3 Step Cards ──────────────────────────────────────────── */}
+        {/* ── Steps / District Badge ──────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Step 1 */}
-          <div className="bg-white border-slate-200 shadow-sm border /80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
+          {/* District Status Card */}
+          <div className="bg-white border-slate-200 shadow-sm border rounded-2xl p-4 flex items-center gap-3 shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-red-50 text-red-600 font-bold flex items-center justify-center text-xs shrink-0 border border-red-100">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">District</p>
+              <p className="text-xs font-black text-slate-900 truncate">{selectedDistrict}</p>
+            </div>
+          </div>
+
+          {/* Step 1: Block Committee */}
+          <div className="bg-white border-slate-200 shadow-sm border rounded-2xl p-4 flex items-center gap-3 shadow-xs">
             <div className="w-8 h-8 rounded-xl bg-red-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
               1
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 1: Fixed District</p>
-              <p className="text-xs font-bold text-slate-900 truncate">{selectedDistrict}</p>
-            </div>
-          </div>
-
-          {/* Step 2 */}
-          <div className="bg-white border-slate-200 shadow-sm border /80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
-            <div className="w-8 h-8 rounded-xl bg-red-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
-              2
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 2: Block Committee</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 1: Block Committee</p>
               <p className="text-xs font-bold text-slate-900 truncate">{selectedBlock || 'Not Selected'}</p>
             </div>
           </div>
 
-          {/* Step 3 */}
-          <div className="bg-white border-slate-200 shadow-sm border /80 rounded-2xl p-4 flex items-center gap-3 shadow-xs">
+          {/* Step 2: Meghala Unit */}
+          <div className="bg-white border-slate-200 shadow-sm border rounded-2xl p-4 flex items-center gap-3 shadow-xs">
             <div className="w-8 h-8 rounded-xl bg-red-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
-              3
+              2
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 3: Meghala</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step 2: Meghala</p>
               <p className="text-xs font-bold text-slate-900 truncate">{selectedMeghala}</p>
             </div>
           </div>
         </div>
 
-        {/* ── 3 Select Boxes Panel (District -> Block -> Meghala Unit) ── */}
-        <div className="bg-white border-slate-200 shadow-sm border /80 rounded-2xl p-5 md:p-6 shadow-xs space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* ── 2 Select Boxes Panel (Block -> Meghala Unit) ── */}
+        <div className="bg-white border-slate-200 shadow-sm border rounded-2xl p-5 md:p-6 shadow-xs space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-            {/* Select Box 1: District (Fixed 14 Kerala Districts) */}
-            <div className="space-y-2">
-              <label htmlFor="district-select" className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-red-600" />
-                1. Select District *
-              </label>
-              <select
-                id="district-select"
-                value={selectedDistrict}
-                onChange={(e) => handleDistrictChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 hover:border-red-400 rounded-xl px-3.5 py-3 text-slate-900 text-xs font-bold focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 transition cursor-pointer shadow-xs"
-              >
-                {districtsList.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Select Box 2: Block Committee (Strictly DB Added Names Only) */}
+            {/* Select Box 1: Block Committee */}
             <div className="space-y-2">
               <label htmlFor="block-select" className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <Building2 className="w-4 h-4 text-red-600" />
-                2. Select Block Committee *
+                1. Select Block Committee *
               </label>
               <select
                 id="block-select"
@@ -281,11 +230,11 @@ export default function VolunteerDirectory() {
               </select>
             </div>
 
-            {/* Select Box 3: Meghala (Strictly DB Added Names Only) */}
+            {/* Select Box 2: Meghala */}
             <div className="space-y-2">
               <label htmlFor="meghala-select" className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <User className="w-4 h-4 text-red-600" />
-                3. Select Meghala *
+                2. Select Meghala *
               </label>
               <select
                 id="meghala-select"
