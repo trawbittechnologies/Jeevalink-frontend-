@@ -11,6 +11,7 @@ import EditRequestModal from '../components/EditRequestModal.jsx';
 import DeleteConfirmModal from '../components/DeleteConfirmModal.jsx';
 import MapLibreContainer from '../components/MapLibreContainer.jsx';
 import LocationSearchInput from '../components/LocationSearchInput.jsx';
+import api from '../store/api.js';
 
 
 
@@ -53,6 +54,25 @@ export default function Requests() {
   const [myRequestsOnly, setMyRequestsOnly] = useState(false);
   const [pendingApprovalBanner, setPendingApprovalBanner] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+  const [approvingReqId, setApprovingReqId] = useState(null);
+
+  const handleApproveReq = async (reqId) => {
+    setApprovingReqId(reqId);
+    try {
+      const res = await api.patch(`/requests/${reqId}/approve`);
+      if (res.data?.success) {
+        triggerToast('Blood request approved and published!', 'success');
+        setSelectedReq(null);
+        fetchRequests(filterBg, filterUrgency);
+      } else {
+        triggerToast(res.data?.message || 'Approval failed', 'error');
+      }
+    } catch (err) {
+      triggerToast(err.response?.data?.message || 'Approval failed', 'error');
+    } finally {
+      setApprovingReqId(null);
+    }
+  };
 
   // Responsive tracker
   useEffect(() => {
@@ -424,6 +444,7 @@ export default function Requests() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {displayRequests.map((req) => {
                     const isOwner = user && (String(req.requested_by || req.requestedBy) === String(user.id || user._id));
+                    const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin'].includes(user?.role);
                     const isSOS = (req.urgencyLevel || req.urgency_level) === 'Immediate';
                     const isFulfilled = req.status === 'Fulfilled';
                     const isPendingApproval = !req.verified || req.pending_approval === true;
@@ -431,7 +452,7 @@ export default function Requests() {
                     return (
                       <div
                         key={req._id || req.id}
-                        onClick={() => !isPendingApproval && setSelectedReq(req)}
+                        onClick={() => (!isPendingApproval || isOwner || isPrivileged) && setSelectedReq(req)}
                         className={`p-4 bg-white dark:bg-zinc-900 border rounded-2xl shadow-sm flex flex-col justify-between gap-3 ${isPendingApproval
                             ? 'border-amber-300 dark:border-amber-700/60 bg-amber-50/30 dark:bg-amber-950/10'
                             : isFulfilled
@@ -567,6 +588,8 @@ export default function Requests() {
                 ) : (
                   <div className="space-y-3">
                     {displayRequests.map((req) => {
+                      const isOwner = user && (String(req.requested_by || req.requestedBy) === String(user.id || user._id));
+                      const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin'].includes(user?.role);
                       const isSOS = (req.urgencyLevel || req.urgency_level) === 'Immediate';
                       const isFulfilled = req.status === 'Fulfilled';
                       const isPendingApproval = !req.verified || req.pending_approval === true;
@@ -574,7 +597,7 @@ export default function Requests() {
                       return (
                         <div
                           key={req._id || req.id}
-                          onClick={() => !isFulfilled && !isPendingApproval && setSelectedReq(req)}
+                          onClick={() => !isFulfilled && (!isPendingApproval || isOwner || isPrivileged) && setSelectedReq(req)}
                           className={`p-4 bg-white dark:bg-zinc-900 border rounded-2xl shadow-sm flex items-start justify-between gap-3 ${isPendingApproval
                               ? 'border-amber-300 dark:border-amber-700/60 bg-amber-50/30 dark:bg-amber-950/10'
                               : isFulfilled
@@ -737,6 +760,30 @@ export default function Requests() {
                   WhatsApp
                 </a>
               </div>
+
+              {/* ── Pending Approval notice & action for privileged users ── */}
+              {(!selectedReq.verified || selectedReq.pending_approval) && (
+                <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-800 text-left space-y-2">
+                  <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-bold text-xs">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    <span>Pending Verification & Approval</span>
+                  </div>
+                  <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                    This request is awaiting verification. Once approved, it will be published to the public feed and matching donors will be alerted.
+                  </p>
+                  {isPrivileged && (
+                    <button
+                      type="button"
+                      onClick={() => handleApproveReq(selectedReq._id || selectedReq.id)}
+                      disabled={approvingReqId === (selectedReq._id || selectedReq.id)}
+                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${approvingReqId === (selectedReq._id || selectedReq.id) ? 'animate-spin' : ''}`} />
+                      {approvingReqId === (selectedReq._id || selectedReq.id) ? 'Approving...' : 'Approve & Publish Request'}
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* ── Edit/Delete panel — only for owner OR admin-level (NOT plain volunteers on others) ── */}
               {canEditDelete && (
