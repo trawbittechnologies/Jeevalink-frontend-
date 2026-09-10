@@ -64,7 +64,44 @@ function formatPhoneNumber(num) {
   return String(num).trim();
 }
 
-function formatGeneratedDateTime(dateVal) {
+function formatRequestDateTime(posterData) {
+  if (!posterData) {
+    return formatDateTime(new Date());
+  }
+
+  // Check blood request created date & time fields
+  const rawDate =
+    posterData.created_at ||
+    posterData.createdAt ||
+    posterData.request_date ||
+    posterData.requestDate ||
+    posterData.requested_at ||
+    posterData.requestedAt ||
+    posterData.date_needed ||
+    posterData.dateNeeded ||
+    posterData.required_date ||
+    posterData.requiredDate ||
+    posterData.generated_at ||
+    posterData.generatedAt ||
+    posterData.updated_at ||
+    posterData.updatedAt;
+
+  if (posterData.time_needed || posterData.timeNeeded || posterData.required_time) {
+    const timeStr = posterData.time_needed || posterData.timeNeeded || posterData.required_time;
+    const dateStr = posterData.date_needed || posterData.dateNeeded || posterData.required_date || posterData.created_at;
+    if (dateStr) {
+      const datePart = String(dateStr).split('T')[0];
+      const combined = new Date(`${datePart} ${timeStr}`);
+      if (!isNaN(combined.getTime())) {
+        return formatDateTime(combined);
+      }
+    }
+  }
+
+  return formatDateTime(rawDate || new Date());
+}
+
+function formatDateTime(dateVal) {
   const d = dateVal ? new Date(dateVal) : new Date();
   const valid = !isNaN(d.getTime()) ? d : new Date();
 
@@ -131,7 +168,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
   const committeeName = formatMeghalaCommittee(rawLocation);
   const requestId = posterData.request_id || posterData.id || posterData._id || 'JL-REQ';
-  const generatedDateTime = formatGeneratedDateTime(posterData.generated_at || new Date());
+  const generatedDateTime = formatRequestDateTime(posterData);
 
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
@@ -300,21 +337,21 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
               {/* ------------------------------------------------------------
                   B. BLOOD PACK DYNAMIC UNITS DISPLAY
-                  (Positioned cleanly in the white label of the blood pack)
+                  (Centered perfectly in the white label of the blood pack)
                  ------------------------------------------------------------ */}
               <div
                 className="absolute flex flex-col items-center justify-center text-center select-none pointer-events-none"
                 style={{
-                  top: '43.0%',
-                  left: '65.2%',
-                  width: '14.2%',
-                  height: '8.4%',
+                  top: '47.2%',
+                  left: '73.5%',
+                  width: '14.5%',
+                  transform: 'translate(-50%, -50%)',
                 }}
               >
-                <div className="text-[19px] font-black text-[#d31818] tracking-tight leading-none">
+                <div className="text-[20px] font-black text-[#d31818] tracking-tight leading-none text-center">
                   {unitsNumber}
                 </div>
-                <div className="text-[7.5px] font-black text-slate-700 tracking-wider uppercase mt-0.5 leading-none">
+                <div className="text-[7.5px] font-black text-slate-700 tracking-wider uppercase mt-0.5 leading-none text-center">
                   {Number(unitsNumber) === 1 ? 'UNIT' : 'UNITS'}
                 </div>
               </div>
