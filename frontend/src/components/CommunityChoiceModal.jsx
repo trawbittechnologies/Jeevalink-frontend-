@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, Users, X, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { LogIn, Users, X, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function CommunityChoiceModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -52,11 +52,6 @@ export default function CommunityChoiceModal({ isOpen, onClose }) {
 
           {/* Header & Creative Title */}
           <div className="text-center space-y-3 mb-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-red-50 border border-red-200/80 rounded-full text-red-600 text-xs font-bold uppercase tracking-wider shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-red-500 animate-pulse" />
-              <span>Enter The Community</span>
-            </div>
-
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Do you already have an account?
             </h2>
