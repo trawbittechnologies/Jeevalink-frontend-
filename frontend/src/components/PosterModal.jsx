@@ -5,13 +5,104 @@ import posterTemplate from '../assets/poster-template.png';
 import { useAuthStore } from '../store/authStore';
 
 const POSTER_CONFIG = {
-  patientName: { top: '47mm', left: '34.2mm', fontSize: '4.2mm', color: '#0f172a', fontWeight: '800', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
-  hospital: { top: '55mm', left: '34.2mm', fontSize: '2.5mm', color: '#475569', fontWeight: '500', fontFamily: "'Inter', sans-serif", letterSpacing: '0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.3' },
-  phone: { top: '64mm', left: '34.2mm', fontSize: '3.6mm', color: '#dc2626', fontWeight: '700', fontFamily: "'Inter', sans-serif", letterSpacing: '0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  bloodGroup: { top: '53mm', left: '67.2mm', fontSize: '7mm', color: '#dc2626', fontWeight: '900', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', width: '20mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: 'none' },
-  units: { top: '68.1mm', left: '67.8mm', fontSize: '2.2mm', color: '#ffffff', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.03em', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: '0px 1px 2px rgba(0,0,0,0.4)' },
-  location: { top: '82mm', left: '45mm', fontSize: '2.8mm', color: '#ffffff', fontWeight: '700', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.12em', width: '74mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.5)' },
-  generatedAt: { top: '88mm', left: '45mm', fontSize: '2.0mm', color: '#ffffff', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.03em', width: '80mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 2px rgba(0,0,0,0.7)', opacity: 0.95 }
+  patientName: {
+    top: '45mm',
+    left: '34.2mm',
+    fontSize: '4.6mm',
+    color: '#0f172a',
+    fontWeight: '900',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    letterSpacing: '-0.02em',
+    width: '36mm',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    lineHeight: '1.15'
+  },
+  hospital: {
+    top: '53.8mm',
+    left: '34.2mm',
+    fontSize: '2.8mm',
+    color: '#334155',
+    fontWeight: '700',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    letterSpacing: '0.01em',
+    width: '36mm',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    lineHeight: '1.25'
+  },
+  phone: {
+    top: '63.2mm',
+    left: '34.2mm',
+    fontSize: '4.2mm',
+    color: '#dc2626',
+    fontWeight: '900',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    letterSpacing: '0.04em',
+    width: '36mm',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center'
+  },
+  bloodGroup: {
+    top: '53mm',
+    left: '67.2mm',
+    fontSize: '7.8mm',
+    color: '#dc2626',
+    fontWeight: '900',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    letterSpacing: '-0.03em',
+    width: '22mm',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    lineHeight: '1',
+    textShadow: 'none'
+  },
+  units: {
+    top: '68.2mm',
+    left: '67.8mm',
+    fontSize: '2.4mm',
+    color: '#ffffff',
+    fontWeight: '800',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    letterSpacing: '0.04em',
+    width: '24mm',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    lineHeight: '1',
+    textShadow: '0px 1px 3px rgba(0,0,0,0.8), 0px 0px 4px rgba(0,0,0,0.5)',
+    textTransform: 'uppercase'
+  },
+  location: {
+    top: '81.5mm',
+    left: '45mm',
+    fontSize: '3.0mm',
+    color: '#ffffff',
+    fontWeight: '900',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    textTransform: 'uppercase',
+    letterSpacing: '0.12em',
+    width: '80mm',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.6)'
+  },
+  generatedAt: {
+    top: '88.5mm',
+    left: '45mm',
+    fontSize: '1.9mm',
+    color: '#ffffff',
+    fontWeight: '700',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    letterSpacing: '0.04em',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    background: 'rgba(15, 23, 42, 0.65)',
+    border: '0.25mm solid rgba(255, 255, 255, 0.35)',
+    padding: '0.6mm 2.8mm',
+    borderRadius: '9999px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+    whiteSpace: 'nowrap'
+  }
 };
 
 export function formatMeghalaCommittee(raw) {
@@ -40,6 +131,27 @@ export function formatMeghalaCommittee(raw) {
 
   // Pure area / meghala name (e.g. "Cheemeni", "Kanhangad", "Nileshwar")
   return `${clean} Meghala Committee`;
+}
+
+function toTitleCase(str) {
+  if (!str) return 'Patient Name';
+  return String(str)
+    .trim()
+    .split(/\s+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function formatPhoneNumber(num) {
+  if (!num) return 'Contact Number';
+  const digits = String(num).replace(/\D/g, '');
+  if (digits.length === 10) {
+    return `${digits.slice(0, 5)} ${digits.slice(5)}`;
+  }
+  if (digits.length === 12 && digits.startsWith('91')) {
+    return `+91 ${digits.slice(2, 7)} ${digits.slice(7)}`;
+  }
+  return String(num).trim();
 }
 
 function formatGeneratedDateTime(dateVal) {
@@ -73,10 +185,13 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
   // Extract fields based on existing data structure variations
   const hospital = posterData.hospital_name || posterData.hospitalName || posterData.venue || 'Hospital Name';
-  const patientName = posterData.patient_name || posterData.patientName || 'Patient Name';
-  const phone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || 'Contact Number';
+  const rawPatientName = posterData.patient_name || posterData.patientName || 'Patient Name';
+  const patientName = toTitleCase(rawPatientName);
+  const rawPhone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || 'Contact Number';
+  const phone = formatPhoneNumber(rawPhone);
   const bloodGroup = posterData.blood_group || posterData.bloodGroup || 'O+';
-  const units = posterData.units_required || posterData.unitsRequired || '1';
+  const rawUnits = posterData.units_required || posterData.unitsRequired || '1';
+  const unitsText = `${rawUnits} UNIT${Number(rawUnits) > 1 || isNaN(Number(rawUnits)) ? 'S' : ''}`;
 
   // Extract and format the Meghala Name accurately
   const rawLocation =
@@ -183,7 +298,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               <span style={{ position: 'absolute', ...POSTER_CONFIG.hospital }}>{hospital}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.phone }}>{phone}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.bloodGroup }}>{bloodGroup}</span>
-              <span style={{ position: 'absolute', ...POSTER_CONFIG.units }}>{units} Unit(s)</span>
+              <span style={{ position: 'absolute', ...POSTER_CONFIG.units }}>{unitsText}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.location }}>{location}</span>
               <span style={{ position: 'absolute', ...POSTER_CONFIG.generatedAt }}>{generatedTimeText}</span>
             </div>
