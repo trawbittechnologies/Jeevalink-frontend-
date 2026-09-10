@@ -6,11 +6,9 @@ import {
   Search,
   Droplets,
   Send,
-  RefreshCw,
   RotateCcw,
   ChevronRight,
-  ShieldCheck,
-  Sparkles
+  ShieldCheck
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore.js';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
@@ -21,14 +19,12 @@ export default function BloodHeroAssistant() {
   const { user } = useAuthStore();
   const location = useLocation();
 
-
-
   const [isOpen, setIsOpen] = useState(false);
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 **Hello!** I am **Hemo**, your assistant for JeevaLink blood donation platform.\n\nI am here to help you with donor eligibility, blood group matching, emergency requests, and platform services.\n\nHow can I help you today?"
+      text: "👋 **Hello!** I am **Hemo**, your assistant for the JeevaLink blood donation network.\n\nI can help you with donor eligibility rules, blood compatibility, emergency requests, and platform services across Kerala.\n\nHow can I help you today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -71,7 +67,6 @@ export default function BloodHeroAssistant() {
     }
   }, [isOpen]);
 
-
   const handleSendMessage = async (textToSend = null) => {
     const query = (textToSend || inputQuery).trim();
     if (!query || isThinking) return;
@@ -85,7 +80,7 @@ export default function BloodHeroAssistant() {
       const response = await queryJeevaLinkAI(query, currentHistory);
       setMessages((prev) => [...prev, { sender: 'assistant', text: response }]);
     } catch (err) {
-      console.error('[BloodHeroAssistant] Error getting Gemini response:', err);
+      console.error('[BloodHeroAssistant] Error getting response:', err);
       setMessages((prev) => [
         ...prev,
         {
@@ -190,8 +185,7 @@ export default function BloodHeroAssistant() {
         onClose={() => setIsCommunityModalOpen(false)}
       />
 
-      {/* ── Fixed Assistant Chatbox Dialog (Cleanly Anchored at bottom-right) ── */}
-      {/* ── Fixed Assistant Chatbox Dialog (Cleanly Anchored at bottom-right) ── */}
+      {/* ── Fixed Assistant Chatbox Dialog ── */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -205,64 +199,57 @@ export default function BloodHeroAssistant() {
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 16 }}
-              transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-              className="fixed inset-x-3 bottom-3 top-14 sm:inset-auto sm:bottom-6 sm:right-6 z-[9999] w-auto sm:w-[385px] sm:h-[590px] sm:max-h-[calc(100vh-48px)] rounded-3xl bg-white shadow-2xl shadow-slate-900/25 border border-slate-200/90 overflow-hidden flex flex-col select-text"
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              className="fixed inset-x-3 bottom-3 top-14 sm:inset-auto sm:bottom-6 sm:right-6 z-[9999] w-auto sm:w-[385px] sm:h-[590px] sm:max-h-[calc(100vh-48px)] rounded-3xl bg-white shadow-2xl shadow-slate-900/20 border border-slate-100 overflow-hidden flex flex-col select-text"
             >
-              {/* Header */}
-              <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-red-700 px-4 py-3.5 text-white flex items-center justify-between shrink-0 shadow-lg select-none">
-                {/* Subtle Ambient Decorative Glows */}
-                <div className="absolute -top-10 -left-10 w-28 h-28 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-400/15 rounded-full blur-xl pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              {/* Minimal Modern Header */}
+              <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-red-700 px-4 py-3 text-white flex items-center justify-between shrink-0 shadow-sm select-none">
+                {/* Ambient Soft Highlight */}
+                <div className="absolute -top-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-px bg-white/15" />
 
                 {/* Left: Avatar + Info */}
                 <div className="relative z-10 flex items-center gap-3">
-                  <div className="relative group">
-                    <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 border-white/90 shadow-md ring-2 ring-red-400/30 flex items-center justify-center bg-white transition-transform group-hover:scale-105 duration-200">
+                  <div className="relative">
+                    <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-white/80 shadow-xs flex items-center justify-center bg-white">
                       <img src="/hemo_avatar.png" alt="Hemo Avatar" className="w-full h-full object-cover" />
                     </div>
-                    {/* Animated online status dot */}
-                    <span className="absolute bottom-0 right-0 flex h-3 w-3">
+                    {/* Pulsing online badge */}
+                    <span className="absolute bottom-0 right-0 flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border border-white"></span>
                     </span>
                   </div>
 
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-black tracking-tight text-white leading-none">Hemo</h3>
-                      <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-white/20 hover:bg-white/25 backdrop-blur-md text-white px-2 py-0.5 rounded-full border border-white/25 shadow-xs transition-colors">
-                        <Sparkles className="w-2.5 h-2.5 text-amber-300 fill-amber-300" />
-                        AI Companion
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <h3 className="text-sm font-extrabold tracking-tight text-white leading-none">Hemo</h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
                       <p className="text-[11px] text-rose-100/90 font-medium leading-none">JeevaLink Blood Network</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Right: Actions */}
-                <div className="relative z-10 flex items-center gap-1.5">
+                <div className="relative z-10 flex items-center gap-1">
                   <button
                     type="button"
                     onClick={handleClearChat}
                     title="Reset Chat"
                     aria-label="Reset Chat"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white/90 hover:text-white border border-white/15 backdrop-blur-xs transition-all cursor-pointer shadow-xs"
+                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 text-white/90 hover:text-white transition-all cursor-pointer"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
+                    <RotateCcw className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
                     title="Close"
                     aria-label="Close Chat"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-red-500/80 active:scale-95 text-white/90 hover:text-white border border-white/15 backdrop-blur-xs transition-all cursor-pointer shadow-xs"
+                    className="p-1.5 rounded-lg bg-white/10 hover:bg-red-500/80 active:scale-95 text-white/90 hover:text-white transition-all cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -270,7 +257,7 @@ export default function BloodHeroAssistant() {
               </div>
 
               {/* Chatbox Messages Body */}
-              <div className="p-4 space-y-3.5 overflow-y-auto overscroll-contain flex-1 text-xs bg-slate-50/80 scrollbar-thin">
+              <div className="p-4 space-y-3.5 overflow-y-auto overscroll-contain flex-1 text-xs bg-slate-50/70 scrollbar-thin">
                 {/* Quick Topic Prompts if few messages */}
                 {messages.length <= 2 && (
                   <div className="space-y-1.5 mb-2">
@@ -283,7 +270,7 @@ export default function BloodHeroAssistant() {
                           key={pIdx}
                           type="button"
                           onClick={() => handleSendMessage(prompt.query)}
-                          className="w-full text-left p-2.5 rounded-xl bg-white hover:bg-red-50/60 active:bg-red-100/60 border border-slate-200/80 hover:border-red-200 text-slate-700 hover:text-red-700 font-semibold text-[11.5px] transition-all flex items-center justify-between group cursor-pointer shadow-xs"
+                          className="w-full text-left p-2.5 rounded-xl bg-white hover:bg-red-50/50 active:bg-red-100/50 border border-slate-200/70 hover:border-red-200 text-slate-700 hover:text-red-700 font-medium text-[11.5px] transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
                         >
                           <span className="truncate">{prompt.label}</span>
                           <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-red-500 transition-transform group-hover:translate-x-0.5 shrink-0 ml-2" />
@@ -303,16 +290,16 @@ export default function BloodHeroAssistant() {
                       <img
                         src="/hemo_avatar.png"
                         alt="Hemo"
-                        className="w-6 h-6 rounded-full object-cover border border-red-200 shrink-0 mb-1 shadow-xs"
+                        className="w-6 h-6 rounded-full object-cover border border-red-200 shrink-0 mb-1"
                       />
                     )}
                     <div
-                      className={`max-w-[85%] p-3.5 rounded-2xl shadow-xs ${
+                      className={`max-w-[85%] p-3.5 rounded-2xl ${
                         msg.sender === 'user'
-                          ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-br-none'
+                          ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-medium rounded-br-xs shadow-xs'
                           : msg.isError
-                            ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-bl-none'
-                            : 'bg-white text-slate-800 border border-slate-200/90 rounded-bl-none'
+                            ? 'bg-rose-50 text-rose-900 border border-rose-200 font-medium rounded-bl-xs'
+                            : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-2xs'
                       }`}
                     >
                       <div className="text-[12.5px] whitespace-pre-wrap leading-relaxed">
@@ -324,13 +311,13 @@ export default function BloodHeroAssistant() {
                         <div className="mt-3 flex gap-2 pt-2 border-t border-slate-100">
                           <button
                             onClick={() => handleLanguageSelect('Malayalam')}
-                            className="px-3 py-1 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-xs"
+                            className="px-3 py-1 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-2xs"
                           >
                             മലയാളം
                           </button>
                           <button
                             onClick={() => handleLanguageSelect('English')}
-                            className="px-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-xs"
+                            className="px-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-2xs"
                           >
                             English
                           </button>
@@ -340,7 +327,7 @@ export default function BloodHeroAssistant() {
                   </div>
                 ))}
 
-                {/* Typing indicator with 3 bouncing dots */}
+                {/* Typing indicator */}
                 {isThinking && (
                   <div className="flex items-end gap-2">
                     <img
@@ -348,7 +335,7 @@ export default function BloodHeroAssistant() {
                       alt="Hemo"
                       className="w-6 h-6 rounded-full object-cover border border-red-200 shrink-0 mb-1"
                     />
-                    <div className="bg-white border border-slate-200/90 rounded-2xl rounded-bl-none px-3.5 py-2.5 shadow-xs flex items-center gap-1.5">
+                    <div className="bg-white border border-slate-200/80 rounded-2xl rounded-bl-xs px-3.5 py-2.5 shadow-2xs flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce [animation-delay:-0.3s]" />
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce [animation-delay:-0.15s]" />
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" />
@@ -360,13 +347,13 @@ export default function BloodHeroAssistant() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Action Shortcuts Bar */}
-              <div className="px-3 py-2 bg-slate-100/80 border-t border-slate-200/70 flex items-center justify-between gap-2 shrink-0">
+              {/* Minimal Action Shortcuts Bar */}
+              <div className="px-3 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2 shrink-0">
                 {user?.role === 'user' ? (
                   <button
                     type="button"
                     onClick={() => handleAction('/donor/eligibility')}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-emerald-50 active:bg-emerald-100 border border-slate-200/80 text-slate-700 hover:text-emerald-700 text-[10.5px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs"
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-emerald-50 active:bg-emerald-100 border border-slate-200/70 text-slate-700 hover:text-emerald-700 text-[10.5px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Eligibility</span>
@@ -375,7 +362,7 @@ export default function BloodHeroAssistant() {
                   <button
                     type="button"
                     onClick={() => handleAction('/donor/search')}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200/80 text-slate-700 hover:text-red-700 text-[10.5px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs"
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200/70 text-slate-700 hover:text-red-700 text-[10.5px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
                   >
                     <Search className="w-3.5 h-3.5 text-red-600" />
                     <span>Find Donors</span>
@@ -384,7 +371,7 @@ export default function BloodHeroAssistant() {
                 <button
                   type="button"
                   onClick={() => handleAction('/requests')}
-                  className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200/80 text-slate-700 hover:text-red-700 text-[10.5px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs"
+                  className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-red-50 active:bg-red-100 border border-slate-200/70 text-slate-700 hover:text-red-700 text-[10.5px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
                 >
                   <Droplets className="w-3.5 h-3.5 text-red-600" />
                   <span>Blood Requests</span>
@@ -392,7 +379,7 @@ export default function BloodHeroAssistant() {
               </div>
 
               {/* Chat Input Form */}
-              <div className="p-3 border-t border-slate-200/80 bg-white shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <div className="p-3 border-t border-slate-100 bg-white shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -405,12 +392,12 @@ export default function BloodHeroAssistant() {
                     value={inputQuery}
                     onChange={(e) => setInputQuery(e.target.value)}
                     placeholder="Ask Hemo about blood donation..."
-                    className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:bg-white transition-all font-medium"
+                    className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:bg-white transition-all font-medium"
                   />
                   <button
                     type="submit"
                     disabled={!inputQuery.trim() || isThinking}
-                    className="p-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-95 cursor-pointer shrink-0"
+                    className="p-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all disabled:opacity-35 shadow-sm active:scale-95 cursor-pointer shrink-0"
                     aria-label="Send message"
                   >
                     <Send className="w-4 h-4" />
@@ -422,7 +409,7 @@ export default function BloodHeroAssistant() {
         )}
       </AnimatePresence>
 
-      {/* ── Floating Mascot Trigger Button (Visible only when chat is closed) ── */}
+      {/* ── Floating Mascot Trigger Button (Enlarged size) ── */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -437,8 +424,8 @@ export default function BloodHeroAssistant() {
               onClick={() => setIsOpen(true)}
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.05 }}
-              className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-xl w-[95px] h-[95px] sm:w-[110px] sm:h-[110px] transition-transform"
-              aria-label="Open AI Blood Assistant"
+              className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-2xl w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] transition-transform"
+              aria-label="Open Hemo Blood Assistant"
             >
               <MascotVideo showBubble={true} />
             </motion.button>
