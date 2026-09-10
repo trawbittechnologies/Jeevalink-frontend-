@@ -58,18 +58,18 @@ const POSTER_CONFIG = {
     textShadow: 'none'
   },
   units: {
-    top: '68.2mm',
+    top: '68.5mm',
     left: '67.8mm',
-    fontSize: '2.4mm',
+    fontSize: '3.4mm',
     color: '#ffffff',
-    fontWeight: '800',
+    fontWeight: '900',
     fontFamily: "'Inter', system-ui, sans-serif",
     letterSpacing: '0.04em',
-    width: '24mm',
+    width: '28mm',
     transform: 'translate(-50%, -50%)',
     textAlign: 'center',
     lineHeight: '1',
-    textShadow: '0px 1px 3px rgba(0,0,0,0.8), 0px 0px 4px rgba(0,0,0,0.5)',
+    textShadow: '0px 1px 4px rgba(0,0,0,0.9), 0px 0px 6px rgba(0,0,0,0.7)',
     textTransform: 'uppercase'
   },
   location: {
