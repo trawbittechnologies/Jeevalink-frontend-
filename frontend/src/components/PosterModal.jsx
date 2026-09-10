@@ -80,7 +80,10 @@ function formatGeneratedDateTime(dateVal) {
   hours = hours ? hours : 12;
   const formattedHours = String(hours).padStart(2, '0');
 
-  return `${day} ${month} ${year} • ${formattedHours}:${minutes} ${ampm}`;
+  return {
+    date: `${day} ${month} ${year}`,
+    time: `${formattedHours}:${minutes} ${ampm}`
+  };
 }
 
 export default function PosterModal({ isOpen, onClose, data, requestData }) {
@@ -128,7 +131,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
   const committeeName = formatMeghalaCommittee(rawLocation);
   const requestId = posterData.request_id || posterData.id || posterData._id || 'JL-REQ';
-  const timestampText = formatGeneratedDateTime(posterData.generated_at || new Date());
+  const generatedDateTime = formatGeneratedDateTime(posterData.generated_at || new Date());
 
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
@@ -344,18 +347,21 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               </div>
 
               {/* ------------------------------------------------------------
-                  D. CREATED DATE & TIME (Bottom Left in White Area of Poster)
+                  D. CREATED DATE & TIME (Bottom Left - Stacked Date & Time)
                  ------------------------------------------------------------ */}
               <div
-                className="absolute select-none pointer-events-none"
+                className="absolute select-none pointer-events-none text-left leading-tight"
                 style={{
-                  bottom: '2.0%',
+                  bottom: '1.8%',
                   left: '4.5%',
                 }}
               >
-                <span className="text-[6.8px] font-semibold text-slate-400 tracking-wide">
-                  {timestampText}
-                </span>
+                <div className="text-[6.8px] font-semibold text-slate-400 tracking-wide leading-none">
+                  {generatedDateTime.date}
+                </div>
+                <div className="text-[6.5px] font-medium text-slate-400 tracking-wide leading-none mt-0.5">
+                  {generatedDateTime.time}
+                </div>
               </div>
 
             </div>
