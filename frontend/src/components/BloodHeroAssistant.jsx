@@ -205,51 +205,44 @@ export default function BloodHeroAssistant() {
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               className="fixed inset-x-3 bottom-3 top-14 sm:inset-auto sm:bottom-6 sm:right-6 z-[9999] w-auto sm:w-[385px] sm:h-[590px] sm:max-h-[calc(100vh-48px)] rounded-3xl bg-white shadow-2xl shadow-slate-900/20 border border-slate-100 overflow-hidden flex flex-col select-text"
             >
-              {/* Minimal Modern Header */}
-              <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-red-700 px-4 py-3 text-white flex items-center justify-between shrink-0 shadow-sm select-none">
-                {/* Ambient Soft Highlight */}
-                <div className="absolute -top-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-px bg-white/15" />
-
+              {/* Minimal Clean Header */}
+              <div className="bg-red-600 px-3.5 py-2.5 text-white flex items-center justify-between shrink-0 shadow-xs select-none">
                 {/* Left: Avatar + Info */}
-                <div className="relative z-10 flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <div className="relative">
-                    <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-white/80 shadow-xs flex items-center justify-center bg-white">
-                      <img src="/hemo_avatar.png" alt="Hemo Avatar" className="w-full h-full object-cover" />
+                    <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-white/80 shadow-xs flex items-center justify-center bg-white">
+                      <img src="/hemo_avatar.png" alt="Hemo" className="w-full h-full object-cover" />
                     </div>
-                    {/* Pulsing online badge */}
-                    <span className="absolute bottom-0 right-0 flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border border-white"></span>
-                    </span>
+                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 border border-white rounded-full" />
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-extrabold tracking-tight text-white leading-none">Hemo</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                      <p className="text-[11px] text-rose-100/90 font-medium leading-none">JeevaLink Blood Network</p>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="text-[13px] font-bold tracking-tight text-white leading-tight">Hemo</h3>
+                      <span className="w-1 h-1 rounded-full bg-emerald-300" />
+                      <span className="text-[10px] text-red-100/90 font-medium leading-none">Online</span>
                     </div>
+                    <p className="text-[10.5px] text-red-100/80 font-normal leading-tight mt-0.5">JeevaLink</p>
                   </div>
                 </div>
 
                 {/* Right: Actions */}
-                <div className="relative z-10 flex items-center gap-1">
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={handleClearChat}
                     title="Reset Chat"
                     aria-label="Reset Chat"
-                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 text-white/90 hover:text-white transition-all cursor-pointer"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
                     title="Close"
                     aria-label="Close Chat"
-                    className="p-1.5 rounded-lg bg-white/10 hover:bg-red-500/80 active:scale-95 text-white/90 hover:text-white transition-all cursor-pointer"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
