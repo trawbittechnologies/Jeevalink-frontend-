@@ -221,16 +221,16 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
               {/* ------------------------------------------------------------
                   A. MAIN WHITE CARD DYNAMIC CONTENT
-                  (Expanded width: 45.2% and left: 15.8% to display full phone number without clipping)
+                  (Shifted right to left: 19.2% with 12px left padding to provide a clear margin from the hand/fingers)
                  ------------------------------------------------------------ */}
               <div
                 className="absolute flex flex-col justify-between overflow-hidden"
                 style={{
                   top: '32.2%',
-                  left: '15.8%',
-                  width: '45.2%',
+                  left: '19.2%',
+                  width: '41.8%',
                   height: '32.2%',
-                  padding: '6px 8px 6px 8px',
+                  padding: '6px 6px 6px 12px',
                 }}
               >
                 {/* 1. Blood Group Header Row */}
@@ -238,19 +238,19 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
                   {/* Blood Group Red Rounded Box */}
                   <div
                     className="bg-[#d31818] rounded-xl text-white flex items-center justify-center shrink-0 shadow-sm"
-                    style={{ width: '58px', height: '38px' }}
+                    style={{ width: '56px', height: '38px' }}
                   >
-                    <span className="text-[21px] font-black tracking-tight leading-none">
+                    <span className="text-[20px] font-black tracking-tight leading-none">
                       {bloodGroup}
                     </span>
                   </div>
 
                   {/* BLOOD NEEDED Bold Text */}
                   <div className="leading-tight">
-                    <div className="text-[13.5px] font-black text-[#d31818] tracking-tight leading-none">
+                    <div className="text-[13px] font-black text-[#d31818] tracking-tight leading-none">
                       BLOOD
                     </div>
-                    <div className="text-[13.5px] font-black text-[#d31818] tracking-tight leading-none mt-0.5">
+                    <div className="text-[13px] font-black text-[#d31818] tracking-tight leading-none mt-0.5">
                       NEEDED
                     </div>
                   </div>
@@ -288,7 +288,7 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
                   <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wide leading-none">
                     Contact
                   </div>
-                  <div className="text-[14px] font-black text-[#d31818] flex items-center gap-1.5 mt-0.5 tracking-tight leading-none whitespace-nowrap">
+                  <div className="text-[13.5px] font-black text-[#d31818] flex items-center gap-1.5 mt-0.5 tracking-tight leading-none whitespace-nowrap">
                     <Phone className="w-3.5 h-3.5 text-slate-800 fill-slate-800 shrink-0" />
                     <span>{phone}</span>
                   </div>
