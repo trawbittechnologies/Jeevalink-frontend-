@@ -9,7 +9,8 @@ import {
   RefreshCw,
   RotateCcw,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore.js';
 import CommunityChoiceModal from './CommunityChoiceModal.jsx';
@@ -27,7 +28,7 @@ export default function BloodHeroAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: "👋 **Hello!** I am **Hemo**, your assistant for iDonate blood donation platform.\n\nI am here to help you with donor eligibility, blood group matching, emergency requests, and platform services.\n\nHow can I help you today?"
+      text: "👋 **Hello!** I am **Hemo**, your assistant for JeevaLink blood donation platform.\n\nI am here to help you with donor eligibility, blood group matching, emergency requests, and platform services.\n\nHow can I help you today?"
     }
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -40,7 +41,7 @@ export default function BloodHeroAssistant() {
   const SUGGESTED_PROMPTS = [
     { label: "🩸 Am I eligible to donate?", query: "Am I eligible to donate blood? What are the key requirements?" },
     { label: "🧪 O- Blood compatibility", query: "Which blood groups can receive O- negative blood?" },
-    { label: "🚑 How emergency requests work", query: "How do emergency blood requests work on iDonate?" },
+    { label: "🚑 How emergency requests work", query: "How do emergency blood requests work on JeevaLink?" },
     { label: "📍 Find donors in Kerala", query: "How can I find registered voluntary donors across Kerala?" }
   ];
 
@@ -211,31 +212,48 @@ export default function BloodHeroAssistant() {
               className="fixed inset-x-3 bottom-3 top-14 sm:inset-auto sm:bottom-6 sm:right-6 z-[9999] w-auto sm:w-[385px] sm:h-[590px] sm:max-h-[calc(100vh-48px)] rounded-3xl bg-white shadow-2xl shadow-slate-900/25 border border-slate-200/90 overflow-hidden flex flex-col select-text"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 px-4 py-3.5 sm:py-3 text-white flex items-center justify-between shrink-0 shadow-md">
-                <div className="flex items-center gap-2.5">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 border-white/60 shadow-md flex items-center justify-center bg-white">
+              <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-red-700 px-4 py-3.5 text-white flex items-center justify-between shrink-0 shadow-lg select-none">
+                {/* Subtle Ambient Decorative Glows */}
+                <div className="absolute -top-10 -left-10 w-28 h-28 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-400/15 rounded-full blur-xl pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+                {/* Left: Avatar + Info */}
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className="relative group">
+                    <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 border-white/90 shadow-md ring-2 ring-red-400/30 flex items-center justify-center bg-white transition-transform group-hover:scale-105 duration-200">
                       <img src="/hemo_avatar.png" alt="Hemo Avatar" className="w-full h-full object-cover" />
                     </div>
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full animate-pulse" />
+                    {/* Animated online status dot */}
+                    <span className="absolute bottom-0 right-0 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
+                    </span>
                   </div>
+
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-sm font-black tracking-tight leading-none">Hemo</h3>
-                      <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full leading-none">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black tracking-tight text-white leading-none">Hemo</h3>
+                      <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-white/20 hover:bg-white/25 backdrop-blur-md text-white px-2 py-0.5 rounded-full border border-white/25 shadow-xs transition-colors">
+                        <Sparkles className="w-2.5 h-2.5 text-amber-300 fill-amber-300" />
                         AI Companion
                       </span>
                     </div>
-                    <p className="text-[11px] text-red-100 font-medium mt-0.5">iDonate Blood Network</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                      <p className="text-[11px] text-rose-100/90 font-medium leading-none">JeevaLink Blood Network</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
+                {/* Right: Actions */}
+                <div className="relative z-10 flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={handleClearChat}
                     title="Reset Chat"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all cursor-pointer"
+                    aria-label="Reset Chat"
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white/90 hover:text-white border border-white/15 backdrop-blur-xs transition-all cursor-pointer shadow-xs"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                   </button>
@@ -243,7 +261,8 @@ export default function BloodHeroAssistant() {
                     type="button"
                     onClick={() => setIsOpen(false)}
                     title="Close"
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all cursor-pointer"
+                    aria-label="Close Chat"
+                    className="p-2 rounded-xl bg-white/10 hover:bg-red-500/80 active:scale-95 text-white/90 hover:text-white border border-white/15 backdrop-blur-xs transition-all cursor-pointer shadow-xs"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -415,10 +434,7 @@ export default function BloodHeroAssistant() {
           >
             <motion.button
               type="button"
-              onClick={() => {
-                setIsOpen(true);
-                setShowTooltip(false);
-              }}
+              onClick={() => setIsOpen(true)}
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.05 }}
               className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-xl w-[95px] h-[95px] sm:w-[110px] sm:h-[110px] transition-transform"
