@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import { Map, List, Search, Award, MessageSquare, Compass, Eye, ShieldCheck, Navigation } from 'lucide-react';
@@ -205,7 +205,7 @@ export default function FindDonors() {
         <div className="md:col-span-5 sticky top-24 space-y-4">
           <MapContainer 
             donors={donors} 
-            requests={requests.filter(r => ['Pending', 'Waiting', 'Accepted'].includes(r.status))}
+            requests={requests.filter(r => (r.verified === true || r.verified === 1) && !r.pending_approval && ['Pending', 'Waiting', 'Accepted'].includes(r.status))}
             center={user?.coordinates || { lat: 12.9716, lng: 77.5946 }}
             radius={searchRadius}
             routeStart={routeDonor ? (user?.coordinates || { lat: 12.9716, lng: 77.5946 }) : null}
@@ -223,7 +223,7 @@ export default function FindDonors() {
           <div className="space-y-4">
             <MapContainer 
               donors={donors} 
-              requests={requests.filter(r => ['Pending', 'Waiting', 'Accepted'].includes(r.status))} 
+              requests={requests.filter(r => (r.verified === true || r.verified === 1) && !r.pending_approval && ['Pending', 'Waiting', 'Accepted'].includes(r.status))} 
               center={user?.coordinates || { lat: 12.9716, lng: 77.5946 }}
               radius={searchRadius}
               routeStart={routeDonor ? (user?.coordinates || { lat: 12.9716, lng: 77.5946 }) : null}

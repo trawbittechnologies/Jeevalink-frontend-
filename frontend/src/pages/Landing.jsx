@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../jl-landing.css";
 import MascotVideo from "../components/MascotVideo.jsx";
@@ -77,9 +77,12 @@ export default function Landing() {
     fetchAwarenessSettings();
   }, [fetchRequests, fetchAwarenessSettings]);
 
-  // Extract active real requests for display
+  // Extract active real requests for display (only verified requests go public)
   const activeRequests = (requests || []).filter(
-    (r) => (r.status || 'Pending').toLowerCase() !== 'fulfilled' && (r.status || '').toLowerCase() !== 'cancelled'
+    (r) => (r.status || 'Pending').toLowerCase() !== 'fulfilled' &&
+           (r.status || '').toLowerCase() !== 'cancelled' &&
+           (r.verified === true || r.verified === 1) &&
+           !r.pending_approval
   );
 
   return (

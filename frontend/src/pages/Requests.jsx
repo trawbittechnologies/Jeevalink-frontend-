@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -323,13 +323,14 @@ export default function Requests() {
   );
 
   const displayRequests = requests.filter((req) => {
+    const isPending = !req.verified || req.pending_approval === true;
     if (myRequestsOnly && user) {
       // Show own requests including pending approval ones
       const isOwner = String(req.requested_by || req.requestedBy) === String(user.id || user._id);
       return isOwner;
     }
     // Public feed: only show verified (non-pending) requests
-    return !req.pending_approval;
+    return !isPending;
   });
 
   return (
@@ -425,7 +426,7 @@ export default function Requests() {
                     const isOwner = user && (String(req.requested_by || req.requestedBy) === String(user.id || user._id));
                     const isSOS = (req.urgencyLevel || req.urgency_level) === 'Immediate';
                     const isFulfilled = req.status === 'Fulfilled';
-                    const isPendingApproval = req.pending_approval === true;
+                    const isPendingApproval = !req.verified || req.pending_approval === true;
 
                     return (
                       <div
@@ -565,10 +566,10 @@ export default function Requests() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {requests.map((req) => {
+                    {displayRequests.map((req) => {
                       const isSOS = (req.urgencyLevel || req.urgency_level) === 'Immediate';
                       const isFulfilled = req.status === 'Fulfilled';
-                      const isPendingApproval = req.pending_approval === true;
+                      const isPendingApproval = !req.verified || req.pending_approval === true;
 
                       return (
                         <div

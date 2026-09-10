@@ -35,6 +35,8 @@ export default function BloodRequests() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = requests.filter((r) => {
+    const isVerified = (r.verified === true || r.verified === 1) && !r.pending_approval;
+    if (!isVerified) return false;
     const bg = r.bloodGroup || r.blood_group;
     const urg = r.urgencyLevel || r.urgency_level;
     let matches = (!filterBG || bg === filterBG) &&
