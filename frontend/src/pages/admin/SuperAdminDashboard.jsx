@@ -4,7 +4,7 @@ import {
   ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
   UserCheck, BarChart3, TrendingUp, Search, Phone,
   Droplets, Flame, CheckCircle2, Award, ArrowUpRight,
-  Trophy
+  Trophy, AlertCircle
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -69,6 +69,7 @@ export default function SuperAdminDashboard() {
     urgency_emergency: 0,
     urgency_normal: 0,
     recent_requests: [],
+    pending_approval_requests: [],
     block_summary: []
   });
 
@@ -99,6 +100,10 @@ export default function SuperAdminDashboard() {
   const [deletingAdminId, setDeletingAdminId] = useState(null);
   const [deletingAdminName, setDeletingAdminName] = useState('');
 
+  // District Blood Request Approval States
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [actionType, setActionType] = useState(null);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -123,6 +128,7 @@ export default function SuperAdminDashboard() {
           urgency_emergency: dData.urgency_emergency || 0,
           urgency_normal: dData.urgency_normal || 0,
           recent_requests: dData.recent_requests || [],
+          pending_approval_requests: dData.pending_approval_requests || [],
           block_summary: dData.block_summary || []
         });
       }
@@ -145,6 +151,51 @@ export default function SuperAdminDashboard() {
       setLoading(false);
     }
   }, []);
+
+  const handleApproveDistrictRequest = async (reqId) => {
+    setActionLoadingId(reqId);
+    setActionType('approve');
+    try {
+      const res = await api.patch(`/requests/${reqId}/approve`);
+      if (res.data?.success) {
+        setDistrictData(prev => ({
+          ...prev,
+          pending_approval_requests: (prev.pending_approval_requests || []).filter(r => (r.id || r._id) !== reqId),
+          recent_requests: (prev.recent_requests || []).map(r => ((r.id || r._id) === reqId ? { ...r, verified: true, status: 'Active' } : r))
+        }));
+        await loadData();
+      }
+    } catch (err) {
+      console.error('Failed to approve request:', err);
+      alert(err.response?.data?.message || 'Failed to approve request');
+    } finally {
+      setActionLoadingId(null);
+      setActionType(null);
+    }
+  };
+
+  const handleRejectDistrictRequest = async (reqId) => {
+    if (!window.confirm('Are you sure you want to reject and remove this blood request?')) return;
+    setActionLoadingId(reqId);
+    setActionType('reject');
+    try {
+      const res = await api.delete(`/requests/${reqId}`);
+      if (res.data?.success) {
+        setDistrictData(prev => ({
+          ...prev,
+          pending_approval_requests: (prev.pending_approval_requests || []).filter(r => (r.id || r._id) !== reqId),
+          recent_requests: (prev.recent_requests || []).filter(r => (r.id || r._id) !== reqId)
+        }));
+        await loadData();
+      }
+    } catch (err) {
+      console.error('Failed to reject request:', err);
+      alert(err.response?.data?.message || 'Failed to reject request');
+    } finally {
+      setActionLoadingId(null);
+      setActionType(null);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -323,6 +374,98 @@ export default function SuperAdminDashboard() {
         </div>
       </div>
 
+      {/* District Pending Blood Request Approval Queue */}
+      {districtData.pending_approval_requests?.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/70 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-extrabold text-amber-950">
+                  District Blood Requests Awaiting Approval ({districtData.pending_approval_requests.length})
+                </h3>
+                <p className="text-xs text-amber-800 font-medium">
+                  Review user-submitted blood requests in {cleanDistrict} before publishing them live to the public feed.
+                </p>
+              </div>
+            </div>
+            <span className="self-start sm:self-auto text-[11px] font-bold px-3 py-1 bg-amber-100/80 border border-amber-300 text-amber-900 rounded-full">
+              Action Required
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {districtData.pending_approval_requests.map((req) => {
+              const reqId = req.id || req._id;
+              const bg = req.blood_group || req.bloodGroup || '—';
+              const patient = req.patient_name || req.patientName || 'Patient';
+              const hospital = req.hospital_name || req.hospitalName || 'Hospital';
+              const city = req.city || req.location || cleanDistrict;
+              const units = req.units_required || req.unitsRequired || 1;
+              const contact = req.contact_number || req.contactNumber || '—';
+              const isApproving = actionLoadingId === reqId && actionType === 'approve';
+              const isRejecting = actionLoadingId === reqId && actionType === 'reject';
+
+              return (
+                <div key={reqId} className="bg-white border border-amber-200 rounded-2xl p-4 shadow-xs space-y-3 hover:border-amber-300 transition">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span className="w-10 h-10 rounded-xl bg-red-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                        {bg}
+                      </span>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-bold text-slate-900 truncate">{patient}</h4>
+                        <p className="text-xs text-slate-600 truncate mt-0.5 font-medium">
+                          {hospital} • <span className="font-bold text-slate-900">{units} Unit{units > 1 ? 's' : ''}</span>
+                        </p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                          Meghala / City: <span className="font-semibold text-slate-700">{city}</span>
+                          {req.requester_name ? ` • By ${req.requester_name}` : ''}
+                        </p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Contact: <a href={`tel:${contact}`} className="text-red-600 font-bold hover:underline">{contact}</a>
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-lg border shrink-0 ${
+                      req.urgency_level === 'Emergency' || req.urgency_level === 'Critical'
+                        ? 'bg-red-50 text-red-700 border-red-200'
+                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}>
+                      {req.urgency_level || 'Urgent'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => handleApproveDistrictRequest(reqId)}
+                      disabled={actionLoadingId === reqId}
+                      className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                    >
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${isApproving ? 'animate-spin' : ''}`} />
+                      {isApproving ? 'Approving...' : 'Approve & Publish'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRejectDistrictRequest(reqId)}
+                      disabled={actionLoadingId === reqId}
+                      className="py-2 px-3 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 active:scale-95 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 hover:border-rose-200 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      <X className={`w-3.5 h-3.5 ${isRejecting ? 'animate-spin' : ''}`} />
+                      {isRejecting ? 'Rejecting...' : 'Reject'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Modern 4 KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
 
@@ -457,9 +600,20 @@ export default function SuperAdminDashboard() {
                         }`}>
                         {req.urgency_level || 'Urgent'}
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
-                        {req.status || 'Active'}
-                      </span>
+                      {!req.verified ? (
+                        <button
+                          type="button"
+                          onClick={() => handleApproveDistrictRequest(req.id)}
+                          disabled={actionLoadingId === req.id}
+                          className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] rounded-md transition cursor-pointer flex items-center gap-1"
+                        >
+                          <CheckCircle2 className="w-3 h-3" /> Approve
+                        </button>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+                          {req.status || 'Active'}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
