@@ -317,27 +317,26 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               </div>
 
               {/* ------------------------------------------------------------
-                  C. COMMITTEE SECTION (Modern Minimal Glass Bar)
+                  C. COMMITTEE SECTION (Clean text without background box)
                  ------------------------------------------------------------ */}
               <div
-                className="absolute flex items-center justify-center"
+                className="absolute flex items-center justify-center text-center select-none pointer-events-none"
                 style={{
                   top: '66.2%',
-                  left: '24.0%',
-                  width: '52.0%',
-                  height: '4.8%',
+                  left: '15.0%',
+                  width: '70.0%',
                 }}
               >
-                <div className="w-full h-full bg-slate-950/65 backdrop-blur-md rounded-xl border border-white/15 px-3 flex items-center justify-center gap-2 shadow-lg shadow-black/20">
+                <div className="flex items-center justify-center gap-2">
                   {/* Users Icon */}
-                  <Users className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <Users className="w-3.5 h-3.5 text-emerald-300 shrink-0 drop-shadow-sm" />
 
                   {/* Text */}
                   <div className="leading-tight text-left min-w-0">
-                    <div className="text-[6.2px] font-semibold text-emerald-300/80 tracking-[0.18em] uppercase leading-none">
+                    <div className="text-[6.5px] font-bold text-emerald-200/90 tracking-[0.2em] uppercase leading-none drop-shadow-sm">
                       REQUESTED BY
                     </div>
-                    <div className="text-[9px] font-extrabold text-white tracking-wide uppercase truncate leading-tight mt-0.5">
+                    <div className="text-[9.5px] font-black text-white tracking-wide uppercase truncate leading-tight mt-0.5 drop-shadow-sm">
                       {committeeName}
                     </div>
                   </div>
@@ -345,20 +344,19 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
               </div>
 
               {/* ------------------------------------------------------------
-                  D. TIMESTAMP PILL (Ultra-Minimal Badge)
+                  D. TIMESTAMP (Clean text without background box)
                  ------------------------------------------------------------ */}
               <div
-                className="absolute flex items-center justify-center"
+                className="absolute flex items-center justify-center text-center select-none pointer-events-none"
                 style={{
                   top: '72.4%',
-                  left: '30.0%',
-                  width: '40.0%',
-                  height: '2.5%',
+                  left: '20.0%',
+                  width: '60.0%',
                 }}
               >
-                <div className="w-full h-full bg-slate-950/45 backdrop-blur-sm border border-white/10 rounded-full px-2.5 flex items-center justify-center gap-1.5 shadow-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/90 shrink-0"></span>
-                  <span className="text-[7.2px] font-medium text-slate-200/90 whitespace-nowrap leading-none tracking-wide">
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-sm"></span>
+                  <span className="text-[7.5px] font-semibold text-teal-100/90 whitespace-nowrap leading-none tracking-wide drop-shadow-sm">
                     {timestampText}
                   </span>
                 </div>
