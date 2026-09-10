@@ -66,6 +66,7 @@ const SuperAdminDashboard = safeLazy(() => import('./pages/admin/SuperAdminDashb
 const SuperAdminManagement = safeLazy(() => import('./pages/admin/SuperAdminManagement.jsx'));
 const BlockCommitteeManagement = safeLazy(() => import('./pages/admin/BlockCommitteeManagement.jsx'));
 const DistrictPointsTable = safeLazy(() => import('./pages/admin/DistrictPointsTable.jsx'));
+const AwarenessManagement = safeLazy(() => import('./pages/admin/AwarenessManagement.jsx'));
 
 // V2 Common & Public Pages
 const Leaderboard = safeLazy(() => import('./pages/Leaderboard.jsx'));
@@ -281,6 +282,12 @@ export default function App() {
                 } />
 
                 {/* Admin Sub-pages */}
+                <Route path="/admin/awareness" element={
+                  <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
+                    <AwarenessManagement />
+                  </ProtectedRoute>
+                } />
+                <Route path="/super-admin/awareness" element={<Navigate to="/admin/awareness" replace />} />
                 <Route path="/admin/feedback" element={
                   <ProtectedRoute roles={['block_admin', 'super_admin', 'technical_admin']}>
                     <FeedbackManagement />
