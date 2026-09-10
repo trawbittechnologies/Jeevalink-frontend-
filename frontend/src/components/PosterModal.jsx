@@ -8,10 +8,10 @@ const POSTER_CONFIG = {
   patientName: { top: '47mm', left: '34.2mm', fontSize: '4.2mm', color: '#0f172a', fontWeight: '800', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.1' },
   hospital: { top: '55mm', left: '34.2mm', fontSize: '2.5mm', color: '#475569', fontWeight: '500', fontFamily: "'Inter', sans-serif", letterSpacing: '0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1.3' },
   phone: { top: '64mm', left: '34.2mm', fontSize: '3.6mm', color: '#dc2626', fontWeight: '700', fontFamily: "'Inter', sans-serif", letterSpacing: '0.02em', width: '32mm', transform: 'translate(-50%, -50%)', textAlign: 'center' },
-  bloodGroup: { top: '53mm', left: '67.2mm', fontSize: '5.5mm', color: '#dc2626', fontWeight: '900', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', width: '20mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: 'none' },
+  bloodGroup: { top: '53mm', left: '67.2mm', fontSize: '4.2mm', color: '#dc2626', fontWeight: '900', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', width: '20mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: 'none' },
   units: { top: '68.1mm', left: '67.8mm', fontSize: '2.2mm', color: '#ffffff', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.03em', width: '22.5mm', transform: 'translate(-50%, -50%)', textAlign: 'center', lineHeight: '1', textShadow: '0px 1px 2px rgba(0,0,0,0.4)' },
   location: { top: '82mm', left: '45mm', fontSize: '2.8mm', color: '#ffffff', fontWeight: '700', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.15em', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 3px rgba(0,0,0,0.5)' },
-  date: { top: '109mm', left: '4mm', fontSize: '1.8mm', color: '#94a3b8', fontWeight: '600', fontFamily: "'Inter', sans-serif", textAlign: 'left', textShadow: 'none' }
+  date: { top: '88mm', left: '45mm', fontSize: '2.5mm', color: 'rgba(255, 255, 255, 0.95)', fontWeight: '600', fontFamily: "'Inter', sans-serif", letterSpacing: '0.04em', width: '72mm', transform: 'translate(-50%, -50%)', textAlign: 'center', textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }
 };
 
 function formatMeghalaCommittee(raw) {
