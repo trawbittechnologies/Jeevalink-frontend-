@@ -12,35 +12,35 @@ function getSmartFallbackReply(query) {
 
   // 1. Technical & Architecture Questions
   if (q.includes('tech') || q.includes('stack') || q.includes('architecture') || q.includes('built with') || q.includes('framework') || q.includes('database') || q.includes('backend') || q.includes('frontend')) {
-    return `**JeevaLink Technical Architecture & Stack (Built by Trawbit Technologies):**\n\n- **Frontend**: React 18 with Vite, Vanilla CSS + TailwindCSS, Framer Motion for animations, and Lucide icon system.\n- **Backend**: Laravel RESTful API with structured controllers, Sanctum/JWT token authentication, and RBAC middleware.\n- **Database**: Relational SQLite / PostgreSQL database managing Users, Blood Requests, Campaigns, and Technical Reports.\n- **AI Engine**: Groq LPU API delivering high-speed natural language processing.\n- **Messaging**: Firebase Cloud Messaging (FCM) for push alerts & direct WhatsApp SOS integration.`;
+    return `**💻 JeevaLink Technology Stack:**\n\n- **Frontend**: React 18 & Vite (Fast, modern user interface)\n- **Backend**: Laravel REST API (Secure and robust backend)\n- **Database**: Relational SQLite / PostgreSQL database\n- **AI Engine**: Groq LPU (Ultra-fast support assistant)\n- **Notifications**: Firebase Cloud Messaging & WhatsApp SOS\n\n*Built and maintained by **Trawbit Technologies**.*`;
   }
 
   if (q.includes('trawbit') || q.includes('developer') || q.includes('who built') || q.includes('team') || q.includes('company')) {
-    return `**About Trawbit Technologies:**\nTrawbit Technologies is the core technology partner and engineering team behind JeevaLink. They design and maintain the web platform, mobile PWA, database infrastructure, Groq AI integrations, and emergency broadcast systems for voluntary blood donation.`;
+    return `**👨‍💻 About Trawbit Technologies:**\n\n**Trawbit Technologies** is the core software development team behind JeevaLink. They created and maintain the web platform, mobile app, database, and emergency blood donation network.`;
   }
 
   // 2. Platform Features & Modules
   if (q.includes('jeevapoint') || q.includes('points') || q.includes('badge') || q.includes('reward')) {
-    return `**JeevaPoints & Recognition System:**\n\n- **Donation Credits**: Donating blood earns 100 JeevaPoints per successful milestone.\n- **Volunteer Credits**: Meghala & Block volunteers receive 20 points for coordinating verified donations.\n- **Badges & Certificates**: Earn digital certificates of appreciation and ranking on the regional Leaderboard.`;
+    return `**🏆 JeevaPoints & Rewards:**\n\n- **Donating Blood**: Earn **100 points** for each donation milestone.\n- **Volunteering**: Earn **20 points** for verifying or coordinating blood donations.\n- **Certificates**: Unlock digital certificates of appreciation and rise on the Leaderboard!`;
   }
 
   if (q.includes('hierarchy') || q.includes('role') || q.includes('meghala') || q.includes('block') || q.includes('admin')) {
-    return `**JeevaLink Role Hierarchy & Structure:**\n\n1. **User / Donor**: Posts requests, self-assesses eligibility, donates blood.\n2. **Unit Squad**: Local grassroots camp and donor registration squad.\n3. **Meghala Volunteer Committee**: Local community coordinator managing donor dispatch & verification.\n4. **Block Committee Admin**: Higher block-level administration verifying volunteers & handling escalations.\n5. **District Super Admin**: District-wide analytics, hospital requests, and governance.\n6. **Technical Admin (Trawbit Technologies)**: System health, bug tracking, and code maintenance.`;
+    return `**👥 JeevaLink Roles & Structure:**\n\n1. **User / Donor**: Donates blood and requests emergency units.\n2. **Meghala Committee**: Local village/ward volunteer coordinators.\n3. **Block Committee Admin**: Oversees local committees and resolves complaints.\n4. **District Super Admin**: Manages district-wide blood camps and hospitals.\n5. **Tech Admin (Trawbit)**: Fixes bugs and manages application servers.`;
   }
 
   if (q.includes('sos') || q.includes('emergency') || q.includes('request blood') || q.includes('urgent')) {
-    return `**Emergency Blood Request & SOS Workflow:**\n\n1. **Create Request**: Fill out patient name, required blood group, units, hospital, and bystander contact.\n2. **Instant Match Broadcast**: The system filters donors by blood compatibility, district proximity, and cooldown readiness.\n3. **SOS Action**: Generate an automated poster and share directly to WhatsApp groups or call bystanders with 1 tap.`;
+    return `**🚨 How to Request Emergency Blood:**\n\n1. **Click 'Request Blood'**: Enter patient name, hospital, and blood group needed.\n2. **Instant SOS**: The system alerts matching eligible donors nearby immediately.\n3. **Share Poster**: Generate an instant WhatsApp poster to share across groups.`;
   }
 
   if (q.includes('eligib') || q.includes('health check') || q.includes('weight') || q.includes('age') || q.includes('malayalam')) {
-    return `**Health & Donor Eligibility Guidelines:**\n\n- **Age**: 18 to 65 years.\n- **Weight**: Minimum 50 kg (110 lbs).\n- **Donation Interval**: 90 days (3 months) cooldown between donations.\n- **Tattoos/Piercings**: 6-month wait period.\n- **Current Health**: Free from fever, active infection, and off antibiotics.\n- **Language**: The Health Eligibility Test on JeevaLink supports full **Malayalam (മലയാളം)** and English with a top switcher.`;
+    return `**🩸 Blood Donation Eligibility Rules:**\n\n- **Age**: 18 to 65 years\n- **Weight**: Minimum **50 kg**\n- **Interval**: **90 days (3 months)** gap between donations\n- **Health**: Must be healthy, free from fever/infection, and not taking antibiotics\n- **Tattoos/Piercings**: Wait 6 months\n\n💡 *Take the quick Health Eligibility Test in Malayalam or English from your dashboard!*`;
   }
 
   if (q.includes('complaint') || q.includes('support') || q.includes('contact') || q.includes('human')) {
-    return `**3-Tier Help & Complaints Structure:**\n\n1. **Technical Support**: Bug reports & system issues handled directly by **Technical Admin (Trawbit Technologies)**.\n2. **Blood Donation / Receive Issues**: Handled directly by your local **Meghala Committee**.\n3. **Complaint Against Meghala**: Escalated above Meghala level to the **Block Committee Admin** for fair review.\n\n*Switch to the "Human Helpdesk" tab to access direct contacts or file a report.*`;
+    return `**🤝 Need Help or Want to Report an Issue?**\n\n- **Technical Bug**: Handled by **Trawbit Tech Team** (support@trawbit.com)\n- **Blood Donation Issue**: Handled by your local **Meghala Committee** (Hotline: 1910)\n- **File a Formal Complaint**: Click the **'Report / Complaint'** button to submit a ticket for admin investigation.`;
   }
 
-  return `**JeevaLink Assistant:**\nI can answer questions regarding:\n- **Blood Donation**: Compatibility, eligibility, donation cooldown, emergency requests.\n- **Project Technical Architecture**: React/Vite, Laravel backend, Groq AI LPU, Trawbit Technologies.\n- **Platform Features**: JeevaPoints, Volunteer Directory, Malayalam health test, and 3-Tier support.\n\nHow can I assist you with these topics?`;
+  return `**👋 JeevaLink Support AI:**\n\nI can help you with:\n- 🩸 **Blood Donation**: Eligibility rules, compatibility, donation gap\n- 🛠️ **Technical Support**: Login issues, OTP, bugs, or features\n- 🚨 **Complaints**: Reporting fake requests or suspicious users\n\n*How can I help you today? (English, മലയാളം, or Manglish)*`;
 }
 
 /**
