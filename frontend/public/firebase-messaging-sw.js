@@ -37,9 +37,20 @@ self.addEventListener('push', (event) => {
   let payload = null;
 
   // Try to read event data in all formats for debugging
-  try { rawText = event.data?.text(); } catch (_) {}
-  try { payload = event.data?.json(); } catch (_) {
-    try { payload = JSON.parse(rawText); } catch (__) {}
+  try {
+    rawText = event.data?.text();
+  } catch (err) {
+    console.debug('[SW] Could not read raw text:', err);
+  }
+
+  try {
+    payload = event.data?.json();
+  } catch (err) {
+    try {
+      payload = JSON.parse(rawText);
+    } catch (parseErr) {
+      console.debug('[SW] JSON parse fallback failed:', parseErr || err);
+    }
   }
 
   console.log('[SW] Push event fired. raw:', rawText, 'parsed:', payload);

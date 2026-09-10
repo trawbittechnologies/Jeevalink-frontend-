@@ -4,12 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, Phone, Send, Headphones,
   CheckCircle2, Loader2, ArrowLeft,
-  User, ExternalLink, RotateCcw,
+  User, RotateCcw,
   Wrench, Droplets, ShieldAlert,
-  Building2, Mail, Copy, Check, Sparkles,
-  ClipboardList, AlertTriangle, ArrowRight,
-  ChevronRight, RefreshCw, Clock, MessageSquare,
-  FileText, ShieldCheck, HelpCircle
+  Copy, Check, Sparkles,
+  ClipboardList,
+  ChevronRight, RefreshCw,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
@@ -74,7 +74,7 @@ function renderMessageContent(text) {
 
     const isBullet = line.trim().startsWith('* ') || line.trim().startsWith('- ') || line.trim().startsWith('• ');
     const isHeading = line.trim().startsWith('# ') || line.trim().startsWith('## ') || line.trim().startsWith('### ');
-    const cleanLine = isBullet ? line.trim().replace(/^[\*\-•]\s*/, '') : isHeading ? line.trim().replace(/^#+\s*/, '') : line;
+    const cleanLine = isBullet ? line.trim().replace(/^[*•-]\s*/, '') : isHeading ? line.trim().replace(/^#+\s*/, '') : line;
 
     const parts = cleanLine.split(/(\*\*[^*]+\*\*)/g);
     const content = parts.map((part, idx) => {
@@ -137,7 +137,6 @@ export default function UserSupport() {
     contactPhone: user?.mobile || ''
   });
   const [submittingComplaint, setSubmittingComplaint] = useState(false);
-  const [submittedTicketId, setSubmittedTicketId] = useState(null);
 
   // Auto scroll chat to bottom
   useEffect(() => {
@@ -235,8 +234,6 @@ export default function UserSupport() {
 
       const res = await api.post('/technical-reports', payload);
       if (res.data?.success) {
-        const ticketId = res.data.data?.id || 'TR-LOGGED';
-        setSubmittedTicketId(ticketId);
         triggerToast('Report submitted successfully to authorized admin team', 'success');
         setShowComplaintModal(false);
         setComplaintStep('form');
