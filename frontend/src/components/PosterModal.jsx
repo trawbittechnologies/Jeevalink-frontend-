@@ -382,22 +382,6 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
                 </div>
               </div>
 
-              {/* ------------------------------------------------------------
-                  E. RIGHT MOTIVATIONAL SLOGAN
-                 ------------------------------------------------------------ */}
-              <div
-                className="absolute text-right"
-                style={{
-                  top: '76.8%',
-                  right: '6.0%',
-                  width: '20%',
-                }}
-              >
-                <div className="text-[6.8px] font-bold text-teal-100/75 tracking-wider leading-[1.25] uppercase">
-                  A SMALL<br />ACT MAKES<br />A BIG DIFFERENCE
-                </div>
-              </div>
-
             </div>
 
           </div>
