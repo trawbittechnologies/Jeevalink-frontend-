@@ -203,18 +203,22 @@ export default function VolunteerDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Volunteer Dashboard</h1>
-            <p className="text-red-100 text-sm mt-1">
-              Welcome, <span className="font-semibold text-white">
-                {(() => {
-                  const rawMeghala = user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
-                  if (!rawMeghala || rawMeghala.toLowerCase() === 'n/a') return 'Meghala Committee';
-                  if (/meghala\s+committee/i.test(rawMeghala)) return rawMeghala;
-                  if (/committee/i.test(rawMeghala)) return rawMeghala;
-                  if (/meghala/i.test(rawMeghala)) return `${rawMeghala} Committee`;
-                  return `${rawMeghala} Meghala Committee`;
-                })()}
+            <div className="flex items-center gap-2 mt-2 flex-wrap text-sm text-red-100">
+              <span className="opacity-90">Welcome,</span>
+              <span className="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl shadow-xs">
+                <span className="text-black font-black text-xs sm:text-sm tracking-wider uppercase">DYFI</span>
+                <span className="font-extrabold text-slate-900 text-sm sm:text-base">
+                  {(() => {
+                    const rawMeghala = user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
+                    if (!rawMeghala || rawMeghala.toLowerCase() === 'n/a') return 'Meghala Committee';
+                    if (/meghala\s+committee/i.test(rawMeghala)) return rawMeghala;
+                    if (/committee/i.test(rawMeghala)) return rawMeghala;
+                    if (/meghala/i.test(rawMeghala)) return `${rawMeghala} Committee`;
+                    return `${rawMeghala} Meghala Committee`;
+                  })()}
+                </span>
               </span>
-            </p>
+            </div>
             <div className="flex items-center gap-3 text-xs text-red-100 mt-3 pt-3 border-t border-red-500/50">
               <span>District: <strong className="text-white">{user?.district || user?.district_name || 'Kasaragod'}</strong></span>
               <span>•</span>
@@ -596,9 +600,10 @@ export default function VolunteerDashboard() {
                   })()}
                 </span>
               </div>
-              <div className="flex justify-between py-1">
+              <div className="flex justify-between py-1 items-center">
                 <span className="text-slate-400">Meghala Committee</span>
-                <span className="font-bold">
+                <span className="font-bold text-slate-100 flex items-center gap-1.5">
+                  <span className="text-black bg-white px-1.5 py-0.5 rounded text-[10px] font-black tracking-wider">DYFI</span>
                   {(() => {
                     const rawMeghala = user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
                     if (!rawMeghala || rawMeghala.toLowerCase() === 'n/a') return 'Meghala Committee';
