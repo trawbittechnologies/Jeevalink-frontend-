@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Trophy, Award, Crown, Medal, Flame, Search, RefreshCw,
-  Building2, Users, Droplets, Heart, Zap, Shield, ArrowUpRight,
-  TrendingUp, CheckCircle2, ChevronRight, Share2, Sparkles,
-  Phone, Mail, MapPin, Info, ArrowUpDown, Filter, Download
-} from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
 
@@ -37,7 +32,6 @@ export default function DistrictPointsTable() {
   });
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
     try {
       // 1. Try dedicated points-table endpoint
       let res = await api.get('/super-admin/points-table').catch(() => null);
@@ -154,7 +148,15 @@ export default function DistrictPointsTable() {
   }, [user]);
 
   useEffect(() => {
-    fetchData();
+    let active = true;
+    (async () => {
+      if (active) {
+        await fetchData();
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, [fetchData]);
 
   const currentDistrict = data.district || user?.district || 'Kasaragod';
@@ -305,7 +307,10 @@ export default function DistrictPointsTable() {
               Dashboard
             </Link>
             <button
-              onClick={fetchData}
+              onClick={() => {
+                setLoading(true);
+                fetchData();
+              }}
               disabled={loading}
               className="px-3.5 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
