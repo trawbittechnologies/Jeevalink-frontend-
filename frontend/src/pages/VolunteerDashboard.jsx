@@ -600,10 +600,9 @@ export default function VolunteerDashboard() {
                   })()}
                 </span>
               </div>
-              <div className="flex justify-between py-1 items-center">
+              <div className="flex justify-between py-1">
                 <span className="text-slate-400">Meghala Committee</span>
-                <span className="font-bold text-slate-100 flex items-center gap-1.5">
-                  <span className="text-black bg-white px-1.5 py-0.5 rounded text-[10px] font-black tracking-wider">DYFI</span>
+                <span className="font-bold">
                   {(() => {
                     const rawMeghala = user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
                     if (!rawMeghala || rawMeghala.toLowerCase() === 'n/a') return 'Meghala Committee';
