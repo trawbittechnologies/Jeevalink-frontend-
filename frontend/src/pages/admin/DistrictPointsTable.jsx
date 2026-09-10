@@ -498,7 +498,7 @@ export default function DistrictPointsTable() {
                           {/* Total Score */}
                           <td className="py-3.5 px-4 text-right">
                             <span className="text-base font-black text-red-600 block">
-                              {b.total_points.toLocaleString()}
+                              {(b.total_points || 0).toLocaleString()}
                             </span>
                             <span className="text-[10px] font-bold text-slate-400 uppercase">Points</span>
                           </td>
