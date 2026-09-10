@@ -97,44 +97,32 @@ const POSTER_CONFIG = {
     transform: 'translate(-50%, -50%)',
     textAlign: 'center',
     background: 'rgba(15, 23, 42, 0.65)',
-    border: '0.25mm solid rgba(255, 255, 255, 0.35)',
-    padding: '0.6mm 2.8mm',
-    borderRadius: '9999px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
-    whiteSpace: 'nowrap'
-  }
-};
-
 export function formatMeghalaCommittee(raw) {
-  if (!raw || typeof raw !== 'string') return 'DYFI Meghala Committee';
+  if (!raw || typeof raw !== 'string') return 'TEST MEGHALA COMMITTEE';
   const clean = raw.trim();
   if (!clean || clean.toLowerCase() === 'n/a' || clean.toLowerCase() === 'null') {
-    return 'DYFI Meghala Committee';
+    return 'TEST MEGHALA COMMITTEE';
   }
 
   const lower = clean.toLowerCase();
 
-  // If clean already contains both meghala and committee
   if (lower.includes('meghala') && lower.includes('committee')) {
-    return clean;
+    return clean.toUpperCase();
   }
 
-  // If clean ends with / contains "meghala" (e.g. "Cheemeni Meghala")
   if (lower.includes('meghala')) {
-    return `${clean} Committee`;
+    return `${clean} COMMITTEE`.toUpperCase();
   }
 
-  // If clean contains "committee"
   if (lower.includes('committee')) {
-    return clean;
+    return clean.toUpperCase();
   }
 
-  // Pure area / meghala name (e.g. "Cheemeni", "Kanhangad", "Nileshwar")
-  return `${clean} Meghala Committee`;
+  return `${clean} MEGHALA COMMITTEE`.toUpperCase();
 }
 
 function toTitleCase(str) {
-  if (!str) return 'Patient Name';
+  if (!str) return 'Pradeep';
   return String(str)
     .trim()
     .split(/\s+/)
@@ -143,13 +131,13 @@ function toTitleCase(str) {
 }
 
 function formatPhoneNumber(num) {
-  if (!num) return 'Contact Number';
+  if (!num) return '79026 19430';
   const digits = String(num).replace(/\D/g, '');
   if (digits.length === 10) {
     return `${digits.slice(0, 5)} ${digits.slice(5)}`;
   }
   if (digits.length === 12 && digits.startsWith('91')) {
-    return `+91 ${digits.slice(2, 7)} ${digits.slice(7)}`;
+    return `${digits.slice(2, 7)} ${digits.slice(7)}`;
   }
   return String(num).trim();
 }
@@ -170,7 +158,7 @@ function formatGeneratedDateTime(dateVal) {
   hours = hours ? hours : 12;
   const formattedHours = String(hours).padStart(2, '0');
 
-  return `Generated: ${day} ${month} ${year} • ${formattedHours}:${minutes} ${ampm}`;
+  return `${day} ${month} ${year} • ${formattedHours}:${minutes} ${ampm}`;
 }
 
 export default function PosterModal({ isOpen, onClose, data, requestData }) {
@@ -183,17 +171,17 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
   const currentUser = useAuthStore.getState().user;
 
-  // Extract fields based on existing data structure variations
-  const hospital = posterData.hospital_name || posterData.hospitalName || posterData.venue || 'Hospital Name';
-  const rawPatientName = posterData.patient_name || posterData.patientName || 'Patient Name';
+  // Extract dynamic data fields
+  const hospital = posterData.hospital_name || posterData.hospitalName || posterData.venue || 'Aster MIMS Hospital';
+  const rawPatientName = posterData.patient_name || posterData.patientName || 'Pradeep';
   const patientName = toTitleCase(rawPatientName);
-  const rawPhone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || 'Contact Number';
+  const rawPhone = posterData.contact_phone || posterData.contact_number || posterData.contactNumber || posterData.mobile || '79026 19430';
   const phone = formatPhoneNumber(rawPhone);
-  const bloodGroup = posterData.blood_group || posterData.bloodGroup || 'O+';
-  const rawUnits = posterData.units_required || posterData.unitsRequired || '1';
-  const unitsText = `${rawUnits} UNIT${Number(rawUnits) > 1 || isNaN(Number(rawUnits)) ? 'S' : ''}`;
+  const bloodGroup = (posterData.blood_group || posterData.bloodGroup || 'B+').toUpperCase();
+  const rawUnits = posterData.units_required || posterData.unitsRequired || '2';
+  const unitsNumber = String(rawUnits).replace(/\D/g, '') || '2';
+  const unitsText = `${unitsNumber} UNIT${Number(unitsNumber) > 1 ? 'S' : ''}`;
 
-  // Extract and format the Meghala Name accurately
   const rawLocation =
     posterData.meghala_committee_name ||
     posterData.meghalaCommitteeName ||
@@ -213,27 +201,26 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
     currentUser?.meghala ||
     currentUser?.city ||
     currentUser?.organization_name ||
-    '';
+    'TEST MEGHALA COMMITTEE';
 
-  const location = formatMeghalaCommittee(rawLocation);
-
+  const committeeName = formatMeghalaCommittee(rawLocation);
   const requestId = posterData.request_id || posterData.id || posterData._id || 'JL-REQ';
-  const generatedTimeText = formatGeneratedDateTime(posterData.generated_at || new Date());
+  const timestampText = formatGeneratedDateTime(posterData.generated_at || new Date());
 
   const handleDownloadPNG = async () => {
     if (!posterRef.current) return;
     setDownloading(true);
     try {
-      await new Promise((res) => setTimeout(res, 100)); // wait for fonts/render
+      await new Promise((res) => setTimeout(res, 150));
 
       const dataUrl = await toPng(posterRef.current, {
         quality: 1.0,
-        pixelRatio: 2, // High resolution
+        pixelRatio: 2.5, // Ultra-crisp HD export
         cacheBust: true,
       });
 
       const link = document.createElement('a');
-      link.download = `idonate-blood-request-${requestId}.png`;
+      link.download = `DYFI-iDonate-${bloodGroup}-${patientName.replace(/\s+/g, '_')}-${requestId}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -249,8 +236,8 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Emergency Blood Request: ${bloodGroup}`,
-          text: `Urgent need for ${bloodGroup} blood at ${hospital}. Please help!`,
+          title: `URGENT: ${bloodGroup} Blood Needed for ${patientName}`,
+          text: `🚨 Urgent requirement for ${bloodGroup} blood (${unitsText}) at ${hospital}. Please contact: ${phone}`,
           url: url,
         });
       } catch (err) {
@@ -263,26 +250,6 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 overflow-y-auto select-none">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative text-slate-900 border border-slate-200 animate-in fade-in zoom-in duration-200">
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition cursor-pointer z-20"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="mb-4 pr-10">
-          <h2 className="text-xl font-bold">Generated Blood Request Poster</h2>
-          <p className="text-xs text-slate-500">Preview the dynamic poster below.</p>
-        </div>
-
-        {/* POSTER RENDER CONTAINER */}
-        <div className="mx-auto w-full shadow-lg rounded-xl overflow-x-auto overflow-y-hidden border border-slate-200 flex justify-center bg-slate-50">
-          {/* Explicit physical sizing in mm as requested by user */}
-          <div ref={posterRef} className="relative bg-white shrink-0 m-0 p-0" style={{ width: '90mm', height: '112.5mm' }}>
 
             {/* Background Template */}
             <img
