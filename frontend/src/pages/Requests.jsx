@@ -343,14 +343,19 @@ export default function Requests() {
   );
 
   const displayRequests = requests.filter((req) => {
-    const isPending = !req.verified || req.pending_approval === true;
+    const isOwner = user && String(req.requested_by || req.requestedBy) === String(user.id || user._id);
+    const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin', 'block_admin'].includes(user.role);
+    const isPending = req.pending_approval === true || req.status === 'Pending Approval';
+
     if (myRequestsOnly && user) {
       // Show own requests including pending approval ones
-      const isOwner = String(req.requested_by || req.requestedBy) === String(user.id || user._id);
       return isOwner;
     }
-    // Public feed: only show verified (non-pending) requests
-    return !isPending;
+    // If pending approval, only owner and privileged staff can see it until approved
+    if (isPending && !isOwner && !isPrivileged) {
+      return false;
+    }
+    return true;
   });
 
   return (

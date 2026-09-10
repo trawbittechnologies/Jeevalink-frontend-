@@ -81,7 +81,7 @@ export default function Landing() {
   const activeRequests = (requests || []).filter(
     (r) => (r.status || 'Pending').toLowerCase() !== 'fulfilled' &&
            (r.status || '').toLowerCase() !== 'cancelled' &&
-           (r.verified === true || r.verified === 1) &&
+           (r.status || '').toLowerCase() !== 'pending approval' &&
            !r.pending_approval
   );
 

@@ -35,15 +35,22 @@ export default function BloodRequests() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = requests.filter((r) => {
-    const isVerified = (r.verified === true || r.verified === 1) && !r.pending_approval;
-    if (!isVerified) return false;
+    const isOwner = user && (String(r.requested_by || r.requestedBy) === String(user.id || user._id));
+    const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin', 'block_admin'].includes(user.role);
+    const isPending = r.pending_approval === true || r.status === 'Pending Approval';
+
+    // If pending approval, only the requester and privileged staff can see it until approved
+    if (isPending && !isOwner && !isPrivileged) {
+      return false;
+    }
+
     const bg = r.bloodGroup || r.blood_group;
     const urg = r.urgencyLevel || r.urgency_level;
     let matches = (!filterBG || bg === filterBG) &&
       (!filterUrgency || urg === filterUrgency || (filterUrgency === 'Immediate' && urg === 'Emergency SOS'));
     if (filterStatus && filterStatus !== 'All') {
       if (filterStatus === 'Active') {
-        matches = matches && ['Pending', 'Waiting', 'Accepted'].includes(r.status);
+        matches = matches && ['Pending', 'Waiting', 'Accepted', 'Pending Approval'].includes(r.status);
       } else {
         matches = matches && r.status === filterStatus;
       }
