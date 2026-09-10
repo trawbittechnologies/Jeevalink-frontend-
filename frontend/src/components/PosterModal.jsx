@@ -205,14 +205,14 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
 
               {/* ------------------------------------------------------------
                   A. MAIN WHITE CARD DYNAMIC CONTENT
-                  (Shifted slightly right to left: 17.2% to completely clear hand/fingers)
+                  (Expanded width: 45.2% and left: 15.8% to display full phone number without clipping)
                  ------------------------------------------------------------ */}
               <div
                 className="absolute flex flex-col justify-between overflow-hidden"
                 style={{
                   top: '32.2%',
-                  left: '17.2%',
-                  width: '43.2%',
+                  left: '15.8%',
+                  width: '45.2%',
                   height: '32.2%',
                   padding: '6px 8px 6px 8px',
                 }}
@@ -270,22 +270,22 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
                 {/* 4. Contact & Units Row */}
                 <div className="flex items-center justify-between gap-1">
                   {/* Contact Number */}
-                  <div className="min-w-0 flex-1">
+                  <div className="shrink-0">
                     <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wide leading-none">
                       Contact
                     </div>
-                    <div className="text-[13.5px] font-black text-[#d31818] flex items-center gap-1.5 mt-0.5 tracking-tight leading-none truncate">
+                    <div className="text-[13px] font-black text-[#d31818] flex items-center gap-1 mt-0.5 tracking-tight leading-none whitespace-nowrap">
                       <Phone className="w-3 h-3 text-slate-800 fill-slate-800 shrink-0" />
-                      <span className="truncate">{phone}</span>
+                      <span>{phone}</span>
                     </div>
                   </div>
 
                   {/* Vertical Divider */}
-                  <div className="h-5 w-[1px] bg-slate-200/90 shrink-0 mx-1"></div>
+                  <div className="h-5 w-[1px] bg-slate-200/90 shrink-0 mx-0.5"></div>
 
                   {/* Units Red Rounded Badge */}
-                  <div className="bg-[#d31818] text-white px-2.5 py-1 rounded-xl shadow-xs shrink-0 flex items-center justify-center">
-                    <span className="text-[10px] font-black tracking-wide leading-none whitespace-nowrap">
+                  <div className="bg-[#d31818] text-white px-2 py-1 rounded-xl shadow-xs shrink-0 flex items-center justify-center">
+                    <span className="text-[9.5px] font-black tracking-wide leading-none whitespace-nowrap">
                       {unitsText}
                     </span>
                   </div>
