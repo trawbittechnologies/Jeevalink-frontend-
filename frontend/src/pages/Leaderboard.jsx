@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Trophy, Award, Medal, Crown, Flame, MapPin, Users, Sparkles, RefreshCw, Building2, Droplets, Heart, Zap, Shield } from 'lucide-react';
 import api from '../store/api.js';
 
@@ -15,39 +15,11 @@ export default function Leaderboard() {
   const fetchLeaderboard = useCallback(async () => {
     try {
       const res = await api.get('/leaderboard');
-      if (res.data?.success) {
+      if (res.data?.success && res.data.data) {
         setData(res.data.data);
       }
     } catch (err) {
       console.error("Failed to load leaderboard:", err);
-      // Fallback data if API returns empty
-      setData({
-        highest_donors: [
-          { id: 1, primary_name: 'Rahul V', blood_group: 'O+', district: 'Kozhikode', meghala: 'Kozhikode North', reward_points: 1250, badge: 'Blood Hero' },
-          { id: 2, primary_name: 'Anjali Nair', blood_group: 'A+', district: 'Malappuram', meghala: 'Tirur', reward_points: 980, badge: 'Life Saver' },
-          { id: 3, primary_name: 'Muhammed Shafi', blood_group: 'B+', district: 'Wayanad', meghala: 'Kalpetta', reward_points: 850, badge: 'Life Saver' },
-          { id: 4, primary_name: 'Deepa K', blood_group: 'AB+', district: 'Kannur', meghala: 'Thalassery', reward_points: 620, badge: 'Life Saver' },
-          { id: 5, primary_name: 'Arun Kumar', blood_group: 'O-', district: 'Palakkad', meghala: 'Ottapalam', reward_points: 450, badge: 'First Drop' }
-        ],
-        highest_block_committee: [
-          { blockCommitteeName: 'Kozhikode North Block', district: 'Kozhikode', total_points: 8400, total_members: 62 },
-          { blockCommitteeName: 'Koduvally Block', district: 'Kozhikode', total_points: 7100, total_members: 54 },
-          { blockCommitteeName: 'Manjeri Block', district: 'Malappuram', total_points: 6500, total_members: 48 },
-          { blockCommitteeName: 'Kalpetta Block', district: 'Wayanad', total_points: 5900, total_members: 42 }
-        ],
-        highest_meghala_committee: [
-          { meghala: 'Kozhikode North Meghala', district: 'Kozhikode', blockCommitteeName: 'Kozhikode North', total_points: 4200, total_members: 34 },
-          { meghala: 'Kalpetta Central Meghala', district: 'Wayanad', blockCommitteeName: 'Kalpetta', total_points: 3800, total_members: 28 },
-          { meghala: 'Manjeri Town Meghala', district: 'Malappuram', blockCommitteeName: 'Manjeri', total_points: 3100, total_members: 25 }
-        ],
-        badges: [
-          { points: 100, badge: 'First Drop', description: 'Completed 1st successful donation!' },
-          { points: 500, badge: 'Life Saver', description: 'Earned 500 points rescuing lives.' },
-          { points: 1000, badge: 'Blood Hero', description: 'Reached 1,000 points milestone.' },
-          { points: 2500, badge: 'Red Guardian', description: 'Reached 2,500 points champion status.' },
-          { points: 5000, badge: 'Legend Donor', description: 'Attained highest 5,000 points legend tier.' }
-        ]
-      });
     } finally {
       setLoading(false);
     }
@@ -175,7 +147,7 @@ export default function Leaderboard() {
                         <div>
                           <h4 className="font-bold text-slate-900 text-base">{donor.primary_name || donor.name}</h4>
                           <p className="text-xs text-slate-500 flex items-center gap-2">
-                            <span>District: {donor.district || 'Kerala'}</span>
+                            {donor.district && <span>District: {donor.district}</span>}
                             {donor.meghala && <span>• {donor.meghala}</span>}
                           </p>
                         </div>
@@ -185,7 +157,7 @@ export default function Leaderboard() {
                         <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-100 border border-amber-300 rounded-full text-amber-800 font-bold text-[11px] mb-1">
                           <Sparkles className="w-3.5 h-3.5 text-amber-600" /> {donor.badge || 'First Drop'}
                         </div>
-                        <p className="text-xs font-black text-red-600">{donor.reward_points || 100} Points</p>
+                        <p className="text-xs font-black text-red-600">{donor.reward_points || 0} Points</p>
                       </div>
                     </div>
                   ))
@@ -210,17 +182,19 @@ export default function Leaderboard() {
                       <div className="flex items-center gap-3">
                         {getRankBadge(idx)}
                         <div>
-                          <h4 className="font-bold text-slate-900 text-base">{b.blockCommitteeName || 'Central Block'}</h4>
-                          <p className="text-xs text-slate-500">
-                            District: <span className="text-slate-700 font-semibold">{b.district || 'Kozhikode'}</span>
-                          </p>
+                          <h4 className="font-bold text-slate-900 text-base">{b.blockCommitteeName}</h4>
+                          {b.district && (
+                            <p className="text-xs text-slate-500">
+                              District: <span className="text-slate-700 font-semibold">{b.district}</span>
+                            </p>
+                          )}
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <span className="font-black text-red-600 text-base">{b.total_points || 1000} Points</span>
+                        <span className="font-black text-red-600 text-base">{b.total_points || 0} Points</span>
                         <p className="text-xs text-slate-500 flex items-center justify-end gap-1 font-medium">
-                          <Users className="w-3.5 h-3.5 text-slate-400" /> {b.total_members || 10} Active Volunteers & Members
+                          <Users className="w-3.5 h-3.5 text-slate-400" /> {b.total_members || 0} Active Volunteers & Members
                         </p>
                       </div>
                     </div>
@@ -246,15 +220,18 @@ export default function Leaderboard() {
                       <div className="flex items-center gap-3">
                         {getRankBadge(idx)}
                         <div>
-                          <h4 className="font-bold text-slate-900 text-base">{m.meghala || 'District Meghala'}</h4>
-                          <p className="text-xs text-slate-500">Block: {m.blockCommitteeName || 'Central'} • District: {m.district || 'Kozhikode'}</p>
+                          <h4 className="font-bold text-slate-900 text-base">{m.meghala}</h4>
+                          <p className="text-xs text-slate-500">
+                            {m.blockCommitteeName && `Block: ${m.blockCommitteeName}`}
+                            {m.district && ` • District: ${m.district}`}
+                          </p>
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <p className="font-black text-amber-600 text-base">{m.total_points || 500} Total Pts</p>
+                        <p className="font-black text-amber-600 text-base">{m.total_points || 0} Total Pts</p>
                         <p className="text-xs text-slate-500 flex items-center justify-end gap-1 font-medium">
-                          <Users className="w-3.5 h-3.5 text-slate-400" /> {m.total_members || 1} Donors
+                          <Users className="w-3.5 h-3.5 text-slate-400" /> {m.total_members || 0} Donors
                         </p>
                       </div>
                     </div>
