@@ -483,16 +483,26 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
-  // Admin Dashboard Actions
+  // User and Donor Fetching
   fetchUsers: async () => {
     try {
       const res = await api.get('/admin/users');
-      if (res.data.success) {
+      if (res.data?.success) {
         const usersList = res.data.data.users || (Array.isArray(res.data.data) ? res.data.data : []);
         set({ allUsers: usersList });
+        return;
       }
-    } catch (err) {
-      console.error('Failed to fetch users', err);
+    } catch {
+      // Fallback for non-admin roles (e.g. volunteer, unit squad)
+      try {
+        const fallbackRes = await api.get('/donors/search');
+        if (fallbackRes.data?.success) {
+          const donorsList = fallbackRes.data.data.donors || [];
+          set({ allUsers: donorsList, donors: donorsList });
+        }
+      } catch (fErr) {
+        console.warn('Failed to fetch fallback donors list', fErr);
+      }
     }
   },
 
