@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, MapPin, Flag, AlertTriangle, UserCheck, ShieldCheck, Heart, MessageSquare, Droplet, Sparkles, CheckCircle2, Clock } from 'lucide-react';
+import { Phone, MapPin, Flag, AlertTriangle, UserCheck, ShieldCheck, Heart, MessageSquare, Droplet, Sparkles, CheckCircle2, Clock, Users } from 'lucide-react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import Modal from './Modal.jsx';
@@ -64,53 +64,64 @@ export default function DonorCard({ donor }) {
     }
   }
 
-  // Resolve assigned Meghala volunteer/coordinator contact (Never Block Admin)
-  let volunteerName = donor.volunteerName || donor.volunteer_name;
-  let volunteerPhone = donor.volunteerPhone || donor.volunteer_phone;
-  let volunteerRole = donor.volunteerRole || donor.volunteer_role;
+  // Resolve assigned Meghala volunteer/coordinator contacts (Strictly NO Block Admin)
+  let vol1Name = donor.volunteerName || donor.volunteer_name;
+  let vol1Phone = donor.volunteerPhone || donor.volunteer_phone;
+  let vol1Role = donor.volunteerRole || donor.volunteer_role;
 
-  // Filter out block_admin if it came from donor data or legacy props
-  if (volunteerRole === 'block_admin') {
-    volunteerName = null;
-    volunteerPhone = null;
-    volunteerRole = null;
+  let vol2Name = donor.volunteerName2 || donor.volunteer_name_2 || donor.secondaryName || donor.secondary_name;
+  let vol2Phone = donor.volunteerPhone2 || donor.volunteer_phone_2 || donor.secondaryContactNumber || donor.secondary_phone;
+  let vol2Role = donor.volunteerRole2 || donor.volunteer_role_2;
+
+  // Filter out block_admin
+  if (vol1Role === 'block_admin') {
+    vol1Name = null;
+    vol1Phone = null;
+    vol1Role = null;
+  }
+  if (vol2Role === 'block_admin') {
+    vol2Name = null;
+    vol2Phone = null;
+    vol2Role = null;
   }
 
-  if (!volunteerPhone && allUsers && allUsers.length > 0) {
+  if (allUsers && allUsers.length > 0) {
     const dDistrict = (district || '').toLowerCase().trim();
     const dCity = (city || '').toLowerCase().trim();
 
-    // Look for Meghala volunteer or unit squad only (DO NOT match block_admin)
-    let matchedVol = allUsers.find((u) => 
+    // Look for Meghala volunteer or unit squad only
+    const matchedVols = allUsers.filter((u) => 
       ['volunteer', 'unit_squad'].includes(u.role) &&
       (u.status === 'Active' || !u.status) &&
       (u.district || '').toLowerCase().trim() === dDistrict &&
       (u.city || '').toLowerCase().trim() === dCity
     );
 
-    if (!matchedVol) {
-      matchedVol = allUsers.find((u) => 
-        ['volunteer', 'unit_squad'].includes(u.role) &&
-        (u.status === 'Active' || !u.status) &&
-        (u.district || '').toLowerCase().trim() === dDistrict
-      );
+    const fallbackVols = matchedVols.length > 0 ? matchedVols : allUsers.filter((u) => 
+      ['volunteer', 'unit_squad'].includes(u.role) &&
+      (u.status === 'Active' || !u.status) &&
+      (u.district || '').toLowerCase().trim() === dDistrict
+    );
+
+    const pool = fallbackVols.length > 0 ? fallbackVols : allUsers.filter((u) => ['volunteer', 'unit_squad'].includes(u.role));
+
+    if (!vol1Phone && pool[0]) {
+      vol1Name = pool[0].primaryName || pool[0].primary_name || pool[0].name;
+      vol1Phone = pool[0].mobile || pool[0].phone;
+      vol1Role = pool[0].role;
     }
 
-    if (!matchedVol) {
-      matchedVol = allUsers.find((u) => ['volunteer', 'unit_squad'].includes(u.role));
-    }
-
-    if (matchedVol) {
-      volunteerName = matchedVol.primaryName || matchedVol.primary_name || matchedVol.name;
-      volunteerPhone = matchedVol.mobile || matchedVol.phone;
-      volunteerRole = matchedVol.role;
+    if (!vol2Phone && pool[1] && pool[1] !== pool[0]) {
+      vol2Name = pool[1].primaryName || pool[1].primary_name || pool[1].name;
+      vol2Phone = pool[1].mobile || pool[1].phone;
+      vol2Role = pool[1].role;
     }
   }
 
   // Final fallbacks: use donor's secondary contact or general Meghala Coordinator
-  if (!volunteerName) volunteerName = donor.secondaryName || donor.secondary_name || 'Meghala Coordinator';
-  if (!volunteerPhone) volunteerPhone = donor.secondaryContactNumber || donor.secondary_phone || '9998593194';
-  if (!volunteerRole || volunteerRole === 'block_admin') volunteerRole = 'volunteer';
+  if (!vol1Name) vol1Name = donor.secondaryName || donor.secondary_name || 'Meghala Coordinator';
+  if (!vol1Phone) vol1Phone = donor.secondaryContactNumber || donor.secondary_phone || '9998593194';
+  if (!vol1Role || vol1Role === 'block_admin') vol1Role = 'volunteer';
 
   // Compute Meghala Committee Display Name
   const rawMeghala = donor.meghalaCommitteeName || donor.meghala_committee_name || donor.meghalaName || donor.meghala_name || city;
@@ -125,182 +136,203 @@ export default function DonorCard({ donor }) {
     }
   }
 
-  const roleLabel = volunteerRole === 'unit_squad' ? 'Unit Squad' : 'Meghala Volunteer';
+  // Build the list of contacts to show
+  const contactsList = [
+    {
+      id: 1,
+      label: 'Volunteer 1',
+      name: vol1Name,
+      phone: vol1Phone,
+      role: vol1Role === 'unit_squad' ? 'Unit Squad' : 'Meghala Volunteer',
+    },
+  ];
 
-  const whatsappMessage = encodeURIComponent(`Hello ${volunteerName} (${meghalaDisplayName}), I found blood donor ${donorName} (${bg}) on iDonate in ${city}, ${district}. Please help connect for an urgent donation.`);
+  if (vol2Phone && vol2Name && (vol2Phone !== vol1Phone || vol2Name !== vol1Name)) {
+    contactsList.push({
+      id: 2,
+      label: 'Volunteer 2',
+      name: vol2Name,
+      phone: vol2Phone,
+      role: vol2Role === 'unit_squad' ? 'Unit Squad' : 'Volunteer 2',
+    });
+  }
 
   return (
-    <div className="group relative bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">
-      {/* Top Ambient Glow Pill */}
-      <div className="absolute -top-12 -right-12 w-28 h-28 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all pointer-events-none" />
-
+    <div className="group bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between text-left relative overflow-hidden">
       <div>
-        {/* Top Header Row */}
-        <div className="flex items-start justify-between gap-3">
-          {/* Avatar & Name */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-md shrink-0 border border-slate-100 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-800">
+        {/* Top Header: Avatar, Name, Location, Blood Badge */}
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="w-11 h-11 rounded-xl overflow-hidden shadow-xs border border-slate-100 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-800">
                 {pic ? (
                   <img src={getStorageUrl(pic)} alt={donorName} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center text-white font-black text-lg">
+                  <div className="w-full h-full bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center text-white font-black text-sm">
                     {donorName[0]?.toUpperCase()}
                   </div>
                 )}
               </div>
-              {/* Online/Available Status Ring */}
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-zinc-900 ${isAvailable ? 'bg-emerald-500 shadow-sm' : 'bg-slate-400'}`} title={isAvailable ? 'Active & Ready to Donate' : 'Currently Busy'} />
+              <div
+                className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900 ${
+                  isAvailable ? 'bg-emerald-500' : 'bg-slate-400'
+                }`}
+                title={isAvailable ? 'Available Now' : 'Busy / Unavailable'}
+              />
             </div>
 
+            {/* Name + ID + City */}
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="text-base font-extrabold text-slate-900 dark:text-zinc-100 truncate tracking-tight">{donorName}</h4>
-                <ShieldCheck className="w-4 h-4 text-sky-500 shrink-0" title="Verified Donor" />
+                <h4 className="text-sm font-black text-slate-900 dark:text-zinc-100 truncate">{donorName}</h4>
+                <ShieldCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" title="Verified Donor" />
                 {donorJeevalinkId && (
-                  <span className="text-[10px] font-mono font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 border border-red-100 dark:border-red-900/50 px-1.5 py-0.5 rounded-md shrink-0">
+                  <span className="text-[9px] font-mono font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/40 px-1 py-0.2 rounded shrink-0">
                     {donorJeevalinkId}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400 mt-0.5 font-medium">
-                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <p className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-zinc-400 font-medium mt-0.5 truncate">
+                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                 <span className="truncate">{city}, {district}</span>
                 {distance !== undefined && distance !== null && (
-                  <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500">• {distance} km</span>
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 shrink-0">• {distance} km</span>
                 )}
-              </div>
+              </p>
             </div>
           </div>
 
-          {/* Blood Group Badge & Report Flag */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className={`px-3.5 py-1.5 rounded-2xl bg-gradient-to-r ${bloodColors[bg] || 'from-red-600 to-rose-600 text-white'} shadow-md flex items-center gap-1.5`}>
-              <Droplet className="w-4 h-4 fill-white text-white opacity-90" />
-              <span className="text-base font-black tracking-wide">{bg}</span>
+          {/* Blood Badge & Report */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className={`px-2.5 py-1 rounded-xl bg-gradient-to-r ${bloodColors[bg] || 'from-red-600 to-rose-600 text-white'} shadow-xs flex items-center gap-1`}>
+              <Droplet className="w-3.5 h-3.5 fill-white text-white opacity-90" />
+              <span className="text-xs font-black tracking-wide">{bg}</span>
             </div>
-
             {user && String(userId) !== String(donorId) && (
               <button
                 onClick={() => setShowReportModal(true)}
-                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-all cursor-pointer"
+                className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer"
                 title="Report Donor"
               >
-                <Flag className="w-3.5 h-3.5" />
+                <Flag className="w-3 h-3" />
               </button>
             )}
           </div>
         </div>
 
-        {/* Dynamic Detail Badges (Age, Sex, Eligibility) */}
-        <div className="flex flex-wrap items-center gap-2 mt-4">
-          <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-xl border ${
+        {/* Minimal Badges Row (Eligibility, Age/Sex, Availability) */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-3">
+          <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-lg border ${
             eligibility === 'Eligible'
               ? 'text-emerald-700 bg-emerald-50/80 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400'
               : eligibility === 'Ineligible'
               ? 'text-rose-700 bg-rose-50/80 border-rose-200 dark:bg-rose-950/30 dark:border-rose-800 dark:text-rose-400'
               : 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400'
           }`}>
-            {eligibility === 'Eligible' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+            {eligibility === 'Eligible' ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
             {eligibility}
           </span>
 
           {(sex || age) && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-300">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-300">
               {sex && <span className="capitalize">{sex}</span>}
               {sex && age && <span>•</span>}
-              {age && <span>{age} yrs</span>}
+              {age && <span>{age}y</span>}
             </span>
           )}
 
-          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-xl ${
+          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg ${
             isAvailable 
-              ? 'bg-emerald-100/70 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' 
+              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' 
               : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'
           }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-            {isAvailable ? 'Available Now' : 'Busy / Unavailable'}
+            {isAvailable ? 'Available' : 'Busy'}
           </span>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-2.5 my-4">
-          <div className="p-2.5 bg-slate-50 dark:bg-zinc-800/60 rounded-2xl text-center border border-slate-100 dark:border-zinc-800">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-[9px]">Donations</p>
-            <p className="text-base font-black text-slate-900 dark:text-zinc-100 mt-0.5">{donations}</p>
+        {/* Minimal Stats Row */}
+        <div className="grid grid-cols-3 gap-2 my-3">
+          <div className="p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-xl text-center border border-slate-100 dark:border-zinc-800">
+            <p className="text-[9px] font-bold text-slate-400 uppercase">Donations</p>
+            <p className="text-sm font-black text-slate-900 dark:text-zinc-100">{donations}</p>
           </div>
-          <div className="p-2.5 bg-slate-50 dark:bg-zinc-800/60 rounded-2xl text-center border border-slate-100 dark:border-zinc-800">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-[9px]">Lives Saved</p>
-            <p className="text-base font-black text-red-600 dark:text-red-400 mt-0.5 flex items-center justify-center gap-1">
-              <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" /> {livesSaved}
+          <div className="p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-xl text-center border border-slate-100 dark:border-zinc-800">
+            <p className="text-[9px] font-bold text-slate-400 uppercase">Lives Saved</p>
+            <p className="text-sm font-black text-red-600 dark:text-red-400 flex items-center justify-center gap-0.5">
+              <Heart className="w-3 h-3 fill-red-500 text-red-500" /> {livesSaved}
             </p>
           </div>
-          <div className="p-2.5 bg-slate-50 dark:bg-zinc-800/60 rounded-2xl text-center border border-slate-100 dark:border-zinc-800">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-[9px]">Match</p>
-            <p className="text-base font-black text-amber-600 dark:text-amber-400 mt-0.5 flex items-center justify-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> {donor.compatibilityScore || 95}%
+          <div className="p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-xl text-center border border-slate-100 dark:border-zinc-800">
+            <p className="text-[9px] font-bold text-slate-400 uppercase">Match</p>
+            <p className="text-sm font-black text-amber-600 dark:text-amber-400 flex items-center justify-center gap-0.5">
+              <Sparkles className="w-3 h-3" /> {donor.compatibilityScore || 95}%
             </p>
           </div>
         </div>
       </div>
 
-      {/* Meghala Committee & Volunteer Contact Card Section */}
-      <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800 space-y-3">
-        <div className="bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 rounded-2xl p-3 space-y-2">
-          {/* Meghala Committee & Volunteer Header */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm shrink-0">
-                <UserCheck className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider truncate" title={meghalaDisplayName}>
-                  {meghalaDisplayName}
-                </p>
-                <p className="text-xs font-black text-slate-900 dark:text-zinc-100 truncate max-w-[170px]" title={volunteerName}>
-                  {volunteerName}
-                </p>
-              </div>
-            </div>
-            <span className="text-[10px] font-extrabold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 rounded-md capitalize shrink-0">
-              {roleLabel}
-            </span>
-          </div>
-
-          {/* Explicitly Visible Phone Number */}
-          {volunteerPhone && (
-            <div className="flex items-center justify-between pt-1.5 border-t border-emerald-100 dark:border-emerald-900/40 text-xs">
-              <span className="font-bold text-slate-600 dark:text-zinc-400">Meghala Contact:</span>
-              <span className="font-black text-emerald-700 dark:text-emerald-400 tracking-wide font-mono text-xs">
-                {volunteerPhone}
-              </span>
-            </div>
-          )}
+      {/* Minimal Meghala Committee & Volunteer Contacts Card */}
+      <div className="pt-3 border-t border-slate-100 dark:border-zinc-800 space-y-2">
+        {/* Meghala Committee Title Header */}
+        <div className="flex items-center justify-between gap-1 text-[10px] px-1">
+          <span className="font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider truncate flex items-center gap-1" title={meghalaDisplayName}>
+            <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            {meghalaDisplayName}
+          </span>
+          <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 shrink-0">
+            {contactsList.length > 1 ? '2 Contacts' : 'Coordinator'}
+          </span>
         </div>
 
-        {/* Action Buttons: Phone & WhatsApp */}
-        {volunteerPhone ? (
-          <div className="grid grid-cols-2 gap-2">
-            <a
-              href={`tel:${volunteerPhone}`}
-              className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-emerald-200 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Phone className="w-3.5 h-3.5" /> Call Volunteer
-            </a>
-            <a
-              href={`https://wa.me/91${volunteerPhone.replace(/\D/g, '')}?text=${whatsappMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> WhatsApp
-            </a>
-          </div>
-        ) : (
-          <div className="py-2.5 px-3 bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 text-xs font-semibold rounded-xl text-center">
-            Coordinator contact pending assignment
-          </div>
-        )}
+        {/* Minimal Contacts List */}
+        <div className="space-y-1.5">
+          {contactsList.map((c) => {
+            const waMsg = encodeURIComponent(`Hello ${c.name} (${meghalaDisplayName}), I found blood donor ${donorName} (${bg}) on iDonate in ${city}, ${district}. Please help connect for an urgent donation.`);
+
+            return (
+              <div
+                key={c.id}
+                className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-xl p-2.5 flex items-center justify-between gap-2 transition-all"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-xs font-black text-slate-900 dark:text-zinc-100 truncate" title={c.name}>
+                      {c.name}
+                    </p>
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 rounded capitalize shrink-0">
+                      {c.role}
+                    </span>
+                  </div>
+                  <p className="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                    {c.phone}
+                  </p>
+                </div>
+
+                {/* Quick Action Buttons */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <a
+                    href={`tel:${c.phone}`}
+                    className="w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all shadow-xs cursor-pointer"
+                    title={`Call ${c.name}`}
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                  </a>
+                  <a
+                    href={`https://wa.me/91${c.phone.replace(/\D/g, '')}?text=${waMsg}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-emerald-400 flex items-center justify-center transition-all cursor-pointer"
+                    title={`WhatsApp ${c.name}`}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Report Modal */}
