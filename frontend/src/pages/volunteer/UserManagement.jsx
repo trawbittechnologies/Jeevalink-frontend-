@@ -308,6 +308,8 @@ export default function UserManagement() {
 
     const autoDistrict = currentUser?.district || 'Kozhikode';
     const placeVal = form.place || form.city || '';
+    const meghalaVal = currentUser?.city || currentUser?.meghala || currentUser?.organization_name || placeVal;
+    const orgVal = currentUser?.organization_name || currentUser?.block || currentUser?.city || '';
 
     const fd = new FormData();
     Object.keys(form).forEach(key => {
@@ -319,6 +321,10 @@ export default function UserManagement() {
     fd.set('district', autoDistrict);
     fd.set('place', placeVal);
     fd.set('city', placeVal);
+    fd.set('meghala', meghalaVal);
+    if (orgVal) {
+      fd.set('organization_name', orgVal);
+    }
     fd.set('role', 'donor');
 
     const res = await volunteerAddUser(fd);
