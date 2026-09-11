@@ -8,11 +8,10 @@ import {
   Bell, Users, Download, Star,
   AlertCircle, Loader2, X, Search, RefreshCw,
   HeartHandshake, MapPin, Phone, Building2,
-  Share2, ShieldCheck, Filter,
-  Layers, ChevronRight, MessageCircle,
+  Filter, Layers, ChevronRight, MessageCircle,
   Check, Calendar, Droplets
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import PosterModal from '../components/PosterModal.jsx';
 
@@ -391,70 +390,71 @@ export default function VolunteerDashboard() {
   const districtName = user?.district || user?.district_name || 'Kasaragod';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 text-left pb-16 select-none">
+    <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 text-left px-2 sm:px-4 lg:px-6 pb-24 lg:pb-16 select-none">
 
-      {/* ─── Clean Minimal Header ─── */}
-      <div className="bg-red-600 text-white rounded-2xl p-6 sm:p-7 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+      {/* ─── Clean Minimal Header (Mobile Responsive) ─── */}
+      <div className="bg-red-600 text-white rounded-2xl p-4 sm:p-6 lg:p-7 shadow-sm">
+        <div className="flex flex-col gap-4">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-md bg-white text-red-700 font-black text-xs uppercase tracking-wider shadow-xs">
+              <span className="px-2 py-0.5 rounded-md bg-white text-red-700 font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-xs">
                 DYFI
               </span>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              <h1 className="text-lg sm:text-2xl font-black tracking-tight text-white leading-tight">
                 {committeeName}
               </h1>
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-red-100 mt-2.5 pt-2.5 border-t border-red-500/60 flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-red-100 mt-2 pt-2 border-t border-red-500/60 flex-wrap">
               <span>District: <strong className="text-white font-bold">{districtName}</strong></span>
-              <span>•</span>
+              <span className="opacity-60">•</span>
               <span>Block: <strong className="text-white font-bold">{blockName}</strong></span>
-              <span>•</span>
-              <span>Volunteer Desk: <strong className="text-white font-bold">{user?.primary_name || user?.name || 'Active'}</strong></span>
+              <span className="opacity-60">•</span>
+              <span>Volunteer: <strong className="text-white font-bold">{user?.primary_name || user?.name || 'Active'}</strong></span>
             </div>
           </div>
 
-          {/* Quick Action Navigation Buttons */}
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {/* Quick Action Buttons Grid (Mobile Friendly) */}
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 pt-1">
             <Link
               to="/volunteer/accepted-donors"
-              className="px-3.5 py-2 bg-white text-red-700 hover:bg-red-50 font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5"
+              className="px-3 py-2 bg-white text-red-700 hover:bg-red-50 font-bold text-xs rounded-xl transition shadow-xs flex items-center justify-center gap-1.5 text-center"
             >
-              <HeartHandshake className="w-4 h-4 text-red-600" />
+              <HeartHandshake className="w-4 h-4 text-red-600 shrink-0" />
               <span>Accepted Donors</span>
             </Link>
 
             <Link
               to="/volunteer/users"
-              className="px-3.5 py-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 border border-red-500/40"
+              className="px-3 py-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-red-500/40 text-center"
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 shrink-0" />
               <span>Users</span>
             </Link>
 
             <Link
               to="/volunteer/unit-committee"
-              className="px-3.5 py-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 border border-red-500/40"
+              className="px-3 py-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-red-500/40 text-center"
             >
-              <Building2 className="w-4 h-4" />
+              <Building2 className="w-4 h-4 shrink-0" />
               <span>Unit Squad</span>
             </Link>
 
             <button
               onClick={handleRefreshAll}
               disabled={loadingPending}
-              className="px-3 py-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-60 border border-red-500/40"
+              className="px-3 py-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 border border-red-500/40 text-center"
               title="Refresh Data"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loadingPending ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${loadingPending ? 'animate-spin' : ''}`} />
+              <span>Sync Data</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ─── Minimal Overview Stat Cards ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ─── Minimal Overview Stat Cards (Responsive 2x2 Grid) ─── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {stats.map((s) => {
           const Icon = s.icon;
           const isSelected = (tab === s.id);
@@ -467,21 +467,21 @@ export default function VolunteerDashboard() {
                   setTab(s.id);
                 }
               }}
-              className={`bg-white rounded-2xl p-5 border ${s.borderAccent} shadow-xs transition hover:border-red-300 cursor-pointer flex items-center justify-between ${
+              className={`bg-white rounded-2xl p-3.5 sm:p-5 border ${s.borderAccent} shadow-xs transition hover:border-red-300 cursor-pointer flex items-center justify-between ${
                 isSelected ? 'ring-2 ring-red-500/30 border-red-500' : ''
               }`}
             >
               <div>
-                <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                <p className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none">
                   {s.value}
                 </p>
-                <p className="text-xs font-medium text-slate-500 mt-0.5">
+                <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1">
                   {s.label}
                 </p>
               </div>
 
-              <div className={`w-10 h-10 rounded-xl ${s.iconBg} ${s.iconColor} flex items-center justify-center shrink-0`}>
-                <Icon className="w-5 h-5" />
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl ${s.iconBg} ${s.iconColor} flex items-center justify-center shrink-0`}>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           );
@@ -490,26 +490,26 @@ export default function VolunteerDashboard() {
 
       {/* ─── Pending Approval Highlight Queue ─── */}
       {pendingList.length > 0 && (
-        <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 space-y-4 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/80 pb-3">
+        <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-amber-200/80 pb-2.5">
             <div>
-              <h3 className="text-base font-bold text-amber-950 flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-amber-600" />
+              <h3 className="text-sm sm:text-base font-bold text-amber-950 flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 shrink-0" />
                 Pending Verification ({pendingList.length})
               </h3>
-              <p className="text-xs text-amber-800 mt-0.5">
-                Review blood requests before publishing them to the live public feed.
+              <p className="text-[11px] sm:text-xs text-amber-800 mt-0.5">
+                Review blood requests before publishing to public feeds.
               </p>
             </div>
             <button
               onClick={() => setTab('pending')}
               className="text-xs font-bold text-amber-800 hover:text-amber-950 hover:underline self-start sm:self-auto cursor-pointer"
             >
-              View all pending →
+              Focus pending ({pendingList.length}) →
             </button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-3.5">
+          <div className="grid sm:grid-cols-2 gap-3">
             {pendingList.slice(0, 4).map((req) => {
               const reqId = req.id || req._id;
               const bg = req.blood_group || req.bloodGroup || '—';
@@ -523,30 +523,30 @@ export default function VolunteerDashboard() {
               return (
                 <div
                   key={reqId}
-                  className="bg-white rounded-xl p-4 border border-amber-200 shadow-xs space-y-3 flex flex-col justify-between"
+                  className="bg-white rounded-xl p-3.5 border border-amber-200 shadow-xs space-y-3 flex flex-col justify-between"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-1 bg-red-600 text-white font-extrabold text-xs rounded-lg shadow-2xs">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 bg-red-600 text-white font-black text-xs rounded-md shadow-2xs">
                           {bg}
                         </span>
                         <div>
-                          <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
                             {patient}
                           </h4>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-[11px] text-slate-500">
                             {hospital}, {city}
                           </p>
                         </div>
                       </div>
 
-                      <span className="text-[10px] font-semibold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md border border-amber-200">
+                      <span className="text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md border border-amber-200 shrink-0">
                         {urgency}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-600 space-y-0.5 pt-1">
+                    <div className="text-[11px] sm:text-xs text-slate-600 space-y-0.5 pt-1">
                       <p>Units Needed: <strong className="text-slate-900">{units} Bag(s)</strong></p>
                       <p>
                         Contact: <a href={`tel:${contact}`} className="text-red-600 font-semibold hover:underline">{contact}</a>
@@ -559,7 +559,7 @@ export default function VolunteerDashboard() {
                     <button
                       onClick={() => handleApprove(reqId, req)}
                       disabled={approvingId === reqId}
-                      className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                      className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-60"
                     >
                       {approvingId === reqId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                       Approve
@@ -567,18 +567,19 @@ export default function VolunteerDashboard() {
 
                     <button
                       onClick={() => handlePoster(reqId)}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center gap-1 cursor-pointer"
+                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center gap-1 cursor-pointer"
                     >
-                      <Download className="w-3.5 h-3.5 text-red-600" /> Poster
+                      <Download className="w-3.5 h-3.5 text-red-600" />
+                      <span className="hidden sm:inline">Poster</span>
                     </button>
 
                     <button
                       onClick={() => handleReject(reqId)}
                       disabled={rejectingId === reqId}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center gap-1 cursor-pointer disabled:opacity-60"
+                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center gap-1 cursor-pointer disabled:opacity-60"
+                      title="Reject"
                     >
                       {rejectingId === reqId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
-                      Reject
                     </button>
                   </div>
                 </div>
@@ -588,21 +589,21 @@ export default function VolunteerDashboard() {
         </div>
       )}
 
-      {/* ─── Main Grid Layout ─── */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* ─── Main Grid Layout (Mobile Stacked) ─── */}
+      <div className="grid lg:grid-cols-3 gap-5 sm:gap-6">
 
         {/* ── Left Column (2 Cols): Blood Requests Queue ── */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-3.5 sm:space-y-4">
 
             {/* Queue Header & Search */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-1.5">
                   <Layers className="w-4 h-4 text-red-600" />
                   Blood Requests Queue
                 </h3>
-                <p className="text-xs text-slate-500">Manage and coordinate blood donation cases in your jurisdiction.</p>
+                <p className="text-[11px] sm:text-xs text-slate-500">Manage and coordinate blood donation cases in your area.</p>
               </div>
 
               <div className="relative w-full sm:w-60">
@@ -612,20 +613,20 @@ export default function VolunteerDashboard() {
                   placeholder="Search patient, hospital..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-red-500 focus:outline-none text-slate-900"
+                  className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-red-500 focus:outline-none text-slate-900"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Primary Tab Navigation */}
+            {/* Primary Tab Navigation (Mobile Scrollable) */}
             <div className="flex bg-slate-100 p-1 rounded-xl gap-1 overflow-x-auto no-scrollbar">
               {[
                 ['pending', 'Pending Approval', pendingList.length],
@@ -636,31 +637,31 @@ export default function VolunteerDashboard() {
                 <button
                   key={val}
                   onClick={() => setTab(val)}
-                  className={`flex-1 min-w-[110px] py-2 px-3 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 min-w-[105px] py-2 px-2 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1 shrink-0 ${
                     tab === val
                       ? 'bg-red-600 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                 >
-                  <span>{label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${tab === val ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  <span className="whitespace-nowrap">{label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${tab === val ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
                     {count}
                   </span>
                 </button>
               ))}
             </div>
 
-            {/* Filter Chips */}
-            <div className="flex items-center justify-between gap-2 flex-wrap pt-1 text-xs">
-              <div className="flex items-center gap-1 flex-wrap">
-                <span className="text-slate-400 text-[11px] font-bold mr-1 flex items-center gap-1">
-                  <Filter className="w-3 h-3" /> Blood:
+            {/* Filter Chips (Mobile Scrollable) */}
+            <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5 text-xs">
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-slate-400 text-[11px] font-bold mr-1 flex items-center gap-0.5">
+                  <Filter className="w-3 h-3" /> Group:
                 </span>
                 {['ALL', ...BLOOD_GROUPS].map((bg) => (
                   <button
                     key={bg}
                     onClick={() => setSelectedBloodFilter(bg)}
-                    className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition cursor-pointer ${
+                    className={`px-2 py-1 rounded-md text-[11px] font-bold transition cursor-pointer shrink-0 ${
                       selectedBloodFilter === bg
                         ? 'bg-red-600 text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -671,12 +672,12 @@ export default function VolunteerDashboard() {
                 ))}
               </div>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 {['ALL', 'Urgent'].map((urg) => (
                   <button
                     key={urg}
                     onClick={() => setSelectedUrgencyFilter(urg)}
-                    className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition cursor-pointer ${
+                    className={`px-2 py-1 rounded-md text-[11px] font-bold transition cursor-pointer shrink-0 ${
                       selectedUrgencyFilter === urg
                         ? 'bg-slate-900 text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -689,9 +690,9 @@ export default function VolunteerDashboard() {
             </div>
 
             {/* Request Cards Stream */}
-            <div className="space-y-3 max-h-[640px] overflow-y-auto pr-1 no-scrollbar">
+            <div className="space-y-3 max-h-[640px] overflow-y-auto pr-0.5 no-scrollbar">
               {tabRequests.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-4">
                   <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-30" />
                   <p className="text-xs font-bold text-slate-600">No requests in this view</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Try resetting search or filter criteria.</p>
@@ -713,112 +714,129 @@ export default function VolunteerDashboard() {
                   return (
                     <div
                       key={reqId}
-                      className="border border-slate-200 rounded-xl p-4 space-y-3 hover:border-red-200 transition bg-white shadow-2xs"
+                      className="border border-slate-200 rounded-xl p-3.5 sm:p-4 space-y-3 hover:border-red-200 transition bg-white shadow-2xs"
                     >
                       {/* Header row */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <span className="w-10 h-10 rounded-xl bg-red-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0">
+                      <div className="flex items-start justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-600 text-white font-black text-xs sm:text-sm flex items-center justify-center shrink-0">
                             {bg}
                           </span>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-bold text-slate-900">{patient}</h4>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">{patient}</h4>
                               {req.requester_name && (
                                 <span className="text-[10px] text-slate-500 font-medium">
                                   by {req.requester_name}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-slate-600 mt-0.5">
+                            <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5">
                               {hospital}, {city} • <strong>{units} Unit{units > 1 ? 's' : ''}</strong>
                             </p>
                           </div>
                         </div>
 
-                        <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full border border-slate-200 shrink-0">
+                        <span className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:py-1 bg-slate-100 text-slate-700 rounded-full border border-slate-200 shrink-0">
                           {urgency}
                         </span>
                       </div>
 
                       {/* Contact row */}
-                      <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                      <div className="flex items-center justify-between text-[11px] sm:text-xs text-slate-500 pt-0.5 flex-wrap gap-1">
                         <p>
                           Contact: <a href={`tel:${contact}`} className="text-red-600 font-semibold hover:underline">{contact || '—'}</a>
                         </p>
                         {req.required_by_date && (
-                          <span className="text-[11px] text-slate-400">
-                            Required by: {req.required_by_date}
+                          <span className="text-[10px] sm:text-[11px] text-slate-400">
+                            Required: {req.required_by_date}
                           </span>
                         )}
                       </div>
 
                       {/* Pending actions */}
                       {isPending && (
-                        <div className="flex gap-2 pt-2 border-t border-slate-100">
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
                           <button
                             onClick={() => handleApprove(reqId, req)}
                             disabled={approvingId === reqId}
-                            className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                            className="col-span-1 sm:col-auto py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-60"
                           >
                             {approvingId === reqId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                            Approve
+                            <span>Approve</span>
                           </button>
+
                           <button
                             onClick={() => handlePoster(reqId)}
-                            className="px-3 py-1.5 border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold rounded-lg transition flex items-center gap-1 cursor-pointer"
+                            className="col-span-1 sm:col-auto py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
                           >
-                            <Download className="w-3.5 h-3.5 text-red-600" /> Poster
+                            <Download className="w-3.5 h-3.5 text-red-600" />
+                            <span>Poster</span>
                           </button>
+
                           <button
                             onClick={() => handleReject(reqId)}
                             disabled={rejectingId === reqId}
-                            className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-60"
+                            className="col-span-1 sm:col-auto py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-60"
                           >
                             {rejectingId === reqId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
-                            Reject
+                            <span>Reject</span>
                           </button>
                         </div>
                       )}
 
-                      {/* Verified active actions */}
+                      {/* Verified active actions (Mobile Friendly Grid) */}
                       {!isPending && !isFulfilled && (
                         <div className="pt-2 border-t border-slate-100 space-y-2">
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
                             <button
                               onClick={() => setSelectedMatchReq(selectedMatchReq === reqId ? null : reqId)}
-                              className="px-3 py-1.5 bg-red-50 text-red-700 text-xs font-bold rounded-lg hover:bg-red-100 transition cursor-pointer border border-red-200"
+                              className="py-2 px-2.5 bg-red-50 text-red-700 text-xs font-bold rounded-lg hover:bg-red-100 transition cursor-pointer border border-red-200 flex items-center justify-center gap-1 text-center"
                             >
-                              {selectedMatchReq === reqId ? 'Hide Donors' : `🔍 Match Donors (${compatibleDonors.length})`}
+                              <Search className="w-3.5 h-3.5" />
+                              <span>{selectedMatchReq === reqId ? 'Hide Donors' : `Match (${compatibleDonors.length})`}</span>
                             </button>
 
                             <button
                               onClick={() => handleGetTop5(reqId, req)}
                               disabled={loadingTop5}
-                              className="px-3 py-1.5 bg-amber-50 text-amber-800 text-xs font-bold rounded-lg hover:bg-amber-100 transition cursor-pointer border border-amber-200 flex items-center gap-1"
+                              className="py-2 px-2.5 bg-amber-50 text-amber-800 text-xs font-bold rounded-lg hover:bg-amber-100 transition cursor-pointer border border-amber-200 flex items-center justify-center gap-1 text-center"
                             >
-                              <Star className="w-3.5 h-3.5 text-amber-600" /> Top 5 Donors
+                              <Star className="w-3.5 h-3.5 text-amber-600" />
+                              <span>Top 5 Donors</span>
                             </button>
 
                             <button
                               onClick={() => handlePoster(reqId)}
-                              className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition cursor-pointer border border-slate-200 flex items-center gap-1"
+                              className="py-2 px-2.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition cursor-pointer border border-slate-200 flex items-center justify-center gap-1 text-center"
                             >
-                              <Download className="w-3.5 h-3.5 text-red-600" /> Poster
+                              <Download className="w-3.5 h-3.5 text-red-600" />
+                              <span>Poster</span>
                             </button>
 
                             <button
                               onClick={() => handleShareWhatsApp(req)}
-                              className="px-3 py-1.5 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-lg hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 flex items-center gap-1"
+                              className="py-2 px-2.5 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-lg hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 flex items-center justify-center gap-1 text-center"
                               title="Share on WhatsApp"
                             >
-                              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" /> WhatsApp
+                              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>WhatsApp</span>
+                            </button>
+                          </div>
+
+                          <div className="pt-1 flex items-center justify-between gap-2">
+                            <button
+                              onClick={() => handleCopyShare(req)}
+                              className="text-[11px] text-slate-500 hover:text-slate-800 font-semibold underline flex items-center gap-1"
+                            >
+                              {copiedId === reqId ? <Check className="w-3 h-3 text-emerald-600" /> : null}
+                              {copiedId === reqId ? 'Copied Details' : 'Copy Broadcast Text'}
                             </button>
 
                             <button
                               onClick={() => handleFulfill(reqId)}
                               disabled={fulfillingId === reqId}
-                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition cursor-pointer ml-auto disabled:opacity-60"
+                              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition cursor-pointer disabled:opacity-60 ml-auto"
                             >
                               Mark Fulfilled
                             </button>
@@ -837,12 +855,12 @@ export default function VolunteerDashboard() {
                                   const dName = d.primary_name || d.primaryName || d.name || 'Donor';
                                   const dPhone = d.mobile || d.phone || '';
                                   return (
-                                    <div key={d.id || d._id} className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 text-xs">
-                                      <div>
-                                        <p className="font-bold text-slate-900">{dName} ({d.blood_group || d.bloodGroup})</p>
-                                        <p className="text-[11px] text-slate-500">{d.city || 'Kasaragod'} • {d.total_donations || 0} donations</p>
+                                    <div key={d.id || d._id} className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 text-xs gap-2">
+                                      <div className="min-w-0">
+                                        <p className="font-bold text-slate-900 truncate">{dName} ({d.blood_group || d.bloodGroup})</p>
+                                        <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">{d.city || 'Kasaragod'} • {d.total_donations || 0} donations</p>
                                       </div>
-                                      <div className="flex items-center gap-1.5">
+                                      <div className="flex items-center gap-1 shrink-0">
                                         {dPhone && (
                                           <a href={`tel:${dPhone}`} className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded text-[11px]">
                                             Call
@@ -850,7 +868,7 @@ export default function VolunteerDashboard() {
                                         )}
                                         <button
                                           onClick={() => triggerToast(`Alert dispatched to ${dName}`, 'success')}
-                                          className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] rounded"
+                                          className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] rounded"
                                         >
                                           Alert
                                         </button>
@@ -884,14 +902,14 @@ export default function VolunteerDashboard() {
           </div>
         </div>
 
-        {/* ── Right Column: Minimal Scope & Matrix Tools ── */}
+        {/* ── Right Column: Minimal Scope & Matrix Tools (Mobile Responsive) ── */}
         <div className="space-y-4">
 
           {/* Committee Jurisdiction Scope */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-red-600" />
+                <Building2 className="w-4 h-4 text-red-600" />
                 Jurisdiction Scope
               </h3>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-700">
@@ -914,7 +932,7 @@ export default function VolunteerDashboard() {
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-slate-400">Volunteer</span>
-                <span className="font-bold text-slate-900">{user?.primary_name || user?.name || 'Assigned'}</span>
+                <span className="font-bold text-slate-900">{user?.primary_name || user?.name || 'Active'}</span>
               </div>
             </div>
 
@@ -928,10 +946,10 @@ export default function VolunteerDashboard() {
           </div>
 
           {/* Blood Compatibility Quick Matrix */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Blood Group Compatibility
+                Blood Compatibility Matrix
               </h3>
             </div>
 
@@ -940,7 +958,7 @@ export default function VolunteerDashboard() {
                 <button
                   key={bg}
                   onClick={() => setSelectedMatrixGroup(bg)}
-                  className={`py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  className={`py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                     selectedMatrixGroup === bg
                       ? 'bg-red-600 text-white shadow-2xs'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -981,7 +999,7 @@ export default function VolunteerDashboard() {
           </div>
 
           {/* Notifications Feed */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                 <Bell className="w-3.5 h-3.5 text-red-600" />
@@ -1018,31 +1036,31 @@ export default function VolunteerDashboard() {
 
       </div>
 
-      {/* ─── Top 5 Donors Modal ─── */}
+      {/* ─── Top 5 Donors Modal (Mobile Centered & Responsive) ─── */}
       <AnimatePresence>
         {top5Modal && (
           <div
-            className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4 backdrop-blur-2xs"
+            className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-2xs"
             onClick={() => setTop5Modal(null)}
           >
             <div
-              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl space-y-4 text-left"
+              className="bg-white rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-xl space-y-4 text-left max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                  <h3 className="text-base font-bold text-slate-900">Recommended Donors</h3>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900">Recommended Donors</h3>
                 </div>
                 <button
                   onClick={() => setTop5Modal(null)}
-                  className="text-slate-400 hover:text-slate-700"
+                  className="text-slate-400 hover:text-slate-700 p-1"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="space-y-2 max-h-72 overflow-y-auto no-scrollbar">
+              <div className="space-y-2 max-h-64 sm:max-h-72 overflow-y-auto no-scrollbar">
                 {top5Modal.donors.length === 0 ? (
                   <p className="text-xs text-slate-400 text-center py-4">No donors found in immediate area cluster.</p>
                 ) : (
@@ -1051,14 +1069,14 @@ export default function VolunteerDashboard() {
                     return (
                       <div
                         key={d.id || i}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs"
+                        className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs gap-2"
                       >
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-6 h-6 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[11px]">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="w-6 h-6 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">
                             #{i + 1}
                           </span>
-                          <div>
-                            <p className="font-bold text-slate-900">{d.primary_name || d.primaryName || d.name}</p>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 truncate">{d.primary_name || d.primaryName || d.name}</p>
                             <p className="text-[11px] text-slate-500">
                               <strong className="text-red-600">{d.blood_group || d.bloodGroup}</strong>
                               {d.priority_score ? ` • Score: ${d.priority_score}` : ''}
@@ -1069,7 +1087,7 @@ export default function VolunteerDashboard() {
                         {mobile && (
                           <a
                             href={`tel:${mobile}`}
-                            className="px-3 py-1 bg-red-600 text-white font-bold rounded-lg text-xs hover:bg-red-700 transition"
+                            className="px-3 py-1.5 bg-red-600 text-white font-bold rounded-lg text-xs hover:bg-red-700 transition shrink-0"
                           >
                             Call
                           </a>
