@@ -3,11 +3,12 @@ import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import RequestCard from '../components/RequestCard.jsx';
 import Modal from '../components/Modal.jsx';
-import { Plus, SlidersHorizontal, Siren, Filter, MapPin, Navigation, X as XIcon } from 'lucide-react';
+import { Plus, SlidersHorizontal, Siren, Filter, MapPin, Navigation, X as XIcon, Crosshair, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PosterModal from '../components/PosterModal.jsx';
 import MapLibreContainer from '../components/MapLibreContainer.jsx';
 import LocationSearchInput from '../components/LocationSearchInput.jsx';
+import { reverseGeocodeNominatim } from '../services/mapService.js';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const URGENCIES = ['Immediate', 'Critical', 'Moderate'];
@@ -21,6 +22,7 @@ export default function BloodRequests() {
   const [showModal, setShowModal] = useState(false);
   const [mapPos, setMapPos] = useState(null);
   const [mapPickedAddress, setMapPickedAddress] = useState('');
+  const [gpsLoading, setGpsLoading] = useState(false);
   const [form, setForm] = useState({
     patientName: '',
     bloodGroup: 'B+',
@@ -31,6 +33,51 @@ export default function BloodRequests() {
     unitsRequired: 1,
     contactNumber: user?.mobile || '',
   });
+
+  const handleUseGPS = () => {
+    if (!navigator.geolocation) {
+      triggerToast('Geolocation is not supported by your browser.', 'warning');
+      return;
+    }
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const newPos = { lat, lng };
+        setMapPos(newPos);
+        try {
+          const geo = await reverseGeocodeNominatim(lat, lng);
+          const addressText = geo?.displayName || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setMapPickedAddress(addressText);
+          const placeOrHospital = geo?.address?.hospital || geo?.address?.amenity || geo?.city || addressText.split(',')[0];
+          setForm(prev => ({
+            ...prev,
+            hospitalName: placeOrHospital || prev.hospitalName,
+            city: geo?.city || prev.city,
+            district: geo?.district || prev.district
+          }));
+          triggerToast('Current GPS location detected and pinned!', 'success');
+        } catch (err) {
+          console.error('GPS reverse geocode error:', err);
+          setMapPickedAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+          triggerToast('GPS coordinates acquired!', 'success');
+        } finally {
+          setGpsLoading(false);
+        }
+      },
+      (err) => {
+        console.error('GPS Geolocation error:', err);
+        let msg = 'Unable to retrieve your GPS location.';
+        if (err.code === 1) msg = 'Location permission denied. Please allow location access in your browser settings.';
+        else if (err.code === 2) msg = 'GPS location unavailable.';
+        else if (err.code === 3) msg = 'GPS location request timed out.';
+        triggerToast(msg, 'warning');
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
@@ -245,18 +292,34 @@ export default function BloodRequests() {
           </div>
 
           {/* Map Location Picker */}
-          <div className="border border-slate-200 rounded-xl overflow-hidden">
-            <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
+          <div className="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+            <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-red-500" />
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick Hospital on OpenStreetMap</span>
               </div>
-              {mapPos && (
-                <button type="button" onClick={() => { setMapPos(null); setMapPickedAddress(''); }}
-                  className="text-[9px] font-bold text-red-500 hover:text-red-700 flex items-center gap-0.5 cursor-pointer">
-                  <XIcon className="w-3 h-3" /> Clear
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleUseGPS}
+                  disabled={gpsLoading}
+                  className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+                  title="Detect and Pin My Current GPS Location"
+                >
+                  {gpsLoading ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
+                  ) : (
+                    <Crosshair className="w-3 h-3 text-emerald-600" />
+                  )}
+                  <span>{gpsLoading ? 'Detecting GPS...' : 'Use My GPS'}</span>
                 </button>
-              )}
+                {mapPos && (
+                  <button type="button" onClick={() => { setMapPos(null); setMapPickedAddress(''); }}
+                    className="text-[9px] font-bold text-red-500 hover:text-red-700 bg-red-50 border border-red-200 px-2 py-1 rounded-lg flex items-center gap-0.5 cursor-pointer">
+                    <XIcon className="w-3 h-3" /> Clear
+                  </button>
+                )}
+              </div>
             </div>
             {/* Search */}
             <div className="p-2 bg-white">

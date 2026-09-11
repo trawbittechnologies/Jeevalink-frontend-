@@ -3,12 +3,13 @@ import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, Plus, Eye, ShieldCheck, Mail, Save, X, Loader2, KeyRound, Phone, MapPin, Lock, Trash2, Upload, Droplet, Clock, CheckCircle2, AlertTriangle, Navigation, Map as MapIcon, Compass, Sparkles
+  Users, Plus, Eye, ShieldCheck, Mail, Save, X, Loader2, KeyRound, Phone, MapPin, Lock, Trash2, Upload, Droplet, Clock, CheckCircle2, AlertTriangle, Navigation, Map as MapIcon, Compass, Sparkles, Crosshair
 } from 'lucide-react';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
 import LocationSearchInput from '../../components/LocationSearchInput.jsx';
 import MapLibreContainer from '../../components/MapLibreContainer.jsx';
+import { reverseGeocodeNominatim } from '../../services/mapService.js';
 import { getStorageUrl } from '../../store/api.js';
 
 const STATUS_OPTIONS = ['Active', 'Inactive', 'Suspended', 'Pending Approval'];
@@ -93,6 +94,56 @@ export default function UserManagement() {
   const [addMapPos, setAddMapPos] = useState(null);
   const [addMapAddress, setAddMapAddress] = useState('');
   const [showMapCanvas, setShowMapCanvas] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  const handleUseGPS = () => {
+    if (!navigator.geolocation) {
+      triggerToast('Geolocation is not supported by your browser.', 'warning');
+      return;
+    }
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const newPos = { lat, lng };
+        setAddMapPos(newPos);
+        try {
+          const geo = await reverseGeocodeNominatim(lat, lng);
+          const addressText = geo?.displayName || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setAddMapAddress(addressText);
+          const placeName = geo?.city || geo?.address?.suburb || geo?.address?.town || geo?.address?.village || addressText.split(',')[0].trim();
+          const pincodeVal = geo?.postcode || geo?.address?.postcode || form.pincode || '';
+          setForm(prev => ({
+            ...prev,
+            place: placeName || prev.place,
+            city: placeName || prev.city,
+            pincode: pincodeVal ? String(pincodeVal).replace(/\D/g, '').slice(0, 6) : prev.pincode,
+            latitude: lat,
+            longitude: lng,
+          }));
+          triggerToast('Current GPS location detected and pinned!', 'success');
+        } catch (err) {
+          console.error('GPS reverse geocode error:', err);
+          setAddMapAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+          setForm(prev => ({ ...prev, latitude: lat, longitude: lng }));
+          triggerToast('GPS coordinates acquired!', 'success');
+        } finally {
+          setGpsLoading(false);
+        }
+      },
+      (err) => {
+        console.error('GPS Geolocation error:', err);
+        let msg = 'Unable to retrieve your GPS location.';
+        if (err.code === 1) msg = 'Location permission denied. Please allow location access in your browser settings.';
+        else if (err.code === 2) msg = 'GPS location unavailable.';
+        else if (err.code === 3) msg = 'GPS location request timed out.';
+        triggerToast(msg, 'warning');
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   // Add OTP Cooldown Countdown
   useEffect(() => {
@@ -1308,18 +1359,34 @@ export default function UserManagement() {
 
                   {/* Place & Location Map Search Section */}
                   <div className="col-span-2 bg-slate-50/90 border border-slate-200/90 p-4 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
                       <label className="block text-[10px] font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-red-600" /> Place / Map Search
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => setShowMapCanvas(!showMapCanvas)}
-                        className="text-[10px] font-bold text-red-600 hover:text-red-700 flex items-center gap-1 bg-red-50 hover:bg-red-100/80 px-2.5 py-1 rounded-lg border border-red-200/60 transition cursor-pointer"
-                      >
-                        <MapIcon className="w-3 h-3" />
-                        {showMapCanvas ? 'Hide Map View' : 'Pick on Map'}
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={handleUseGPS}
+                          disabled={gpsLoading}
+                          className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 px-2.5 py-1 rounded-lg border border-emerald-200/60 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50 shadow-2xs"
+                          title="Auto-detect current GPS location"
+                        >
+                          {gpsLoading ? (
+                            <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
+                          ) : (
+                            <Crosshair className="w-3 h-3 text-emerald-600" />
+                          )}
+                          <span>{gpsLoading ? 'Detecting GPS...' : 'Use My GPS'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowMapCanvas(!showMapCanvas)}
+                          className="text-[10px] font-bold text-red-600 hover:text-red-700 flex items-center gap-1 bg-red-50 hover:bg-red-100/80 px-2.5 py-1 rounded-lg border border-red-200/60 transition cursor-pointer"
+                        >
+                          <MapIcon className="w-3 h-3" />
+                          {showMapCanvas ? 'Hide Map View' : 'Pick on Map'}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Photon / Kerala places autocomplete search */}

@@ -4,13 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
-import { Heart, User, MapPin, AlertCircle, FileText, CheckCircle2, Download, Edit3, Trash2, Clock, Navigation, X as XIcon, Building2, Phone, Droplet, List, Plus } from 'lucide-react';
+import { Heart, User, MapPin, AlertCircle, FileText, CheckCircle2, Download, Edit3, Trash2, Clock, Navigation, X as XIcon, Building2, Phone, Droplet, List, Plus, Crosshair, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PosterModal from '../components/PosterModal.jsx';
 import EditRequestModal from '../components/EditRequestModal.jsx';
 import DeleteConfirmModal from '../components/DeleteConfirmModal.jsx';
 import MapLibreContainer from '../components/MapLibreContainer.jsx';
 import LocationSearchInput from '../components/LocationSearchInput.jsx';
+import { reverseGeocodeNominatim } from '../services/mapService.js';
 import api from '../store/api.js';
 
 
@@ -45,6 +46,7 @@ export default function Requests() {
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'new'
   const [position, setPosition] = useState(null); // { lat, lng }
   const [mapPickedAddress, setMapPickedAddress] = useState(''); // Reverse geocoded address
+  const [gpsLoading, setGpsLoading] = useState(false);
   const [selectedReq, setSelectedReq] = useState(null);
   const [editingReq, setEditingReq] = useState(null);
   const [deletingReqId, setDeletingReqId] = useState(null);
@@ -55,6 +57,51 @@ export default function Requests() {
   const [pendingApprovalBanner, setPendingApprovalBanner] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
   const [approvingReqId, setApprovingReqId] = useState(null);
+
+  const handleUseGPS = () => {
+    if (!navigator.geolocation) {
+      triggerToast('Geolocation is not supported by your browser.', 'warning');
+      return;
+    }
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const newPos = { lat, lng };
+        setPosition(newPos);
+        try {
+          const geo = await reverseGeocodeNominatim(lat, lng);
+          const addressText = geo?.displayName || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setMapPickedAddress(addressText);
+          setValue('location', addressText, { shouldValidate: true });
+          const placeOrHospital = geo?.address?.hospital || geo?.address?.amenity || geo?.city || addressText.split(',')[0];
+          if (placeOrHospital) {
+            setValue('hospitalName', placeOrHospital, { shouldValidate: true });
+          }
+          triggerToast('Current GPS location detected and pinned!', 'success');
+        } catch (err) {
+          console.error('GPS reverse geocode error:', err);
+          const coordText = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setMapPickedAddress(coordText);
+          setValue('location', coordText, { shouldValidate: true });
+          triggerToast('GPS coordinates acquired!', 'success');
+        } finally {
+          setGpsLoading(false);
+        }
+      },
+      (err) => {
+        console.error('GPS Geolocation error:', err);
+        let msg = 'Unable to retrieve your GPS location.';
+        if (err.code === 1) msg = 'Location permission denied. Please allow location access in your browser settings.';
+        else if (err.code === 2) msg = 'GPS location unavailable.';
+        else if (err.code === 3) msg = 'GPS location request timed out.';
+        triggerToast(msg, 'warning');
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const handleApproveReq = async (reqId) => {
     setApprovingReqId(reqId);
@@ -216,20 +263,36 @@ export default function Requests() {
 
       {/* Map Location Picker */}
       <div className="border border-slate-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="bg-slate-50 dark:bg-zinc-950 px-3 py-2 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between gap-2">
+        <div className="bg-slate-50 dark:bg-zinc-950 px-3 py-2 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-red-500" />
             <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Pin Hospital on OpenStreetMap</span>
           </div>
-          {position && (
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => { setPosition(null); setMapPickedAddress(''); }}
-              className="text-[9px] font-bold text-red-500 hover:text-red-700 flex items-center gap-0.5 cursor-pointer"
+              onClick={handleUseGPS}
+              disabled={gpsLoading}
+              className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+              title="Detect and Pin My Current GPS Location"
             >
-              <XIcon className="w-3 h-3" /> Clear
+              {gpsLoading ? (
+                <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
+              ) : (
+                <Crosshair className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+              )}
+              <span>{gpsLoading ? 'Detecting GPS...' : 'Use My GPS'}</span>
             </button>
-          )}
+            {position && (
+              <button
+                type="button"
+                onClick={() => { setPosition(null); setMapPickedAddress(''); }}
+                className="text-[9px] font-bold text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 px-2 py-1 rounded-lg flex items-center gap-0.5 cursor-pointer"
+              >
+                <XIcon className="w-3 h-3" /> Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Photon Location Search Box */}
