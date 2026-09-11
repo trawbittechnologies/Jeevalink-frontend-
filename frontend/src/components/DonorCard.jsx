@@ -64,17 +64,25 @@ export default function DonorCard({ donor }) {
     }
   }
 
-  // Resolve assigned volunteer contact with fallback to store or secondary fields
+  // Resolve assigned Meghala volunteer/coordinator contact (Never Block Admin)
   let volunteerName = donor.volunteerName || donor.volunteer_name;
   let volunteerPhone = donor.volunteerPhone || donor.volunteer_phone;
   let volunteerRole = donor.volunteerRole || donor.volunteer_role;
+
+  // Filter out block_admin if it came from donor data or legacy props
+  if (volunteerRole === 'block_admin') {
+    volunteerName = null;
+    volunteerPhone = null;
+    volunteerRole = null;
+  }
 
   if (!volunteerPhone && allUsers && allUsers.length > 0) {
     const dDistrict = (district || '').toLowerCase().trim();
     const dCity = (city || '').toLowerCase().trim();
 
+    // Look for Meghala volunteer or unit squad only (DO NOT match block_admin)
     let matchedVol = allUsers.find((u) => 
-      ['volunteer', 'unit_squad', 'block_admin'].includes(u.role) &&
+      ['volunteer', 'unit_squad'].includes(u.role) &&
       (u.status === 'Active' || !u.status) &&
       (u.district || '').toLowerCase().trim() === dDistrict &&
       (u.city || '').toLowerCase().trim() === dCity
@@ -82,14 +90,14 @@ export default function DonorCard({ donor }) {
 
     if (!matchedVol) {
       matchedVol = allUsers.find((u) => 
-        ['volunteer', 'unit_squad', 'block_admin'].includes(u.role) &&
+        ['volunteer', 'unit_squad'].includes(u.role) &&
         (u.status === 'Active' || !u.status) &&
         (u.district || '').toLowerCase().trim() === dDistrict
       );
     }
 
     if (!matchedVol) {
-      matchedVol = allUsers.find((u) => ['volunteer', 'unit_squad', 'block_admin'].includes(u.role));
+      matchedVol = allUsers.find((u) => ['volunteer', 'unit_squad'].includes(u.role));
     }
 
     if (matchedVol) {
@@ -99,12 +107,27 @@ export default function DonorCard({ donor }) {
     }
   }
 
-  // Final fallbacks
+  // Final fallbacks: use donor's secondary contact or general Meghala Coordinator
   if (!volunteerName) volunteerName = donor.secondaryName || donor.secondary_name || 'Meghala Coordinator';
   if (!volunteerPhone) volunteerPhone = donor.secondaryContactNumber || donor.secondary_phone || '9998593194';
-  if (!volunteerRole) volunteerRole = 'volunteer';
+  if (!volunteerRole || volunteerRole === 'block_admin') volunteerRole = 'volunteer';
 
-  const whatsappMessage = encodeURIComponent(`Hello ${volunteerName}, I found blood donor ${donorName} (${bg}) on iDonate in ${city}, ${district}. Please help connect for an urgent donation.`);
+  // Compute Meghala Committee Display Name
+  const rawMeghala = donor.meghalaCommitteeName || donor.meghala_committee_name || donor.meghalaName || donor.meghala_name || city;
+  let meghalaDisplayName = 'Meghala Committee';
+  if (rawMeghala && rawMeghala !== 'Local Area') {
+    if (rawMeghala.toLowerCase().includes('meghala') && rawMeghala.toLowerCase().includes('committee')) {
+      meghalaDisplayName = rawMeghala;
+    } else if (rawMeghala.toLowerCase().includes('meghala')) {
+      meghalaDisplayName = `${rawMeghala} Committee`;
+    } else {
+      meghalaDisplayName = `${rawMeghala} Meghala Committee`;
+    }
+  }
+
+  const roleLabel = volunteerRole === 'unit_squad' ? 'Unit Squad' : 'Meghala Volunteer';
+
+  const whatsappMessage = encodeURIComponent(`Hello ${volunteerName} (${meghalaDisplayName}), I found blood donor ${donorName} (${bg}) on iDonate in ${city}, ${district}. Please help connect for an urgent donation.`);
 
   return (
     <div className="group relative bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">
@@ -221,29 +244,33 @@ export default function DonorCard({ donor }) {
         </div>
       </div>
 
-      {/* Volunteer Contact Card Section */}
+      {/* Meghala Committee & Volunteer Contact Card Section */}
       <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800 space-y-3">
         <div className="bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 rounded-2xl p-3 space-y-2">
-          {/* Volunteer Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm">
+          {/* Meghala Committee & Volunteer Header */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm shrink-0">
                 <UserCheck className="w-4 h-4" />
               </div>
-              <div>
-                <p className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Meghala Volunteer</p>
-                <p className="text-xs font-black text-slate-900 dark:text-zinc-100 truncate max-w-[160px]">{volunteerName}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider truncate" title={meghalaDisplayName}>
+                  {meghalaDisplayName}
+                </p>
+                <p className="text-xs font-black text-slate-900 dark:text-zinc-100 truncate max-w-[170px]" title={volunteerName}>
+                  {volunteerName}
+                </p>
               </div>
             </div>
-            <span className="text-[10px] font-extrabold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 rounded-md capitalize">
-              {volunteerRole.replace('_', ' ')}
+            <span className="text-[10px] font-extrabold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 rounded-md capitalize shrink-0">
+              {roleLabel}
             </span>
           </div>
 
           {/* Explicitly Visible Phone Number */}
           {volunteerPhone && (
             <div className="flex items-center justify-between pt-1.5 border-t border-emerald-100 dark:border-emerald-900/40 text-xs">
-              <span className="font-bold text-slate-600 dark:text-zinc-400">Volunteer Contact:</span>
+              <span className="font-bold text-slate-600 dark:text-zinc-400">Meghala Contact:</span>
               <span className="font-black text-emerald-700 dark:text-emerald-400 tracking-wide font-mono text-xs">
                 {volunteerPhone}
               </span>
