@@ -253,7 +253,7 @@ export default function DonorCard({ donor }) {
         </div>
 
         {/* Minimal Stats Row */}
-        <div className="grid grid-cols-3 gap-2 my-3">
+        <div className="grid grid-cols-2 gap-2.5 my-3">
           <div className="p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-xl text-center border border-slate-100 dark:border-zinc-800">
             <p className="text-[9px] font-bold text-slate-400 uppercase">Donations</p>
             <p className="text-sm font-black text-slate-900 dark:text-zinc-100">{donations}</p>
@@ -262,12 +262,6 @@ export default function DonorCard({ donor }) {
             <p className="text-[9px] font-bold text-slate-400 uppercase">Lives Saved</p>
             <p className="text-sm font-black text-red-600 dark:text-red-400 flex items-center justify-center gap-0.5">
               <Heart className="w-3 h-3 fill-red-500 text-red-500" /> {livesSaved}
-            </p>
-          </div>
-          <div className="p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-xl text-center border border-slate-100 dark:border-zinc-800">
-            <p className="text-[9px] font-bold text-slate-400 uppercase">Match</p>
-            <p className="text-sm font-black text-amber-600 dark:text-amber-400 flex items-center justify-center gap-0.5">
-              <Sparkles className="w-3 h-3" /> {donor.compatibilityScore || 95}%
             </p>
           </div>
         </div>
