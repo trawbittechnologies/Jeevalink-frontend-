@@ -3,10 +3,12 @@ import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, Plus, Eye, ShieldCheck, Mail, Save, X, Loader2, KeyRound, Phone, MapPin, Lock, Trash2, Upload, Droplet, Clock, CheckCircle2, AlertTriangle
+  Users, Plus, Eye, ShieldCheck, Mail, Save, X, Loader2, KeyRound, Phone, MapPin, Lock, Trash2, Upload, Droplet, Clock, CheckCircle2, AlertTriangle, Navigation, Map as MapIcon, Compass, Sparkles
 } from 'lucide-react';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
+import LocationSearchInput from '../../components/LocationSearchInput.jsx';
+import MapLibreContainer from '../../components/MapLibreContainer.jsx';
 import { getStorageUrl } from '../../store/api.js';
 
 const STATUS_OPTIONS = ['Active', 'Inactive', 'Suspended', 'Pending Approval'];
@@ -86,6 +88,11 @@ export default function UserManagement() {
   const [addOtpLoading, setAddOtpLoading] = useState(false);
   const [addOtpCooldown, setAddOtpCooldown] = useState(0);
   const [verifiedEmail, setVerifiedEmail] = useState('');
+
+  // Add Donor Map & Place Search states
+  const [addMapPos, setAddMapPos] = useState(null);
+  const [addMapAddress, setAddMapAddress] = useState('');
+  const [showMapCanvas, setShowMapCanvas] = useState(false);
 
   // Add OTP Cooldown Countdown
   useEffect(() => {
@@ -331,6 +338,9 @@ export default function UserManagement() {
     if (res.success) {
       setShowAddModal(false);
       setForm({});
+      setAddMapPos(null);
+      setAddMapAddress('');
+      setShowMapCanvas(false);
       setAddOtpSent(false);
       setAddOtpCode('');
       setAddOtpVerified(false);
@@ -373,8 +383,13 @@ export default function UserManagement() {
               city: currentUser?.city || '',
               pincode: '',
               district: autoDistrict,
+              latitude: null,
+              longitude: null,
               profile_picture: null,
             });
+            setAddMapPos(null);
+            setAddMapAddress('');
+            setShowMapCanvas(false);
             setAddOtpSent(false);
             setAddOtpCode('');
             setAddOtpVerified(false);
@@ -1291,13 +1306,135 @@ export default function UserManagement() {
                     )}
                   </div>
 
+                  {/* Place & Location Map Search Section */}
+                  <div className="col-span-2 bg-slate-50/90 border border-slate-200/90 p-4 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-[10px] font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-red-600" /> Place / Map Search
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowMapCanvas(!showMapCanvas)}
+                        className="text-[10px] font-bold text-red-600 hover:text-red-700 flex items-center gap-1 bg-red-50 hover:bg-red-100/80 px-2.5 py-1 rounded-lg border border-red-200/60 transition cursor-pointer"
+                      >
+                        <MapIcon className="w-3 h-3" />
+                        {showMapCanvas ? 'Hide Map View' : 'Pick on Map'}
+                      </button>
+                    </div>
+
+                    {/* Photon / Kerala places autocomplete search */}
+                    <div className="relative">
+                      <LocationSearchInput
+                        initialValue={form.place || form.city || ''}
+                        onSelectLocation={(loc) => {
+                          if (!loc) {
+                            setAddMapPos(null);
+                            setAddMapAddress('');
+                            return;
+                          }
+                          const pos = { lat: loc.lat, lng: loc.lng };
+                          setAddMapPos(pos);
+                          setAddMapAddress(loc.displayName || loc.name || '');
+
+                          const placeName = loc.city || loc.name || (loc.displayName ? loc.displayName.split(',')[0].trim() : '');
+                          const pincodeVal = loc.postcode || loc.address?.postcode || form.pincode || '';
+
+                          setForm(prev => ({
+                            ...prev,
+                            place: placeName || prev.place,
+                            city: placeName || prev.city,
+                            pincode: pincodeVal ? String(pincodeVal).replace(/\D/g, '').slice(0, 6) : prev.pincode,
+                            latitude: loc.lat || prev.latitude,
+                            longitude: loc.lng || prev.longitude,
+                          }));
+                        }}
+                        placeholder="Search Kerala place, town, hospital, landmark (Photon OSM)..."
+                      />
+                    </div>
+
+                    {/* Collapsible Interactive Map Canvas */}
+                    {showMapCanvas && (
+                      <div className="rounded-xl overflow-hidden border border-slate-200/80 shadow-inner bg-slate-100 animate-in fade-in duration-200">
+                        <div className="h-[200px] w-full relative z-0">
+                          <MapLibreContainer
+                            isPicker={true}
+                            pickerLocation={addMapPos}
+                            center={addMapPos || { lat: 11.2588, lng: 75.7804 }}
+                            zoom={addMapPos ? 14 : 10}
+                            onLocationPicked={(loc) => {
+                              const pos = { lat: loc.lat, lng: loc.lng };
+                              setAddMapPos(pos);
+                              setAddMapAddress(loc.displayName || '');
+
+                              const placeName = loc.city || loc.address?.suburb || loc.address?.town || loc.address?.village || (loc.displayName ? loc.displayName.split(',')[0].trim() : '');
+                              const pincodeVal = loc.postcode || loc.address?.postcode || form.pincode || '';
+
+                              setForm(prev => ({
+                                ...prev,
+                                place: placeName || prev.place,
+                                city: placeName || prev.city,
+                                pincode: pincodeVal ? String(pincodeVal).replace(/\D/g, '').slice(0, 6) : prev.pincode,
+                                latitude: loc.lat,
+                                longitude: loc.lng,
+                              }));
+                            }}
+                            height="100%"
+                          />
+                        </div>
+                        <div className="p-2 bg-slate-100/90 text-[10px] text-slate-500 font-medium flex items-center justify-between">
+                          <span>📍 Click anywhere on the map to pin and reverse-geocode place</span>
+                          {addMapPos && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAddMapPos(null);
+                                setAddMapAddress('');
+                              }}
+                              className="text-red-600 font-bold hover:underline cursor-pointer"
+                            >
+                              Reset Pin
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Picked Address Banner */}
+                    {addMapAddress ? (
+                      <div className="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2 animate-in fade-in duration-150">
+                        <Navigation className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] text-emerald-800 font-bold leading-tight truncate">
+                            {addMapAddress}
+                          </p>
+                          {addMapPos && (
+                            <p className="text-[9px] text-emerald-600 font-mono mt-0.5">
+                              Coordinates: {Number(addMapPos.lat).toFixed(4)}, {Number(addMapPos.lng).toFixed(4)}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAddMapPos(null);
+                            setAddMapAddress('');
+                          }}
+                          className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                          title="Clear selection"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Place / City *</label>
-                    <input type="text" value={form.place || form.city || ''} onChange={e => setForm({ ...form, place: e.target.value, city: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Enter place / city" required />
+                    <input type="text" value={form.place || form.city || ''} onChange={e => setForm({ ...form, place: e.target.value, city: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all font-semibold" placeholder="Enter place / city" required />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">PIN Code *</label>
-                    <input type="text" value={form.pincode || ''} onChange={e => setForm({ ...form, pincode: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" maxLength={6} placeholder="6-digit pincode" required />
+                    <input type="text" value={form.pincode || ''} onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all font-mono font-semibold" maxLength={6} placeholder="6-digit pincode" required />
                   </div>
                   <div className="col-span-2">
                     <div className="flex items-center justify-between mb-1">
