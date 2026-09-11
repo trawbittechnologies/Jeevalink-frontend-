@@ -32,7 +32,7 @@ const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 export default function VolunteerDashboard() {
   const {
     requests, donors, allUsers, notifications,
-    fetchRequests, fetchNotifications, fetchUsers,
+    fetchRequests, fetchNotifications, fetchUsers, searchDonors,
     markAllNotificationsRead, triggerToast
   } = useAppStore();
   const { user } = useAuthStore();
@@ -93,6 +93,7 @@ export default function VolunteerDashboard() {
         fetchRequests(),
         fetchNotifications(),
         fetchUsers(),
+        searchDonors ? searchDonors() : Promise.resolve(),
         fetchPending(),
         fetchVolunteerDashboard()
       ]);
@@ -103,7 +104,7 @@ export default function VolunteerDashboard() {
     } finally {
       setLoadingPending(false);
     }
-  }, [fetchRequests, fetchNotifications, fetchUsers, fetchPending, fetchVolunteerDashboard, triggerToast]);
+  }, [fetchRequests, fetchNotifications, fetchUsers, searchDonors, fetchPending, fetchVolunteerDashboard, triggerToast]);
 
   useEffect(() => {
     let active = true;
@@ -112,12 +113,13 @@ export default function VolunteerDashboard() {
         fetchRequests();
         fetchNotifications();
         fetchUsers();
+        if (searchDonors) searchDonors();
         await fetchPending();
         await fetchVolunteerDashboard();
       }
     })();
     return () => { active = false; };
-  }, [fetchRequests, fetchNotifications, fetchUsers, fetchPending, fetchVolunteerDashboard]);
+  }, [fetchRequests, fetchNotifications, fetchUsers, searchDonors, fetchPending, fetchVolunteerDashboard]);
 
   // ── Helper: Compatible Donors Filter ───────────────────────────────
   const getCompatibleDonors = useCallback((bloodGroup) => {
