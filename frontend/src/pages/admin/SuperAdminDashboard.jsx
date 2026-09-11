@@ -384,35 +384,183 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  // Block Summary Mapping with Case-Insensitive keys
-  const availableBlocksMap = new Map();
+  // Known Meghala to Block dictionary for Kasaragod
+  const MEGHALA_BLOCK_MAP = {
+    'upper kottachery': 'kanhangad',
+    'puthiyakotta': 'kanhangad',
+    'ajanur': 'kanhangad',
+    'ajanoor': 'kanhangad',
+    'kottachery': 'kanhangad',
+    'kanhangad south': 'kanhangad',
+    'kanhangad north': 'kanhangad',
+    'chithari': 'kanhangad',
+    'chittari': 'kanhangad',
+    'madikai': 'kanhangad',
+    'kottappuram': 'nileshwar',
+    'kinanoor': 'nileshwar',
+    'karindalam': 'nileshwar',
+    'nileshwaram': 'nileshwar',
+    'nileshswar': 'nileshwar',
+    'cheemeni': 'cheruvathur',
+    'kayyur': 'cheruvathur',
+    'thuruthi': 'cheruvathur',
+    'pilicode': 'cheruvathur',
+    'chandera': 'cheruvathur',
+    'thrikarippur': 'trikaripur',
+    'trikaripur': 'trikaripur',
+    'olavara': 'trikaripur',
+    'elambachi': 'trikaripur',
+    'valiyaparamba': 'trikaripur',
+    'ranipuram': 'panathady',
+    'kallar': 'panathady',
+    'panathur': 'panathady',
+    'balal': 'panathady',
+    'east eleri': 'eleri',
+    'west eleri': 'eleri',
+    'chittarikkal': 'eleri',
+    'palavayal': 'eleri',
+    'kundamkuzhy': 'bedakam',
+    'kolathur': 'bedakam',
+    'kuttikol': 'bedakam',
+    'bedadka': 'bedakam',
+    'bekal': 'udma',
+    'pallikere': 'udma',
+    'melparamba': 'udma',
+    'chembirika': 'udma',
+    'kalanad': 'udma',
+    'vidyanagar': 'kasaragod',
+    'nullipady': 'kasaragod',
+    'mogral': 'kasaragod',
+    'karanthakkad': 'kasaragod',
+    'chengala': 'kasaragod',
+    'madhur': 'kasaragod',
+    'arikady': 'kumbala',
+    'badiadka': 'kumbala',
+    'badiadkka': 'kumbala',
+    'seethangoli': 'kumbala',
+    'puthige': 'kumbala',
+    'manjeshwar': 'manjeshwaram',
+    'uppala': 'manjeshwaram',
+    'hosangadi': 'manjeshwaram',
+    'paivalike': 'manjeshwaram',
+    'meenja': 'manjeshwaram',
+    'vorkady': 'manjeshwaram',
+    'mulleria': 'karadukka',
+    'bovikanam': 'karadukka',
+    'delampady': 'karadukka',
+    'bellur': 'karadukka'
+  };
 
-  (districtData.block_summary || []).forEach(b => {
-    if (b.block) {
-      const key = b.block.toLowerCase().trim();
-      availableBlocksMap.set(key, {
-        block: b.block,
-        users: b.users || 0,
-        volunteers: b.volunteers || 0
-      });
-    }
-  });
+  // Dynamic real Block Analytics with live donor counts
+  const realBlockAnalytics = useMemo(() => {
+    const blockMap = new Map();
 
-  blockAdmins.forEach(ba => {
-    const bName = ba.blockCommitteeName || ba.city || ba.block;
-    if (bName) {
-      const key = bName.toLowerCase().trim();
-      if (!availableBlocksMap.has(key)) {
-        availableBlocksMap.set(key, {
-          block: bName,
-          users: 0,
-          volunteers: 0
+    // 1. Seed from registered block admins
+    (blockAdmins || []).forEach(ba => {
+      const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
+      if (bName && bName.toLowerCase() !== 'n/a') {
+        const key = bName.toLowerCase();
+        if (!blockMap.has(key)) {
+          blockMap.set(key, {
+            block: bName,
+            users: 0,
+            volunteers: 0
+          });
+        }
+      }
+    });
+
+    // 2. Incorporate server block summary if provided
+    (districtData.block_summary || []).forEach(b => {
+      if (b.block) {
+        const key = b.block.toLowerCase().trim();
+        if (!blockMap.has(key)) {
+          blockMap.set(key, {
+            block: b.block,
+            users: Number(b.users) || 0,
+            volunteers: Number(b.volunteers) || 0
+          });
+        } else {
+          const existing = blockMap.get(key);
+          existing.users = Math.max(existing.users, Number(b.users) || 0);
+          existing.volunteers = Math.max(existing.volunteers, Number(b.volunteers) || 0);
+        }
+      }
+    });
+
+    // 3. Match from client allUsers & donors pool
+    const donorsPool = (allUsers && allUsers.length > 0) ? allUsers : (donors || []);
+    const blockKeys = Array.from(blockMap.keys());
+
+    if (blockKeys.length > 0 && donorsPool.length > 0) {
+      const totalServerBlockUsers = Array.from(blockMap.values()).reduce((sum, b) => sum + (b.users || 0), 0);
+
+      // If server counts are not present or less than pool count, recalculate dynamically
+      if (totalServerBlockUsers === 0 || totalServerBlockUsers < donorsPool.length) {
+        blockMap.forEach(v => {
+          v.users = 0;
+          v.volunteers = 0;
+        });
+
+        donorsPool.forEach(u => {
+          const role = String(u.role || '').toLowerCase();
+          const isVolunteer = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+          const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
+            (u.blood_group && u.blood_group !== 'N/A' && u.blood_group !== '') ||
+            (u.bloodGroup && u.bloodGroup !== 'N/A' && u.bloodGroup !== '');
+
+          const uBlock = String(u.organization_name || u.organizationName || u.block || u.blockCommitteeName || '').toLowerCase().trim();
+          const uCity = String(u.city || u.meghala || '').toLowerCase().trim();
+          const uRemarks = String(u.remarks || '').toLowerCase().trim();
+
+          // A. Direct organization/block match
+          let matchedKey = blockKeys.find(k =>
+            (uBlock && (uBlock === k || uBlock.includes(k) || k.includes(uBlock)))
+          );
+
+          // B. Known Meghala-to-Block dictionary lookup
+          if (!matchedKey && uCity) {
+            const mapped = MEGHALA_BLOCK_MAP[uCity];
+            if (mapped) {
+              matchedKey = blockKeys.find(k => k === mapped || k.includes(mapped) || mapped.includes(k));
+            }
+          }
+          if (!matchedKey && uRemarks) {
+            for (const [mName, bName] of Object.entries(MEGHALA_BLOCK_MAP)) {
+              if (uRemarks.includes(mName)) {
+                matchedKey = blockKeys.find(k => k === bName || k.includes(bName) || bName.includes(k));
+                if (matchedKey) break;
+              }
+            }
+          }
+
+          // C. City matches block name directly
+          if (!matchedKey && uCity) {
+            matchedKey = blockKeys.find(k => uCity === k || uCity.includes(k) || k.includes(uCity));
+          }
+
+          // D. Remarks contain block name
+          if (!matchedKey && uRemarks) {
+            matchedKey = blockKeys.find(k => uRemarks.includes(k));
+          }
+
+          // E. Fallback to Kasaragod / first block so no real registered donor is dropped
+          if (!matchedKey && blockKeys.length > 0) {
+            matchedKey = blockKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || blockKeys[0];
+          }
+
+          if (matchedKey && blockMap.has(matchedKey)) {
+            const item = blockMap.get(matchedKey);
+            if (isDonor) item.users += 1;
+            if (isVolunteer) item.volunteers += 1;
+          }
         });
       }
     }
-  });
 
-  const realBlockAnalytics = Array.from(availableBlocksMap.values());
+    return Array.from(blockMap.values());
+  }, [blockAdmins, districtData.block_summary, allUsers, donors]);
+
   const maxUsersInBlock = Math.max(1, ...realBlockAnalytics.map(b => b.users));
 
   const filteredBlockAdmins = blockAdmins.filter(ba => {
