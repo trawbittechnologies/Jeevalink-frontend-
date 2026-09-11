@@ -286,28 +286,50 @@ export default function VolunteerDashboard() {
     setTimeout(() => setCopiedId(null), 2500);
   };
 
-  // ── Data Categorization ────────────────────────────────────────────
+  // ── Data Categorization (Case-Insensitive & Robust) ─────────────────
+  const allRequestsPool = useMemo(() => {
+    const list = [...(requests || [])];
+    if (Array.isArray(dashboardData?.active_requests)) {
+      dashboardData.active_requests.forEach((dr) => {
+        const id = dr.id || dr._id;
+        if (!list.some((r) => (r.id || r._id) === id)) {
+          list.push(dr);
+        }
+      });
+    }
+    return list;
+  }, [requests, dashboardData]);
+
   const unverified = useMemo(() => {
-    return requests.filter((r) =>
-      (!r.verified || r.status === 'Pending Approval' || r.pending_approval) &&
-      ['Pending', 'Waiting', 'Accepted', 'Pending Approval'].includes(r.status)
-    );
-  }, [requests]);
+    return allRequestsPool.filter((r) => {
+      const s = String(r.status || '').toLowerCase();
+      const v = r.verified === true || r.verified === 1 || r.verified === '1' || r.verified === 'true';
+      return (!v || s === 'pending approval' || r.pending_approval) &&
+        !['fulfilled', 'cancelled', 'expired'].includes(s);
+    });
+  }, [allRequestsPool]);
 
   const verified = useMemo(() => {
-    return requests.filter((r) =>
-      r.verified &&
-      r.status !== 'Pending Approval' &&
-      !r.pending_approval &&
-      ['Pending', 'Waiting', 'Accepted'].includes(r.status)
-    );
-  }, [requests]);
+    return allRequestsPool.filter((r) => {
+      const s = String(r.status || '').toLowerCase();
+      const v = r.verified === true || r.verified === 1 || r.verified === '1' || r.verified === 'true';
+      return (v || ['pending', 'waiting', 'accepted', 'active', 'in progress'].includes(s)) &&
+        s !== 'pending approval' &&
+        !r.pending_approval &&
+        !['fulfilled', 'cancelled', 'expired'].includes(s);
+    });
+  }, [allRequestsPool]);
 
   const fulfilled = useMemo(() => {
-    return requests.filter((r) => r.status === 'Fulfilled');
-  }, [requests]);
+    return allRequestsPool.filter((r) => {
+      const s = String(r.status || '').toLowerCase();
+      return s === 'fulfilled' || s === 'completed';
+    });
+  }, [allRequestsPool]);
 
-  const pendingList = pendingFromServer.length > 0 ? pendingFromServer : unverified;
+  const pendingList = (pendingFromServer && pendingFromServer.length > 0)
+    ? pendingFromServer
+    : unverified;
 
   // Active Tab Requests
   const rawTabRequests = useMemo(() => {
