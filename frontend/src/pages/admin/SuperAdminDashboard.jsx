@@ -107,7 +107,7 @@ export default function SuperAdminDashboard() {
   const [actionType, setActionType] = useState(null);
 
   // Awareness Video & Content Settings State
-  const { awarenessSettings, updateAwarenessSettings, fetchAwarenessSettings } = useAppStore();
+  const { awarenessSettings, updateAwarenessSettings, fetchAwarenessSettings, allUsers, fetchUsers, donors, searchDonors } = useAppStore();
   const [videoFile, setVideoFile] = useState(null);
   const [posterFile, setPosterFile] = useState(null);
   const [savingAwareness, setSavingAwareness] = useState(false);
@@ -174,13 +174,22 @@ export default function SuperAdminDashboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      if (fetchUsers) fetchUsers();
+      if (searchDonors) searchDonors();
+
       const [resDist, resAdmins, resPoints] = await Promise.all([
-        api.get('/super-admin/metrics'),
-        api.get('/super-admin/block-admins'),
+        api.get('/super-admin/metrics').catch((err) => {
+          console.error("Super Admin metrics error:", err);
+          return { data: null };
+        }),
+        api.get('/super-admin/block-admins').catch((err) => {
+          console.error("Super Admin block-admins error:", err);
+          return { data: null };
+        }),
         api.get('/super-admin/points-table').catch(() => ({ data: null }))
       ]);
 
-      if (resDist.data?.success) {
+      if (resDist?.data?.success) {
         const dData = resDist.data.data || resDist.data;
         setDistrictData({
           district: dData.district || 'Kasaragod',
@@ -200,7 +209,7 @@ export default function SuperAdminDashboard() {
         });
       }
 
-      if (resAdmins.data?.success) {
+      if (resAdmins?.data?.success) {
         const raw = resAdmins.data;
         let list = [];
         if (Array.isArray(raw)) list = raw;
@@ -209,7 +218,7 @@ export default function SuperAdminDashboard() {
         setBlockAdmins(list);
       }
 
-      if (resPoints.data?.success && resPoints.data.data) {
+      if (resPoints?.data?.success && resPoints.data.data) {
         setPointsLeaderboard(resPoints.data.data);
       }
     } catch (err) {
@@ -217,7 +226,47 @@ export default function SuperAdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUsers, searchDonors]);
+
+  // Resilient real counts with client-store fallback
+  const realDonorsCount = useMemo(() => {
+    const serverCount = Number(districtData.total_users);
+    if (!isNaN(serverCount) && serverCount > 0) return serverCount;
+
+    const userDonors = (allUsers || []).filter(u => {
+      const role = String(u.role || '').toLowerCase();
+      const bg = String(u.blood_group || u.bloodGroup || '').toUpperCase();
+      return ['user', 'donor', 'receiver'].includes(role) || (bg && bg !== 'N/A' && bg !== '');
+    });
+    if (userDonors.length > 0) return userDonors.length;
+    if (donors && donors.length > 0) return donors.length;
+    if (allUsers && allUsers.length > 0) return allUsers.length;
+    return !isNaN(serverCount) ? serverCount : 0;
+  }, [districtData.total_users, allUsers, donors]);
+
+  const realVolunteersCount = useMemo(() => {
+    const serverCount = Number(districtData.total_volunteers);
+    if (!isNaN(serverCount) && serverCount > 0) return serverCount;
+
+    const volUsers = (allUsers || []).filter(u => {
+      const role = String(u.role || '').toLowerCase();
+      return ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+    });
+    if (volUsers.length > 0) return volUsers.length;
+    return !isNaN(serverCount) ? serverCount : 0;
+  }, [districtData.total_volunteers, allUsers]);
+
+  const realBlockAdminsCount = useMemo(() => {
+    if (blockAdmins && blockAdmins.length > 0) return blockAdmins.length;
+    const serverCount = Number(districtData.total_admins);
+    if (!isNaN(serverCount) && serverCount > 0) return serverCount;
+    const baUsers = (allUsers || []).filter(u => {
+      const role = String(u.role || '').toLowerCase();
+      return ['block_admin', 'blockadmin', 'admin'].includes(role);
+    });
+    if (baUsers.length > 0) return baUsers.length;
+    return 0;
+  }, [blockAdmins, districtData.total_admins, allUsers]);
 
   const handleApproveDistrictRequest = async (reqId) => {
     setActionLoadingId(reqId);
