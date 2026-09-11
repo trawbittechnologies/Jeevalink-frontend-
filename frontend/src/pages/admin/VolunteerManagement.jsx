@@ -67,7 +67,16 @@ export default function VolunteerManagement() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const volunteers = allUsers.filter(u => u.role === 'volunteer' || u.role === 'Volunteer');
+  const isBlockAdmin = user?.role === 'block_admin';
+  const myBlock = (user?.organization_name || user?.city || user?.blockCommitteeName || user?.block || '').trim().toLowerCase();
+
+  const volunteers = allUsers
+    .filter(u => u.role === 'volunteer' || u.role === 'Volunteer')
+    .filter(v => {
+      if (!isBlockAdmin || !myBlock) return true;
+      const vBlock = (v.blockCommitteeName || v.organization_name || v.blockName || v.block || '').trim().toLowerCase();
+      return vBlock === myBlock;
+    });
 
   const filtered = volunteers.filter(v => {
     const q = search.toLowerCase();
@@ -122,13 +131,17 @@ export default function VolunteerManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border-slate-200 shadow-sm p-6 rounded-3xl border /80 shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">Volunteer Management (Meghala Committee)</h1>
+            <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">
+              Volunteer Management {isBlockAdmin && (user?.organization_name || user?.city) ? `(${user?.organization_name || user?.city})` : '(Meghala Committee)'}
+            </h1>
             <span className="px-2.5 py-0.5 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
               {volunteers.length} Total
             </span>
           </div>
           <p className="text-slate-500 text-xs mt-1">
-            Manage Meghala Committee primary and secondary volunteers, access credentials, and account statuses.
+            {isBlockAdmin 
+              ? `Manage Meghala Committee primary and secondary volunteers added by ${user?.organization_name || user?.city || 'your Block'}.`
+              : 'Manage Meghala Committee primary and secondary volunteers, access credentials, and account statuses.'}
           </p>
         </div>
 
@@ -444,7 +457,9 @@ export default function VolunteerManagement() {
                         person2Name: form.person2Name,
                         person2Contact: form.person2Contact,
                         whatsapp: form.whatsapp,
-                        email: form.email
+                        email: form.email,
+                        blockCommitteeName: user?.organization_name || user?.city || user?.block || '',
+                        district: user?.district || 'Kasaragod'
                       });
                       if (res.success) {
                         setShowAddModal(false);
@@ -463,7 +478,9 @@ export default function VolunteerManagement() {
                         person2Name: form.person2Name,
                         person2Contact: form.person2Contact,
                         whatsapp: form.whatsapp,
-                        email: form.email
+                        email: form.email,
+                        blockCommitteeName: selectedVolunteer.blockCommitteeName || selectedVolunteer.organization_name || user?.organization_name || user?.city || '',
+                        district: selectedVolunteer.district || user?.district || 'Kasaragod'
                       });
                       if (res.success) {
                         triggerToast('Volunteer details updated!', 'success');

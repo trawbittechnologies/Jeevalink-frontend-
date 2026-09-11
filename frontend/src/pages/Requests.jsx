@@ -593,16 +593,17 @@ export default function Requests() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {displayRequests.map((req) => {
+                    {displayRequests.map((req, i) => {
                       const isOwner = user && (String(req.requested_by || req.requestedBy) === String(user.id || user._id));
                       const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin'].includes(user?.role);
-                      const isSOS = (req.urgencyLevel || req.urgency_level) === 'Immediate';
+                      const urgStr = (req.urgencyLevel || req.urgency_level || '');
+                      const isSOS = urgStr === 'Immediate' || urgStr === 'Emergency SOS';
                       const isFulfilled = req.status === 'Fulfilled';
-                      const isPendingApproval = !req.verified || req.pending_approval === true;
+                      const isPendingApproval = !req.verified || req.pending_approval === true || req.status === 'Pending Approval';
 
                       return (
                         <div
-                          key={req._id || req.id}
+                          key={req.id || req._id || i}
                           onClick={() => !isFulfilled && (!isPendingApproval || isOwner || isPrivileged) && setSelectedReq(req)}
                           className={`p-4 bg-white dark:bg-zinc-900 border rounded-2xl shadow-sm flex items-start justify-between gap-3 ${isPendingApproval
                               ? 'border-amber-300 dark:border-amber-700/60 bg-amber-50/30 dark:bg-amber-950/10'
@@ -622,13 +623,13 @@ export default function Requests() {
                               ) : (
                                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${isFulfilled
                                     ? 'bg-slate-100 dark:bg-zinc-800 text-slate-500'
-                                    : (req.urgencyLevel || req.urgency_level) === 'Immediate'
+                                    : isSOS
                                       ? 'bg-red-500/10 text-red-600'
-                                      : (req.urgencyLevel || req.urgency_level) === 'Critical'
+                                      : urgStr === 'Critical' || urgStr === 'Urgent'
                                         ? 'bg-orange-500/10 text-orange-600'
                                         : 'bg-slate-100 dark:bg-zinc-800 text-slate-650'
                                   }`}>
-                                  {isFulfilled ? 'Fulfilled' : (req.urgencyLevel || req.urgency_level)}
+                                  {isFulfilled ? 'Fulfilled' : urgStr}
                                 </span>
                               )}
                               <span className="text-[10px] text-slate-400 dark:text-zinc-550 font-medium">
