@@ -91,13 +91,17 @@ export default function AdminDashboard() {
     e.preventDefault();
     setCreatedResult(null);
     try {
-      const cleanFullName = person2Name ? `${person1Name} & ${person2Name}` : person1Name;
       const res = await api.post('/block-admin/volunteers', {
-        primary_name: cleanFullName,
+        name: person1Name,
+        primary_name: person1Name,
+        person1Name: person1Name,
+        person2Name: person2Name || null,
         email: email,
         mobile: person1Contact,
         secondary_name: person2Name || null,
+        secondaryName: person2Name || null,
         secondary_phone: person2Contact || null,
+        secondaryContactNumber: person2Contact || null,
         whatsapp_number: whatsapp || person1Contact,
         city: meghalaName || 'Local Unit',
         meghala: meghalaName || 'Local Unit',

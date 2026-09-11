@@ -9,8 +9,12 @@ import DeleteConfirmModal from './DeleteConfirmModal.jsx';
 
 const urgencyConfig = {
   Immediate: { bg: 'bg-red-600', text: 'text-white', icon: ShieldAlert, label: 'SOS — Immediate' },
+  'Emergency SOS': { bg: 'bg-red-600', text: 'text-white', icon: ShieldAlert, label: 'SOS — Immediate' },
   Critical: { bg: 'bg-orange-500', text: 'text-white', icon: ShieldAlert, label: 'Critical' },
+  Urgent: { bg: 'bg-orange-500', text: 'text-white', icon: ShieldAlert, label: 'Urgent' },
   Moderate: { bg: 'bg-amber-400', text: 'text-amber-900', icon: Clock, label: 'Moderate' },
+  Normal: { bg: 'bg-slate-600', text: 'text-white', icon: Clock, label: 'Normal' },
+  Standard: { bg: 'bg-slate-600', text: 'text-white', icon: Clock, label: 'Standard' },
 };
 
 const bloodColors = {
@@ -309,7 +313,8 @@ export default function RequestCard({ request, showActions = true }) {
     setUnaccepting(false);
   };
 
-  const urg = urgencyConfig[request.urgencyLevel] || urgencyConfig.Moderate;
+  const rawUrg = request.urgency_level || request.urgencyLevel || 'Moderate';
+  const urg = urgencyConfig[rawUrg] || urgencyConfig.Moderate;
   const UrgIcon = urg.icon;
 
   const whatsappNumber = request.volunteerWhatsapp || request.whatsappNumber || request.volunteerPhone || request.contactNumber || '';

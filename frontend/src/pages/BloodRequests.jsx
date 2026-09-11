@@ -37,7 +37,7 @@ export default function BloodRequests() {
   const filtered = requests.filter((r) => {
     const isOwner = user && (String(r.requested_by || r.requestedBy) === String(user.id || user._id));
     const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin', 'block_admin'].includes(user.role);
-    const isPending = r.pending_approval === true || r.status === 'Pending Approval';
+    const isPending = !r.verified || r.pending_approval === true || r.status === 'Pending Approval';
 
     // If pending approval, only the requester and privileged staff can see it until approved
     if (isPending && !isOwner && !isPrivileged) {
@@ -45,9 +45,15 @@ export default function BloodRequests() {
     }
 
     const bg = r.bloodGroup || r.blood_group;
-    const urg = r.urgencyLevel || r.urgency_level;
-    let matches = (!filterBG || bg === filterBG) &&
-      (!filterUrgency || urg === filterUrgency || (filterUrgency === 'Immediate' && urg === 'Emergency SOS'));
+    const reqUrg = (r.urgencyLevel || r.urgency_level || '').toLowerCase();
+
+    const matchesBg = !filterBG || bg === filterBG;
+    const matchesUrgency = !filterUrgency ||
+      (filterUrgency === 'Immediate' && (reqUrg.includes('immediate') || reqUrg.includes('sos'))) ||
+      (filterUrgency === 'Critical' && (reqUrg.includes('critical') || reqUrg.includes('urgent'))) ||
+      (filterUrgency === 'Moderate' && (reqUrg.includes('moderate') || reqUrg.includes('standard') || reqUrg.includes('normal')));
+
+    let matches = matchesBg && matchesUrgency;
     if (filterStatus && filterStatus !== 'All') {
       if (filterStatus === 'Active') {
         matches = matches && ['Pending', 'Waiting', 'Accepted', 'Pending Approval'].includes(r.status);
@@ -60,15 +66,17 @@ export default function BloodRequests() {
 
   const [posterReq, setPosterReq] = useState(null);
 
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.patientName || !form.hospitalName) {
       triggerToast('Please fill all required fields.', 'warning');
       return;
     }
-    const payload = { ...form, unitsRequired: Number(form.unitsRequired) };
+    const payload = { 
+      ...form, 
+      unitsRequired: Number(form.unitsRequired) || 1,
+      contactNumber: form.contactNumber || user?.mobile || user?.phone || ''
+    };
     if (mapPos) { payload.latitude = mapPos.lat; payload.longitude = mapPos.lng; }
     const res = await createRequest(payload);
     if (res.success) {
@@ -81,7 +89,7 @@ export default function BloodRequests() {
         ...createdRequest,
         patient_name: form.patientName,
         blood_group: form.bloodGroup,
-        units_required: form.unitsRequired,
+        units_required: Number(form.unitsRequired) || 1,
         hospital_name: form.hospitalName,
         venue: form.hospitalName,
         location: form.city || form.district || 'Kerala',
@@ -89,17 +97,30 @@ export default function BloodRequests() {
         district: form.district || user?.district || 'Kasaragod',
         meghala_name: createdRequest.meghala_name || createdRequest.requester_meghala || form.city || user?.city || user?.meghala || '',
         requester_meghala: createdRequest.requester_meghala || createdRequest.meghala_name || form.city || user?.city || user?.meghala || '',
-        contact_phone: form.contactNumber,
+        contact_phone: form.contactNumber || user?.mobile || '',
         urgency_level: form.urgencyLevel,
         request_id: createdRequest.id || createdRequest._id || res.data?.id || `JL-${Date.now().toString().slice(-4)}`
       };
       setPosterReq(newReq);
-      setForm({ ...form, patientName: '', hospitalName: '', city: '', district: '' });
-      triggerToast('Blood request posted successfully! Download poster below.', 'success');
+      setForm({ 
+        patientName: '', 
+        bloodGroup: 'B+',
+        hospitalName: '', 
+        city: '', 
+        district: '',
+        urgencyLevel: 'Moderate',
+        unitsRequired: 1,
+        contactNumber: user?.mobile || ''
+      });
+      triggerToast('Blood alert posted successfully! Poster ready for download.', 'success');
+      fetchRequests();
     }
   };
 
-  const sosCount = requests.filter((r) => ((r.urgencyLevel || r.urgency_level) === 'Immediate' || (r.urgencyLevel || r.urgency_level) === 'Emergency SOS') && ['Pending', 'Waiting', 'Accepted'].includes(r.status)).length;
+  const sosCount = requests.filter((r) => {
+    const urg = (r.urgencyLevel || r.urgency_level || '').toLowerCase();
+    return (urg.includes('immediate') || urg.includes('sos')) && ['Pending', 'Waiting', 'Accepted'].includes(r.status);
+  }).length;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -193,7 +214,7 @@ export default function BloodRequests() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((req, i) => (
-            <motion.div key={req._id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+            <motion.div key={req.id || req._id || i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <RequestCard request={req} />
             </motion.div>
           ))}

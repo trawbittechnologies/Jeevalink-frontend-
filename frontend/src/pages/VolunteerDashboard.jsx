@@ -168,12 +168,12 @@ export default function VolunteerDashboard() {
   };
 
   // Filter lists
-  const unverified = requests.filter((r) => !r.verified && ['Pending', 'Waiting', 'Accepted'].includes(r.status));
-  const verified = requests.filter((r) => r.verified && ['Pending', 'Waiting', 'Accepted'].includes(r.status));
+  const unverified = requests.filter((r) => (!r.verified || r.status === 'Pending Approval' || r.pending_approval) && ['Pending', 'Waiting', 'Accepted', 'Pending Approval'].includes(r.status));
+  const verified = requests.filter((r) => r.verified && r.status !== 'Pending Approval' && ['Pending', 'Waiting', 'Accepted'].includes(r.status));
   const fulfilled = requests.filter((r) => r.status === 'Fulfilled');
 
   const stats = [
-    { label: 'Pending Approval', value: pendingFromServer.length },
+    { label: 'Pending Approval', value: pendingFromServer.length > 0 ? pendingFromServer.length : unverified.length },
     { label: 'Verified Active', value: verified.length },
     { label: 'Fulfilled Requests', value: fulfilled.length },
     { label: 'Unread Alerts', value: notifications.filter((n) => !n.read && !n.is_read).length },

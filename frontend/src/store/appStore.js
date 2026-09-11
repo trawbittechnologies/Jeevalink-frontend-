@@ -136,29 +136,41 @@ export const useAppStore = create((set, get) => ({
       const payload = {
         patient_name: requestData.patientName,
         blood_group: requestData.bloodGroup,
-        units_required: requestData.unitsRequired,
+        units_required: Number(requestData.unitsRequired) || 1,
         hospital_name: requestData.hospitalName,
-        hospital_address: requestData.hospitalAddress,
-        location: requestData.location,
+        hospital_address: requestData.hospitalAddress || requestData.location || '',
+        location: requestData.location || requestData.hospitalAddress || requestData.city || 'Kerala',
         city: requestData.city || requestData.meghala || userCity || 'Kasaragod',
         district: requestData.district || userDistrict,
-        contact_number: requestData.contactNumber,
-        contact_person_name: requestData.contactPersonName,
+        contact_number: requestData.contactNumber || currentUser?.mobile || currentUser?.phone || '',
+        contact_person_name: requestData.contactPersonName || currentUser?.primary_name || currentUser?.primaryName || '',
         required_by_date: requestData.requiredByDate || new Date().toISOString().split('T')[0],
         urgency_level: mappedUrgency,
-        additional_notes: requestData.additionalNotes,
+        additional_notes: requestData.additionalNotes || '',
       };
       const res = await api.post('/requests', payload);
       if (res.data.success) {
-        const newReq = res.data.data.request;
-        const isVerified = res.data.verified === true;
+        const newReq = res.data.data?.request || res.data?.request || res.data;
+        const isVerified = res.data.verified === true || newReq.verified === true;
         const serverMessage = res.data.message || '';
-        // Only push to the public feed immediately if verified (privileged user)
-        // For regular users, it will appear via getForUser (pending_approval flag set)
-        set((state) => ({ requests: [newReq, ...state.requests] }));
+        
+        set((state) => {
+          const reqIdStr = String(newReq.id || newReq._id || '');
+          const filtered = state.requests.filter(
+            (r) => String(r.id || r._id || '') !== reqIdStr
+          );
+          return { requests: [newReq, ...filtered] };
+        });
+
         if (isVerified) {
           get().triggerToast('Blood request posted and published!', 'success');
         }
+        
+        // Refresh requests in the background to ensure relations and counts are synced
+        setTimeout(() => {
+          get().fetchRequests();
+        }, 500);
+
         // Return verified flag and message for UI banner handling
         return { success: true, request: newReq, verified: isVerified, message: serverMessage };
       }
