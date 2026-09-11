@@ -39,6 +39,7 @@ export default function VolunteerDashboard() {
 
   const [tab, setTab] = useState('pending'); // 'pending' | 'verified' | 'fulfilled' | 'all'
   const [pendingFromServer, setPendingFromServer] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
   const [loadingPending, setLoadingPending] = useState(false);
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
@@ -54,6 +55,21 @@ export default function VolunteerDashboard() {
   const [selectedUrgencyFilter, setSelectedUrgencyFilter] = useState('ALL');
   const [selectedMatrixGroup, setSelectedMatrixGroup] = useState('O+');
   const [copiedId, setCopiedId] = useState(null);
+
+  // ── Fetch dynamic dashboard metrics & feeds ─────────────────────────
+  const fetchVolunteerDashboard = useCallback(async () => {
+    try {
+      const res = await api.get('/volunteer/dashboard');
+      if (res.data?.success) {
+        setDashboardData(res.data.data);
+        if (Array.isArray(res.data.data?.pending_requests)) {
+          setPendingFromServer(res.data.data.pending_requests);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch volunteer dashboard metrics:', err);
+    }
+  }, []);
 
   // ── Fetch pending requests from server (volunteer-scoped) ──────────
   const fetchPending = useCallback(async () => {
@@ -77,16 +93,17 @@ export default function VolunteerDashboard() {
         fetchRequests(),
         fetchNotifications(),
         fetchUsers(),
-        fetchPending()
+        fetchPending(),
+        fetchVolunteerDashboard()
       ]);
-      triggerToast('Dashboard data refreshed', 'success');
+      triggerToast('Dashboard data refreshed with live server data', 'success');
     } catch (err) {
       console.error('Refresh error:', err);
       triggerToast('Failed to refresh data', 'error');
     } finally {
       setLoadingPending(false);
     }
-  }, [fetchRequests, fetchNotifications, fetchUsers, fetchPending, triggerToast]);
+  }, [fetchRequests, fetchNotifications, fetchUsers, fetchPending, fetchVolunteerDashboard, triggerToast]);
 
   useEffect(() => {
     let active = true;
@@ -96,10 +113,11 @@ export default function VolunteerDashboard() {
         fetchNotifications();
         fetchUsers();
         await fetchPending();
+        await fetchVolunteerDashboard();
       }
     })();
     return () => { active = false; };
-  }, [fetchRequests, fetchNotifications, fetchUsers, fetchPending]);
+  }, [fetchRequests, fetchNotifications, fetchUsers, fetchPending, fetchVolunteerDashboard]);
 
   // ── Helper: Compatible Donors Filter ───────────────────────────────
   const getCompatibleDonors = useCallback((bloodGroup) => {
