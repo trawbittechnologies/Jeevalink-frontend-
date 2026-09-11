@@ -647,14 +647,21 @@ export const useAppStore = create((set, get) => ({
       let res;
       try {
         res = await api.delete(`/volunteer/users/${userId}`);
-      } catch {
-        res = await api.delete(`/admin/users/${userId}`);
+      } catch (volErr) {
+        const currentUser = useAuthStore.getState().user;
+        const role = String(currentUser?.role || '').toLowerCase();
+        if (['technical_admin', 'super_admin', 'block_admin', 'admin'].includes(role)) {
+          res = await api.delete(`/admin/users/${userId}`);
+        } else {
+          throw volErr;
+        }
       }
 
-      if (res.data.success) {
+      if (res?.data?.success) {
         set((state) => ({
           allUsers: state.allUsers.filter((u) => String(u._id || u.id) !== String(userId) && String(u.id) !== String(userId)),
-          unitSquads: (state.unitSquads || []).filter((u) => String(u._id || u.id) !== String(userId) && String(u.id) !== String(userId))
+          unitSquads: (state.unitSquads || []).filter((u) => String(u._id || u.id) !== String(userId) && String(u.id) !== String(userId)),
+          donors: (state.donors || []).filter((u) => String(u._id || u.id) !== String(userId) && String(u.id) !== String(userId))
         }));
         get().triggerToast(res.data.message || 'User deleted successfully.', 'success');
         return { success: true };

@@ -373,21 +373,56 @@ export default function VolunteerDashboard() {
     });
   }, [rawTabRequests, searchQuery, selectedBloodFilter, selectedUrgencyFilter]);
 
+  // Dynamic Metric Counts with server & store fallback
+  const totalPendingCount = useMemo(() => {
+    const s = dashboardData?.stats?.pending_requests;
+    if (typeof s === 'number') return s;
+    return pendingList.length;
+  }, [dashboardData, pendingList]);
+
+  const totalActiveCount = useMemo(() => {
+    const s = dashboardData?.stats?.active_requests;
+    if (typeof s === 'number') return s;
+    return verified.length;
+  }, [dashboardData, verified]);
+
+  const totalFulfilledCount = useMemo(() => {
+    const s = dashboardData?.stats?.fulfilled_requests;
+    if (typeof s === 'number') return s;
+    return fulfilled.length;
+  }, [dashboardData, fulfilled]);
+
+  const totalDonorsCount = useMemo(() => {
+    const serverVal = Number(dashboardData?.stats?.total_donors);
+    if (!isNaN(serverVal) && serverVal > 0) {
+      return serverVal;
+    }
+    const userDonors = (allUsers || []).filter(u => {
+      const role = String(u.role || '').toLowerCase();
+      const bg = String(u.blood_group || u.bloodGroup || '').toUpperCase();
+      return ['user', 'donor', 'receiver'].includes(role) || (bg && bg !== 'N/A' && bg !== '');
+    });
+    if (userDonors.length > 0) return userDonors.length;
+    if (donors && donors.length > 0) return donors.length;
+    if (allUsers && allUsers.length > 0) return allUsers.length;
+    return !isNaN(serverVal) ? serverVal : 0;
+  }, [dashboardData, allUsers, donors]);
+
   // Clean Dynamic Statistics Cards
   const stats = [
     {
       id: 'pending',
       label: 'Pending Approval',
-      value: dashboardData?.stats?.pending_requests ?? pendingList.length,
+      value: totalPendingCount,
       icon: AlertCircle,
       iconColor: 'text-amber-600',
       iconBg: 'bg-amber-50',
-      borderAccent: (dashboardData?.stats?.pending_requests ?? pendingList.length) > 0 ? 'border-amber-300' : 'border-slate-200',
+      borderAccent: totalPendingCount > 0 ? 'border-amber-300' : 'border-slate-200',
     },
     {
       id: 'verified',
       label: 'Verified Active',
-      value: dashboardData?.stats?.active_requests ?? verified.length,
+      value: totalActiveCount,
       icon: Droplets,
       iconColor: 'text-red-600',
       iconBg: 'bg-red-50',
@@ -396,7 +431,7 @@ export default function VolunteerDashboard() {
     {
       id: 'fulfilled',
       label: 'Fulfilled Requests',
-      value: dashboardData?.stats?.fulfilled_requests ?? fulfilled.length,
+      value: totalFulfilledCount,
       icon: CheckCircle2,
       iconColor: 'text-emerald-600',
       iconBg: 'bg-emerald-50',
@@ -405,7 +440,7 @@ export default function VolunteerDashboard() {
     {
       id: 'donors',
       label: 'Registered Donors',
-      value: dashboardData?.stats?.total_donors ?? ((allUsers || []).filter(u => u.role === 'user').length || donors.length),
+      value: totalDonorsCount,
       icon: Users,
       iconColor: 'text-blue-600',
       iconBg: 'bg-blue-50',
