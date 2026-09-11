@@ -69,8 +69,8 @@ export default function DonorCard({ donor }) {
   let vol1Phone = donor.volunteerPhone || donor.volunteer_phone;
   let vol1Role = donor.volunteerRole || donor.volunteer_role;
 
-  let vol2Name = donor.volunteerName2 || donor.volunteer_name_2 || donor.secondaryName || donor.secondary_name;
-  let vol2Phone = donor.volunteerPhone2 || donor.volunteer_phone_2 || donor.secondaryContactNumber || donor.secondary_phone;
+  let vol2Name = donor.volunteerName2 || donor.volunteer_name_2;
+  let vol2Phone = donor.volunteerPhone2 || donor.volunteer_phone_2;
   let vol2Role = donor.volunteerRole2 || donor.volunteer_role_2;
 
   // Filter out block_admin
@@ -85,17 +85,33 @@ export default function DonorCard({ donor }) {
     vol2Role = null;
   }
 
+  let rawMeghala = donor.meghalaCommitteeName || donor.meghala_committee_name || donor.meghalaName || donor.meghala_name || donor.meghala || donor.organization_name;
+
   if (allUsers && allUsers.length > 0) {
     const dDistrict = (district || '').toLowerCase().trim();
     const dCity = (city || '').toLowerCase().trim();
+    const dOrg = (donor.organization_name || '').toLowerCase().trim();
+    const dMeghala = (donor.meghala || donor.meghalaName || donor.meghala_name || '').toLowerCase().trim();
 
-    // Look for Meghala volunteer or unit squad only
-    const matchedVols = allUsers.filter((u) => 
-      ['volunteer', 'unit_squad'].includes(u.role) &&
-      (u.status === 'Active' || !u.status) &&
-      (u.district || '').toLowerCase().trim() === dDistrict &&
-      (u.city || '').toLowerCase().trim() === dCity
-    );
+    let addedBy = '';
+    if (donor.remarks && typeof donor.remarks === 'string') {
+      const match = donor.remarks.match(/added by meghala:\s*([^,\n;]+)/i);
+      if (match) addedBy = match[1].toLowerCase().trim();
+    }
+
+    // Look for Meghala volunteer or unit squad matching addedBy, meghala, organization, or city
+    const matchedVols = allUsers.filter((u) => {
+      if (!['volunteer', 'unit_squad'].includes(u.role) || (u.status && u.status !== 'Active')) return false;
+      const uCity = (u.city || '').toLowerCase().trim();
+      const uOrg = (u.organization_name || '').toLowerCase().trim();
+      const uDist = (u.district || '').toLowerCase().trim();
+
+      if (addedBy && (uCity === addedBy || uOrg === addedBy)) return true;
+      if (dMeghala && (uCity === dMeghala || uOrg === dMeghala)) return true;
+      if (dOrg && (uCity === dOrg || uOrg === dOrg)) return true;
+      if (dCity && uDist === dDistrict && (uCity === dCity || uOrg === dCity)) return true;
+      return false;
+    });
 
     const fallbackVols = matchedVols.length > 0 ? matchedVols : allUsers.filter((u) => 
       ['volunteer', 'unit_squad'].includes(u.role) &&
@@ -105,16 +121,29 @@ export default function DonorCard({ donor }) {
 
     const pool = fallbackVols.length > 0 ? fallbackVols : allUsers.filter((u) => ['volunteer', 'unit_squad'].includes(u.role));
 
-    if (!vol1Phone && pool[0]) {
-      vol1Name = pool[0].primaryName || pool[0].primary_name || pool[0].name;
-      vol1Phone = pool[0].mobile || pool[0].phone;
-      vol1Role = pool[0].role;
-    }
-
-    if (!vol2Phone && pool[1] && pool[1] !== pool[0]) {
-      vol2Name = pool[1].primaryName || pool[1].primary_name || pool[1].name;
-      vol2Phone = pool[1].mobile || pool[1].phone;
-      vol2Role = pool[1].role;
+    if (pool[0]) {
+      const primaryVol = pool[0];
+      if (!vol1Phone) {
+        vol1Name = primaryVol.primaryName || primaryVol.primary_name || primaryVol.name;
+        vol1Phone = primaryVol.mobile || primaryVol.phone;
+        vol1Role = primaryVol.role;
+      }
+      if (!vol2Phone) {
+        const p2Name = primaryVol.secondaryName || primaryVol.secondary_name || primaryVol.person2Name;
+        const p2Phone = primaryVol.secondaryContactNumber || primaryVol.secondary_contact_number || primaryVol.secondary_phone || primaryVol.person2Contact;
+        if (p2Name && p2Phone) {
+          vol2Name = p2Name;
+          vol2Phone = p2Phone;
+          vol2Role = 'volunteer';
+        } else if (pool[1] && pool[1] !== pool[0]) {
+          vol2Name = pool[1].primaryName || pool[1].primary_name || pool[1].name;
+          vol2Phone = pool[1].mobile || pool[1].phone;
+          vol2Role = pool[1].role;
+        }
+      }
+      if (!rawMeghala || rawMeghala === 'Local Area') {
+        rawMeghala = primaryVol.city || primaryVol.meghala || primaryVol.organization_name;
+      }
     }
   }
 
@@ -123,8 +152,11 @@ export default function DonorCard({ donor }) {
   if (!vol1Phone) vol1Phone = donor.secondaryContactNumber || donor.secondary_phone || '9998593194';
   if (!vol1Role || vol1Role === 'block_admin') vol1Role = 'volunteer';
 
+  if (!rawMeghala || rawMeghala === 'Local Area') {
+    rawMeghala = city || district || 'Meghala';
+  }
+
   // Compute Meghala Committee Display Name
-  const rawMeghala = donor.meghalaCommitteeName || donor.meghala_committee_name || donor.meghalaName || donor.meghala_name || city;
   let meghalaDisplayName = 'Meghala Committee';
   if (rawMeghala && rawMeghala !== 'Local Area') {
     if (rawMeghala.toLowerCase().includes('meghala') && rawMeghala.toLowerCase().includes('committee')) {
