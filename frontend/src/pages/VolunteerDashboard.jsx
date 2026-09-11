@@ -150,6 +150,7 @@ export default function VolunteerDashboard() {
         triggerToast('Request approved and published', 'success');
         setPendingFromServer((prev) => prev.filter((r) => (r.id || r._id) !== reqId));
         fetchRequests();
+        fetchVolunteerDashboard();
         handleGetTop5(reqId, reqObj);
       } else {
         triggerToast(res.data?.message || 'Approval failed', 'error');
@@ -170,6 +171,7 @@ export default function VolunteerDashboard() {
       if (res.data?.success || res.status === 200) {
         setPendingFromServer((prev) => prev.filter((r) => (r.id || r._id) !== reqId));
         fetchRequests();
+        fetchVolunteerDashboard();
         triggerToast('Blood request rejected', 'info');
       } else {
         triggerToast('Failed to reject request', 'error');
@@ -197,6 +199,7 @@ export default function VolunteerDashboard() {
         } catch { /* ignore */ }
         triggerToast('Request marked as fulfilled', 'success');
         fetchRequests();
+        fetchVolunteerDashboard();
       } else {
         triggerToast(res.data?.message || 'Failed to mark as fulfilled', 'error');
       }
@@ -346,21 +349,21 @@ export default function VolunteerDashboard() {
     });
   }, [rawTabRequests, searchQuery, selectedBloodFilter, selectedUrgencyFilter]);
 
-  // Clean Statistics Cards
+  // Clean Dynamic Statistics Cards
   const stats = [
     {
       id: 'pending',
       label: 'Pending Approval',
-      value: pendingList.length,
+      value: dashboardData?.stats?.pending_requests ?? pendingList.length,
       icon: AlertCircle,
       iconColor: 'text-amber-600',
       iconBg: 'bg-amber-50',
-      borderAccent: pendingList.length > 0 ? 'border-amber-300' : 'border-slate-200',
+      borderAccent: (dashboardData?.stats?.pending_requests ?? pendingList.length) > 0 ? 'border-amber-300' : 'border-slate-200',
     },
     {
       id: 'verified',
       label: 'Verified Active',
-      value: verified.length,
+      value: dashboardData?.stats?.active_requests ?? verified.length,
       icon: Droplets,
       iconColor: 'text-red-600',
       iconBg: 'bg-red-50',
@@ -369,7 +372,7 @@ export default function VolunteerDashboard() {
     {
       id: 'fulfilled',
       label: 'Fulfilled Requests',
-      value: fulfilled.length,
+      value: dashboardData?.stats?.fulfilled_requests ?? fulfilled.length,
       icon: CheckCircle2,
       iconColor: 'text-emerald-600',
       iconBg: 'bg-emerald-50',
@@ -378,7 +381,7 @@ export default function VolunteerDashboard() {
     {
       id: 'donors',
       label: 'Registered Donors',
-      value: (allUsers || []).filter(u => u.role === 'user').length || donors.length,
+      value: dashboardData?.stats?.total_donors ?? ((allUsers || []).filter(u => u.role === 'user').length || donors.length),
       icon: Users,
       iconColor: 'text-blue-600',
       iconBg: 'bg-blue-50',
@@ -386,9 +389,9 @@ export default function VolunteerDashboard() {
     }
   ];
 
-  // Committee details resolver
+  // Committee details resolver (dynamic from server + user profile)
   const committeeName = (() => {
-    const rawMeghala = user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
+    const rawMeghala = dashboardData?.jurisdiction?.meghala || user?.meghalaCommitteeName || user?.meghala_committee_name || user?.meghala || user?.meghalaName || user?.meghala_name || user?.city || '';
     if (!rawMeghala || rawMeghala.toLowerCase() === 'n/a') return 'Meghala Committee';
     if (/meghala\s+committee/i.test(rawMeghala)) return rawMeghala;
     if (/committee/i.test(rawMeghala)) return rawMeghala;
@@ -397,15 +400,15 @@ export default function VolunteerDashboard() {
   })();
 
   const blockName = (() => {
-    const rawBlock = user?.blockCommitteeName || user?.block_committee_name || user?.organization_name || user?.organizationName || user?.block || user?.block_name || user?.blockName || (user?.role === 'block_admin' ? user?.city : '') || '';
+    const rawBlock = dashboardData?.jurisdiction?.block || user?.blockCommitteeName || user?.block_committee_name || user?.organization_name || user?.organizationName || user?.block || user?.block_name || user?.blockName || (user?.role === 'block_admin' ? user?.city : '') || '';
     if (!rawBlock || rawBlock.toLowerCase() === 'n/a' || rawBlock.toLowerCase() === 'central') {
-      return user?.district ? `${user.district} Block` : 'Block Committee';
+      return (dashboardData?.jurisdiction?.district || user?.district) ? `${dashboardData?.jurisdiction?.district || user.district} Block` : 'Block Committee';
     }
     if (/block\s+committee/i.test(rawBlock) || /block/i.test(rawBlock) || /committee/i.test(rawBlock)) return rawBlock;
     return `${rawBlock} Block`;
   })();
 
-  const districtName = user?.district || user?.district_name || 'Kasaragod';
+  const districtName = dashboardData?.jurisdiction?.district || user?.district || user?.district_name || 'Kasaragod';
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 text-left px-2 sm:px-4 lg:px-6 pb-24 lg:pb-16 select-none">
