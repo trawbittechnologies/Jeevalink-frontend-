@@ -593,7 +593,7 @@ export default function SuperAdminDashboard() {
               <Droplets className="w-4 h-4 fill-red-100" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-1">{districtData.total_users}</p>
+          <p className="text-2xl font-black text-slate-900 mt-1">{realDonorsCount}</p>
           <p className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> System Verified
           </p>
@@ -607,7 +607,7 @@ export default function SuperAdminDashboard() {
               <UserCheck className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-emerald-700 mt-1">{districtData.total_volunteers}</p>
+          <p className="text-2xl font-black text-emerald-700 mt-1">{realVolunteersCount}</p>
           <p className="text-[10px] text-slate-500 font-medium mt-1">District Squads</p>
         </div>
 
@@ -619,7 +619,7 @@ export default function SuperAdminDashboard() {
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-amber-700 mt-1">{blockAdmins.length || districtData.total_admins}</p>
+          <p className="text-2xl font-black text-amber-700 mt-1">{realBlockAdminsCount}</p>
           <p className="text-[10px] text-slate-500 font-medium mt-1">Active Hubs</p>
         </div>
 
