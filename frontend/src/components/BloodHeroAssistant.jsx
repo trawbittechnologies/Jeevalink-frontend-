@@ -402,7 +402,7 @@ export default function BloodHeroAssistant() {
         )}
       </AnimatePresence>
 
-      {/* ── Floating Mascot Trigger Button (Enlarged size) ── */}
+      {/* ── Floating Mascot Trigger Button (Responsive Size) ── */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -410,14 +410,14 @@ export default function BloodHeroAssistant() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-20 md:bottom-6 right-3 sm:right-6 z-[9990] flex items-end select-none pointer-events-auto"
+            className="fixed bottom-4 sm:bottom-6 right-2 sm:right-6 z-[9990] flex items-end select-none pointer-events-auto"
           >
             <motion.button
               type="button"
               onClick={() => setIsOpen(true)}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.93 }}
               whileHover={{ scale: 1.05 }}
-              className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-2xl w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] transition-transform"
+              className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-2xl w-[76px] h-[76px] sm:w-[110px] sm:h-[110px] md:w-[135px] md:h-[135px] transition-all"
               aria-label="Open Hemo Blood Assistant"
             >
               <MascotVideo showBubble={true} />
