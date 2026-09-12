@@ -183,7 +183,7 @@ export default function MascotVideo({
                 <span className="text-[8px] sm:text-[9px] font-bold text-white tracking-wider">CLICK TO CHAT</span>
               </div>
               {/* Tail pointing down to mascot */}
-              <div className="absolute -bottom-[6px] right-8 sm:right-12 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
+              <div className="absolute -bottom-[6px] right-10 sm:right-14 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
             </motion.div>
           </AnimatePresence>
         </motion.div>
@@ -194,7 +194,7 @@ export default function MascotVideo({
         <div
           key={idx}
           ref={el => (containerRefs.current[idx] = el)}
-          className="w-full h-full flex items-center justify-center scale-115 sm:scale-110 origin-bottom transition-transform"
+          className="w-full h-full flex items-center justify-center scale-125 sm:scale-115 origin-bottom transition-transform"
           style={{
             position: 'absolute',
             inset: 0,
