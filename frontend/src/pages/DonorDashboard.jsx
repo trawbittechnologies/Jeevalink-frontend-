@@ -6,7 +6,7 @@ import api from '../store/api.js';
 import {
   Loader2, X, Phone, RefreshCw,
   Heart, Siren, Droplet, Send, ShieldAlert, ShieldCheck,
-  Share2, MapPin, Headphones
+  Share2, MapPin, Headphones, MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Modal from '../components/Modal.jsx';
@@ -320,12 +320,18 @@ export default function DonorDashboard() {
           <span className="text-[11px] font-semibold text-emerald-600">{eligibility.text}</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
           <Link
             to="/support"
             className="py-2.5 px-3 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-bold rounded-xl text-center transition flex items-center justify-center gap-1.5"
           >
-            <Headphones className="w-3.5 h-3.5" /> Support & AI Help
+            <Headphones className="w-3.5 h-3.5" /> Support
+          </Link>
+          <Link
+            to="/feedback"
+            className="py-2.5 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold rounded-xl text-center transition flex items-center justify-center gap-1.5"
+          >
+            <MessageSquare className="w-3.5 h-3.5" /> Send Feedback
           </Link>
           <Link
             to="/donor/eligibility"

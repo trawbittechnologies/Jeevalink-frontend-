@@ -9,7 +9,7 @@ import {
   AlertCircle, Loader2, X, Search, RefreshCw,
   HeartHandshake, MapPin, Phone, Building2,
   Filter, Layers, ChevronRight, MessageCircle,
-  Check, Calendar, Droplets
+  Check, Calendar, Droplets, MessageSquare
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -518,6 +518,14 @@ export default function VolunteerDashboard() {
             >
               <Building2 className="w-4 h-4 shrink-0" />
               <span>Unit Squad</span>
+            </Link>
+
+            <Link
+              to="/volunteer/feedback"
+              className="px-3 py-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-red-500/40 text-center"
+            >
+              <MessageSquare className="w-4 h-4 shrink-0" />
+              <span>Feedback</span>
             </Link>
 
             <button

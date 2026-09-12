@@ -74,6 +74,7 @@ const VolunteerDirectory = safeLazy(() => import('./pages/VolunteerDirectory.jsx
 const TechnicalReports = safeLazy(() => import('./pages/TechnicalReports.jsx'));
 const Campaigns = safeLazy(() => import('./pages/Campaigns.jsx'));
 const UserSupport = safeLazy(() => import('./pages/UserSupport.jsx'));
+const SendFeedback = safeLazy(() => import('./pages/SendFeedback.jsx'));
 
 function PageLoader() {
   return (
@@ -381,6 +382,9 @@ export default function App() {
                 <Route path="/support" element={<UserSupport />} />
                 <Route path="/user/support" element={<Navigate to="/support" replace />} />
                 <Route path="/help" element={<Navigate to="/support" replace />} />
+                <Route path="/feedback" element={<SendFeedback />} />
+                <Route path="/donor/feedback" element={<Navigate to="/feedback" replace />} />
+                <Route path="/volunteer/feedback" element={<SendFeedback />} />
                 <Route path="/campaigns" element={<Campaigns />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />

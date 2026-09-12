@@ -5,7 +5,7 @@ import { useAppStore } from '../store/appStore.js';
 import {
   LayoutDashboard, Users, Droplets, User,
   Settings, ClipboardList, ShieldCheck, LogOut, ChevronRight, ShieldAlert, Search,
-  Building2, Megaphone, HeartHandshake, X, Headphones, Trophy, Video
+  Building2, Megaphone, HeartHandshake, X, Headphones, Trophy, Video, MessageSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
@@ -16,6 +16,7 @@ const userLinks = [
   { to: '/donor/eligibility', label: 'Health Eligibility', icon: ShieldCheck },
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
   { to: '/support', label: 'Support & Help', icon: Headphones },
+  { to: '/feedback', label: 'Send Feedback', icon: MessageSquare },
   { to: '/profile', label: 'My Profile', icon: User },
 ];
 
@@ -27,6 +28,7 @@ const unitSquadLinks = [
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
   { to: '/donor/search', label: 'Find Donors', icon: Search },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
+  { to: '/feedback', label: 'Send Feedback', icon: MessageSquare },
   { to: '/profile', label: 'My Profile', icon: User },
 ];
 
@@ -39,6 +41,7 @@ const volunteerLinks = [
   { to: '/requests', label: 'Blood Requests', icon: Droplets },
   { to: '/donor/search', label: 'Find Donors', icon: Search },
   { to: '/technical-reports', label: 'Send Tech Report', icon: ShieldAlert },
+  { to: '/volunteer/feedback', label: 'Send Feedback', icon: MessageSquare },
   { to: '/profile', label: 'My Profile', icon: User },
 ];
 
