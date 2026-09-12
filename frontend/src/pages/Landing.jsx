@@ -362,23 +362,29 @@ export default function Landing() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.55, duration: 0.5 }}
             style={{
-              display: 'flex', gap: 'clamp(1.5rem, 3.5vw, 3rem)', justifyContent: 'center', alignItems: 'center',
+              display: 'flex', gap: 'clamp(1rem, 2.5vw, 2.5rem)', justifyContent: 'center', alignItems: 'center',
+              flexWrap: 'wrap',
               paddingTop: '1.25rem', borderTop: '1px solid rgba(226,232,240,0.85)',
-              width: '100%', maxWidth: '520px', marginTop: '1.25rem',
+              width: '100%', maxWidth: '580px', marginTop: '1.25rem',
             }}
           >
             {[
               {
-                val: displayCount > 0 ? `${displayCount.toLocaleString()}+` : (totalDonors > 0 ? `${totalDonors.toLocaleString()}+` : '1+'),
+                val: displayDonorCount > 0 ? `${displayDonorCount.toLocaleString()}+` : (totalDonors > 0 ? `${totalDonors}+` : '1+'),
                 label: 'Total Donors',
+                highlight: true,
+              },
+              {
+                val: displayVolunteerCount > 0 ? `${displayVolunteerCount.toLocaleString()}+` : (totalVolunteers > 0 ? `${totalVolunteers}+` : '1+'),
+                label: 'Volunteers',
                 highlight: true,
               },
               { val: 'Kasaragod', label: 'Donor Reach' },
               { val: 'Real-time', label: 'SOS Response' },
             ].map(s => (
-              <div key={s.label} style={{ textAlign: 'center' }}>
+              <div key={s.label} style={{ textAlign: 'center', minWidth: '65px' }}>
                 <div style={{
-                  fontSize: 'clamp(1rem, 1.4vw, 1.25rem)',
+                  fontSize: 'clamp(0.95rem, 1.35vw, 1.25rem)',
                   fontWeight: 800,
                   color: s.highlight ? '#dc2626' : '#0f172a',
                   marginBottom: 2,
@@ -387,7 +393,7 @@ export default function Landing() {
                 }}>
                   {s.val}
                 </div>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {s.label}
                 </div>
               </div>
