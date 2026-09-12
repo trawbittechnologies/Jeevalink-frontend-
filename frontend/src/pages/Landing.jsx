@@ -12,7 +12,8 @@ import {
   Search,
   UserPlus,
   HeartHandshake,
-  CheckCircle2
+  CheckCircle2,
+  Heart
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
 
@@ -46,9 +47,38 @@ const processSteps = [
 ];
 
 export default function Landing() {
-  const { requests, fetchRequests, awarenessSettings, fetchAwarenessSettings } = useAppStore();
+  const { requests, fetchRequests, awarenessSettings, fetchAwarenessSettings, publicStats, fetchPublicStats } = useAppStore();
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
+
+  const totalDonors = publicStats?.totalDonors ?? 0;
+  const [displayCount, setDisplayCount] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const end = Number(totalDonors) || 0;
+    if (end === 0) {
+      setDisplayCount(0);
+      return;
+    }
+    const duration = 1200;
+    const startTime = performance.now();
+
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const val = Math.floor(easeOut * (end - start) + start);
+      setDisplayCount(val);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setDisplayCount(end);
+      }
+    };
+    const animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, [totalDonors]);
 
   const heroSlides = [
     {
@@ -75,7 +105,8 @@ export default function Landing() {
   useEffect(() => {
     fetchRequests();
     fetchAwarenessSettings();
-  }, [fetchRequests, fetchAwarenessSettings]);
+    fetchPublicStats();
+  }, [fetchRequests, fetchAwarenessSettings, fetchPublicStats]);
 
   // Extract active real requests for display (only verified requests go public)
   const activeRequests = (requests || []).filter(
@@ -268,11 +299,87 @@ export default function Landing() {
             </div>
           </div>
 
+          {/* Creative Minimal Dynamic Donors Live Counter Pill */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.38 }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '9px',
+              padding: '6px 14px 6px 11px',
+              borderRadius: '9999px',
+              background: 'rgba(255, 255, 255, 0.88)',
+              border: '1px solid rgba(226, 232, 240, 0.9)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px -2px rgba(220, 38, 38, 0.08), 0 2px 6px rgba(15, 23, 42, 0.03)',
+              marginBottom: '1.25rem',
+            }}
+          >
+            {/* Pulsing live radar dot */}
+            <span style={{ position: 'relative', display: 'flex', width: '8px', height: '8px' }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  backgroundColor: '#22c55e',
+                  opacity: 0.75,
+                  animation: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+                }}
+              />
+              <span
+                style={{
+                  position: 'relative',
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#16a34a',
+                }}
+              />
+            </span>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <span
+                style={{
+                  fontSize: '0.96rem',
+                  fontWeight: 900,
+                  color: '#0f172a',
+                  fontVariantNumeric: 'tabular-nums',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {displayCount > 0 ? displayCount.toLocaleString() : (totalDonors > 0 ? totalDonors.toLocaleString() : '1')}
+              </span>
+              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
+                Total Donors Connected
+              </span>
+            </div>
+
+            <span
+              style={{
+                fontSize: '0.62rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                padding: '2px 7px',
+                borderRadius: '6px',
+                background: 'rgba(220, 38, 38, 0.08)',
+                color: '#dc2626',
+              }}
+            >
+              Live
+            </span>
+          </motion.div>
+
           {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.48 }}
             style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'center' }}
           >
             <button
@@ -301,21 +408,36 @@ export default function Landing() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
+            transition={{ delay: 0.55, duration: 0.5 }}
             style={{
-              display: 'flex', gap: '3rem', justifyContent: 'center',
+              display: 'flex', gap: 'clamp(1.5rem, 3.5vw, 3rem)', justifyContent: 'center', alignItems: 'center',
               paddingTop: '1.25rem', borderTop: '1px solid rgba(226,232,240,0.85)',
-              width: '100%', maxWidth: '520px',
+              width: '100%', maxWidth: '520px', marginTop: '1.25rem',
             }}
           >
             {[
+              {
+                val: displayCount > 0 ? `${displayCount.toLocaleString()}+` : (totalDonors > 0 ? `${totalDonors.toLocaleString()}+` : '1+'),
+                label: 'Total Donors',
+                highlight: true,
+              },
               { val: 'Kasaragod', label: 'Donor Reach' },
-              { val: 'Verified', label: 'Block Committees' },
               { val: 'Real-time', label: 'SOS Response' },
             ].map(s => (
               <div key={s.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 'clamp(0.95rem, 1.3vw, 1.15rem)', fontWeight: 800, color: '#dc2626', marginBottom: 2, lineHeight: 1.2 }}>{s.val}</div>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.label}</div>
+                <div style={{
+                  fontSize: 'clamp(1rem, 1.4vw, 1.25rem)',
+                  fontWeight: 800,
+                  color: s.highlight ? '#dc2626' : '#0f172a',
+                  marginBottom: 2,
+                  lineHeight: 1.2,
+                  fontVariantNumeric: 'tabular-nums',
+                }}>
+                  {s.val}
+                </div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                  {s.label}
+                </div>
               </div>
             ))}
           </motion.div>
