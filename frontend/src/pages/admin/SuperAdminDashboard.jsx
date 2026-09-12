@@ -859,28 +859,48 @@ export default function SuperAdminDashboard() {
                 <Droplets className="w-4 h-4 text-red-600 fill-red-100" />
                 Blood Group Donors Availability
               </h3>
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Real-time Matrix</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  {totalMatrixDonors} Registered Donor{totalMatrixDonors === 1 ? '' : 's'}
+                </span>
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Real-time Matrix
+                </span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {ALL_BLOOD_GROUPS.map((bg) => {
                 const count = bgCountMap.get(bg) || 0;
                 let dotColor = 'bg-emerald-500';
-                if (count === 0) dotColor = 'bg-red-500';
-                else if (count < 3) dotColor = 'bg-amber-500';
+                let statusLabel = 'Optimal';
+                if (count === 0) {
+                  dotColor = 'bg-red-500';
+                  statusLabel = 'Critical (0)';
+                } else if (count < 3) {
+                  dotColor = 'bg-amber-500';
+                  statusLabel = 'Low Stock';
+                }
 
                 return (
-                  <div key={bg} className="bg-slate-50/80 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between">
+                  <div
+                    key={bg}
+                    className="bg-slate-50/80 hover:bg-white hover:border-red-200 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between transition-all duration-200 shadow-2xs group cursor-default"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="w-7 h-7 rounded-lg bg-red-600 text-white font-black text-xs flex items-center justify-center">
+                      <span className="w-7 h-7 rounded-lg bg-red-600 text-white font-black text-xs flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                         {bg}
                       </span>
                       <div>
-                        <p className="text-xs font-black text-slate-900">{count}</p>
-                        <p className="text-[9px] text-slate-400 font-semibold">Donors</p>
+                        <p className="text-xs font-black text-slate-900 leading-tight">{count}</p>
+                        <p className="text-[9px] text-slate-400 font-semibold leading-tight">Donor{count === 1 ? '' : 's'}</p>
                       </div>
                     </div>
-                    <span className={`w-2 h-2 rounded-full ${dotColor}`} title={`Stock Status: ${count} Donors`} />
+                    <span
+                      className={`w-2 h-2 rounded-full ${dotColor} ${count > 0 ? 'ring-2 ring-emerald-100' : 'ring-2 ring-red-100'}`}
+                      title={`${bg}: ${count} Donors Available (${statusLabel})`}
+                    />
                   </div>
                 );
               })}
@@ -905,42 +925,51 @@ export default function SuperAdminDashboard() {
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {districtData.recent_requests.slice(0, 4).map((req) => (
-                  <div key={req.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="w-7 h-7 rounded-lg bg-red-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                        {req.blood_group}
-                      </span>
-                      <div className="truncate">
-                        <p className="font-bold text-slate-900 truncate">{req.patient_name || 'Emergency Patient'}</p>
-                        <p className="text-[10px] text-slate-400 truncate">{req.hospital_name || 'Hospital'}</p>
+                {districtData.recent_requests.slice(0, 4).map((req) => {
+                  const reqBg = req.blood_group || req.bloodGroup || '—';
+                  const patient = req.patient_name || req.patientName || 'Emergency Patient';
+                  const hospital = req.hospital_name || req.hospitalName || 'Hospital';
+                  const urgency = req.urgency_level || req.urgencyLevel || 'Urgent';
+                  const isEmergency = urgency === 'Emergency' || urgency === 'Critical';
+
+                  return (
+                    <div key={req.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-7 h-7 rounded-lg bg-red-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                          {reqBg}
+                        </span>
+                        <div className="truncate">
+                          <p className="font-bold text-slate-900 truncate">{patient}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{hospital}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                          isEmergency
+                            ? 'bg-red-50 text-red-700 border border-red-200'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {urgency}
+                        </span>
+                        {!req.verified ? (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveDistrictRequest(req.id)}
+                            disabled={actionLoadingId === req.id}
+                            className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] rounded-md transition cursor-pointer flex items-center gap-1"
+                          >
+                            <CheckCircle2 className="w-3 h-3" /> Approve
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+                            {req.status || 'Active'}
+                          </span>
+                        )}
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${req.urgency_level === 'Emergency' || req.urgency_level === 'Critical'
-                          ? 'bg-red-50 text-red-700 border border-red-200'
-                          : 'bg-slate-100 text-slate-700'
-                        }`}>
-                        {req.urgency_level || 'Urgent'}
-                      </span>
-                      {!req.verified ? (
-                        <button
-                          type="button"
-                          onClick={() => handleApproveDistrictRequest(req.id)}
-                          disabled={actionLoadingId === req.id}
-                          className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] rounded-md transition cursor-pointer flex items-center gap-1"
-                        >
-                          <CheckCircle2 className="w-3 h-3" /> Approve
-                        </button>
-                      ) : (
-                        <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
-                          {req.status || 'Active'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
