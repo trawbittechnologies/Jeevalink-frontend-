@@ -162,7 +162,7 @@ export default function MascotVideo({
       {/* Speech bubble */}
       {showBubble && (
         <motion.div
-          className="absolute bottom-[98%] sm:bottom-[102%] right-0 sm:right-2 z-30 pointer-events-none drop-shadow-md mb-1"
+          className="absolute bottom-[96%] sm:bottom-[100%] right-0 sm:right-2 z-30 pointer-events-none drop-shadow-md mb-1"
           animate={{ y: [0, -3, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         >
@@ -173,17 +173,17 @@ export default function MascotVideo({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -4, scale: 0.95 }}
               transition={{ duration: 0.25 }}
-              className="relative bg-white/95 backdrop-blur-md px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl flex flex-col items-center whitespace-nowrap cursor-pointer pointer-events-auto border border-red-100 shadow-md shadow-red-500/10 max-w-[170px] sm:max-w-none"
+              className="relative bg-white/95 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex flex-col items-center whitespace-nowrap cursor-pointer pointer-events-auto border border-red-100 shadow-md shadow-red-500/10 max-w-[190px] sm:max-w-none"
             >
-              <p className="text-[10px] sm:text-[12.5px] font-bold text-slate-800 flex items-center justify-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1 truncate">
+              <p className="text-[11px] sm:text-[12.5px] font-bold text-slate-800 flex items-center justify-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1 truncate">
                 {creativeMessages[msgIdx]}
               </p>
-              <div className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 px-2 py-0.5 sm:px-2.5 rounded-full shadow-xs">
-                <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white animate-pulse" />
-                <span className="text-[7.5px] sm:text-[9px] font-bold text-white tracking-wider">CLICK TO CHAT</span>
+              <div className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 px-2.5 py-0.5 rounded-full shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <span className="text-[8px] sm:text-[9px] font-bold text-white tracking-wider">CLICK TO CHAT</span>
               </div>
               {/* Tail pointing down to mascot */}
-              <div className="absolute -bottom-[6px] right-5 sm:right-9 w-0 h-0 border-l-[5px] sm:border-l-[6px] border-l-transparent border-r-[5px] sm:border-r-[6px] border-r-transparent border-t-[6px] sm:border-t-[7px] border-t-white" />
+              <div className="absolute -bottom-[6px] right-8 sm:right-12 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
             </motion.div>
           </AnimatePresence>
         </motion.div>
@@ -194,7 +194,7 @@ export default function MascotVideo({
         <div
           key={idx}
           ref={el => (containerRefs.current[idx] = el)}
-          className="w-full h-full flex items-center justify-center scale-100 sm:scale-105 origin-bottom transition-transform"
+          className="w-full h-full flex items-center justify-center scale-115 sm:scale-110 origin-bottom transition-transform"
           style={{
             position: 'absolute',
             inset: 0,

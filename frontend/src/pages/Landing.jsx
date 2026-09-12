@@ -418,12 +418,13 @@ export default function Landing() {
 
           <div className="bg-slate-900 text-white rounded-3xl overflow-hidden shadow-2xl border border-slate-800/80 grid grid-cols-1 md:grid-cols-12 items-center">
             {/* Video Player */}
-            <div className="md:col-span-7 relative h-72 sm:h-96 md:h-[400px] bg-black overflow-hidden">
+            <div className="md:col-span-7 relative h-56 sm:h-80 md:h-[400px] bg-black overflow-hidden">
               <MascotVideo
                 videoUrl={awarenessSettings?.videoUrl}
                 posterUrl={awarenessSettings?.posterUrl}
                 showAudioToggle={true}
                 showPlayPause={true}
+                showBubble={false}
                 className="w-full h-full object-cover"
               />
             </div>

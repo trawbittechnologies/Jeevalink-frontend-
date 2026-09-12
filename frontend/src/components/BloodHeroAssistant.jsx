@@ -417,7 +417,7 @@ export default function BloodHeroAssistant() {
               onClick={() => setIsOpen(true)}
               whileTap={{ scale: 0.93 }}
               whileHover={{ scale: 1.05 }}
-              className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-2xl w-[76px] h-[76px] sm:w-[110px] sm:h-[110px] md:w-[135px] md:h-[135px] transition-all"
+              className="relative flex items-center justify-center p-0 bg-transparent border-0 outline-none cursor-pointer drop-shadow-2xl w-[108px] h-[108px] sm:w-[140px] sm:h-[140px] md:w-[165px] md:h-[165px] transition-all"
               aria-label="Open Hemo Blood Assistant"
             >
               <MascotVideo showBubble={true} />
