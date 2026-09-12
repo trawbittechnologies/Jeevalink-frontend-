@@ -295,45 +295,6 @@ export default function Landing() {
               Enter Community
               <ArrowRight style={{ width: 15, height: 15 }} />
             </button>
-
-            <Link
-              to="/donor/search"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '7px',
-                padding: '13px 22px',
-                background: 'rgba(255,255,255,0.92)', color: '#0f172a',
-                fontWeight: 700, fontSize: '0.9rem',
-                borderRadius: '13px', border: '1.5px solid rgba(226,232,240,0.9)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 4px 14px rgba(15,23,42,0.06)',
-                textDecoration: 'none', transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#dc2626'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(226,232,240,0.9)'; e.currentTarget.style.color = '#0f172a'; }}
-            >
-              <Search style={{ width: 15, height: 15, color: '#dc2626' }} />
-              Search Donors
-            </Link>
-
-            <Link
-              to="/requests"
-              style={{
-                display: 'inline-flex', alignItems: 'center',
-                padding: '13px 20px',
-                background: 'rgba(255,255,255,0.85)', color: '#334155',
-                fontWeight: 700, fontSize: '0.9rem',
-                borderRadius: '13px', border: '1.5px solid rgba(226,232,240,0.85)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 4px 14px rgba(15,23,42,0.04)',
-                textDecoration: 'none', transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = '#334155'; e.currentTarget.style.borderColor = 'rgba(226,232,240,0.85)'; }}
-            >
-              Request Blood
-            </Link>
           </motion.div>
 
           {/* Stats row */}
