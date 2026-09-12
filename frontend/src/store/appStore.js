@@ -541,7 +541,10 @@ export const useAppStore = create((set, get) => ({
   // User and Donor Fetching
   fetchUsers: async () => {
     try {
-      const res = await api.get('/admin/users');
+      const currentUser = useAuthStore.getState().user;
+      const role = (currentUser?.role || '').toLowerCase();
+      const endpoint = ['volunteer', 'unit_squad'].includes(role) ? '/volunteer/users' : '/admin/users';
+      const res = await api.get(endpoint);
       if (res.data?.success) {
         const usersList = res.data.data.users || (Array.isArray(res.data.data) ? res.data.data : []);
         set({ allUsers: usersList });
@@ -550,13 +553,22 @@ export const useAppStore = create((set, get) => ({
     } catch {
       // Fallback for non-admin roles (e.g. volunteer, unit squad)
       try {
-        const fallbackRes = await api.get('/donors/search');
+        const fallbackRes = await api.get('/admin/users');
         if (fallbackRes.data?.success) {
-          const donorsList = fallbackRes.data.data.donors || [];
-          set({ allUsers: donorsList, donors: donorsList });
+          const usersList = fallbackRes.data.data.users || (Array.isArray(fallbackRes.data.data) ? fallbackRes.data.data : []);
+          set({ allUsers: usersList });
+          return;
         }
-      } catch (fErr) {
-        console.warn('Failed to fetch fallback donors list', fErr);
+      } catch {
+        try {
+          const fallbackRes = await api.get('/donors/search');
+          if (fallbackRes.data?.success) {
+            const donorsList = fallbackRes.data.data.donors || [];
+            set({ allUsers: donorsList, donors: donorsList });
+          }
+        } catch (fErr) {
+          console.warn('Failed to fetch fallback donors list', fErr);
+        }
       }
     }
   },
@@ -1269,6 +1281,8 @@ export const useAppStore = create((set, get) => ({
           is_verified: Boolean(rawUser.is_verified ?? rawUser.isVerified ?? (rawUser.status === 'Active')),
           status: rawUser.status || 'Active',
           role: rawUser.role || 'donor',
+          created_by: rawUser.created_by || useAuthStore.getState().user?.id,
+          createdBy: rawUser.created_by || useAuthStore.getState().user?.id,
         };
         set((state) => ({
           allUsers: [newUser, ...state.allUsers.filter(u => String(u._id || u.id) !== String(newUser.id || newUser._id))]
