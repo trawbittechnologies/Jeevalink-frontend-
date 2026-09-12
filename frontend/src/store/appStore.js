@@ -32,21 +32,55 @@ export const useAppStore = create((set, get) => ({
   searchRadius: 15,
   selectedBloodGroup: 'B+',
   toast: { show: false, message: '', type: 'success' },
-  publicStats: { totalVolunteers: '-', totalRequests: '-' },
+  publicStats: { totalDonors: 0, totalVolunteers: '-', totalRequests: '-' },
 
   fetchPublicStats: async () => {
     try {
       const res = await api.get('/public/stats');
       if (res.data.success) {
+        const data = res.data.data || {};
+        let donorCount = data.total_donors ?? data.totalDonors;
+        if (donorCount === undefined || donorCount === null) {
+          // Fallback to live-donor-count if not included in public/stats
+          try {
+            const liveRes = await api.get('/emergency/live-donor-count');
+            if (liveRes.data.success) {
+              donorCount = liveRes.data.data?.count || 0;
+            }
+          } catch {
+            donorCount = 0;
+          }
+        }
         set({
           publicStats: {
-            totalVolunteers: res.data.data.total_volunteers || 0,
-            totalRequests: res.data.data.total_requests || 0
+            totalDonors: Number(donorCount) || 0,
+            totalVolunteers: data.total_volunteers || 0,
+            totalRequests: data.total_requests || 0
           }
         });
+        return {
+          totalDonors: Number(donorCount) || 0,
+          totalVolunteers: data.total_volunteers || 0,
+          totalRequests: data.total_requests || 0
+        };
       }
     } catch (err) {
       console.error('Failed to fetch public stats', err);
+      // Fallback try live donor count
+      try {
+        const liveRes = await api.get('/emergency/live-donor-count');
+        if (liveRes.data.success) {
+          const donorCount = liveRes.data.data?.count || 0;
+          set((state) => ({
+            publicStats: {
+              ...state.publicStats,
+              totalDonors: Number(donorCount) || 0
+            }
+          }));
+        }
+      } catch {
+        // silent
+      }
     }
   },
 
