@@ -233,7 +233,7 @@ export default function UserManagement() {
 
   const filtered = users.filter(v => {
     const isUserVerified = Boolean(v.is_verified || v.isVerified || (v.status || '').toLowerCase() === 'active');
-    
+
     if (activeTab === 'pending' && isUserVerified) return false;
     if (activeTab === 'verified' && !isUserVerified) return false;
 
@@ -460,11 +460,10 @@ export default function UserManagement() {
         <button
           type="button"
           onClick={() => setActiveTab('all')}
-          className={`p-5 rounded-3xl border text-left transition-all cursor-pointer ${
-            activeTab === 'all'
+          className={`p-5 rounded-3xl border text-left transition-all cursor-pointer ${activeTab === 'all'
               ? 'bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-slate-900/10'
               : 'bg-white text-slate-900 border-slate-200/80 hover:border-slate-300 shadow-xs'
-          }`}
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className={`text-[11px] font-black uppercase tracking-wider ${activeTab === 'all' ? 'text-slate-300' : 'text-slate-500'}`}>
@@ -484,11 +483,10 @@ export default function UserManagement() {
         <button
           type="button"
           onClick={() => setActiveTab('pending')}
-          className={`p-5 rounded-3xl border text-left transition-all cursor-pointer relative overflow-hidden ${
-            activeTab === 'pending'
+          className={`p-5 rounded-3xl border text-left transition-all cursor-pointer relative overflow-hidden ${activeTab === 'pending'
               ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20 ring-2 ring-amber-500/20'
               : 'bg-white text-slate-900 border-slate-200/80 hover:border-amber-300 shadow-xs'
-          }`}
+            }`}
         >
           {pendingCount > 0 && (
             <span className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
@@ -515,11 +513,10 @@ export default function UserManagement() {
         <button
           type="button"
           onClick={() => setActiveTab('verified')}
-          className={`p-5 rounded-3xl border text-left transition-all cursor-pointer ${
-            activeTab === 'verified'
+          className={`p-5 rounded-3xl border text-left transition-all cursor-pointer ${activeTab === 'verified'
               ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20 ring-2 ring-emerald-600/20'
               : 'bg-white text-slate-900 border-slate-200/80 hover:border-emerald-300 shadow-xs'
-          }`}
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className={`text-[11px] font-black uppercase tracking-wider ${activeTab === 'verified' ? 'text-emerald-100' : 'text-emerald-700'}`}>
@@ -547,11 +544,10 @@ export default function UserManagement() {
           <button
             type="button"
             onClick={() => setActiveTab('all')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'all'
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeTab === 'all'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/60'
-            }`}
+              }`}
           >
             <Users className="w-4 h-4" />
             All Members ({users.length})
@@ -560,11 +556,10 @@ export default function UserManagement() {
           <button
             type="button"
             onClick={() => setActiveTab('pending')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'pending'
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeTab === 'pending'
                 ? 'bg-amber-500 text-white shadow-xs border border-amber-500'
                 : 'bg-amber-50/60 text-amber-800 hover:bg-amber-100 border border-amber-200/80'
-            }`}
+              }`}
           >
             <Clock className="w-4 h-4 text-amber-600" />
             Pending Verification ({pendingCount})
@@ -578,11 +573,10 @@ export default function UserManagement() {
           <button
             type="button"
             onClick={() => setActiveTab('verified')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'verified'
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeTab === 'verified'
                 ? 'bg-emerald-600 text-white shadow-xs border border-emerald-600'
                 : 'bg-emerald-50/60 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/80'
-            }`}
+              }`}
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             Verified Users ({verifiedCount})
@@ -1134,8 +1128,8 @@ export default function UserManagement() {
                       <p className="text-red-100 text-[10px] font-medium">Verify donor email via OTP to confirm credentials & activate account</p>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => setShowAddModal(false)} 
+                  <button
+                    onClick={() => setShowAddModal(false)}
                     className="w-8 h-8 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
                   >
                     <X className="w-4 h-4" />
@@ -1145,408 +1139,406 @@ export default function UserManagement() {
 
               <div className="p-6 overflow-y-auto flex-1 scrollbar-thin">
                 <form onSubmit={handleAddSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2 flex flex-col items-center pb-2 border-b border-slate-100">
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 text-center w-full">
-                      Profile Picture *
-                    </label>
-                    {form.profile_picture ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <img
-                          src={typeof form.profile_picture === 'string' ? form.profile_picture : URL.createObjectURL(form.profile_picture)}
-                          alt="Profile Preview"
-                          className="w-24 h-24 rounded-2xl object-cover border-2 border-red-200 shadow-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setForm({ ...form, profile_picture: null })}
-                          className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5" /> Remove & Change Photo
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="w-full flex flex-col items-center justify-center p-5 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-red-400 rounded-2xl cursor-pointer transition-colors group">
-                        <Upload className="w-6 h-6 text-slate-400 group-hover:text-red-600 transition-colors mb-1.5" />
-                        <span className="text-xs font-bold text-slate-700 group-hover:text-red-600 transition-colors">
-                          Click to upload Profile Picture
-                        </span>
-                        <span className="text-[10px] text-slate-400 mt-0.5">Supports JPG, PNG, WEBP</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              setForm({ ...form, profile_picture: e.target.files[0] });
-                            }
-                          }}
-                        />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2 flex flex-col items-center pb-2 border-b border-slate-100">
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 text-center w-full">
+                        Profile Picture *
                       </label>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Blood Group *</label>
-                    <select value={form.blood_group || 'A+'} onChange={e => setForm({ ...form, blood_group: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
-                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => <option key={bg} value={bg}>{bg}</option>)}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Gender / Sex *</label>
-                    <select value={form.sex || 'male'} onChange={e => setForm({ ...form, sex: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="transgender">Transgender</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase">Date of Birth *</label>
-                      <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">18+ Years Only</span>
-                    </div>
-                    <input 
-                      type="date" 
-                      max={getEighteenYearsAgoDate()} 
-                      value={form.dob || ''} 
-                      onChange={e => setForm({ ...form, dob: e.target.value })} 
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" 
-                      required 
-                    />
-                    <p className="text-[9px] text-slate-400 mt-0.5">Only 18+ years old allowed</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Primary Name *</label>
-                    <input type="text" value={form.primary_name || ''} onChange={e => setForm({ ...form, primary_name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="Enter primary name" />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Mobile *</label>
-                    <input
-                      type="tel"
-                      maxLength={10}
-                      value={form.mobile || ''}
-                      onChange={e => setForm({ ...form, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono"
-                      required
-                      placeholder="10-digit mobile number (e.g. 9876543210)"
-                    />
-                  </div>
-
-                  {/* Donor Email Field with Integrated OTP Verification */}
-                  <div className="col-span-2 bg-slate-50/90 border border-slate-200/90 p-4 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-[10px] font-extrabold text-gray-600 uppercase tracking-wider">
-                        Donor Email Address *
-                      </label>
-                      {addOtpVerified && form.email && form.email.trim().toLowerCase() === verifiedEmail.toLowerCase() ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Email Verified
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                          <AlertTriangle className="w-3 h-3 text-amber-600" /> OTP Verification Required
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                        <input
-                          type="email"
-                          value={form.email || ''}
-                          disabled={addOtpVerified}
-                          onChange={(e) => {
-                            const newEmail = e.target.value;
-                            setForm({ ...form, email: newEmail });
-                            if (addOtpVerified && newEmail.trim().toLowerCase() !== verifiedEmail.toLowerCase()) {
-                              setAddOtpVerified(false);
-                              setAddOtpSent(false);
-                              setVerifiedEmail('');
-                            }
-                          }}
-                          className={`w-full pl-10 pr-3 py-2.5 bg-white border rounded-xl text-sm font-semibold outline-none transition-all ${
-                            addOtpVerified
-                              ? 'border-emerald-300 text-emerald-900 bg-emerald-50/40 cursor-not-allowed'
-                              : 'border-slate-200 text-slate-900 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                          }`}
-                          required
-                          placeholder="donor@example.com"
-                        />
-                      </div>
-
-                      {!addOtpVerified ? (
-                        <button
-                          type="button"
-                          onClick={handleSendAddOtp}
-                          disabled={addOtpLoading || addOtpCooldown > 0 || !form.email?.trim()}
-                          className="px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer disabled:cursor-not-allowed"
-                          title={addOtpCooldown > 0 ? `Wait ${addOtpCooldown}s before resending` : 'Send OTP to donor email'}
-                        >
-                          {addOtpLoading ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <KeyRound className="w-3.5 h-3.5" />
-                          )}
-                          {addOtpCooldown > 0
-                            ? `Resend (${addOtpCooldown}s)`
-                            : (addOtpSent ? 'Resend OTP' : 'Send OTP')}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAddOtpVerified(false);
-                            setAddOtpSent(false);
-                            setAddOtpCode('');
-                            setVerifiedEmail('');
-                          }}
-                          className="px-3 py-2 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition cursor-pointer"
-                        >
-                          Change
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Interactive OTP Entry Box */}
-                    {addOtpSent && !addOtpVerified && (
-                      <div className="p-3.5 bg-red-50/80 border border-red-200 rounded-xl space-y-2.5 animate-fade-in-up">
-                        <div className="flex items-center justify-between text-xs">
-                          <p className="font-bold text-red-900">
-                            Enter the 6-digit OTP sent to <span className="font-mono underline">{form.email}</span>
-                          </p>
-                          <span className="text-[10px] text-red-600 font-semibold">Expires in 10m</span>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            maxLength={6}
-                            value={addOtpCode}
-                            onChange={(e) => setAddOtpCode(e.target.value.replace(/\D/g, ''))}
-                            placeholder="6-digit OTP"
-                            className="w-full text-center tracking-[0.4em] font-mono text-base font-bold py-2 bg-white border border-red-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none"
+                      {form.profile_picture ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <img
+                            src={typeof form.profile_picture === 'string' ? form.profile_picture : URL.createObjectURL(form.profile_picture)}
+                            alt="Profile Preview"
+                            className="w-24 h-24 rounded-2xl object-cover border-2 border-red-200 shadow-sm"
                           />
                           <button
                             type="button"
-                            onClick={handleVerifyAddOtp}
-                            disabled={addOtpLoading || addOtpCode.trim().length !== 6}
-                            className="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                            onClick={() => setForm({ ...form, profile_picture: null })}
+                            className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" /> Remove & Change Photo
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="w-full flex flex-col items-center justify-center p-5 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-red-400 rounded-2xl cursor-pointer transition-colors group">
+                          <Upload className="w-6 h-6 text-slate-400 group-hover:text-red-600 transition-colors mb-1.5" />
+                          <span className="text-xs font-bold text-slate-700 group-hover:text-red-600 transition-colors">
+                            Click to upload Profile Picture
+                          </span>
+                          <span className="text-[10px] text-slate-400 mt-0.5">Supports JPG, PNG, WEBP</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setForm({ ...form, profile_picture: e.target.files[0] });
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Blood Group *</label>
+                      <select value={form.blood_group || 'A+'} onChange={e => setForm({ ...form, blood_group: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
+                        {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => <option key={bg} value={bg}>{bg}</option>)}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Gender / Sex *</label>
+                      <select value={form.sex || 'male'} onChange={e => setForm({ ...form, sex: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="transgender">Transgender</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase">Date of Birth *</label>
+                        <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">18+ Years Only</span>
+                      </div>
+                      <input
+                        type="date"
+                        max={getEighteenYearsAgoDate()}
+                        value={form.dob || ''}
+                        onChange={e => setForm({ ...form, dob: e.target.value })}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        required
+                      />
+                      <p className="text-[9px] text-slate-400 mt-0.5">Only 18+ years old allowed</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Primary Name *</label>
+                      <input type="text" value={form.primary_name || ''} onChange={e => setForm({ ...form, primary_name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required placeholder="Enter primary name" />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Mobile *</label>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={form.mobile || ''}
+                        onChange={e => setForm({ ...form, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono"
+                        required
+                        placeholder="10-digit mobile number (e.g. 9876543210)"
+                      />
+                    </div>
+
+                    {/* Donor Email Field with Integrated OTP Verification */}
+                    <div className="col-span-2 bg-slate-50/90 border border-slate-200/90 p-4 rounded-2xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-[10px] font-extrabold text-gray-600 uppercase tracking-wider">
+                          Donor Email Address *
+                        </label>
+                        {addOtpVerified && form.email && form.email.trim().toLowerCase() === verifiedEmail.toLowerCase() ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Email Verified
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            <AlertTriangle className="w-3 h-3 text-amber-600" /> OTP Verification Required
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="email"
+                            value={form.email || ''}
+                            disabled={addOtpVerified}
+                            onChange={(e) => {
+                              const newEmail = e.target.value;
+                              setForm({ ...form, email: newEmail });
+                              if (addOtpVerified && newEmail.trim().toLowerCase() !== verifiedEmail.toLowerCase()) {
+                                setAddOtpVerified(false);
+                                setAddOtpSent(false);
+                                setVerifiedEmail('');
+                              }
+                            }}
+                            className={`w-full pl-10 pr-3 py-2.5 bg-white border rounded-xl text-sm font-semibold outline-none transition-all ${addOtpVerified
+                                ? 'border-emerald-300 text-emerald-900 bg-emerald-50/40 cursor-not-allowed'
+                                : 'border-slate-200 text-slate-900 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                              }`}
+                            required
+                            placeholder="donor@example.com"
+                          />
+                        </div>
+
+                        {!addOtpVerified ? (
+                          <button
+                            type="button"
+                            onClick={handleSendAddOtp}
+                            disabled={addOtpLoading || addOtpCooldown > 0 || !form.email?.trim()}
+                            className="px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer disabled:cursor-not-allowed"
+                            title={addOtpCooldown > 0 ? `Wait ${addOtpCooldown}s before resending` : 'Send OTP to donor email'}
                           >
                             {addOtpLoading ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              <KeyRound className="w-3.5 h-3.5" />
                             )}
-                            Verify OTP
+                            {addOtpCooldown > 0
+                              ? `Resend (${addOtpCooldown}s)`
+                              : (addOtpSent ? 'Resend OTP' : 'Send OTP')}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAddOtpVerified(false);
+                              setAddOtpSent(false);
+                              setAddOtpCode('');
+                              setVerifiedEmail('');
+                            }}
+                            className="px-3 py-2 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition cursor-pointer"
+                          >
+                            Change
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Interactive OTP Entry Box */}
+                      {addOtpSent && !addOtpVerified && (
+                        <div className="p-3.5 bg-red-50/80 border border-red-200 rounded-xl space-y-2.5 animate-fade-in-up">
+                          <div className="flex items-center justify-between text-xs">
+                            <p className="font-bold text-red-900">
+                              Enter the 6-digit OTP sent to <span className="font-mono underline">{form.email}</span>
+                            </p>
+                            <span className="text-[10px] text-red-600 font-semibold">Expires in 10m</span>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              maxLength={6}
+                              value={addOtpCode}
+                              onChange={(e) => setAddOtpCode(e.target.value.replace(/\D/g, ''))}
+                              placeholder="6-digit OTP"
+                              className="w-full text-center tracking-[0.4em] font-mono text-base font-bold py-2 bg-white border border-red-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleVerifyAddOtp}
+                              disabled={addOtpLoading || addOtpCode.trim().length !== 6}
+                              className="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                            >
+                              {addOtpLoading ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              )}
+                              Verify OTP
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Verification Success Box */}
+                      {addOtpVerified && (
+                        <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 animate-fade-in-up">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Donor email verified successfully! You can now complete and submit registration.</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Place & Location Map Search Section */}
+                    <div className="col-span-2 bg-slate-50/90 border border-slate-200/90 p-4 rounded-2xl space-y-3">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <label className="block text-[10px] font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-red-600" /> Place / Map Search
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={handleUseGPS}
+                            disabled={gpsLoading}
+                            className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 px-2.5 py-1 rounded-lg border border-emerald-200/60 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50 shadow-2xs"
+                            title="Auto-detect current GPS location"
+                          >
+                            {gpsLoading ? (
+                              <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
+                            ) : (
+                              <Crosshair className="w-3 h-3 text-emerald-600" />
+                            )}
+                            <span>{gpsLoading ? 'Detecting GPS...' : 'Use My GPS'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowMapCanvas(!showMapCanvas)}
+                            className="text-[10px] font-bold text-red-600 hover:text-red-700 flex items-center gap-1 bg-red-50 hover:bg-red-100/80 px-2.5 py-1 rounded-lg border border-red-200/60 transition cursor-pointer"
+                          >
+                            <MapIcon className="w-3 h-3" />
+                            {showMapCanvas ? 'Hide Map View' : 'Pick on Map'}
                           </button>
                         </div>
                       </div>
-                    )}
 
-                    {/* Verification Success Box */}
-                    {addOtpVerified && (
-                      <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 animate-fade-in-up">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Donor email verified successfully! You can now complete and submit registration.</span>
-                      </div>
-                    )}
-                  </div>
+                      {/* Photon / Kerala places autocomplete search */}
+                      <div className="relative">
+                        <LocationSearchInput
+                          initialValue={form.place || form.city || ''}
+                          onSelectLocation={(loc) => {
+                            if (!loc) {
+                              setAddMapPos(null);
+                              setAddMapAddress('');
+                              return;
+                            }
+                            const pos = { lat: loc.lat, lng: loc.lng };
+                            setAddMapPos(pos);
+                            setAddMapAddress(loc.displayName || loc.name || '');
 
-                  {/* Place & Location Map Search Section */}
-                  <div className="col-span-2 bg-slate-50/90 border border-slate-200/90 p-4 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <label className="block text-[10px] font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-red-600" /> Place / Map Search
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={handleUseGPS}
-                          disabled={gpsLoading}
-                          className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 px-2.5 py-1 rounded-lg border border-emerald-200/60 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50 shadow-2xs"
-                          title="Auto-detect current GPS location"
-                        >
-                          {gpsLoading ? (
-                            <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
-                          ) : (
-                            <Crosshair className="w-3 h-3 text-emerald-600" />
-                          )}
-                          <span>{gpsLoading ? 'Detecting GPS...' : 'Use My GPS'}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowMapCanvas(!showMapCanvas)}
-                          className="text-[10px] font-bold text-red-600 hover:text-red-700 flex items-center gap-1 bg-red-50 hover:bg-red-100/80 px-2.5 py-1 rounded-lg border border-red-200/60 transition cursor-pointer"
-                        >
-                          <MapIcon className="w-3 h-3" />
-                          {showMapCanvas ? 'Hide Map View' : 'Pick on Map'}
-                        </button>
+                            const placeName = loc.city || loc.name || (loc.displayName ? loc.displayName.split(',')[0].trim() : '');
+                            const pincodeVal = loc.postcode || loc.address?.postcode || form.pincode || '';
+
+                            setForm(prev => ({
+                              ...prev,
+                              place: placeName || prev.place,
+                              city: placeName || prev.city,
+                              pincode: pincodeVal ? String(pincodeVal).replace(/\D/g, '').slice(0, 6) : prev.pincode,
+                              latitude: loc.lat || prev.latitude,
+                              longitude: loc.lng || prev.longitude,
+                            }));
+                          }}
+                          placeholder="Search Kerala place, town, hospital, landmark (Photon OSM)..."
+                        />
                       </div>
+
+                      {/* Collapsible Interactive Map Canvas */}
+                      {showMapCanvas && (
+                        <div className="rounded-xl overflow-hidden border border-slate-200/80 shadow-inner bg-slate-100 animate-in fade-in duration-200">
+                          <div className="h-[200px] w-full relative z-0">
+                            <MapLibreContainer
+                              isPicker={true}
+                              pickerLocation={addMapPos}
+                              center={addMapPos || { lat: 11.2588, lng: 75.7804 }}
+                              zoom={addMapPos ? 14 : 10}
+                              onLocationPicked={(loc) => {
+                                const pos = { lat: loc.lat, lng: loc.lng };
+                                setAddMapPos(pos);
+                                setAddMapAddress(loc.displayName || '');
+
+                                const placeName = loc.city || loc.address?.suburb || loc.address?.town || loc.address?.village || (loc.displayName ? loc.displayName.split(',')[0].trim() : '');
+                                const pincodeVal = loc.postcode || loc.address?.postcode || form.pincode || '';
+
+                                setForm(prev => ({
+                                  ...prev,
+                                  place: placeName || prev.place,
+                                  city: placeName || prev.city,
+                                  pincode: pincodeVal ? String(pincodeVal).replace(/\D/g, '').slice(0, 6) : prev.pincode,
+                                  latitude: loc.lat,
+                                  longitude: loc.lng,
+                                }));
+                              }}
+                              height="100%"
+                            />
+                          </div>
+                          <div className="p-2 bg-slate-100/90 text-[10px] text-slate-500 font-medium flex items-center justify-between">
+                            <span>📍 Click anywhere on the map to pin and reverse-geocode place</span>
+                            {addMapPos && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAddMapPos(null);
+                                  setAddMapAddress('');
+                                }}
+                                className="text-red-600 font-bold hover:underline cursor-pointer"
+                              >
+                                Reset Pin
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Picked Address Banner */}
+                      {addMapAddress ? (
+                        <div className="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2 animate-in fade-in duration-150">
+                          <Navigation className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] text-emerald-800 font-bold leading-tight truncate">
+                              {addMapAddress}
+                            </p>
+                            {addMapPos && (
+                              <p className="text-[9px] text-emerald-600 font-mono mt-0.5">
+                                Coordinates: {Number(addMapPos.lat).toFixed(4)}, {Number(addMapPos.lng).toFixed(4)}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAddMapPos(null);
+                              setAddMapAddress('');
+                            }}
+                            className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                            title="Clear selection"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
 
-                    {/* Photon / Kerala places autocomplete search */}
-                    <div className="relative">
-                      <LocationSearchInput
-                        initialValue={form.place || form.city || ''}
-                        onSelectLocation={(loc) => {
-                          if (!loc) {
-                            setAddMapPos(null);
-                            setAddMapAddress('');
-                            return;
-                          }
-                          const pos = { lat: loc.lat, lng: loc.lng };
-                          setAddMapPos(pos);
-                          setAddMapAddress(loc.displayName || loc.name || '');
-
-                          const placeName = loc.city || loc.name || (loc.displayName ? loc.displayName.split(',')[0].trim() : '');
-                          const pincodeVal = loc.postcode || loc.address?.postcode || form.pincode || '';
-
-                          setForm(prev => ({
-                            ...prev,
-                            place: placeName || prev.place,
-                            city: placeName || prev.city,
-                            pincode: pincodeVal ? String(pincodeVal).replace(/\D/g, '').slice(0, 6) : prev.pincode,
-                            latitude: loc.lat || prev.latitude,
-                            longitude: loc.lng || prev.longitude,
-                          }));
-                        }}
-                        placeholder="Search Kerala place, town, hospital, landmark (Photon OSM)..."
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Place / City *</label>
+                      <input type="text" value={form.place || form.city || ''} onChange={e => setForm({ ...form, place: e.target.value, city: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all font-semibold" placeholder="Enter place / city" required />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">PIN Code *</label>
+                      <input type="text" value={form.pincode || ''} onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all font-mono font-semibold" maxLength={6} placeholder="6-digit pincode" required />
+                    </div>
+                    <div className="col-span-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase">District *</label>
+                        <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                          <Lock className="w-2.5 h-2.5 text-emerald-600" /> Auto-Fixed from Super Admin Scope
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={form.district || currentUser?.district || 'Kozhikode'}
+                        readOnly
+                        disabled
+                        className="w-full p-3 bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl text-sm outline-none cursor-not-allowed select-none"
                       />
                     </div>
-
-                    {/* Collapsible Interactive Map Canvas */}
-                    {showMapCanvas && (
-                      <div className="rounded-xl overflow-hidden border border-slate-200/80 shadow-inner bg-slate-100 animate-in fade-in duration-200">
-                        <div className="h-[200px] w-full relative z-0">
-                          <MapLibreContainer
-                            isPicker={true}
-                            pickerLocation={addMapPos}
-                            center={addMapPos || { lat: 11.2588, lng: 75.7804 }}
-                            zoom={addMapPos ? 14 : 10}
-                            onLocationPicked={(loc) => {
-                              const pos = { lat: loc.lat, lng: loc.lng };
-                              setAddMapPos(pos);
-                              setAddMapAddress(loc.displayName || '');
-
-                              const placeName = loc.city || loc.address?.suburb || loc.address?.town || loc.address?.village || (loc.displayName ? loc.displayName.split(',')[0].trim() : '');
-                              const pincodeVal = loc.postcode || loc.address?.postcode || form.pincode || '';
-
-                              setForm(prev => ({
-                                ...prev,
-                                place: placeName || prev.place,
-                                city: placeName || prev.city,
-                                pincode: pincodeVal ? String(pincodeVal).replace(/\D/g, '').slice(0, 6) : prev.pincode,
-                                latitude: loc.lat,
-                                longitude: loc.lng,
-                              }));
-                            }}
-                            height="100%"
-                          />
-                        </div>
-                        <div className="p-2 bg-slate-100/90 text-[10px] text-slate-500 font-medium flex items-center justify-between">
-                          <span>📍 Click anywhere on the map to pin and reverse-geocode place</span>
-                          {addMapPos && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAddMapPos(null);
-                                setAddMapAddress('');
-                              }}
-                              className="text-red-600 font-bold hover:underline cursor-pointer"
-                            >
-                              Reset Pin
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Picked Address Banner */}
-                    {addMapAddress ? (
-                      <div className="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2 animate-in fade-in duration-150">
-                        <Navigation className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[11px] text-emerald-800 font-bold leading-tight truncate">
-                            {addMapAddress}
-                          </p>
-                          {addMapPos && (
-                            <p className="text-[9px] text-emerald-600 font-mono mt-0.5">
-                              Coordinates: {Number(addMapPos.lat).toFixed(4)}, {Number(addMapPos.lng).toFixed(4)}
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAddMapPos(null);
-                            setAddMapAddress('');
-                          }}
-                          className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
-                          title="Clear selection"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : null}
                   </div>
 
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Place / City *</label>
-                    <input type="text" value={form.place || form.city || ''} onChange={e => setForm({ ...form, place: e.target.value, city: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all font-semibold" placeholder="Enter place / city" required />
+                  <div className="flex gap-3 pt-3 mt-4 border-t border-slate-100">
+                    <button type="button" onClick={() => setShowAddModal(false)}
+                      className="flex-1 py-3 bg-white border-slate-200 shadow-sm border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading || !addOtpVerified}
+                      className={`flex-1 py-3 text-white text-xs font-bold rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm ${addOtpVerified
+                          ? 'bg-red-600 hover:bg-red-700 cursor-pointer shadow-red-600/20'
+                          : 'bg-slate-400 cursor-not-allowed opacity-70'
+                        }`}
+                    >
+                      {loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
+                      {addOtpVerified ? 'Create User / Donor' : 'Verify Email OTP to Create'}
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">PIN Code *</label>
-                    <input type="text" value={form.pincode || ''} onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all font-mono font-semibold" maxLength={6} placeholder="6-digit pincode" required />
-                  </div>
-                  <div className="col-span-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase">District *</label>
-                      <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5 text-emerald-600" /> Auto-Fixed from Super Admin Scope
-                      </span>
-                    </div>
-                    <input 
-                      type="text" 
-                      value={form.district || currentUser?.district || 'Kozhikode'} 
-                      readOnly 
-                      disabled 
-                      className="w-full p-3 bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl text-sm outline-none cursor-not-allowed select-none" 
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-3 mt-4 border-t border-slate-100">
-                  <button type="button" onClick={() => setShowAddModal(false)}
-                    className="flex-1 py-3 bg-white border-slate-200 shadow-sm border text-slate-600 text-xs font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading || !addOtpVerified}
-                    className={`flex-1 py-3 text-white text-xs font-bold rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm ${
-                      addOtpVerified
-                        ? 'bg-red-600 hover:bg-red-700 cursor-pointer shadow-red-600/20'
-                        : 'bg-slate-400 cursor-not-allowed opacity-70'
-                    }`}
-                  >
-                    {loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Plus className="w-4 h-4" />
-                    )} 
-                    {addOtpVerified ? 'Create User / Donor' : 'Verify Email OTP to Create'}
-                  </button>
-                </div>
-              </form>
-            </div>
+                </form>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
       </AnimatePresence>
 
       {/* Delete Confirmation Modal */}

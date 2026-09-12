@@ -88,7 +88,7 @@ export const useAppStore = create((set, get) => ({
             }
           }));
         }
-      } catch {}
+      } catch { }
       try {
         const volRes = await api.get('/public/volunteers');
         if (volRes.data.success) {
@@ -101,7 +101,7 @@ export const useAppStore = create((set, get) => ({
             }
           }));
         }
-      } catch {}
+      } catch { }
     }
   },
 
@@ -208,7 +208,7 @@ export const useAppStore = create((set, get) => ({
         const newReq = res.data.data?.request || res.data?.request || res.data;
         const isVerified = res.data.verified === true || newReq.verified === true;
         const serverMessage = res.data.message || '';
-        
+
         set((state) => {
           const reqIdStr = String(newReq.id || newReq._id || '');
           const filtered = state.requests.filter(
@@ -220,7 +220,7 @@ export const useAppStore = create((set, get) => ({
         if (isVerified) {
           get().triggerToast('Blood request posted and published!', 'success');
         }
-        
+
         // Refresh requests in the background to ensure relations and counts are synced
         setTimeout(() => {
           get().fetchRequests();
@@ -488,7 +488,7 @@ export const useAppStore = create((set, get) => ({
       const params = {};
       if (bloodGroup && bloodGroup !== 'All') params.bloodGroup = bloodGroup;
       if (district && district !== 'All') params.district = district;
-      
+
       const res = await api.get('/donors/search', { params });
       if (res.data.success) {
         let donorsList = res.data.data.donors || [];
@@ -541,10 +541,7 @@ export const useAppStore = create((set, get) => ({
   // User and Donor Fetching
   fetchUsers: async () => {
     try {
-      const currentUser = useAuthStore.getState().user;
-      const role = (currentUser?.role || '').toLowerCase();
-      const endpoint = ['volunteer', 'unit_squad'].includes(role) ? '/volunteer/users' : '/admin/users';
-      const res = await api.get(endpoint);
+      const res = await api.get('/admin/users');
       if (res.data?.success) {
         const usersList = res.data.data.users || (Array.isArray(res.data.data) ? res.data.data : []);
         set({ allUsers: usersList });
@@ -553,22 +550,13 @@ export const useAppStore = create((set, get) => ({
     } catch {
       // Fallback for non-admin roles (e.g. volunteer, unit squad)
       try {
-        const fallbackRes = await api.get('/admin/users');
+        const fallbackRes = await api.get('/donors/search');
         if (fallbackRes.data?.success) {
-          const usersList = fallbackRes.data.data.users || (Array.isArray(fallbackRes.data.data) ? fallbackRes.data.data : []);
-          set({ allUsers: usersList });
-          return;
+          const donorsList = fallbackRes.data.data.donors || [];
+          set({ allUsers: donorsList, donors: donorsList });
         }
-      } catch {
-        try {
-          const fallbackRes = await api.get('/donors/search');
-          if (fallbackRes.data?.success) {
-            const donorsList = fallbackRes.data.data.donors || [];
-            set({ allUsers: donorsList, donors: donorsList });
-          }
-        } catch (fErr) {
-          console.warn('Failed to fetch fallback donors list', fErr);
-        }
+      } catch (fErr) {
+        console.warn('Failed to fetch fallback donors list', fErr);
       }
     }
   },
@@ -591,7 +579,7 @@ export const useAppStore = create((set, get) => ({
         set((state) => ({
           allUsers: state.allUsers.map((u) => String(u._id) === String(userId) ? { ...u, status } : u)
         }));
-        
+
         // Sync with authStore if current user was updated
         const currentUser = useAuthStore.getState().user;
         if (currentUser && String(currentUser._id) === String(userId)) {
@@ -767,7 +755,7 @@ export const useAppStore = create((set, get) => ({
         }
         // Show warning if email failed to send, otherwise success
         const msg = res.data.message || 'Volunteer added successfully!';
-        
+
         get().triggerToast(msg, emailSent ? 'success' : 'warning');
         return { success: true, user: newUser, emailSent, generatedPassword };
       }
@@ -799,10 +787,10 @@ export const useAppStore = create((set, get) => ({
         role: user.role || 'user',
         status: user.status || 'Active',
       };
-      
+
       const updatedUsers = [...state.allUsers, newUser];
       let updatedDonors = state.donors;
-      
+
       if (newUser.role === 'user') {
         const newDonor = {
           _id: user._id,
@@ -818,7 +806,7 @@ export const useAppStore = create((set, get) => ({
         };
         updatedDonors = [newDonor, ...state.donors];
       }
-      
+
       return {
         allUsers: updatedUsers,
         donors: updatedDonors
@@ -849,8 +837,8 @@ export const useAppStore = create((set, get) => ({
       const res = await api.post('/emergency/request', data);
       if (res.data.success) {
         const newReq = res.data.data.request;
-        set((state) => ({ 
-          emergencyRequests: [newReq, ...state.emergencyRequests] 
+        set((state) => ({
+          emergencyRequests: [newReq, ...state.emergencyRequests]
         }));
         get().triggerToast('Emergency alert broadcasted successfully!', 'success');
         return { success: true, request: newReq };
@@ -1281,8 +1269,6 @@ export const useAppStore = create((set, get) => ({
           is_verified: Boolean(rawUser.is_verified ?? rawUser.isVerified ?? (rawUser.status === 'Active')),
           status: rawUser.status || 'Active',
           role: rawUser.role || 'donor',
-          created_by: rawUser.created_by || useAuthStore.getState().user?.id,
-          createdBy: rawUser.created_by || useAuthStore.getState().user?.id,
         };
         set((state) => ({
           allUsers: [newUser, ...state.allUsers.filter(u => String(u._id || u.id) !== String(newUser.id || newUser._id))]
