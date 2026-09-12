@@ -32,7 +32,7 @@ export const useAppStore = create((set, get) => ({
   searchRadius: 15,
   selectedBloodGroup: 'B+',
   toast: { show: false, message: '', type: 'success' },
-  publicStats: { totalDonors: 0, totalVolunteers: '-', totalRequests: '-' },
+  publicStats: { totalDonors: 0, totalVolunteers: 0, totalRequests: '-' },
 
   fetchPublicStats: async () => {
     try {
@@ -40,8 +40,8 @@ export const useAppStore = create((set, get) => ({
       if (res.data.success) {
         const data = res.data.data || {};
         let donorCount = data.total_donors ?? data.totalDonors;
+        let volunteerCount = data.total_volunteers ?? data.totalVolunteers;
         if (donorCount === undefined || donorCount === null) {
-          // Fallback to live-donor-count if not included in public/stats
           try {
             const liveRes = await api.get('/emergency/live-donor-count');
             if (liveRes.data.success) {
@@ -51,22 +51,32 @@ export const useAppStore = create((set, get) => ({
             donorCount = 0;
           }
         }
+        if (volunteerCount === undefined || volunteerCount === null) {
+          try {
+            const volRes = await api.get('/public/volunteers');
+            if (volRes.data.success) {
+              const list = volRes.data.data?.volunteers || volRes.data.data || [];
+              volunteerCount = Array.isArray(list) ? list.length : (volRes.data.data?.total || 0);
+            }
+          } catch {
+            volunteerCount = 0;
+          }
+        }
         set({
           publicStats: {
             totalDonors: Number(donorCount) || 0,
-            totalVolunteers: data.total_volunteers || 0,
+            totalVolunteers: Number(volunteerCount) || 0,
             totalRequests: data.total_requests || 0
           }
         });
         return {
           totalDonors: Number(donorCount) || 0,
-          totalVolunteers: data.total_volunteers || 0,
+          totalVolunteers: Number(volunteerCount) || 0,
           totalRequests: data.total_requests || 0
         };
       }
     } catch (err) {
       console.error('Failed to fetch public stats', err);
-      // Fallback try live donor count
       try {
         const liveRes = await api.get('/emergency/live-donor-count');
         if (liveRes.data.success) {
@@ -78,9 +88,20 @@ export const useAppStore = create((set, get) => ({
             }
           }));
         }
-      } catch {
-        // silent
-      }
+      } catch {}
+      try {
+        const volRes = await api.get('/public/volunteers');
+        if (volRes.data.success) {
+          const list = volRes.data.data?.volunteers || volRes.data.data || [];
+          const volCount = Array.isArray(list) ? list.length : (volRes.data.data?.total || 0);
+          set((state) => ({
+            publicStats: {
+              ...state.publicStats,
+              totalVolunteers: Number(volCount) || 0
+            }
+          }));
+        }
+      } catch {}
     }
   },
 

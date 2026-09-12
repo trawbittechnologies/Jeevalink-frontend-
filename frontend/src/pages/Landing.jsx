@@ -52,13 +52,15 @@ export default function Landing() {
   const [slideIdx, setSlideIdx] = useState(0);
 
   const totalDonors = publicStats?.totalDonors ?? 0;
-  const [displayCount, setDisplayCount] = useState(0);
+  const totalVolunteers = publicStats?.totalVolunteers ?? 0;
+  const [displayDonorCount, setDisplayDonorCount] = useState(0);
+  const [displayVolunteerCount, setDisplayVolunteerCount] = useState(0);
 
   useEffect(() => {
     let start = 0;
     const end = Number(totalDonors) || 0;
     if (end === 0) {
-      setDisplayCount(0);
+      setDisplayDonorCount(0);
       return;
     }
     const duration = 1200;
@@ -69,16 +71,42 @@ export default function Landing() {
       const progress = Math.min(elapsed / duration, 1);
       const easeOut = 1 - Math.pow(1 - progress, 3);
       const val = Math.floor(easeOut * (end - start) + start);
-      setDisplayCount(val);
+      setDisplayDonorCount(val);
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        setDisplayCount(end);
+        setDisplayDonorCount(end);
       }
     };
     const animId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animId);
   }, [totalDonors]);
+
+  useEffect(() => {
+    let start = 0;
+    const end = Number(totalVolunteers) || 0;
+    if (end === 0) {
+      setDisplayVolunteerCount(0);
+      return;
+    }
+    const duration = 1200;
+    const startTime = performance.now();
+
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const val = Math.floor(easeOut * (end - start) + start);
+      setDisplayVolunteerCount(val);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setDisplayVolunteerCount(end);
+      }
+    };
+    const animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, [totalVolunteers]);
 
   const heroSlides = [
     {
