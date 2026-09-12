@@ -193,19 +193,19 @@ export default function SuperAdminDashboard() {
         const dData = resDist.data.data || resDist.data;
         setDistrictData({
           district: dData.district || 'Kasaragod',
-          total_users: dData.total_users || 0,
-          total_volunteers: dData.total_volunteers || 0,
-          total_admins: dData.total_block_admins || 0,
-          total_requests: dData.total_requests || 0,
-          fulfilled_requests: dData.fulfilled_requests || 0,
-          pending_requests: dData.pending_requests || 0,
-          fulfillment_rate: dData.fulfillment_rate ?? 100,
-          blood_group_distribution: dData.blood_group_distribution || [],
-          urgency_emergency: dData.urgency_emergency || 0,
-          urgency_normal: dData.urgency_normal || 0,
-          recent_requests: dData.recent_requests || [],
-          pending_approval_requests: dData.pending_approval_requests || [],
-          block_summary: dData.block_summary || []
+          total_users: dData.total_users ?? dData.totalUsers ?? 0,
+          total_volunteers: dData.total_volunteers ?? dData.totalVolunteers ?? 0,
+          total_admins: dData.total_block_admins ?? dData.totalBlockAdmins ?? 0,
+          total_requests: dData.total_requests ?? dData.totalRequests ?? 0,
+          fulfilled_requests: dData.fulfilled_requests ?? dData.fulfilledRequests ?? 0,
+          pending_requests: dData.pending_requests ?? dData.pendingRequests ?? 0,
+          fulfillment_rate: dData.fulfillment_rate ?? dData.fulfillmentRate ?? 100,
+          blood_group_distribution: dData.blood_group_distribution || dData.bloodGroupDistribution || [],
+          urgency_emergency: dData.urgency_emergency ?? dData.urgencyEmergency ?? 0,
+          urgency_normal: dData.urgency_normal ?? dData.urgencyNormal ?? 0,
+          recent_requests: dData.recent_requests || dData.recentRequests || [],
+          pending_approval_requests: dData.pending_approval_requests || dData.pendingApprovalRequests || [],
+          block_summary: dData.block_summary || dData.blockSummary || []
         });
       }
 
@@ -577,14 +577,74 @@ export default function SuperAdminDashboard() {
     );
   });
 
-  // Map real blood group distribution
-  const bgCountMap = new Map();
-  (districtData.blood_group_distribution || []).forEach(item => {
-    if (item.blood_group) {
-      const cleanBg = item.blood_group.toUpperCase().replace(/\s+/g, '').replace(/VE$/i, '');
-      bgCountMap.set(cleanBg, item.count || 0);
+  // Helper to normalize any blood group format (e.g. "O+", "o+ve", "O_POSITIVE", "AB POS", "b-")
+  const normalizeBloodGroup = (bg) => {
+    if (!bg) return null;
+    let clean = String(bg).trim().toUpperCase();
+    clean = clean.replace(/POSITIVE|POS|\+VE|VE/g, '+');
+    clean = clean.replace(/NEGATIVE|NEG|\-VE/g, '-');
+    clean = clean.replace(/[\s_]/g, '');
+    clean = clean.replace(/\+\+/g, '+');
+    if (ALL_BLOOD_GROUPS.includes(clean)) return clean;
+    const match = clean.match(/(A|B|AB|O)[\+\-]/);
+    if (match && ALL_BLOOD_GROUPS.includes(match[0])) return match[0];
+    return null;
+  };
+
+  // Dynamic real-time blood group matrix from backend distribution and client donor pool
+  const bgCountMap = useMemo(() => {
+    const map = new Map();
+    ALL_BLOOD_GROUPS.forEach(bg => map.set(bg, 0));
+
+    // 1. Fill from backend blood_group_distribution / bloodGroupDistribution
+    const serverList = districtData.blood_group_distribution || districtData.bloodGroupDistribution || [];
+    if (Array.isArray(serverList)) {
+      serverList.forEach(item => {
+        const rawBg = item.blood_group || item.bloodGroup || item.bg || item.blood_type || item.bloodType;
+        const cleanBg = normalizeBloodGroup(rawBg);
+        const count = Number(item.count ?? item.total ?? item.donors_count ?? item.donorsCount ?? 0);
+        if (cleanBg && !isNaN(count)) {
+          map.set(cleanBg, (map.get(cleanBg) || 0) + count);
+        }
+      });
     }
-  });
+
+    // 2. Supplement with live client donors pool (allUsers & donors)
+    const donorsPool = (allUsers && allUsers.length > 0) ? allUsers : (donors || []);
+    if (donorsPool.length > 0) {
+      const clientMap = new Map();
+      ALL_BLOOD_GROUPS.forEach(bg => clientMap.set(bg, 0));
+
+      donorsPool.forEach(u => {
+        const rawBg = u.blood_group || u.bloodGroup || u.blood_type || u.bloodType;
+        const cleanBg = normalizeBloodGroup(rawBg);
+        if (cleanBg) {
+          const role = String(u.role || '').toLowerCase();
+          const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
+            (rawBg && rawBg !== 'N/A' && rawBg !== '');
+          if (isDonor) {
+            clientMap.set(cleanBg, (clientMap.get(cleanBg) || 0) + 1);
+          }
+        }
+      });
+
+      ALL_BLOOD_GROUPS.forEach(bg => {
+        const serverVal = map.get(bg) || 0;
+        const clientVal = clientMap.get(bg) || 0;
+        map.set(bg, Math.max(serverVal, clientVal));
+      });
+    }
+
+    return map;
+  }, [districtData.blood_group_distribution, districtData.bloodGroupDistribution, allUsers, donors]);
+
+  const totalMatrixDonors = useMemo(() => {
+    let sum = 0;
+    ALL_BLOOD_GROUPS.forEach(bg => {
+      sum += bgCountMap.get(bg) || 0;
+    });
+    return sum;
+  }, [bgCountMap]);
 
   const currentDistrict = districtData.district || user?.district || 'Kasaragod';
   const cleanDistrict = currentDistrict.replace(/^dyfi\s*/i, '').trim();
