@@ -77,14 +77,23 @@ export default function DistrictPointsTable() {
         }
       });
 
+      const meghalaSummary = Array.isArray(dData.meghala_summary) ? dData.meghala_summary : [];
+
       blockSummary.forEach((bs) => {
         const bName = bs.block || bs.city || bs.name;
         if (bName && String(bName).trim()) {
           const key = String(bName).toLowerCase().trim();
+          const dCount = Number(bs.users || bs.donors) || 0;
+          const vCount = Number(bs.volunteers) || 0;
+          const mCount = Number(bs.meghala_count || (Array.isArray(bs.meghalas) ? bs.meghalas.length : 0)) || 0;
           if (blockMap.has(key)) {
             const existing = blockMap.get(key);
-            existing.donors_count = bs.users || bs.donors || existing.donors_count;
-            existing.volunteers_count = bs.volunteers || existing.volunteers_count;
+            existing.donors_count = dCount || existing.donors_count;
+            existing.volunteers_count = vCount || existing.volunteers_count;
+            existing.meghala_count = mCount || existing.meghala_count;
+            if (!existing.total_points || existing.total_points === 0) {
+              existing.total_points = (existing.donors_count * 100) + (existing.volunteers_count * 50) + (existing.meghala_count * 25);
+            }
           } else {
             blockMap.set(key, {
               rank: blockMap.size + 1,
@@ -92,12 +101,12 @@ export default function DistrictPointsTable() {
               admin_name: 'Block Coordinator',
               admin_mobile: '',
               admin_email: '',
-              total_points: 0,
-              donors_count: bs.users || bs.donors || 0,
-              volunteers_count: bs.volunteers || 0,
+              total_points: (dCount * 100) + (vCount * 50) + (mCount * 25),
+              donors_count: dCount,
+              volunteers_count: vCount,
               fulfilled_requests: 0,
               total_requests: 0,
-              meghala_count: 0
+              meghala_count: mCount
             });
           }
         }
@@ -107,6 +116,26 @@ export default function DistrictPointsTable() {
         ...b,
         rank: idx + 1
       }));
+      compiledBlocks.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+      compiledBlocks.forEach((b, idx) => { b.rank = idx + 1; });
+
+      const compiledMeghalas = meghalaSummary.map((ms, idx) => {
+        const mDonors = Number(ms.donors) || 0;
+        const mVolunteers = Number(ms.volunteers) || 0;
+        const pts = (mDonors * 100) + (mVolunteers * 50);
+        return {
+          rank: idx + 1,
+          meghala_name: ms.meghala,
+          block_name: ms.block,
+          district: dData.district || 'Kasaragod',
+          total_points: pts,
+          total_members: mDonors + mVolunteers,
+          donors_count: mDonors,
+          volunteers_count: mVolunteers,
+        };
+      });
+      compiledMeghalas.sort((a, b) => b.total_points - a.total_points);
+      compiledMeghalas.forEach((m, idx) => { m.rank = idx + 1; });
 
       const totalDistPoints = compiledBlocks.reduce((acc, b) => acc + (b.total_points || 0), 0);
       const topBlockName = compiledBlocks.length > 0 ? compiledBlocks[0].block_name : 'N/A';
@@ -116,14 +145,14 @@ export default function DistrictPointsTable() {
         summary: {
           total_district_points: totalDistPoints,
           total_blocks: compiledBlocks.length,
-          total_meghalas: 0,
+          total_meghalas: compiledMeghalas.length,
           total_donors: dData.total_users || 0,
           total_volunteers: dData.total_volunteers || 0,
           top_block: topBlockName,
-          top_donor: 'N/A',
+          top_donor: compiledMeghalas.length > 0 ? compiledMeghalas[0].meghala_name + ' Unit' : 'N/A',
         },
         blocks: compiledBlocks,
-        meghalas: [],
+        meghalas: compiledMeghalas,
         top_donors: [],
         top_volunteers: [],
         point_rules: [
@@ -131,6 +160,7 @@ export default function DistrictPointsTable() {
           { action: 'Meghala Volunteer Verification', target: 'Meghala Volunteer', badge: '🛡️ +20 Pts' },
           { action: 'Block Committee Coordination', target: 'Block Admin', badge: '🏢 +20 Pts' },
           { action: 'Emergency SOS Acceptance', target: 'Donor / Responder', badge: '⚡ +20 Pts' },
+          { action: 'Block Fulfilled Request Bonus', target: 'Block Committee Score', badge: '🏆 +150 Pts' },
         ],
         badges_guide: [
           { name: 'First Drop', points: 100, desc: 'Completed 1st verified blood donation.' },
