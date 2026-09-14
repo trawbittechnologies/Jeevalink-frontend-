@@ -32,18 +32,50 @@ function parseBlockAdminContacts(ba) {
   };
 }
 
+const DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK = {
+  'Kanhangad': ['Ajanur', 'Chithari', 'Kanhangad North', 'Kanhangad South', 'Kottachery', 'Madikai', 'Puthiyakotta', 'Upper Kottachery'],
+  'Nileshwar': ['Karindalam', 'Kinanoor', 'Kottappuram', 'Nileshwaram'],
+  'Cheruvathur': ['Chandera', 'Cheemeni', 'Kayyur', 'Pilicode', 'Thuruthi'],
+  'Trikaripur': ['Elambachi', 'Olavara', 'Trikaripur', 'Valiyaparamba'],
+  'Panathady': ['Balal', 'Kallar', 'Panathur', 'Ranipuram'],
+  'Eleri': ['Chittarikkal', 'East Eleri', 'Palavayal', 'West Eleri'],
+  'Bedakam': ['Bedadka', 'Kolathur', 'Kundamkuzhy', 'Kuttikol'],
+  'Udma': ['Bekal', 'Chembirika', 'Kalanad', 'Melparamba', 'Pallikere'],
+  'Kasaragod': ['Chengala', 'Karanthakkad', 'Madhur', 'Mogral', 'Nullipady', 'Vidyanagar'],
+  'Kumbala': ['Arikady', 'Badiadka', 'Puthige', 'Seethangoli'],
+  'Manjeshwaram': ['Hosangadi', 'Manjeshwar', 'Meenja', 'Paivalike', 'Uppala', 'Vorkady'],
+  'Karadukka': ['Bellur', 'Bovikanam', 'Delampady', 'Mulleria'],
+};
+
+function normalizeBlockName(name) {
+  if (!name || typeof name !== 'string') return '';
+  let s = name.toLowerCase().trim();
+  s = s.replace(/^(dyfi|block committee|block)\s+/i, '');
+  s = s.replace(/\s+(block committee|committee|block)$/i, '');
+  return s.trim();
+}
+
+function normalizeMeghalaName(name) {
+  if (!name || typeof name !== 'string') return '';
+  let s = name.toLowerCase().trim();
+  s = s.replace(/^(meghala committee|meghala|unit squad|unit)\s+/i, '');
+  s = s.replace(/\s+(meghala committee|committee|meghala|unit squad|unit)$/i, '');
+  return s.trim();
+}
+
 export default function BlockCommitteeManagement() {
   const { user } = useAuthStore();
   const { allUsers, donors } = useAppStore();
   const [blockAdmins, setBlockAdmins] = useState([]);
   const [blockSummary, setBlockSummary] = useState([]);
+  const [serverMeghalaSummary, setServerMeghalaSummary] = useState([]);
   const [allUsersLocal, setAllUsersLocal] = useState([]); // fetched by this page
   const [district, setDistrict] = useState(user?.district || 'Kasaragod');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'tree'
-  const [meghalasByBlock, setMeghalasByBlock] = useState({});
+  const [meghalasByBlock, setMeghalasByBlock] = useState(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK);
   const [expandedBlocks, setExpandedBlocks] = useState({});
 
   // Modals
@@ -93,6 +125,15 @@ export default function BlockCommitteeManagement() {
         if (dData.district) setDistrict(dData.district);
         const bs = dData.block_summary || dData.blockSummary || [];
         setBlockSummary(Array.isArray(bs) ? bs : []);
+        const ms = dData.meghala_summary || dData.meghalaSummary || [];
+        setServerMeghalaSummary(Array.isArray(ms) ? ms : []);
+        if (dData.meghalas_by_block || dData.meghalasByBlock) {
+          setMeghalasByBlock(prev => ({
+            ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK,
+            ...prev,
+            ...(dData.meghalas_by_block || dData.meghalasByBlock)
+          }));
+        }
       }
       if (resAdmins.data?.success) {
         setBlockAdmins(resAdmins.data.data || []);
@@ -100,7 +141,11 @@ export default function BlockCommitteeManagement() {
       if (resOptions?.data?.success && resOptions.data?.data) {
         const rawData = resOptions.data.data;
         const mbMap = rawData.meghalasByBlock || rawData.meghalas_by_block || {};
-        setMeghalasByBlock(mbMap);
+        setMeghalasByBlock(prev => ({
+          ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK,
+          ...prev,
+          ...mbMap
+        }));
       }
       // Populate local user pool for donor counting
       if (resUsers?.data?.success) {
@@ -249,6 +294,31 @@ export default function BlockCommitteeManagement() {
     const bMap = new Map();
     const mMap = new Map();
 
+    const activeMeghalasByBlock = {
+      ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK,
+      ...meghalasByBlock
+    };
+
+    // Pre-seed blocks from activeMeghalasByBlock
+    Object.keys(activeMeghalasByBlock).forEach(b => {
+      const key = b.toLowerCase().trim();
+      bMap.set(key, { donors: 0, volunteers: 0 });
+      const normKey = normalizeBlockName(b);
+      if (normKey && !bMap.has(normKey)) {
+        bMap.set(normKey, { donors: 0, volunteers: 0 });
+      }
+    });
+
+    // Seed blocks from registered block admins
+    blockAdmins.forEach(ba => {
+      const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
+      if (!bName || bName.toLowerCase() === 'n/a') return;
+      const key = bName.toLowerCase();
+      const normKey = normalizeBlockName(bName);
+      if (!bMap.has(key)) bMap.set(key, { donors: 0, volunteers: 0 });
+      if (normKey && !bMap.has(normKey)) bMap.set(normKey, { donors: 0, volunteers: 0 });
+    });
+
     // 1. Seed block map from block_summary (authoritative server counts)
     const hasServerBlockCounts = blockSummary.length > 0 &&
       blockSummary.some(bs => Number(bs.users || bs.donors || 0) > 0);
@@ -256,98 +326,219 @@ export default function BlockCommitteeManagement() {
     blockSummary.forEach(bs => {
       const bName = (bs.block || bs.city || bs.name || '').trim();
       if (!bName) return;
-      bMap.set(bName.toLowerCase(), {
-        donors: Number(bs.users || bs.donors || 0),
-        volunteers: Number(bs.volunteers || 0)
-      });
-    });
-
-    // Also seed block map from registered block admins (ensures all blocks appear)
-    blockAdmins.forEach(ba => {
-      const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
-      if (!bName || bName.toLowerCase() === 'n/a') return;
       const key = bName.toLowerCase();
-      if (!bMap.has(key)) bMap.set(key, { donors: 0, volunteers: 0 });
+      const normKey = normalizeBlockName(bName);
+      const val = {
+        donors: Number(bs.donors ?? bs.users ?? 0),
+        volunteers: Number(bs.volunteers ?? 0)
+      };
+      bMap.set(key, val);
+      if (normKey) bMap.set(normKey, val);
     });
 
-    // 2. Seed meghala map from meghalasByBlock
-    Object.values(meghalasByBlock).forEach(list => {
-      if (Array.isArray(list)) list.forEach(m => {
-        const key = String(m).toLowerCase().trim();
-        if (!mMap.has(key)) mMap.set(key, { donors: 0, volunteers: 0 });
-      });
+    // Pre-seed all meghalas from activeMeghalasByBlock
+    Object.values(activeMeghalasByBlock).forEach(list => {
+      if (Array.isArray(list)) {
+        list.forEach(m => {
+          const key = String(m).toLowerCase().trim();
+          mMap.set(key, { donors: 0, volunteers: 0 });
+          const normKey = normalizeMeghalaName(key);
+          if (normKey && !mMap.has(normKey)) {
+            mMap.set(normKey, { donors: 0, volunteers: 0 });
+          }
+        });
+      }
     });
 
-    // 3. User pool: prefer freshly fetched local list, then global store
+    // Seed meghalas from server meghala_summary if available
+    const hasServerMeghalaCounts = serverMeghalaSummary.length > 0 &&
+      serverMeghalaSummary.some(ms => Number(ms.donors || 0) > 0 || Number(ms.volunteers || 0) > 0);
+
+    serverMeghalaSummary.forEach(ms => {
+      const mName = (ms.meghala || ms.name || '').trim();
+      if (!mName) return;
+      const key = mName.toLowerCase();
+      const normKey = normalizeMeghalaName(key);
+      const val = {
+        donors: Number(ms.donors ?? ms.users ?? 0),
+        volunteers: Number(ms.volunteers ?? 0)
+      };
+      mMap.set(key, val);
+      if (normKey) mMap.set(normKey, val);
+    });
+
+    // Also check if blockSummary items contain nested meghalas
+    blockSummary.forEach(bs => {
+      if (Array.isArray(bs.meghalas)) {
+        bs.meghalas.forEach(m => {
+          const mName = (m.meghala || m.name || '').trim();
+          if (!mName) return;
+          const key = mName.toLowerCase();
+          const normKey = normalizeMeghalaName(key);
+          const existing = mMap.get(key) || { donors: 0, volunteers: 0 };
+          const updated = {
+            donors: Math.max(existing.donors, Number(m.donors ?? m.users ?? 0)),
+            volunteers: Math.max(existing.volunteers, Number(m.volunteers ?? 0))
+          };
+          mMap.set(key, updated);
+          if (normKey) mMap.set(normKey, updated);
+        });
+      }
+    });
+
+    // Build reverse map: meghalaNameLower -> parentBlockLower
+    const meghalaToBlock = new Map();
+    for (const [blk, mList] of Object.entries(activeMeghalasByBlock)) {
+      const blkKey = normalizeBlockName(blk);
+      if (Array.isArray(mList)) {
+        mList.forEach(m => {
+          meghalaToBlock.set(String(m).toLowerCase().trim(), blkKey);
+          meghalaToBlock.set(normalizeMeghalaName(m), blkKey);
+        });
+      }
+    }
+
+    // 3. User pool: calculate client-side counts if server has no counts or as supplementary
     const pool = allUsersLocal.length > 0
       ? allUsersLocal
       : (allUsers && allUsers.length > 0 ? allUsers : (donors || []));
 
-    const bKeys = Array.from(bMap.keys());
     const mKeys = Array.from(mMap.keys());
+    const bKeys = Array.from(bMap.keys());
 
-    pool.forEach(u => {
-      const role = String(u.role || '').toLowerCase();
-      const isVolunteer = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
-      const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
-        ((u.blood_group || u.bloodGroup || '') !== '' &&
-         (u.blood_group || u.bloodGroup || '') !== 'N/A');
+    if (!hasServerMeghalaCounts && pool.length > 0) {
+      pool.forEach(u => {
+        const role = String(u.role || '').toLowerCase();
+        const isVolunteer = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+        const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
+          ((u.blood_group || u.bloodGroup || '') !== '' &&
+           (u.blood_group || u.bloodGroup || '') !== 'N/A');
 
-      const uBlock = String(
-        u.organization_name || u.organizationName ||
-        u.block || u.blockCommitteeName || ''
-      ).toLowerCase().trim();
-      const uMeghala = String(u.city || u.meghala || '').toLowerCase().trim();
+        const uRemarks = String(u.remarks || '');
+        const uCity = String(u.city || '');
+        const uMeghala = String(u.meghala || u.meghalaName || '');
+        const uOrg = String(u.organization_name || u.organizationName || u.block || '');
 
-      // ── Block assignment (only when server has no counts) ──
-      if (!hasServerBlockCounts) {
-        let bKey = bKeys.find(k => uBlock && (uBlock === k || uBlock.includes(k) || k.includes(uBlock)));
+        // Resolve candidate meghala in order of priority:
+        let matchedMKey = null;
 
-        if (!bKey && uMeghala) {
-          // Infer block from meghala's parent block in meghalasByBlock
-          for (const [blk, mList] of Object.entries(meghalasByBlock)) {
-            if (Array.isArray(mList) && mList.some(m => String(m).toLowerCase().trim() === uMeghala)) {
-              const blkKey = blk.toLowerCase().trim();
-              bKey = bKeys.find(k => k === blkKey || k.includes(blkKey) || blkKey.includes(k));
-              if (bKey) break;
+        // A. Remarks: Added by Meghala: <meghala>
+        const mMatch = uRemarks.match(/added by meghala:\s*([^,\[\n;]+)/i);
+        if (mMatch) {
+          const rawM = mMatch[1].trim().toLowerCase();
+          const normM = normalizeMeghalaName(rawM);
+          matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
+        }
+
+        // B. Remarks: Added by Unit Squad: <squad>
+        if (!matchedMKey) {
+          const sMatch = uRemarks.match(/added by unit squad:\s*([^,\[\n;]+)/i);
+          if (sMatch) {
+            const rawS = sMatch[1].trim().toLowerCase();
+            const normS = normalizeMeghalaName(rawS);
+            matchedMKey = mKeys.find(k => k === rawS || normalizeMeghalaName(k) === normS);
+          }
+        }
+
+        // C. Explicit u.meghala or u.meghalaName
+        if (!matchedMKey && uMeghala && uMeghala.toLowerCase() !== 'n/a') {
+          const rawM = uMeghala.trim().toLowerCase();
+          const normM = normalizeMeghalaName(rawM);
+          matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
+        }
+
+        // D. Volunteer's city is their Meghala
+        if (!matchedMKey && isVolunteer && uCity) {
+          const rawC = uCity.trim().toLowerCase();
+          const normC = normalizeMeghalaName(rawC);
+          matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
+        }
+
+        // E. Direct city match against known meghalas
+        if (!matchedMKey && uCity) {
+          const rawC = uCity.trim().toLowerCase();
+          const normC = normalizeMeghalaName(rawC);
+          matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
+        }
+
+        // F. Direct org match against known meghalas
+        if (!matchedMKey && uOrg) {
+          const rawO = uOrg.trim().toLowerCase();
+          const normO = normalizeMeghalaName(rawO);
+          matchedMKey = mKeys.find(k => k === rawO || normalizeMeghalaName(k) === normO);
+        }
+
+        // G. Check if remarks contains any known meghala name
+        if (!matchedMKey && uRemarks) {
+          const rLower = uRemarks.toLowerCase();
+          for (const k of mKeys) {
+            if (k.length > 3 && rLower.includes(k)) {
+              matchedMKey = k;
+              break;
             }
           }
         }
-        if (!bKey && uMeghala) bKey = bKeys.find(k => uMeghala === k || uMeghala.includes(k) || k.includes(uMeghala));
-        if (!bKey && bKeys.length > 0) {
-          bKey = bKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || bKeys[0];
-        }
-        if (bKey && bMap.has(bKey)) {
-          const item = bMap.get(bKey);
-          if (isDonor) item.donors += 1;
-          if (isVolunteer) item.volunteers += 1;
-        }
-      }
 
-      // ── Meghala assignment (always from pool — no server source) ──
-      if (uMeghala) {
-        const mKey = mKeys.find(k => uMeghala === k || uMeghala.includes(k) || k.includes(uMeghala));
-        if (mKey && mMap.has(mKey)) {
-          const item = mMap.get(mKey);
-          if (isDonor) item.donors += 1;
-          if (isVolunteer) item.volunteers += 1;
+        // Increment Meghala counts
+        if (matchedMKey && mMap.has(matchedMKey)) {
+          const mItem = mMap.get(matchedMKey);
+          if (isDonor) mItem.donors += 1;
+          if (isVolunteer) mItem.volunteers += 1;
         }
-      }
-    });
+
+        // ── Block assignment (only when server has no counts) ──
+        if (!hasServerBlockCounts) {
+          let bKey = null;
+          if (matchedMKey && meghalaToBlock.has(matchedMKey)) {
+            bKey = meghalaToBlock.get(matchedMKey);
+          }
+          if (!bKey && uOrg) {
+            const normOrg = normalizeBlockName(uOrg);
+            bKey = bKeys.find(k => k === normOrg || normalizeBlockName(k) === normOrg);
+          }
+          if (!bKey && uCity) {
+            const normCity = normalizeBlockName(uCity);
+            bKey = bKeys.find(k => k === normCity || normalizeBlockName(k) === normCity);
+          }
+          if (!bKey && bKeys.length > 0) {
+            bKey = bKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || bKeys[0];
+          }
+          if (bKey && bMap.has(bKey)) {
+            const bItem = bMap.get(bKey);
+            if (isDonor) bItem.donors += 1;
+            if (isVolunteer) bItem.volunteers += 1;
+          }
+        }
+      });
+    }
 
     return { blockDonorMap: bMap, meghalaDonorMap: mMap };
-  }, [blockSummary, blockAdmins, meghalasByBlock, allUsersLocal, allUsers, donors]);
+  }, [blockSummary, serverMeghalaSummary, blockAdmins, meghalasByBlock, allUsersLocal, allUsers, donors]);
 
   // Helper: get block donor stats by block name
   const getBlockStats = (blockLabel) => {
-    const key = blockLabel.toLowerCase().trim();
-    return blockDonorMap.get(key) || { donors: 0, volunteers: 0 };
+    if (!blockLabel) return { donors: 0, volunteers: 0 };
+    const raw = String(blockLabel).toLowerCase().trim();
+    if (blockDonorMap.has(raw)) return blockDonorMap.get(raw);
+    const norm = normalizeBlockName(raw);
+    if (blockDonorMap.has(norm)) return blockDonorMap.get(norm);
+    for (const [k, v] of blockDonorMap.entries()) {
+      if (normalizeBlockName(k) === norm || k.includes(norm) || norm.includes(k)) return v;
+    }
+    return { donors: 0, volunteers: 0 };
   };
 
   // Helper: get meghala donor stats by meghala name
   const getMeghalaStats = (meghalaName) => {
-    const key = String(meghalaName).toLowerCase().trim();
-    return meghalaDonorMap.get(key) || { donors: 0, volunteers: 0 };
+    if (!meghalaName) return { donors: 0, volunteers: 0 };
+    const raw = String(meghalaName).toLowerCase().trim();
+    if (meghalaDonorMap.has(raw)) return meghalaDonorMap.get(raw);
+    const norm = normalizeMeghalaName(raw);
+    if (meghalaDonorMap.has(norm)) return meghalaDonorMap.get(norm);
+    for (const [k, v] of meghalaDonorMap.entries()) {
+      if (normalizeMeghalaName(k) === norm) return v;
+    }
+    return { donors: 0, volunteers: 0 };
   };
 
 
