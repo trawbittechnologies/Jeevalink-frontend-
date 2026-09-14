@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
-  CheckCircle2, Download, ShieldCheck
+  CheckCircle2, Download, ShieldCheck, ChevronRight, ChevronDown,
+  MapPin, LayoutList, GitBranch, Users
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -37,6 +38,9 @@ export default function BlockCommitteeManagement() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('table'); // 'table' | 'tree'
+  const [meghalasByBlock, setMeghalasByBlock] = useState({});
+  const [expandedBlocks, setExpandedBlocks] = useState({});
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -70,9 +74,10 @@ export default function BlockCommitteeManagement() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resDist, resAdmins] = await Promise.all([
+      const [resDist, resAdmins, resOptions] = await Promise.all([
         api.get('/super-admin/metrics'),
-        api.get('/super-admin/block-admins')
+        api.get('/super-admin/block-admins'),
+        api.get('/public/volunteer-options').catch(() => null)
       ]);
 
       if (resDist.data?.success) {
@@ -81,6 +86,11 @@ export default function BlockCommitteeManagement() {
       }
       if (resAdmins.data?.success) {
         setBlockAdmins(resAdmins.data.data || []);
+      }
+      if (resOptions?.data?.success && resOptions.data?.data) {
+        const rawData = resOptions.data.data;
+        const mbMap = rawData.meghalasByBlock || rawData.meghalas_by_block || {};
+        setMeghalasByBlock(mbMap);
       }
     } catch (err) {
       console.error("Block Committee Load error:", err);
@@ -253,6 +263,32 @@ export default function BlockCommitteeManagement() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {/* View Toggle */}
+          <div className="flex items-center bg-slate-100 dark:bg-zinc-800 rounded-2xl p-1 gap-1">
+            <button
+              onClick={() => setViewMode('table')}
+              title="Table View"
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 shadow-sm'
+                  : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+              }`}
+            >
+              <LayoutList className="w-3.5 h-3.5" /> Table
+            </button>
+            <button
+              onClick={() => setViewMode('tree')}
+              title="Tree View — shows Meghala units under each Block"
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'tree'
+                  ? 'bg-white dark:bg-zinc-900 text-red-600 dark:text-red-400 shadow-sm'
+                  : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+              }`}
+            >
+              <GitBranch className="w-3.5 h-3.5" /> Tree
+            </button>
+          </div>
+
           <button
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-xs font-bold shadow-md shadow-red-200 transition flex items-center gap-2 cursor-pointer"
@@ -360,107 +396,239 @@ export default function BlockCommitteeManagement() {
           </div>
         </div>
 
-        {/* Table Content View */}
-        {filteredBlockAdmins.length === 0 ? (
-          <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400 shadow-sm text-xs">
-            <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
-            No Block Committees found matching your search.
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-zinc-800/80 shadow-xs">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-200/80 dark:border-zinc-800/80 text-slate-500 dark:text-zinc-400 font-extrabold uppercase tracking-wider text-[11px]">
-                  <th className="py-3.5 px-4">Block Committee</th>
-                  <th className="py-3.5 px-4">Primary Contact (Admin 1)</th>
-                  <th className="py-3.5 px-4">Secondary Contact (Admin 2)</th>
-                  <th className="py-3.5 px-4">Email</th>
-                  <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60 bg-white dark:bg-zinc-900">
-                {filteredBlockAdmins.map((ba) => {
-                  const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = parseBlockAdminContacts(ba);
+        {/* ─── TABLE VIEW ─── */}
+        {viewMode === 'table' && (
+          filteredBlockAdmins.length === 0 ? (
+            <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400 shadow-sm text-xs">
+              <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
+              No Block Committees found matching your search.
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-zinc-800/80 shadow-xs">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-200/80 dark:border-zinc-800/80 text-slate-500 dark:text-zinc-400 font-extrabold uppercase tracking-wider text-[11px]">
+                    <th className="py-3.5 px-4">Block Committee</th>
+                    <th className="py-3.5 px-4">Primary Contact (Admin 1)</th>
+                    <th className="py-3.5 px-4">Secondary Contact (Admin 2)</th>
+                    <th className="py-3.5 px-4">Email</th>
+                    <th className="py-3.5 px-4 text-center">Status</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60 bg-white dark:bg-zinc-900">
+                  {filteredBlockAdmins.map((ba) => {
+                    const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = parseBlockAdminContacts(ba);
 
-                  return (
-                    <tr key={ba.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-850/50 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-zinc-100 whitespace-nowrap">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100 dark:border-red-900/40">
-                            <Building2 className="w-4 h-4" />
+                    return (
+                      <tr key={ba.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-850/50 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-zinc-100 whitespace-nowrap">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100 dark:border-red-900/40">
+                              <Building2 className="w-4 h-4" />
+                            </span>
+                            <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || 'N/A'}</span>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <div className="font-bold text-slate-900 dark:text-zinc-100">{admin1Name}</div>
+                          <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3 text-slate-400" />
+                            <span>{admin1Mobile}</span>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {admin2Name || admin2Mobile ? (
+                            <>
+                              <div className="font-bold text-slate-900 dark:text-zinc-100">{admin2Name || 'Admin 2'}</div>
+                              {admin2Mobile && (
+                                <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
+                                  <Phone className="w-3 h-3 text-slate-400" />
+                                  <span>{admin2Mobile}</span>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-slate-400 dark:text-zinc-600 italic">Not set</span>
+                          )}
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300 font-mono text-xs">
+                            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>{ba.email}</span>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${ba.status === 'Active'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
+                            }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            {ba.status}
                           </span>
-                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || 'N/A'}</span>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="font-bold text-slate-900 dark:text-zinc-100">{admin1Name}</div>
-                        <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span>{admin1Mobile}</span>
-                        </div>
-                      </td>
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleOpenEdit(ba)}
+                              className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                              title="Edit Block Committee"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" /> Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeletingAdminId(ba.id);
+                                setDeletingAdminName(ba.primary_name || ba.name);
+                              }}
+                              className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                              title="Delete Block Committee"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
 
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        {admin2Name || admin2Mobile ? (
-                          <>
-                            <div className="font-bold text-slate-900 dark:text-zinc-100">{admin2Name || 'Admin 2'}</div>
-                            {admin2Mobile && (
-                              <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
-                                <Phone className="w-3 h-3 text-slate-400" />
-                                <span>{admin2Mobile}</span>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-slate-400 dark:text-zinc-600 italic">Not set</span>
-                        )}
-                      </td>
+        {/* ─── TREE VIEW ─── */}
+        {viewMode === 'tree' && (
+          <div className="space-y-3">
+            {/* Legend */}
+            <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider px-1">
+              <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 text-red-500" /> Block Committee</span>
+              <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-violet-500" /> Meghala Unit</span>
+            </div>
 
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300 font-mono text-xs">
-                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{ba.email}</span>
-                        </div>
-                      </td>
+            {filteredBlockAdmins.length === 0 ? (
+              <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400 shadow-sm text-xs">
+                <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
+                No Block Committees found matching your search.
+              </div>
+            ) : (
+              filteredBlockAdmins.map((ba) => {
+                const blockLabel = ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || 'N/A';
+                const { admin1Name, admin1Mobile } = parseBlockAdminContacts(ba);
+                const isExpanded = !!expandedBlocks[ba.id];
 
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${ba.status === 'Active'
-                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
-                            : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
-                          }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                          {ba.status}
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleOpenEdit(ba)}
-                            className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
-                            title="Edit Block Committee"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" /> Edit
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDeletingAdminId(ba.id);
-                              setDeletingAdminName(ba.primary_name || ba.name);
-                            }}
-                            className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
-                            title="Delete Block Committee"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                // Match meghala list: try exact then case-insensitive
+                const meghalaList = (() => {
+                  if (meghalasByBlock[blockLabel]) return meghalasByBlock[blockLabel];
+                  const key = Object.keys(meghalasByBlock).find(
+                    k => k.toLowerCase().trim() === blockLabel.toLowerCase().trim()
                   );
-                })}
-              </tbody>
-            </table>
+                  return key ? meghalasByBlock[key] : [];
+                })();
+
+                return (
+                  <div
+                    key={ba.id}
+                    className="border border-slate-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-xs"
+                  >
+                    {/* Block Row */}
+                    <button
+                      onClick={() =>
+                        setExpandedBlocks(prev => ({ ...prev, [ba.id]: !prev[ba.id] }))
+                      }
+                      className="w-full flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-zinc-900 hover:bg-red-50/40 dark:hover:bg-red-950/10 transition-colors cursor-pointer text-left group"
+                    >
+                      {/* Expand chevron */}
+                      <span className="w-5 h-5 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                        <ChevronRight className="w-3 h-3 text-slate-500 dark:text-zinc-400" />
+                      </span>
+
+                      {/* Block icon */}
+                      <span className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 border border-red-100 dark:border-red-900/40">
+                        <Building2 className="w-4 h-4" />
+                      </span>
+
+                      {/* Block name + admin info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{blockLabel}</span>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            ba.status === 'Active'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
+                          }`}>
+                            <span className={`w-1 h-1 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            {ba.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">
+                          <span className="flex items-center gap-1">
+                            <Phone className="w-3 h-3" />{admin1Name} · {admin1Mobile}
+                          </span>
+                          {meghalaList.length > 0 && (
+                            <span className="flex items-center gap-1 text-violet-500 dark:text-violet-400 font-bold">
+                              <Users className="w-3 h-3" />{meghalaList.length} Meghala{meghalaList.length !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-2 shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleOpenEdit(ba); }}
+                          className="px-2.5 py-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <Edit3 className="w-3 h-3" /> Edit
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeletingAdminId(ba.id); setDeletingAdminName(ba.primary_name || ba.name); }}
+                          className="px-2.5 py-1.5 text-[11px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3 h-3" /> Delete
+                        </button>
+                      </div>
+                    </button>
+
+                    {/* Meghala Children (expanded) */}
+                    {isExpanded && (
+                      <div className="border-t border-slate-100 dark:border-zinc-800/60 bg-slate-50/60 dark:bg-zinc-950/60">
+                        {meghalaList.length === 0 ? (
+                          <div className="flex items-center gap-2 px-12 py-3 text-[11px] text-slate-400 dark:text-zinc-600 italic">
+                            <MapPin className="w-3 h-3" /> No Meghala units registered under this block yet.
+                          </div>
+                        ) : (
+                          <ul className="py-2">
+                            {meghalaList.map((meghala, idx) => (
+                              <li
+                                key={idx}
+                                className="flex items-center gap-3 px-12 py-2 hover:bg-violet-50/60 dark:hover:bg-violet-950/20 transition-colors group/meghala"
+                              >
+                                {/* Tree connector lines */}
+                                <span className="flex flex-col items-center self-stretch w-4 shrink-0">
+                                  <span className="w-px flex-1 bg-slate-200 dark:bg-zinc-700" />
+                                  {idx === meghalaList.length - 1 && <span className="w-4 h-px bg-slate-200 dark:bg-zinc-700" />}
+                                </span>
+                                <span className="w-6 h-6 rounded-lg bg-violet-50 dark:bg-violet-950/40 text-violet-500 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-100 dark:border-violet-900/40">
+                                  <MapPin className="w-3 h-3" />
+                                </span>
+                                <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{meghala}</span>
+                                <span className="ml-auto text-[10px] text-slate-400 dark:text-zinc-600 opacity-0 group-hover/meghala:opacity-100 transition-opacity">Meghala Unit</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
 
