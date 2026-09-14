@@ -60,17 +60,21 @@ export default function AdminDashboard() {
         api.get('/block-admin/volunteers')
       ]);
 
+      const volunteerList = resVolunteers.data?.success && Array.isArray(resVolunteers.data.data) ? resVolunteers.data.data : [];
+      const metricsVolunteers = Number(resMetrics.data?.data?.total_volunteers) || 0;
+      const finalVolunteers = Math.max(metricsVolunteers, volunteerList.length);
+
       if (resMetrics.data?.success) {
         setBlockData({
           blockCommitteeName: resMetrics.data.data?.city || user?.city || user?.block || 'Block Committee',
           total_users: resMetrics.data.data?.total_users || 0,
-          total_volunteers: resMetrics.data.data?.total_volunteers || 0,
-          volunteers: resVolunteers.data?.data || [],
+          total_volunteers: finalVolunteers,
+          volunteers: volunteerList,
           members: [],
           meghala_summary: []
         });
       }
-      if (resVolunteers.data?.success) setMeghalaAdmins(resVolunteers.data.data || []);
+      if (resVolunteers.data?.success) setMeghalaAdmins(volunteerList);
     } catch {
       // ignore
     } finally {
