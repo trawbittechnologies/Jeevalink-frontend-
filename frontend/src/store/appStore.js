@@ -51,15 +51,20 @@ export const useAppStore = create((set, get) => ({
             donorCount = 0;
           }
         }
-        if (volunteerCount === undefined || volunteerCount === null) {
+        if (volunteerCount === undefined || volunteerCount === null || Number(volunteerCount) === 0) {
           try {
             const volRes = await api.get('/public/volunteers');
             if (volRes.data.success) {
               const list = volRes.data.data?.volunteers || volRes.data.data || [];
-              volunteerCount = Array.isArray(list) ? list.length : (volRes.data.data?.total || 0);
+              const fallbackVol = Array.isArray(list) ? list.length : (volRes.data.data?.total || 0);
+              if (fallbackVol > 0) {
+                volunteerCount = fallbackVol;
+              }
             }
           } catch {
-            volunteerCount = 0;
+            if (volunteerCount === undefined || volunteerCount === null) {
+              volunteerCount = 0;
+            }
           }
         }
         set({
