@@ -263,6 +263,16 @@ export default function UserManagement() {
     setVerifyingUserId(null);
   };
 
+  // Determine current user's meghala name for UI display
+  const myMeghala = (
+    currentUser?.meghala ||
+    currentUser?.meghalaName ||
+    currentUser?.meghala_name ||
+    currentUser?.city ||
+    currentUser?.organization_name ||
+    ''
+  ).trim();
+
   // Determine the user list source:
   // - Meghala volunteers: strictly use freshly fetched meghalaUsers (backend-scoped to only users added by this Meghala)
   // - Admin roles: fall back to allUsers from the global store
