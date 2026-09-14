@@ -789,11 +789,6 @@ export default function BlockCommitteeManagement() {
                                 <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold text-xs">
                                   <Droplets className="w-3 h-3" />{stats.donors}
                                 </span>
-                                {stats.volunteers > 0 && (
-                                  <span className="flex items-center gap-1 text-violet-500 dark:text-violet-400 font-semibold text-[10px]">
-                                    <UserCheck className="w-2.5 h-2.5" />{stats.volunteers} vol.
-                                  </span>
-                                )}
                               </div>
                             );
                           })()}
@@ -859,13 +854,18 @@ export default function BlockCommitteeManagement() {
                 const { admin1Name, admin1Mobile } = parseBlockAdminContacts(ba);
                 const isExpanded = !!expandedBlocks[ba.id];
 
-                // Match meghala list: try exact then case-insensitive
+                // Match meghala list: try exact, normalized, then dictionary fallback
                 const meghalaList = (() => {
-                  if (meghalasByBlock[blockLabel]) return meghalasByBlock[blockLabel];
-                  const key = Object.keys(meghalasByBlock).find(
-                    k => k.toLowerCase().trim() === blockLabel.toLowerCase().trim()
+                  const activeMap = { ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK, ...meghalasByBlock };
+                  if (activeMap[blockLabel]) return activeMap[blockLabel];
+                  const normLabel = normalizeBlockName(blockLabel);
+                  const key = Object.keys(activeMap).find(
+                    k => k.toLowerCase().trim() === blockLabel.toLowerCase().trim() ||
+                         normalizeBlockName(k) === normLabel ||
+                         k.toLowerCase().includes(normLabel) ||
+                         normLabel.includes(k.toLowerCase())
                   );
-                  return key ? meghalasByBlock[key] : [];
+                  return key ? activeMap[key] : [];
                 })();
 
                 return (
@@ -911,16 +911,9 @@ export default function BlockCommitteeManagement() {
                           {(() => {
                             const stats = getBlockStats(blockLabel);
                             return (
-                              <>
-                                <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
-                                  <Droplets className="w-3 h-3" />{stats.donors} Donors
-                                </span>
-                                {stats.volunteers > 0 && (
-                                  <span className="flex items-center gap-1 text-violet-500 dark:text-violet-400 font-bold">
-                                    <UserCheck className="w-3 h-3" />{stats.volunteers} Volunteers
-                                  </span>
-                                )}
-                              </>
+                              <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
+                                <Droplets className="w-3 h-3" />{stats.donors} Donors
+                              </span>
                             );
                           })()}
                           {meghalaList.length > 0 && (
@@ -979,11 +972,6 @@ export default function BlockCommitteeManagement() {
                                       <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/30 px-2 py-0.5 rounded-full">
                                         <Droplets className="w-2.5 h-2.5" />{mStats.donors} Donors
                                       </span>
-                                      {mStats.volunteers > 0 && (
-                                        <span className="flex items-center gap-1 text-[10px] font-bold text-violet-500 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/30 px-2 py-0.5 rounded-full">
-                                          <UserCheck className="w-2.5 h-2.5" />{mStats.volunteers} Vol.
-                                        </span>
-                                      )}
                                     </div>
                                   );
                                 })()}
