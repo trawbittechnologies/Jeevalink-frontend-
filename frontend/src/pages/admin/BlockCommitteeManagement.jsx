@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
-  CheckCircle2, Download, ShieldCheck, ChevronRight, ChevronDown,
-  MapPin, LayoutList, GitBranch, Users, Droplets, UserCheck
+  CheckCircle2, Download, ChevronRight,
+  MapPin, LayoutList, GitBranch, Users, Droplets
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -456,7 +456,7 @@ export default function BlockCommitteeManagement() {
         let matchedMKey = null;
 
         // A. Remarks: Added by Meghala: <meghala>
-        const mMatch = uRemarks.match(/added by meghala:\s*([^,\[\n;]+)/i);
+        const mMatch = uRemarks.match(/added by meghala:\s*([^,[\n;]+)/i);
         if (mMatch) {
           const rawM = mMatch[1].trim().toLowerCase();
           const normM = normalizeMeghalaName(rawM);
@@ -465,7 +465,7 @@ export default function BlockCommitteeManagement() {
 
         // B. Remarks: Added by Unit Squad: <squad>
         if (!matchedMKey) {
-          const sMatch = uRemarks.match(/added by unit squad:\s*([^,\[\n;]+)/i);
+          const sMatch = uRemarks.match(/added by unit squad:\s*([^,[\n;]+)/i);
           if (sMatch) {
             const rawS = sMatch[1].trim().toLowerCase();
             const normS = normalizeMeghalaName(rawS);
@@ -546,10 +546,10 @@ export default function BlockCommitteeManagement() {
     }
 
     return { blockDonorMap: bMap, meghalaDonorMap: mMap };
-  }, [blockSummary, serverMeghalaSummary, blockAdmins, meghalasByBlock, allUsersLocal, allUsers, donors]);
+  }, [blockSummary, serverMeghalaSummary, blockAdmins, dynamicMeghalasByBlock, allUsersLocal, allUsers, donors]);
 
   // Helper: get block donor stats by block name
-  const getBlockStats = (blockLabel) => {
+  const getBlockStats = useCallback((blockLabel) => {
     if (!blockLabel) return { donors: 0, volunteers: 0 };
     const raw = String(blockLabel).toLowerCase().trim();
     if (blockDonorMap.has(raw)) return blockDonorMap.get(raw);
@@ -559,10 +559,10 @@ export default function BlockCommitteeManagement() {
       if (normalizeBlockName(k) === norm || k.includes(norm) || norm.includes(k)) return v;
     }
     return { donors: 0, volunteers: 0 };
-  };
+  }, [blockDonorMap]);
 
   // Helper: get meghala donor stats by meghala name
-  const getMeghalaStats = (meghalaName) => {
+  const getMeghalaStats = useCallback((meghalaName) => {
     if (!meghalaName) return { donors: 0, volunteers: 0 };
     const raw = String(meghalaName).toLowerCase().trim();
     if (meghalaDonorMap.has(raw)) return meghalaDonorMap.get(raw);
@@ -572,7 +572,7 @@ export default function BlockCommitteeManagement() {
       if (normalizeMeghalaName(k) === norm) return v;
     }
     return { donors: 0, volunteers: 0 };
-  };
+  }, [meghalaDonorMap]);
 
 
   // ── Unified Block Committee List (All 12 Blocks + Dynamic Blocks + Assigned Admins) ──
@@ -661,7 +661,7 @@ export default function BlockCommitteeManagement() {
     });
 
     return list;
-  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, blockDonorMap]);
+  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, blockDonorMap, getBlockStats]);
 
   const filteredCommittees = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
