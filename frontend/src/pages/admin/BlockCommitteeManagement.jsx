@@ -575,24 +575,135 @@ export default function BlockCommitteeManagement() {
   };
 
 
+  // ── Unified Block Committee List (All 12 Blocks + Dynamic Blocks + Assigned Admins) ──
+  const allBlockCommittees = useMemo(() => {
+    const blockNamesMap = new Map();
+
+    // 1. All blocks from dynamicMeghalasByBlock (guaranteed to have the 12 Kasaragod blocks + server meghalas)
+    Object.keys(dynamicMeghalasByBlock).forEach(bName => {
+      const norm = normalizeBlockName(bName);
+      if (norm && !blockNamesMap.has(norm)) {
+        blockNamesMap.set(norm, bName);
+      }
+    });
+
+    // 2. Any blocks from blockAdmins
+    blockAdmins.forEach(ba => {
+      const bName = (ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '').trim();
+      if (bName && bName.toLowerCase() !== 'n/a') {
+        const norm = normalizeBlockName(bName);
+        if (norm && !blockNamesMap.has(norm)) {
+          blockNamesMap.set(norm, bName);
+        }
+      }
+    });
+
+    // 3. Any blocks from blockSummary
+    blockSummary.forEach(bs => {
+      const bName = (bs.block || bs.city || bs.name || '').trim();
+      if (bName && bName.toLowerCase() !== 'n/a') {
+        const norm = normalizeBlockName(bName);
+        if (norm && !blockNamesMap.has(norm)) {
+          blockNamesMap.set(norm, bName);
+        }
+      }
+    });
+
+    // Ensure all standard Kasaragod blocks exist
+    Object.keys(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK).forEach(bName => {
+      const norm = normalizeBlockName(bName);
+      if (norm && !blockNamesMap.has(norm)) {
+        blockNamesMap.set(norm, bName);
+      }
+    });
+
+    const list = Array.from(blockNamesMap.entries()).map(([norm, canonicalName]) => {
+      // Find matching admin if registered
+      const admin = blockAdmins.find(ba => {
+        const b = (ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '').trim();
+        return normalizeBlockName(b) === norm || b.toLowerCase() === canonicalName.toLowerCase();
+      });
+
+      const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = admin
+        ? parseBlockAdminContacts(admin)
+        : { admin1Name: 'Admin Not Assigned', admin1Mobile: '—', admin2Name: '', admin2Mobile: '' };
+
+      const meghalas = (() => {
+        if (dynamicMeghalasByBlock[canonicalName]) return dynamicMeghalasByBlock[canonicalName];
+        const key = Object.keys(dynamicMeghalasByBlock).find(k => normalizeBlockName(k) === norm);
+        return key ? dynamicMeghalasByBlock[key] : (DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK[canonicalName] || []);
+      })();
+
+      const stats = getBlockStats(canonicalName);
+
+      return {
+        id: admin ? admin.id : `unassigned-${norm}`,
+        rawAdmin: admin || null,
+        isAssigned: !!admin,
+        blockName: canonicalName,
+        admin1Name: admin ? admin1Name : 'Admin Not Assigned',
+        admin1Mobile: admin ? admin1Mobile : '—',
+        admin2Name: admin ? admin2Name : '',
+        admin2Mobile: admin ? admin2Mobile : '',
+        email: admin ? (admin.email || '—') : '—',
+        status: admin ? (admin.status || 'Active') : 'Unassigned',
+        meghalas,
+        meghalaCount: meghalas.length,
+        donors: stats.donors,
+        volunteers: stats.volunteers,
+      };
+    });
+
+    // Sort: assigned first, then alphabetical by block name
+    list.sort((a, b) => {
+      if (a.isAssigned !== b.isAssigned) return a.isAssigned ? -1 : 1;
+      return a.blockName.localeCompare(b.blockName);
+    });
+
+    return list;
+  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, blockDonorMap]);
+
+  const filteredCommittees = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return allBlockCommittees.filter(c => {
+      const matchQuery = !q || (
+        c.blockName.toLowerCase().includes(q) ||
+        c.admin1Name.toLowerCase().includes(q) ||
+        c.admin1Mobile.includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        c.meghalas.some(m => m.toLowerCase().includes(q))
+      );
+      const matchStatus = statusFilter === 'all' || (
+        statusFilter === 'Unassigned' ? !c.isAssigned : c.status === statusFilter
+      );
+      return matchQuery && matchStatus;
+    });
+  }, [allBlockCommittees, searchQuery, statusFilter]);
+
+  const totalBlocks = allBlockCommittees.length;
+  const totalMeghalas = allBlockCommittees.reduce((acc, c) => acc + c.meghalaCount, 0);
+  const totalBlockDonors = allBlockCommittees.reduce((acc, c) => acc + c.donors, 0);
+  const activeCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Active').length;
+  const unassignedCount = allBlockCommittees.filter(c => !c.isAssigned).length;
+  const suspendedCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Suspended').length;
+
   const exportCSV = () => {
-    const headers = ['Block Name', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Status'];
-    const rows = filteredBlockAdmins.map(ba => [
-      ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '',
-      ba.primary_name || ba.name || '',
-      ba.email || '',
-      ba.mobile || '',
-      ba.secondaryContactNumber || ba.secondary_contact_number || ba.secondary_contact || '',
-      ba.status || 'Active'
+    const headers = ['Block Name', 'Meghalas Count', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Donors', 'Status'];
+    const rows = filteredCommittees.map(c => [
+      c.blockName,
+      c.meghalaCount,
+      c.admin1Name,
+      c.email,
+      c.admin1Mobile,
+      c.admin2Mobile,
+      c.donors,
+      c.status
     ]);
-    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const csv = [headers, ...rows].map(r => r.map(col => `"${String(col || '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `block_committees_${district.toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`; a.click();
   };
-
-  const activeCount = blockAdmins.filter(ba => ba.status === 'Active').length;
-  const suspendedCount = blockAdmins.filter(ba => ba.status === 'Suspended').length;
 
   const rawDistrict = district || user?.district || 'Kasaragod';
   const cleanDistrict = rawDistrict.replace(/^dyfi\s*/i, '').trim();
@@ -639,7 +750,7 @@ export default function BlockCommitteeManagement() {
           </div>
 
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => { setBlockName(''); setShowAddModal(true); }}
             className="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-xs font-bold shadow-md shadow-red-200 transition flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Add Block Committee
@@ -660,14 +771,15 @@ export default function BlockCommitteeManagement() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Block Committees</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">{blockAdmins.length}</h3>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">{totalBlocks}</h3>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">{cleanDistrict} District</p>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-rose-600 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 text-red-600 flex items-center justify-center">
               <Building2 className="w-5 h-5" />
             </div>
           </div>
@@ -676,11 +788,12 @@ export default function BlockCommitteeManagement() {
         <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Active Committees</p>
-              <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-500 mt-1">{activeCount}</h3>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Meghala Units</p>
+              <h3 className="text-2xl font-black text-violet-600 dark:text-violet-400 mt-1">{totalMeghalas}</h3>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Across {totalBlocks} Blocks</p>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/40 text-violet-600 flex items-center justify-center">
+              <MapPin className="w-5 h-5" />
             </div>
           </div>
         </div>
@@ -688,11 +801,25 @@ export default function BlockCommitteeManagement() {
         <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Suspended Committees</p>
-              <h3 className="text-2xl font-black text-amber-600 dark:text-amber-500 mt-1">{suspendedCount}</h3>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Block Donors</p>
+              <h3 className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{totalBlockDonors}</h3>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Meghala registered</p>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 text-amber-600 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-rose-600 flex items-center justify-center">
+              <Droplets className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Admin Status</p>
+              <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-500 mt-1">{activeCount} Active</h3>
+              <p className="text-[11px] text-amber-500 mt-0.5">{unassignedCount} Unassigned</p>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-emerald-600 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
         </div>
@@ -703,7 +830,7 @@ export default function BlockCommitteeManagement() {
 
         {/* Filters & Search Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-zinc-800/60 pb-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'all'
@@ -711,7 +838,7 @@ export default function BlockCommitteeManagement() {
                   : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200'
                 }`}
             >
-              All ({blockAdmins.length})
+              All ({totalBlocks})
             </button>
             <button
               onClick={() => setStatusFilter('Active')}
@@ -723,14 +850,25 @@ export default function BlockCommitteeManagement() {
               Active ({activeCount})
             </button>
             <button
-              onClick={() => setStatusFilter('Suspended')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'Suspended'
-                  ? 'bg-red-600 text-white'
+              onClick={() => setStatusFilter('Unassigned')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'Unassigned'
+                  ? 'bg-amber-600 text-white'
                   : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200'
                 }`}
             >
-              Suspended ({suspendedCount})
+              Unassigned ({unassignedCount})
             </button>
+            {suspendedCount > 0 && (
+              <button
+                onClick={() => setStatusFilter('Suspended')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'Suspended'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200'
+                  }`}
+              >
+                Suspended ({suspendedCount})
+              </button>
+            )}
           </div>
 
           <div className="relative w-full sm:w-72">
@@ -738,7 +876,7 @@ export default function BlockCommitteeManagement() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by block, admin, mobile..."
+              placeholder="Search by block, meghala, admin..."
               className="w-full px-4 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-xs text-slate-900 dark:text-zinc-100 pr-9"
             />
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -747,7 +885,7 @@ export default function BlockCommitteeManagement() {
 
         {/* ─── TABLE VIEW ─── */}
         {viewMode === 'table' && (
-          filteredBlockAdmins.length === 0 ? (
+          filteredCommittees.length === 0 ? (
             <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400 shadow-sm text-xs">
               <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
               No Block Committees found matching your search.
@@ -758,6 +896,7 @@ export default function BlockCommitteeManagement() {
                 <thead>
                   <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-200/80 dark:border-zinc-800/80 text-slate-500 dark:text-zinc-400 font-extrabold uppercase tracking-wider text-[11px]">
                     <th className="py-3.5 px-4">Block Committee</th>
+                    <th className="py-3.5 px-4">Meghala Units</th>
                     <th className="py-3.5 px-4">Primary Contact (Admin 1)</th>
                     <th className="py-3.5 px-4">Secondary Contact (Admin 2)</th>
                     <th className="py-3.5 px-4">Email</th>
@@ -767,36 +906,54 @@ export default function BlockCommitteeManagement() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60 bg-white dark:bg-zinc-900">
-                  {filteredBlockAdmins.map((ba) => {
-                    const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = parseBlockAdminContacts(ba);
-
+                  {filteredCommittees.map((c) => {
                     return (
-                      <tr key={ba.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-850/50 transition-colors">
+                      <tr key={c.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-850/50 transition-colors">
                         <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-zinc-100 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
                             <span className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100 dark:border-red-900/40">
                               <Building2 className="w-4 h-4" />
                             </span>
-                            <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || 'N/A'}</span>
+                            <div>
+                              <div className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{c.blockName}</div>
+                              <div className="text-[10px] text-slate-400 font-normal">{cleanDistrict} District</div>
+                            </div>
                           </div>
                         </td>
 
+                        {/* Meghalas Column */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          <div className="font-bold text-slate-900 dark:text-zinc-100">{admin1Name}</div>
-                          <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
-                            <Phone className="w-3 h-3 text-slate-400" />
-                            <span>{admin1Mobile}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-900/40">
+                              <MapPin className="w-3 h-3 text-violet-500" />
+                              {c.meghalaCount} Meghala{c.meghalaCount !== 1 ? 's' : ''}
+                            </span>
                           </div>
+                          {c.meghalas.length > 0 && (
+                            <div className="text-[10px] text-slate-400 max-w-[180px] truncate mt-0.5" title={c.meghalas.join(', ')}>
+                              {c.meghalas.slice(0, 3).join(', ')}{c.meghalas.length > 3 ? ` +${c.meghalas.length - 3}` : ''}
+                            </div>
+                          )}
                         </td>
 
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          {admin2Name || admin2Mobile ? (
+                          <div className={`font-bold ${c.isAssigned ? 'text-slate-900 dark:text-zinc-100' : 'text-slate-400 italic'}`}>{c.admin1Name}</div>
+                          {c.admin1Mobile !== '—' && (
+                            <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
+                              <Phone className="w-3 h-3 text-slate-400" />
+                              <span>{c.admin1Mobile}</span>
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {c.admin2Name || c.admin2Mobile ? (
                             <>
-                              <div className="font-bold text-slate-900 dark:text-zinc-100">{admin2Name || 'Admin 2'}</div>
-                              {admin2Mobile && (
+                              <div className="font-bold text-slate-900 dark:text-zinc-100">{c.admin2Name || 'Admin 2'}</div>
+                              {c.admin2Mobile && (
                                 <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
                                   <Phone className="w-3 h-3 text-slate-400" />
-                                  <span>{admin2Mobile}</span>
+                                  <span>{c.admin2Mobile}</span>
                                 </div>
                               )}
                             </>
@@ -806,57 +963,73 @@ export default function BlockCommitteeManagement() {
                         </td>
 
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300 font-mono text-xs">
-                            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>{ba.email}</span>
-                          </div>
+                          {c.email !== '—' ? (
+                            <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300 font-mono text-xs">
+                              <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span>{c.email}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 dark:text-zinc-600 italic">—</span>
+                          )}
                         </td>
 
-                        {/* Donors column in table view */}
+                        {/* Donors column */}
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                          {(() => {
-                            const bLabel = ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '';
-                            const stats = getBlockStats(bLabel);
-                            return (
-                              <div className="flex flex-col items-center gap-0.5">
-                                <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold text-xs">
-                                  <Droplets className="w-3 h-3" />{stats.donors}
-                                </span>
-                              </div>
-                            );
-                          })()}
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${ba.status === 'Active'
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
-                              : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
-                            }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                            {ba.status}
+                          <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold text-xs bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 px-2.5 py-1 rounded-full">
+                            <Droplets className="w-3 h-3" />{c.donors} Donors
                           </span>
                         </td>
 
+                        {/* Status column */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                            c.status === 'Active'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
+                              : c.status === 'Suspended'
+                              ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
+                              : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-400'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              c.status === 'Active' ? 'bg-emerald-500' : c.status === 'Suspended' ? 'bg-red-500' : 'bg-amber-500'
+                            }`} />
+                            {c.status}
+                          </span>
+                        </td>
+
+                        {/* Actions column */}
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleOpenEdit(ba)}
-                              className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
-                              title="Edit Block Committee"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" /> Edit
-                            </button>
+                          {c.isAssigned ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleOpenEdit(c.rawAdmin)}
+                                className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                                title="Edit Block Committee"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" /> Edit
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDeletingAdminId(c.rawAdmin.id);
+                                  setDeletingAdminName(c.rawAdmin.primary_name || c.rawAdmin.name);
+                                }}
+                                className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                                title="Delete Block Committee"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> Delete
+                              </button>
+                            </div>
+                          ) : (
                             <button
                               onClick={() => {
-                                setDeletingAdminId(ba.id);
-                                setDeletingAdminName(ba.primary_name || ba.name);
+                                setBlockName(c.blockName);
+                                setShowAddModal(true);
                               }}
-                              className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
-                              title="Delete Block Committee"
+                              className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1 ml-auto"
+                              title="Assign Admin to this Block"
                             >
-                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                              <Plus className="w-3.5 h-3.5" /> Assign Admin
                             </button>
-                          </div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -876,40 +1049,25 @@ export default function BlockCommitteeManagement() {
               <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-violet-500" /> Meghala Unit</span>
             </div>
 
-            {filteredBlockAdmins.length === 0 ? (
+            {filteredCommittees.length === 0 ? (
               <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400 shadow-sm text-xs">
                 <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
                 No Block Committees found matching your search.
               </div>
             ) : (
-              filteredBlockAdmins.map((ba) => {
-                const blockLabel = ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || 'N/A';
-                const { admin1Name, admin1Mobile } = parseBlockAdminContacts(ba);
-                const isExpanded = !!expandedBlocks[ba.id];
-
-                // Match meghala list: try exact, normalized, then dictionary fallback
-                const meghalaList = (() => {
-                  const activeMap = dynamicMeghalasByBlock;
-                  if (activeMap[blockLabel]) return activeMap[blockLabel];
-                  const normLabel = normalizeBlockName(blockLabel);
-                  const key = Object.keys(activeMap).find(
-                    k => k.toLowerCase().trim() === blockLabel.toLowerCase().trim() ||
-                         normalizeBlockName(k) === normLabel ||
-                         k.toLowerCase().includes(normLabel) ||
-                         normLabel.includes(k.toLowerCase())
-                  );
-                  return key ? activeMap[key] : [];
-                })();
+              filteredCommittees.map((c) => {
+                const isExpanded = !!expandedBlocks[c.id];
+                const meghalaList = c.meghalas;
 
                 return (
                   <div
-                    key={ba.id}
+                    key={c.id}
                     className="border border-slate-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-xs"
                   >
                     {/* Block Row */}
                     <button
                       onClick={() =>
-                        setExpandedBlocks(prev => ({ ...prev, [ba.id]: !prev[ba.id] }))
+                        setExpandedBlocks(prev => ({ ...prev, [c.id]: !prev[c.id] }))
                       }
                       className="w-full flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-zinc-900 hover:bg-red-50/40 dark:hover:bg-red-950/10 transition-colors cursor-pointer text-left group"
                     >
@@ -926,29 +1084,28 @@ export default function BlockCommitteeManagement() {
                       {/* Block name + admin info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{blockLabel}</span>
+                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{c.blockName}</span>
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                            ba.status === 'Active'
+                            c.status === 'Active'
                               ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
-                              : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
+                              : c.status === 'Suspended'
+                              ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
+                              : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-400'
                           }`}>
-                            <span className={`w-1 h-1 rounded-full ${ba.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                            {ba.status}
+                            <span className={`w-1 h-1 rounded-full ${
+                              c.status === 'Active' ? 'bg-emerald-500' : c.status === 'Suspended' ? 'bg-red-500' : 'bg-amber-500'
+                            }`} />
+                            {c.status}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400 flex-wrap">
                           <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" />{admin1Name} · {admin1Mobile}
+                            <Phone className="w-3 h-3" />{c.admin1Name}{c.admin1Mobile !== '—' ? ` · ${c.admin1Mobile}` : ''}
                           </span>
                           {/* Block-level donor count */}
-                          {(() => {
-                            const stats = getBlockStats(blockLabel);
-                            return (
-                              <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
-                                <Droplets className="w-3 h-3" />{stats.donors} Donors
-                              </span>
-                            );
-                          })()}
+                          <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
+                            <Droplets className="w-3 h-3" />{c.donors} Donors
+                          </span>
                           {meghalaList.length > 0 && (
                             <span className="flex items-center gap-1 text-amber-500 dark:text-amber-400 font-bold">
                               <Users className="w-3 h-3" />{meghalaList.length} Meghala{meghalaList.length !== 1 ? 's' : ''}
@@ -959,18 +1116,37 @@ export default function BlockCommitteeManagement() {
 
                       {/* Action buttons */}
                       <div className="flex items-center gap-2 shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleOpenEdit(ba); }}
-                          className="px-2.5 py-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
-                        >
-                          <Edit3 className="w-3 h-3" /> Edit
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setDeletingAdminId(ba.id); setDeletingAdminName(ba.primary_name || ba.name); }}
-                          className="px-2.5 py-1.5 text-[11px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
-                        >
-                          <Trash2 className="w-3 h-3" /> Delete
-                        </button>
+                        {c.isAssigned ? (
+                          <>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleOpenEdit(c.rawAdmin); }}
+                              className="px-2.5 py-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                            >
+                              <Edit3 className="w-3 h-3" /> Edit
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeletingAdminId(c.rawAdmin.id);
+                                setDeletingAdminName(c.rawAdmin.primary_name || c.rawAdmin.name);
+                              }}
+                              className="px-2.5 py-1.5 text-[11px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3 h-3" /> Delete
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBlockName(c.blockName);
+                              setShowAddModal(true);
+                            }}
+                            className="px-2.5 py-1.5 text-[11px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3" /> Assign Admin
+                          </button>
+                        )}
                       </div>
                     </button>
 
