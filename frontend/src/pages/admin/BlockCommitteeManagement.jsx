@@ -287,6 +287,54 @@ export default function BlockCommitteeManagement() {
     return matchQuery && matchStatus;
   });
 
+  // ── Dynamic Meghalas by Block (Predefined + Server + Dynamically Added) ──
+  const dynamicMeghalasByBlock = useMemo(() => {
+    const combined = {};
+    // 1. Predefined standard Kasaragod blocks and meghalas
+    Object.entries(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK).forEach(([blk, list]) => {
+      combined[blk] = [...list];
+    });
+
+    // 2. Server-returned meghalas (includes DB registered)
+    Object.entries(meghalasByBlock || {}).forEach(([blk, list]) => {
+      if (!combined[blk]) combined[blk] = [];
+      if (Array.isArray(list)) {
+        list.forEach(m => {
+          if (!combined[blk].some(item => item.toLowerCase().trim() === String(m).toLowerCase().trim())) {
+            combined[blk].push(String(m).trim());
+          }
+        });
+      }
+    });
+
+    // 3. Dynamically scan users/volunteers/unit squads for any custom Meghala
+    const userPool = (allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []);
+    userPool.forEach(u => {
+      const role = (u.role || '').toLowerCase().trim();
+      const isVol = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+      const mName = (isVol ? (u.city || '') : '').trim();
+      const bName = (isVol ? (u.organization_name || '') : '').trim();
+      if (mName && bName && mName.toLowerCase() !== 'n/a' && bName.toLowerCase() !== 'n/a') {
+        const matchedBlockKey = Object.keys(combined).find(
+          k => k.toLowerCase().trim() === bName.toLowerCase().trim() ||
+               normalizeBlockName(k) === normalizeBlockName(bName)
+        );
+        const targetBlock = matchedBlockKey || bName;
+        if (!combined[targetBlock]) combined[targetBlock] = [];
+        if (!combined[targetBlock].some(item => item.toLowerCase().trim() === mName.toLowerCase().trim())) {
+          combined[targetBlock].push(mName);
+        }
+      }
+    });
+
+    // Sort meghala names alphabetically for clean display
+    Object.keys(combined).forEach(k => {
+      combined[k].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    });
+
+    return combined;
+  }, [meghalasByBlock, allUsersLocal, allUsers]);
+
   // ── Donor / Volunteer count maps ──────────────────────────────────────────
   // blockDonorMap  : { blockNameLower -> { donors, volunteers } }
   // meghalaDonorMap: { meghalaNameLower -> { donors, volunteers } }
@@ -294,10 +342,7 @@ export default function BlockCommitteeManagement() {
     const bMap = new Map();
     const mMap = new Map();
 
-    const activeMeghalasByBlock = {
-      ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK,
-      ...meghalasByBlock
-    };
+    const activeMeghalasByBlock = dynamicMeghalasByBlock;
 
     // Pre-seed blocks from activeMeghalasByBlock
     Object.keys(activeMeghalasByBlock).forEach(b => {
@@ -856,7 +901,7 @@ export default function BlockCommitteeManagement() {
 
                 // Match meghala list: try exact, normalized, then dictionary fallback
                 const meghalaList = (() => {
-                  const activeMap = { ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK, ...meghalasByBlock };
+                  const activeMap = dynamicMeghalasByBlock;
                   if (activeMap[blockLabel]) return activeMap[blockLabel];
                   const normLabel = normalizeBlockName(blockLabel);
                   const key = Object.keys(activeMap).find(
