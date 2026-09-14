@@ -93,7 +93,9 @@ export const useAppStore = create((set, get) => ({
             }
           }));
         }
-      } catch { }
+      } catch {
+        // ignore
+      }
       try {
         const volRes = await api.get('/public/volunteers');
         if (volRes.data.success) {
@@ -106,7 +108,9 @@ export const useAppStore = create((set, get) => ({
             }
           }));
         }
-      } catch { }
+      } catch {
+        // ignore
+      }
     }
   },
 

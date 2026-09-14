@@ -661,7 +661,7 @@ export default function BlockCommitteeManagement() {
     });
 
     return list;
-  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, blockDonorMap, getBlockStats]);
+  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, getBlockStats]);
 
   const filteredCommittees = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
