@@ -275,18 +275,6 @@ export default function BlockCommitteeManagement() {
     }
   };
 
-  const filteredBlockAdmins = blockAdmins.filter(ba => {
-    const q = searchQuery.toLowerCase();
-    const matchQuery = (
-      (ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '').toLowerCase().includes(q) ||
-      (ba.primary_name || ba.name || '').toLowerCase().includes(q) ||
-      (ba.email || '').toLowerCase().includes(q) ||
-      (ba.mobile || '').toLowerCase().includes(q)
-    );
-    const matchStatus = statusFilter === 'all' || ba.status === statusFilter;
-    return matchQuery && matchStatus;
-  });
-
   // ── Dynamic Meghalas by Block (Predefined + Server + Dynamically Added) ──
   const dynamicMeghalasByBlock = useMemo(() => {
     const combined = {};
