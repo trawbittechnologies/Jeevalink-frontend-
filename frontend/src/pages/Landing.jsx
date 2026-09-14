@@ -370,13 +370,13 @@ export default function Landing() {
           >
             {[
               {
-                val: displayDonorCount > 0 ? `${displayDonorCount.toLocaleString()}+` : (totalDonors > 0 ? `${totalDonors}+` : '1+'),
+                val: displayDonorCount > 0 ? `${displayDonorCount.toLocaleString()}+` : (totalDonors > 0 ? `${totalDonors}+` : '0'),
                 label: 'Total Donors',
                 highlight: true,
               },
               {
-                val: displayVolunteerCount > 0 ? `${displayVolunteerCount.toLocaleString()}+` : (totalVolunteers > 0 ? `${totalVolunteers}+` : '1+'),
-                label: 'Meghala',
+                val: displayVolunteerCount > 0 ? `${displayVolunteerCount.toLocaleString()}+` : (totalVolunteers > 0 ? `${totalVolunteers}+` : '0'),
+                label: 'Total Volunteers',
                 highlight: true,
               },
               { val: 'Kasaragod', label: 'Donor Reach' },
