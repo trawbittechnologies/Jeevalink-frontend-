@@ -246,14 +246,11 @@ export default function SuperAdminDashboard() {
 
   const realVolunteersCount = useMemo(() => {
     const serverCount = Number(districtData.total_volunteers);
-    if (!isNaN(serverCount) && serverCount > 0) return serverCount;
-
     const volUsers = (allUsers || []).filter(u => {
       const role = String(u.role || '').toLowerCase();
       return ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
     });
-    if (volUsers.length > 0) return volUsers.length;
-    return !isNaN(serverCount) ? serverCount : 0;
+    return Math.max(!isNaN(serverCount) ? serverCount : 0, volUsers.length);
   }, [districtData.total_volunteers, allUsers]);
 
   const realBlockAdminsCount = useMemo(() => {

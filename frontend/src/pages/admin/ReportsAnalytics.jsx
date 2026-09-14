@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { motion } from 'framer-motion';
 import {
@@ -23,7 +23,7 @@ export default function ReportsAnalytics() {
   const { allUsers, requests } = useAppStore();
   const [period, setPeriod] = useState('6m');
 
-  const totalVol = allUsers.filter(u => u.role === 'volunteer').length;
+  const totalVol = allUsers.filter(u => ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(String(u.role || '').toLowerCase())).length;
   const totalReq = requests.length;
   const completedReq = requests.filter(r => r.status === 'Fulfilled' || r.status === 'Completed').length;
   const successRate = totalReq > 0 ? ((completedReq / totalReq) * 100).toFixed(1) : '0.0';
@@ -31,7 +31,7 @@ export default function ReportsAnalytics() {
   // Real District Data computed from Store Users & Requests
   const districtsList = Array.from(new Set([...allUsers.map(u => u.district), ...requests.map(r => r.district)].filter(Boolean)));
   const DISTRICT_DATA = districtsList.map(dist => {
-    const distVols = allUsers.filter(u => u.district === dist && u.role === 'volunteer').length;
+    const distVols = allUsers.filter(u => u.district === dist && ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(String(u.role || '').toLowerCase())).length;
     const distReqs = requests.filter(r => r.district === dist).length;
     const distCompleted = requests.filter(r => r.district === dist && (r.status === 'Fulfilled' || r.status === 'Completed')).length;
     const rate = distReqs > 0 ? ((distCompleted / distReqs) * 100).toFixed(1) : '0.0';
@@ -109,9 +109,9 @@ export default function ReportsAnalytics() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Total Volunteers', value: totalVol || 168, trend: '+12%', color: 'text-blue-600' },
-          { label: 'Total Requests', value: totalReq || 222, trend: '+22%', color: 'text-red-600' },
-          { label: 'Completed', value: completedReq || 202, trend: '+18%', color: 'text-emerald-600' },
+          { label: 'Total Volunteers', value: totalVol, trend: '+12%', color: 'text-blue-600' },
+          { label: 'Total Requests', value: totalReq, trend: '+22%', color: 'text-red-600' },
+          { label: 'Completed', value: completedReq, trend: '+18%', color: 'text-emerald-600' },
           { label: 'Success Rate', value: `${successRate}%`, trend: '+4%', color: 'text-amber-600' },
         ].map(({ label, value, trend, color }) => (
           <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
