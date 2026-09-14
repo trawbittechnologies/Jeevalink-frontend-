@@ -224,7 +224,33 @@ export default function UserManagement() {
     setVerifyingUserId(null);
   };
 
-  const users = allUsers.filter(u => ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase()));
+  // Determine current user's meghala scope
+  const myRole = (currentUser?.role || '').toLowerCase().trim();
+  const isMeghalaScoped = ['volunteer', 'unit_squad'].includes(myRole);
+  const myMeghala = (
+    currentUser?.meghala ||
+    currentUser?.meghalaName ||
+    currentUser?.meghala_name ||
+    currentUser?.city ||
+    ''
+  ).toLowerCase().trim();
+
+  // All donor-type users from the store
+  const allDonorUsers = allUsers.filter(u =>
+    ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase())
+  );
+
+  // Scope to current volunteer's meghala if applicable
+  const users = isMeghalaScoped && myMeghala
+    ? allDonorUsers.filter(u => {
+        const uMeghala = (
+          u.meghala || u.meghalaName || u.meghala_name || u.city || ''
+        ).toLowerCase().trim();
+        return uMeghala === myMeghala ||
+               uMeghala.includes(myMeghala) ||
+               myMeghala.includes(uMeghala);
+      })
+    : allDonorUsers;
 
   const pendingUsers = users.filter(u => !u.is_verified && !u.isVerified && (u.status || '').toLowerCase() !== 'active');
   const verifiedUsers = users.filter(u => u.is_verified || u.isVerified || (u.status || '').toLowerCase() === 'active');
@@ -408,11 +434,17 @@ export default function UserManagement() {
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border-slate-200 shadow-sm p-6 rounded-3xl border /80 shadow-xs">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">User Management (Meghala Scope)</h1>
             <span className="px-2.5 py-0.5 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
               {users.length} Registered
             </span>
+            {isMeghalaScoped && myMeghala && (
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-violet-50 text-violet-700 text-xs font-bold rounded-full border border-violet-200">
+                <MapPin className="w-3 h-3" />
+                {currentUser?.meghala || currentUser?.meghalaName || currentUser?.city}
+              </span>
+            )}
           </div>
           <p className="text-slate-500 text-xs mt-1">
             Register new members/donors, view profiles, and perform secure OTP-verified updates.
