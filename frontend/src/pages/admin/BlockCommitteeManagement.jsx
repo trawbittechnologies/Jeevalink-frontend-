@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
   CheckCircle2, Download, ShieldCheck, ChevronRight, ChevronDown,
-  MapPin, LayoutList, GitBranch, Users
+  MapPin, LayoutList, GitBranch, Users, Droplets, UserCheck
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
+import { useAppStore } from '../../store/appStore.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 
 function parseBlockAdminContacts(ba) {
@@ -33,7 +34,9 @@ function parseBlockAdminContacts(ba) {
 
 export default function BlockCommitteeManagement() {
   const { user } = useAuthStore();
+  const { allUsers, donors } = useAppStore();
   const [blockAdmins, setBlockAdmins] = useState([]);
+  const [blockSummary, setBlockSummary] = useState([]);
   const [district, setDistrict] = useState(user?.district || 'Kasaragod');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,6 +86,9 @@ export default function BlockCommitteeManagement() {
       if (resDist.data?.success) {
         const dData = resDist.data.data || resDist.data;
         if (dData.district) setDistrict(dData.district);
+        // Capture block_summary for donor/volunteer counts
+        const bs = dData.block_summary || dData.blockSummary || [];
+        setBlockSummary(Array.isArray(bs) ? bs : []);
       }
       if (resAdmins.data?.success) {
         setBlockAdmins(resAdmins.data.data || []);
@@ -225,6 +231,103 @@ export default function BlockCommitteeManagement() {
     const matchStatus = statusFilter === 'all' || ba.status === statusFilter;
     return matchQuery && matchStatus;
   });
+
+  // ── Donor / Volunteer count maps ──────────────────────────────────────────
+  // blockDonorMap  : { blockNameLower -> { donors, volunteers } }
+  // meghalaDonorMap: { meghalaNameLower -> { donors, volunteers } }
+  const { blockDonorMap, meghalaDonorMap } = useMemo(() => {
+    const bMap = new Map();  // key: block name lowercase
+    const mMap = new Map();  // key: meghala name lowercase
+
+    // Seed block map from block_summary (server counts)
+    blockSummary.forEach(bs => {
+      const bName = (bs.block || bs.city || bs.name || '').trim();
+      if (!bName) return;
+      const key = bName.toLowerCase();
+      bMap.set(key, {
+        donors: Number(bs.users || bs.donors || 0),
+        volunteers: Number(bs.volunteers || 0)
+      });
+    });
+
+    // Also seed block map from registered block admins (so all blocks appear)
+    blockAdmins.forEach(ba => {
+      const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
+      if (!bName || bName.toLowerCase() === 'n/a') return;
+      const key = bName.toLowerCase();
+      if (!bMap.has(key)) bMap.set(key, { donors: 0, volunteers: 0 });
+    });
+
+    // Build flat meghala list from meghalasByBlock
+    const allMeghalaNames = [];
+    Object.values(meghalasByBlock).forEach(list => {
+      if (Array.isArray(list)) list.forEach(m => allMeghalaNames.push(String(m).toLowerCase().trim()));
+    });
+    allMeghalaNames.forEach(m => { if (!mMap.has(m)) mMap.set(m, { donors: 0, volunteers: 0 }); });
+
+    // User pool: prefer allUsers, fallback donors
+    const pool = (allUsers && allUsers.length > 0) ? allUsers : (donors || []);
+    const bKeys = Array.from(bMap.keys());
+    const mKeys = Array.from(mMap.keys());
+
+    pool.forEach(u => {
+      const role = String(u.role || '').toLowerCase();
+      const isVolunteer = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+      const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
+        ((u.blood_group || u.bloodGroup || '') !== '' &&
+         (u.blood_group || u.bloodGroup || '') !== 'N/A');
+
+      const uBlock = String(u.organization_name || u.organizationName || u.block || u.blockCommitteeName || '').toLowerCase().trim();
+      const uMeghala = String(u.city || u.meghala || '').toLowerCase().trim();
+
+      // ── Assign to block ──
+      let bKey = bKeys.find(k => uBlock && (uBlock === k || uBlock.includes(k) || k.includes(uBlock)));
+      if (!bKey && uMeghala) {
+        // Try to infer block from meghala membership in meghalasByBlock
+        for (const [blk, mList] of Object.entries(meghalasByBlock)) {
+          if (Array.isArray(mList) && mList.some(m => String(m).toLowerCase().trim() === uMeghala)) {
+            bKey = bKeys.find(k => blk.toLowerCase().trim() === k || k.includes(blk.toLowerCase().trim()) || blk.toLowerCase().trim().includes(k));
+            if (bKey) break;
+          }
+        }
+      }
+      if (!bKey && uMeghala) bKey = bKeys.find(k => uMeghala === k || uMeghala.includes(k) || k.includes(uMeghala));
+      if (!bKey && bKeys.length > 0) bKey = bKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || bKeys[0];
+
+      if (bKey && bMap.has(bKey)) {
+        const item = bMap.get(bKey);
+        // Only increment if server counts are absent (avoid double-counting)
+        const serverTotal = Array.from(bMap.values()).reduce((s, v) => s + v.donors, 0);
+        if (serverTotal === 0) {
+          if (isDonor) item.donors += 1;
+          if (isVolunteer) item.volunteers += 1;
+        }
+      }
+
+      // ── Assign to meghala ──
+      const mKey = mKeys.find(k => uMeghala && (uMeghala === k || uMeghala.includes(k) || k.includes(uMeghala)));
+      if (mKey && mMap.has(mKey)) {
+        const item = mMap.get(mKey);
+        if (isDonor) item.donors += 1;
+        if (isVolunteer) item.volunteers += 1;
+      }
+    });
+
+    return { blockDonorMap: bMap, meghalaDonorMap: mMap };
+  }, [blockSummary, blockAdmins, meghalasByBlock, allUsers, donors]);
+
+  // Helper: get block donor stats by block name
+  const getBlockStats = (blockLabel) => {
+    const key = blockLabel.toLowerCase().trim();
+    return blockDonorMap.get(key) || { donors: 0, volunteers: 0 };
+  };
+
+  // Helper: get meghala donor stats by meghala name
+  const getMeghalaStats = (meghalaName) => {
+    const key = String(meghalaName).toLowerCase().trim();
+    return meghalaDonorMap.get(key) || { donors: 0, volunteers: 0 };
+  };
+
 
   const exportCSV = () => {
     const headers = ['Block Name', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Status'];
@@ -412,6 +515,7 @@ export default function BlockCommitteeManagement() {
                     <th className="py-3.5 px-4">Primary Contact (Admin 1)</th>
                     <th className="py-3.5 px-4">Secondary Contact (Admin 2)</th>
                     <th className="py-3.5 px-4">Email</th>
+                    <th className="py-3.5 px-4 text-center">Donors</th>
                     <th className="py-3.5 px-4 text-center">Status</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
@@ -460,6 +564,26 @@ export default function BlockCommitteeManagement() {
                             <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                             <span>{ba.email}</span>
                           </div>
+                        </td>
+
+                        {/* Donors column in table view */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          {(() => {
+                            const bLabel = ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '';
+                            const stats = getBlockStats(bLabel);
+                            return (
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold text-xs">
+                                  <Droplets className="w-3 h-3" />{stats.donors}
+                                </span>
+                                {stats.volunteers > 0 && (
+                                  <span className="flex items-center gap-1 text-violet-500 dark:text-violet-400 font-semibold text-[10px]">
+                                    <UserCheck className="w-2.5 h-2.5" />{stats.volunteers} vol.
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
@@ -566,12 +690,28 @@ export default function BlockCommitteeManagement() {
                             {ba.status}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">
+                        <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400 flex-wrap">
                           <span className="flex items-center gap-1">
                             <Phone className="w-3 h-3" />{admin1Name} · {admin1Mobile}
                           </span>
+                          {/* Block-level donor count */}
+                          {(() => {
+                            const stats = getBlockStats(blockLabel);
+                            return (
+                              <>
+                                <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
+                                  <Droplets className="w-3 h-3" />{stats.donors} Donors
+                                </span>
+                                {stats.volunteers > 0 && (
+                                  <span className="flex items-center gap-1 text-violet-500 dark:text-violet-400 font-bold">
+                                    <UserCheck className="w-3 h-3" />{stats.volunteers} Volunteers
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
                           {meghalaList.length > 0 && (
-                            <span className="flex items-center gap-1 text-violet-500 dark:text-violet-400 font-bold">
+                            <span className="flex items-center gap-1 text-amber-500 dark:text-amber-400 font-bold">
                               <Users className="w-3 h-3" />{meghalaList.length} Meghala{meghalaList.length !== 1 ? 's' : ''}
                             </span>
                           )}
@@ -618,7 +758,22 @@ export default function BlockCommitteeManagement() {
                                   <MapPin className="w-3 h-3" />
                                 </span>
                                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{meghala}</span>
-                                <span className="ml-auto text-[10px] text-slate-400 dark:text-zinc-600 opacity-0 group-hover/meghala:opacity-100 transition-opacity">Meghala Unit</span>
+                                {/* Meghala donor stats */}
+                                {(() => {
+                                  const mStats = getMeghalaStats(meghala);
+                                  return (
+                                    <div className="ml-auto flex items-center gap-2">
+                                      <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/30 px-2 py-0.5 rounded-full">
+                                        <Droplets className="w-2.5 h-2.5" />{mStats.donors} Donors
+                                      </span>
+                                      {mStats.volunteers > 0 && (
+                                        <span className="flex items-center gap-1 text-[10px] font-bold text-violet-500 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/30 px-2 py-0.5 rounded-full">
+                                          <UserCheck className="w-2.5 h-2.5" />{mStats.volunteers} Vol.
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </li>
                             ))}
                           </ul>
