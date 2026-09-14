@@ -70,6 +70,7 @@ export default function BlockCommitteeManagement() {
   const [blockSummary, setBlockSummary] = useState([]);
   const [serverMeghalaSummary, setServerMeghalaSummary] = useState([]);
   const [allUsersLocal, setAllUsersLocal] = useState([]); // fetched by this page
+  const [allVolunteers, setAllVolunteers] = useState([]); // registered volunteer contacts
   const [district, setDistrict] = useState(user?.district || 'Kasaragod');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,17 +111,19 @@ export default function BlockCommitteeManagement() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resDist, resAdmins, resOptions, resUsers] = await Promise.all([
-        api.get('/super-admin/metrics'),
-        api.get('/super-admin/block-admins'),
+      const [resDist, resAdmins, resOptions, resUsers, resVols] = await Promise.all([
+        api.get('/super-admin/metrics').catch(() => null),
+        api.get('/super-admin/block-admins').catch(() => null),
         api.get('/public/volunteer-options').catch(() => null),
         // Fetch all users so we can compute per-meghala donor counts
         api.get('/admin/users').catch(() =>
           api.get('/donors/search').catch(() => null)
-        )
+        ),
+        // Fetch public volunteers to compute actual volunteer counts
+        api.get('/public/volunteers').catch(() => null)
       ]);
 
-      if (resDist.data?.success) {
+      if (resDist?.data?.success) {
         const dData = resDist.data.data || resDist.data;
         if (dData.district) setDistrict(dData.district);
         const bs = dData.block_summary || dData.blockSummary || [];
@@ -128,30 +131,68 @@ export default function BlockCommitteeManagement() {
         const ms = dData.meghala_summary || dData.meghalaSummary || [];
         setServerMeghalaSummary(Array.isArray(ms) ? ms : []);
         if (dData.meghalas_by_block || dData.meghalasByBlock) {
+          const mb = dData.meghalas_by_block || dData.meghalasByBlock;
+          const cleanedMb = {};
+          for (const [blk, mList] of Object.entries(mb)) {
+            if (/test|dummy/i.test(blk)) continue;
+            if (Array.isArray(mList)) {
+              cleanedMb[blk] = mList.filter(m => {
+                if (/test|dummy/i.test(m)) return false;
+                if (normalizeMeghalaName(m) === normalizeBlockName(blk)) return false;
+                return true;
+              });
+            }
+          }
           setMeghalasByBlock(prev => ({
             ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK,
             ...prev,
-            ...(dData.meghalas_by_block || dData.meghalasByBlock)
+            ...cleanedMb
           }));
         }
       }
-      if (resAdmins.data?.success) {
+      if (resAdmins?.data?.success) {
         setBlockAdmins(resAdmins.data.data || []);
       }
       if (resOptions?.data?.success && resOptions.data?.data) {
         const rawData = resOptions.data.data;
         const mbMap = rawData.meghalasByBlock || rawData.meghalas_by_block || {};
-        setMeghalasByBlock(prev => ({
-          ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK,
-          ...prev,
-          ...mbMap
-        }));
+        const cleanedMbMap = {};
+        for (const [blk, mList] of Object.entries(mbMap)) {
+          if (/test|dummy/i.test(blk)) continue;
+          if (Array.isArray(mList)) {
+            cleanedMbMap[blk] = mList.filter(m => {
+              if (/test|dummy/i.test(m)) return false;
+              if (normalizeMeghalaName(m) === normalizeBlockName(blk)) return false;
+              return true;
+            });
+          }
+        }
+        setMeghalasByBlock(prev => {
+          const merged = { ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK, ...prev };
+          for (const [blk, mList] of Object.entries(cleanedMbMap)) {
+            const existing = merged[blk] || [];
+            merged[blk] = Array.from(new Set([...existing, ...mList]));
+          }
+          return merged;
+        });
       }
       // Populate local user pool for donor counting
       if (resUsers?.data?.success) {
         const raw = resUsers.data.data;
         const list = raw?.users || raw?.donors || (Array.isArray(raw) ? raw : []);
         setAllUsersLocal(list);
+      }
+      // Populate volunteers list
+      if (resVols?.data?.success && Array.isArray(resVols.data.data)) {
+        const cleanVols = resVols.data.data.filter(v => {
+          const b = String(v.block || v.organization_name || '').toLowerCase();
+          const m = String(v.meghala || v.city || '').toLowerCase();
+          const n = String(v.name || v.primary_name || '').toLowerCase();
+          return !b.includes('test') && !b.includes('dummy') &&
+                 !m.includes('test') && !m.includes('dummy') &&
+                 !n.includes('test') && !n.includes('dummy');
+        });
+        setAllVolunteers(cleanVols);
       }
     } catch (err) {
       console.error("Block Committee Load error:", err);
