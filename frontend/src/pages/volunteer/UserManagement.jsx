@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
+import api from '../../store/api.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Plus, Eye, ShieldCheck, Mail, Save, X, Loader2, KeyRound, Phone, MapPin, Lock, Trash2, Upload, Droplet, Clock, CheckCircle2, AlertTriangle, Navigation, Map as MapIcon, Compass, Sparkles, Crosshair
@@ -68,6 +69,42 @@ export default function UserManagement() {
     triggerToast
   } = useAppStore();
   const { user: currentUser } = useAuthStore();
+
+  // Meghala-scoped user list (fetched from /volunteer/users which backend scopes by meghala)
+  const [meghalaUsers, setMeghalaUsers] = useState([]);
+  const [fetchingUsers, setFetchingUsers] = useState(false);
+
+  const myRole = (currentUser?.role || '').toLowerCase().trim();
+  const isMeghalaScoped = ['volunteer', 'unit_squad'].includes(myRole);
+
+  const fetchMeghalaUsers = useCallback(async () => {
+    setFetchingUsers(true);
+    try {
+      if (isMeghalaScoped) {
+        // Use volunteer-scoped endpoint — backend filters by the logged-in user's meghala
+        const res = await api.get('/volunteer/users');
+        if (res.data?.success) {
+          const list = res.data.data?.users ||
+                       res.data.data?.donors ||
+                       (Array.isArray(res.data.data) ? res.data.data : []);
+          // Keep only donor-type roles
+          setMeghalaUsers(list.filter(u =>
+            ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase())
+          ));
+          return;
+        }
+      }
+      // Fallback: admin roles use the global fetchUsers
+      await fetchUsers();
+      setMeghalaUsers([]);
+    } catch (err) {
+      console.warn('fetchMeghalaUsers error, falling back to global fetchUsers:', err);
+      try { await fetchUsers(); } catch { /* ignore */ }
+      setMeghalaUsers([]);
+    } finally {
+      setFetchingUsers(false);
+    }
+  }, [isMeghalaScoped, fetchUsers]);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({ status: 'all', role: 'all' });
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'pending' | 'verified'
@@ -207,8 +244,8 @@ export default function UserManagement() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchMeghalaUsers();
+  }, [fetchMeghalaUsers]);
 
   const handleVerifyUser = async (userToVerify) => {
     const userId = userToVerify._id || userToVerify.id;
@@ -219,14 +256,14 @@ export default function UserManagement() {
       if (selectedUser && (selectedUser._id === userId || selectedUser.id === userId)) {
         setSelectedUser({ ...selectedUser, status: 'Active', is_verified: true });
       }
-      fetchUsers();
+      fetchMeghalaUsers();
     }
     setVerifyingUserId(null);
   };
 
-  // Determine current user's meghala scope
-  const myRole = (currentUser?.role || '').toLowerCase().trim();
-  const isMeghalaScoped = ['volunteer', 'unit_squad'].includes(myRole);
+  // Determine the user list source:
+  // - Meghala volunteers: use freshly fetched meghalaUsers (backend-scoped)
+  // - Admin roles: fall back to allUsers from the global store
   const myMeghala = (
     currentUser?.meghala ||
     currentUser?.meghalaName ||
@@ -235,20 +272,16 @@ export default function UserManagement() {
     ''
   ).toLowerCase().trim();
 
-  // All donor-type users from the store
-  const allDonorUsers = allUsers.filter(u =>
-    ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase())
-  );
+  const allDonorUsers = isMeghalaScoped
+    ? meghalaUsers  // already scoped and filtered by backend
+    : allUsers.filter(u => ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase()));
 
-  // Scope to current volunteer's meghala if applicable
-  const users = isMeghalaScoped && myMeghala
-    ? allDonorUsers.filter(u => {
-        const uMeghala = (
-          u.meghala || u.meghalaName || u.meghala_name || u.city || ''
-        ).toLowerCase().trim();
-        return uMeghala === myMeghala ||
-               uMeghala.includes(myMeghala) ||
-               myMeghala.includes(uMeghala);
+  // Client-side safety net: if backend returned unscoped data, filter here too
+  const users = (isMeghalaScoped && myMeghala && meghalaUsers.length === 0)
+    ? allUsers.filter(u => {
+        if (!['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase())) return false;
+        const uMeghala = (u.meghala || u.meghalaName || u.meghala_name || u.city || '').toLowerCase().trim();
+        return uMeghala === myMeghala || uMeghala.includes(myMeghala) || myMeghala.includes(uMeghala);
       })
     : allDonorUsers;
 
@@ -423,7 +456,7 @@ export default function UserManagement() {
       setAddOtpVerified(false);
       setVerifiedEmail('');
       setAddOtpCooldown(0);
-      await fetchUsers();
+      await fetchMeghalaUsers();
     }
     setLoading(false);
   };
