@@ -98,8 +98,10 @@ export default function UserManagement() {
       await fetchUsers();
       setMeghalaUsers([]);
     } catch (err) {
-      console.warn('fetchMeghalaUsers error, falling back to global fetchUsers:', err);
-      try { await fetchUsers(); } catch { /* ignore */ }
+      console.warn('fetchMeghalaUsers error:', err);
+      if (!isMeghalaScoped) {
+        try { await fetchUsers(); } catch { /* ignore */ }
+      }
       setMeghalaUsers([]);
     } finally {
       setFetchingUsers(false);
@@ -262,28 +264,12 @@ export default function UserManagement() {
   };
 
   // Determine the user list source:
-  // - Meghala volunteers: use freshly fetched meghalaUsers (backend-scoped)
+  // - Meghala volunteers: strictly use freshly fetched meghalaUsers (backend-scoped to only users added by this Meghala)
   // - Admin roles: fall back to allUsers from the global store
-  const myMeghala = (
-    currentUser?.meghala ||
-    currentUser?.meghalaName ||
-    currentUser?.meghala_name ||
-    currentUser?.city ||
-    ''
-  ).toLowerCase().trim();
+  const allDonorUsers = allUsers.filter(u => ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase()));
 
-  const allDonorUsers = isMeghalaScoped
-    ? meghalaUsers  // already scoped and filtered by backend
-    : allUsers.filter(u => ['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase()));
-
-  // Client-side safety net: if backend returned unscoped data, filter here too
-  const users = (isMeghalaScoped && myMeghala && meghalaUsers.length === 0)
-    ? allUsers.filter(u => {
-        if (!['user', 'donor', 'receiver'].includes((u.role || '').toLowerCase())) return false;
-        const uMeghala = (u.meghala || u.meghalaName || u.meghala_name || u.city || '').toLowerCase().trim();
-        return uMeghala === myMeghala || uMeghala.includes(myMeghala) || myMeghala.includes(uMeghala);
-      })
-    : allDonorUsers;
+  // For Meghala Committee volunteers, show strictly only users added by this Meghala
+  const users = isMeghalaScoped ? meghalaUsers : allDonorUsers;
 
   const pendingUsers = users.filter(u => !u.is_verified && !u.isVerified && (u.status || '').toLowerCase() !== 'active');
   const verifiedUsers = users.filter(u => u.is_verified || u.isVerified || (u.status || '').toLowerCase() === 'active');
@@ -355,6 +341,7 @@ export default function UserManagement() {
       setOtpSent(false);
       setOtpVerified(false);
       setOtpCode('');
+      await fetchMeghalaUsers();
     }
     setLoading(false);
   };
@@ -456,6 +443,9 @@ export default function UserManagement() {
       setAddOtpVerified(false);
       setVerifiedEmail('');
       setAddOtpCooldown(0);
+      if (res.user) {
+        setMeghalaUsers(prev => [res.user, ...prev.filter(u => String(u._id || u.id) !== String(res.user._id || res.user.id))]);
+      }
       await fetchMeghalaUsers();
     }
     setLoading(false);
@@ -1616,7 +1606,7 @@ export default function UserManagement() {
           setLoading(true);
           const res = await deleteUser(confirmModal.item._id || confirmModal.item.id);
           if (res?.success) {
-            await fetchUsers();
+            await fetchMeghalaUsers();
           }
           setLoading(false);
           setConfirmModal({ open: false, item: null });
