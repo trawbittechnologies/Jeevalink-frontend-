@@ -4,7 +4,7 @@ import {
   ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
   UserCheck, BarChart3, TrendingUp, Search, Phone,
   Droplets, Flame, CheckCircle2, Award, ArrowUpRight,
-  Trophy, AlertCircle, Video, Film, Image, Upload, Save, Users, Sparkles
+  Trophy, AlertCircle, Video, Film, Image, Upload, Save, Sparkles
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -55,6 +55,73 @@ function parseBlockAdminContacts(ba) {
     admin2Mobile: admin2Mobile || '',
   };
 }
+
+// Known Meghala to Block dictionary for Kasaragod
+const MEGHALA_BLOCK_MAP = {
+  'upper kottachery': 'kanhangad',
+  'puthiyakotta': 'kanhangad',
+  'ajanur': 'kanhangad',
+  'ajanoor': 'kanhangad',
+  'kottachery': 'kanhangad',
+  'kanhangad south': 'kanhangad',
+  'kanhangad north': 'kanhangad',
+  'chithari': 'kanhangad',
+  'chittari': 'kanhangad',
+  'madikai': 'kanhangad',
+  'kottappuram': 'nileshwar',
+  'kinanoor': 'nileshwar',
+  'karindalam': 'nileshwar',
+  'nileshwaram': 'nileshwar',
+  'nileshswar': 'nileshwar',
+  'cheemeni': 'cheruvathur',
+  'kayyur': 'cheruvathur',
+  'thuruthi': 'cheruvathur',
+  'pilicode': 'cheruvathur',
+  'chandera': 'cheruvathur',
+  'thrikarippur': 'trikaripur',
+  'trikaripur': 'trikaripur',
+  'olavara': 'trikaripur',
+  'elambachi': 'trikaripur',
+  'valiyaparamba': 'trikaripur',
+  'ranipuram': 'panathady',
+  'kallar': 'panathady',
+  'panathur': 'panathady',
+  'balal': 'panathady',
+  'east eleri': 'eleri',
+  'west eleri': 'eleri',
+  'chittarikkal': 'eleri',
+  'palavayal': 'eleri',
+  'kundamkuzhy': 'bedakam',
+  'kolathur': 'bedakam',
+  'kuttikol': 'bedakam',
+  'bedadka': 'bedakam',
+  'bekal': 'udma',
+  'pallikere': 'udma',
+  'melparamba': 'udma',
+  'chembirika': 'udma',
+  'kalanad': 'udma',
+  'vidyanagar': 'kasaragod',
+  'nullipady': 'kasaragod',
+  'mogral': 'kasaragod',
+  'karanthakkad': 'kasaragod',
+  'chengala': 'kasaragod',
+  'madhur': 'kasaragod',
+  'arikady': 'kumbala',
+  'badiadka': 'kumbala',
+  'badiadkka': 'kumbala',
+  'seethangoli': 'kumbala',
+  'puthige': 'kumbala',
+  'manjeshwar': 'manjeshwaram',
+  'uppala': 'manjeshwaram',
+  'hosangadi': 'manjeshwaram',
+  'paivalike': 'manjeshwaram',
+  'meenja': 'manjeshwaram',
+  'vorkady': 'manjeshwaram',
+  'mulleria': 'karadukka',
+  'bovikanam': 'karadukka',
+  'delampady': 'karadukka',
+  'bellur': 'karadukka'
+};
 
 export default function SuperAdminDashboard() {
   const { user } = useAuthStore();
@@ -111,31 +178,31 @@ export default function SuperAdminDashboard() {
   const [videoFile, setVideoFile] = useState(null);
   const [posterFile, setPosterFile] = useState(null);
   const [savingAwareness, setSavingAwareness] = useState(false);
-  const [awarenessForm, setAwarenessForm] = useState({
-    videoUrl: '',
-    posterUrl: '',
-    badgeText: '',
-    quoteTitle: '',
-    quoteDescription: '',
-    buttonLabel: ''
-  });
+  const [prevAwarenessSettings, setPrevAwarenessSettings] = useState(awarenessSettings);
+  const [awarenessForm, setAwarenessForm] = useState(() => ({
+    videoUrl: awarenessSettings?.videoUrl || '',
+    posterUrl: awarenessSettings?.posterUrl || '',
+    badgeText: awarenessSettings?.badgeText || '',
+    quoteTitle: awarenessSettings?.quoteTitle || '',
+    quoteDescription: awarenessSettings?.quoteDescription || '',
+    buttonLabel: awarenessSettings?.buttonLabel || ''
+  }));
+
+  if (awarenessSettings !== prevAwarenessSettings) {
+    setPrevAwarenessSettings(awarenessSettings);
+    setAwarenessForm({
+      videoUrl: awarenessSettings?.videoUrl || '',
+      posterUrl: awarenessSettings?.posterUrl || '',
+      badgeText: awarenessSettings?.badgeText || '',
+      quoteTitle: awarenessSettings?.quoteTitle || '',
+      quoteDescription: awarenessSettings?.quoteDescription || '',
+      buttonLabel: awarenessSettings?.buttonLabel || ''
+    });
+  }
 
   useEffect(() => {
     fetchAwarenessSettings();
   }, [fetchAwarenessSettings]);
-
-  useEffect(() => {
-    if (awarenessSettings) {
-      setAwarenessForm({
-        videoUrl: awarenessSettings.videoUrl || '',
-        posterUrl: awarenessSettings.posterUrl || '',
-        badgeText: awarenessSettings.badgeText || '',
-        quoteTitle: awarenessSettings.quoteTitle || '',
-        quoteDescription: awarenessSettings.quoteDescription || '',
-        buttonLabel: awarenessSettings.buttonLabel || ''
-      });
-    }
-  }, [awarenessSettings]);
 
   const handleSaveAwareness = async (e) => {
     e.preventDefault();
@@ -381,73 +448,6 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  // Known Meghala to Block dictionary for Kasaragod
-  const MEGHALA_BLOCK_MAP = {
-    'upper kottachery': 'kanhangad',
-    'puthiyakotta': 'kanhangad',
-    'ajanur': 'kanhangad',
-    'ajanoor': 'kanhangad',
-    'kottachery': 'kanhangad',
-    'kanhangad south': 'kanhangad',
-    'kanhangad north': 'kanhangad',
-    'chithari': 'kanhangad',
-    'chittari': 'kanhangad',
-    'madikai': 'kanhangad',
-    'kottappuram': 'nileshwar',
-    'kinanoor': 'nileshwar',
-    'karindalam': 'nileshwar',
-    'nileshwaram': 'nileshwar',
-    'nileshswar': 'nileshwar',
-    'cheemeni': 'cheruvathur',
-    'kayyur': 'cheruvathur',
-    'thuruthi': 'cheruvathur',
-    'pilicode': 'cheruvathur',
-    'chandera': 'cheruvathur',
-    'thrikarippur': 'trikaripur',
-    'trikaripur': 'trikaripur',
-    'olavara': 'trikaripur',
-    'elambachi': 'trikaripur',
-    'valiyaparamba': 'trikaripur',
-    'ranipuram': 'panathady',
-    'kallar': 'panathady',
-    'panathur': 'panathady',
-    'balal': 'panathady',
-    'east eleri': 'eleri',
-    'west eleri': 'eleri',
-    'chittarikkal': 'eleri',
-    'palavayal': 'eleri',
-    'kundamkuzhy': 'bedakam',
-    'kolathur': 'bedakam',
-    'kuttikol': 'bedakam',
-    'bedadka': 'bedakam',
-    'bekal': 'udma',
-    'pallikere': 'udma',
-    'melparamba': 'udma',
-    'chembirika': 'udma',
-    'kalanad': 'udma',
-    'vidyanagar': 'kasaragod',
-    'nullipady': 'kasaragod',
-    'mogral': 'kasaragod',
-    'karanthakkad': 'kasaragod',
-    'chengala': 'kasaragod',
-    'madhur': 'kasaragod',
-    'arikady': 'kumbala',
-    'badiadka': 'kumbala',
-    'badiadkka': 'kumbala',
-    'seethangoli': 'kumbala',
-    'puthige': 'kumbala',
-    'manjeshwar': 'manjeshwaram',
-    'uppala': 'manjeshwaram',
-    'hosangadi': 'manjeshwaram',
-    'paivalike': 'manjeshwaram',
-    'meenja': 'manjeshwaram',
-    'vorkady': 'manjeshwaram',
-    'mulleria': 'karadukka',
-    'bovikanam': 'karadukka',
-    'delampady': 'karadukka',
-    'bellur': 'karadukka'
-  };
-
   // Dynamic real Block Analytics with live donor counts
   const realBlockAnalytics = useMemo(() => {
     const blockMap = new Map();
@@ -579,11 +579,11 @@ export default function SuperAdminDashboard() {
     if (!bg) return null;
     let clean = String(bg).trim().toUpperCase();
     clean = clean.replace(/POSITIVE|POS|\+VE|VE/g, '+');
-    clean = clean.replace(/NEGATIVE|NEG|\-VE/g, '-');
+    clean = clean.replace(/NEGATIVE|NEG|-VE/g, '-');
     clean = clean.replace(/[\s_]/g, '');
     clean = clean.replace(/\+\+/g, '+');
     if (ALL_BLOOD_GROUPS.includes(clean)) return clean;
-    const match = clean.match(/(A|B|AB|O)[\+\-]/);
+    const match = clean.match(/(A|B|AB|O)[+-]/);
     if (match && ALL_BLOOD_GROUPS.includes(match[0])) return match[0];
     return null;
   };
