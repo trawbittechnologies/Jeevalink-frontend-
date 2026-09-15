@@ -1189,6 +1189,7 @@ export default function BlockCommitteeManagement() {
             <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider px-1">
               <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 text-red-500" /> Block Committee</span>
               <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-violet-500" /> Meghala Unit</span>
+              <span className="flex items-center gap-1.5"><Users className="w-3 h-3 text-emerald-500" /> Volunteers</span>
             </div>
 
             {filteredCommittees.length === 0 ? (
@@ -1248,9 +1249,13 @@ export default function BlockCommitteeManagement() {
                           <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
                             <Droplets className="w-3 h-3" />{c.donors} Donors
                           </span>
+                          {/* Block-level volunteer count */}
+                          <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                            <Users className="w-3 h-3" />{c.volunteers} Volunteers
+                          </span>
                           {meghalaList.length > 0 && (
                             <span className="flex items-center gap-1 text-amber-500 dark:text-amber-400 font-bold">
-                              <Users className="w-3 h-3" />{meghalaList.length} Meghala{meghalaList.length !== 1 ? 's' : ''}
+                              <MapPin className="w-3 h-3" />{meghalaList.length} Meghala{meghalaList.length !== 1 ? 's' : ''}
                             </span>
                           )}
                         </div>
@@ -1315,13 +1320,16 @@ export default function BlockCommitteeManagement() {
                                   <MapPin className="w-3 h-3" />
                                 </span>
                                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{meghala}</span>
-                                {/* Meghala donor stats */}
+                                {/* Meghala donor and volunteer stats */}
                                 {(() => {
                                   const mStats = getMeghalaStats(meghala);
                                   return (
                                     <div className="ml-auto flex items-center gap-2">
                                       <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/30 px-2 py-0.5 rounded-full">
                                         <Droplets className="w-2.5 h-2.5" />{mStats.donors} Donors
+                                      </span>
+                                      <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/30 px-2 py-0.5 rounded-full">
+                                        <Users className="w-2.5 h-2.5" />{mStats.volunteers} Volunteers
                                       </span>
                                     </div>
                                   );
