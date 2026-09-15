@@ -402,7 +402,11 @@ export default function DistrictPointsTable() {
 
   // Filtered Meghalas
   const filteredMeghalas = useMemo(() => {
-    let list = [...(data.meghalas || [])];
+    const invalidTerms = ['meghala unit', 'meghala', 'unit', 'unit committee', 'committee', 'block', 'unassigned', 'n/a', ''];
+    let list = (data.meghalas || []).filter(m => {
+      const name = String(m.meghala_name || m.meghala || m.name || '').toLowerCase().trim();
+      return name && !invalidTerms.includes(name);
+    });
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(m =>
