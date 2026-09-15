@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
   CheckCircle2, Download, ChevronRight,
-  MapPin, LayoutList, GitBranch, Users, Droplets
+  MapPin, LayoutList, GitBranch, Users, Droplets, UserCheck
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';

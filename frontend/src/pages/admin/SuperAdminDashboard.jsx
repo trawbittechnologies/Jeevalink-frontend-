@@ -415,8 +415,8 @@ export default function SuperAdminDashboard() {
     // 3. Fallback dynamically from allUsers volunteer pool
     const matchingVols = (allUsers || []).filter(u => {
       const role = String(u.role || '').toLowerCase().trim();
-      const isVol = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
-        role.includes('volunteer') || role.includes('meghala');
+      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'
+      const isVol = role === 'volunteer';
       if (!isVol) return false;
       const uOrg = normalizeBlockName(String(u.organization_name || u.block || ''));
       const uCity = normalizeBlockName(String(u.city || ''));
