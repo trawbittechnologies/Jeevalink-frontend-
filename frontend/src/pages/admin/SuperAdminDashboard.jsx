@@ -564,6 +564,13 @@ export default function SuperAdminDashboard() {
     return Array.from(blockMap.values());
   }, [blockAdmins, districtData.block_summary, districtData.meghalas_by_block, getBlockMeghalaStats, allUsers, donors]);
 
+  // Dynamic total volunteers across all blocks
+  const totalVolunteersDisplay = useMemo(() => {
+    const blockSum = (realBlockAnalytics || []).reduce((acc, b) => acc + (Number(b.volunteers) || 0), 0);
+    if (blockSum > 0) return blockSum;
+    return realVolunteersCount;
+  }, [realBlockAnalytics, realVolunteersCount]);
+
   const maxUsersInBlock = Math.max(1, ...realBlockAnalytics.map(b => b.users));
 
   const filteredBlockAdmins = blockAdmins.filter(ba => {

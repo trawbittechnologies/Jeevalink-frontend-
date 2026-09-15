@@ -931,16 +931,16 @@ export default function BlockCommitteeManagement() {
           <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Across {totalBlocks} Blocks</p>
         </div>
 
-        {/* Matches SuperAdminDashboard KPI 2 */}
+        {/* Dynamic Total Volunteers on Status Board */}
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Active Meghalas</span>
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Volunteers</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center">
-              <UserCheck className="w-4 h-4" />
+              <Users className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{realVolunteersCount}</h3>
-          <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">District Squads · {totalBlockVolunteers} Assigned</p>
+          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{totalVolunteersDisplay}</h3>
+          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Across {totalBlocks} Blocks</p>
         </div>
 
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
