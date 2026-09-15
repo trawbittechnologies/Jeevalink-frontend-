@@ -111,10 +111,9 @@ export default function BlockCommitteeManagement() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resDist, resAdmins, resOptions, resUsers, resVols] = await Promise.all([
+      const [resDist, resAdmins, resUsers, resVols] = await Promise.all([
         api.get('/super-admin/metrics').catch(() => null),
         api.get('/super-admin/block-admins').catch(() => null),
-        api.get('/public/volunteer-options').catch(() => null),
         // Fetch all users so we can compute per-meghala donor counts
         api.get('/admin/users').catch(() =>
           api.get('/donors/search').catch(() => null)
