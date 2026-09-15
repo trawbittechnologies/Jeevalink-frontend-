@@ -38,15 +38,96 @@ export default function DistrictPointsTable() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Try dedicated points-table endpoint
-      let res = await api.get('/super-admin/points-table').catch(() => null);
+      // 1. Fetch dedicated points-table endpoint AND official blocks directory endpoint in parallel
+      const [resPoints, resBlocks] = await Promise.all([
+        api.get('/super-admin/points-table').catch(() => null),
+        api.get('/super-admin/blocks').catch(() => null),
+      ]);
 
-      if (res?.data?.success && res.data.data) {
-        setData(res.data.data);
+      const dirBlocks = resBlocks?.data?.success && Array.isArray(resBlocks.data.data?.blocks)
+        ? resBlocks.data.data.blocks
+        : [];
+
+      // Create lookup map of directory blocks from /super-admin/blocks by clean block key
+      const dirMap = new Map();
+      dirBlocks.forEach(db => {
+        const name = db.blockName || db.blockCommitteeName || db.city || '';
+        if (name) {
+          const key = name.toLowerCase().replace(/^(dyfi|block committee|block)\s+|\s+(block committee|committee|block)$/g, '').trim();
+          dirMap.set(key, db);
+        }
+      });
+
+      if (resPoints?.data?.success && resPoints.data.data) {
+        const rawData = resPoints.data.data;
+        const ptsBlocks = Array.isArray(rawData.blocks) ? rawData.blocks : [];
+
+        // Merge directory block details (admin leads, contact info, status) into points blocks
+        const mergedBlocks = ptsBlocks.map(pb => {
+          const pbName = pb.block_name || pb.blockCommitteeName || pb.city || pb.block || '';
+          const key = pbName.toLowerCase().replace(/^(dyfi|block committee|block)\s+|\s+(block committee|committee|block)$/g, '').trim();
+
+          const dir = dirMap.get(key) || Array.from(dirMap.values()).find(d => {
+            const dKey = (d.blockName || '').toLowerCase().trim();
+            return key.includes(dKey) || dKey.includes(key);
+          });
+
+          return {
+            ...pb,
+            block_name: pbName || dir?.blockName || 'Block Committee',
+            admin_name: (dir?.admin1Name && dir.admin1Name !== 'Admin Not Assigned' && dir.admin1Name !== 'N/A')
+              ? dir.admin1Name
+              : (pb.admin_name || 'Block Coordinator'),
+            admin_mobile: (dir?.admin1Mobile && dir.admin1Mobile !== '—' && dir.admin1Mobile !== 'N/A')
+              ? dir.admin1Mobile
+              : (pb.admin_mobile || ''),
+            admin2_name: dir?.admin2Name || '',
+            admin2_mobile: dir?.admin2Mobile || '',
+            status: dir?.status || pb.status || (dir?.isAssigned ? 'Active' : 'Unassigned'),
+            isAssigned: dir?.isAssigned ?? pb.is_assigned ?? false,
+            donors_count: pb.donors_count ?? dir?.donors ?? dir?.donorCount ?? 0,
+            volunteers_count: pb.volunteers_count ?? dir?.volunteers ?? dir?.volunteerCount ?? 0,
+            meghala_count: pb.meghala_count ?? dir?.meghalaCount ?? dir?.meghalas?.length ?? 0,
+          };
+        });
+
+        // Add any directory blocks not present in ptsBlocks
+        dirMap.forEach((db, key) => {
+          const exists = mergedBlocks.some(mb => {
+            const mKey = mb.block_name.toLowerCase().replace(/^(dyfi|block committee|block)\s+|\s+(block committee|committee|block)$/g, '').trim();
+            return mKey === key || mKey.includes(key) || key.includes(mKey);
+          });
+          if (!exists) {
+            mergedBlocks.push({
+              block_name: db.blockName || db.blockCommitteeName,
+              admin_name: db.admin1Name || 'Block Coordinator',
+              admin_mobile: db.admin1Mobile !== '—' ? db.admin1Mobile : '',
+              admin2_name: db.admin2Name || '',
+              admin2_mobile: db.admin2Mobile || '',
+              status: db.status || 'Unassigned',
+              isAssigned: db.isAssigned,
+              total_points: 0,
+              donors_count: db.donors || db.donorCount || 0,
+              volunteers_count: db.volunteers || db.volunteerCount || 0,
+              fulfilled_requests: 0,
+              total_requests: 0,
+              meghala_count: db.meghalaCount || db.meghalas?.length || 0,
+            });
+          }
+        });
+
+        // Re-sort merged blocks by points
+        mergedBlocks.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+        mergedBlocks.forEach((b, idx) => { b.rank = idx + 1; });
+
+        setData({
+          ...rawData,
+          blocks: mergedBlocks,
+        });
         return;
       }
 
-      // 2. Try public leaderboard endpoint as fallback
+      // 2. Try public leaderboard endpoint if super-admin/points-table is not available
       let resPub = await api.get('/leaderboard').catch(() => null);
       if (resPub?.data?.success && resPub.data.data) {
         const pub = resPub.data.data;
@@ -71,53 +152,39 @@ export default function DistrictPointsTable() {
         return;
       }
 
-      // 3. Fallback from metrics
-      const resDist = await api.get('/super-admin/metrics').catch(() => null);
-      const dData = resDist?.data?.data || {};
-      const blockSummary = Array.isArray(dData.block_summary) ? dData.block_summary : [];
-      const meghalaSummary = Array.isArray(dData.meghala_summary) ? dData.meghala_summary : [];
-
-      const compiledBlocks = blockSummary.map((bs, idx) => ({
+      // 3. Dynamic fallback from directory blocks
+      const compiledBlocks = dirBlocks.map((bs, idx) => ({
         rank: idx + 1,
-        block_name: bs.block || bs.blockName || bs.city || 'Block Committee',
-        admin_name: 'Block Coordinator',
-        admin_mobile: '',
-        admin_email: '',
-        total_points: (Number(bs.donors || bs.users) * 100) + (Number(bs.volunteers) * 50),
-        donors_count: Number(bs.donors || bs.users) || 0,
-        volunteers_count: Number(bs.volunteers) || 0,
+        block_name: bs.blockName || bs.blockCommitteeName || bs.city || 'Block Committee',
+        admin_name: bs.admin1Name || 'Block Coordinator',
+        admin_mobile: bs.admin1Mobile !== '—' ? bs.admin1Mobile : '',
+        admin_email: bs.email !== '—' ? bs.email : '',
+        status: bs.status || 'Unassigned',
+        isAssigned: bs.isAssigned,
+        total_points: ((bs.donors || bs.donorCount || 0) * 100) + ((bs.volunteers || bs.volunteerCount || 0) * 50),
+        donors_count: bs.donors || bs.donorCount || 0,
+        volunteers_count: bs.volunteers || bs.volunteerCount || 0,
         fulfilled_requests: 0,
         total_requests: 0,
-        meghala_count: Number(bs.meghala_count || bs.meghalas?.length) || 0
+        meghala_count: bs.meghalaCount || bs.meghalas?.length || 0
       }));
 
       compiledBlocks.sort((a, b) => b.total_points - a.total_points);
       compiledBlocks.forEach((b, idx) => { b.rank = idx + 1; });
 
-      const compiledMeghalas = meghalaSummary.map((ms, idx) => ({
-        rank: idx + 1,
-        meghala_name: ms.meghala,
-        block_name: ms.block,
-        district: dData.district || 'Kasaragod',
-        total_points: ((ms.donors || 0) * 100) + ((ms.volunteers || 0) * 50),
-        total_members: (ms.donors || 0) + (ms.volunteers || 0),
-        donors_count: ms.donors || 0,
-        volunteers_count: ms.volunteers || 0,
-      }));
-
       setData({
-        district: dData.district || user?.district || 'Kasaragod',
+        district: user?.district || 'Kasaragod',
         summary: {
           total_district_points: compiledBlocks.reduce((acc, b) => acc + b.total_points, 0),
           total_blocks: compiledBlocks.length,
-          total_meghalas: compiledMeghalas.length,
-          total_donors: dData.total_users || 0,
-          total_volunteers: dData.total_volunteers || 0,
+          total_meghalas: compiledBlocks.reduce((acc, b) => acc + b.meghala_count, 0),
+          total_donors: compiledBlocks.reduce((acc, b) => acc + b.donors_count, 0),
+          total_volunteers: compiledBlocks.reduce((acc, b) => acc + b.volunteers_count, 0),
           top_block: compiledBlocks[0]?.block_name || 'N/A',
           top_donor: 'N/A',
         },
         blocks: compiledBlocks,
-        meghalas: compiledMeghalas,
+        meghalas: [],
         top_donors: [],
         top_volunteers: [],
         point_rules: [
@@ -301,6 +368,12 @@ export default function DistrictPointsTable() {
             >
               Dashboard
             </Link>
+            <Link
+              to="/super-admin/blocks"
+              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white border border-white/20 rounded-xl text-xs font-bold transition flex items-center gap-2 backdrop-blur-md"
+            >
+              Manage Blocks
+            </Link>
             <button
               onClick={fetchData}
               disabled={loading}
@@ -460,14 +533,15 @@ export default function DistrictPointsTable() {
                     <tbody className="divide-y divide-slate-100">
                       {filteredBlocks.map((b, idx) => {
                         const blockName = b.block_name || b.blockCommitteeName || b.city || b.block || `Block ${idx + 1}`;
-                        const adminName = b.admin_name || b.primary_name || 'Block Coordinator';
+                        const adminName = b.admin_name || b.admin1Name || b.primary_name || 'Block Coordinator';
+                        const adminMobile = b.admin_mobile || b.admin1Mobile || '';
                         const currentPts = Number(b.total_points) || 0;
                         const percent = Math.min(100, Math.round((currentPts / maxBlockPoints) * 100));
 
                         return (
                           <tr
                             key={b.block_name || idx}
-                            onClick={() => setSelectedBlockDetail({ ...b, block_name: blockName, admin_name: adminName })}
+                            onClick={() => setSelectedBlockDetail({ ...b, block_name: blockName, admin_name: adminName, admin_mobile: adminMobile })}
                             className="hover:bg-red-50/40 transition-colors cursor-pointer group"
                           >
                             <td className="py-4 px-4 text-center">
@@ -478,15 +552,26 @@ export default function DistrictPointsTable() {
                                 {blockName}
                                 <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-600 transition-colors" />
                               </div>
-                              <span className="text-[10px] text-slate-400 font-medium block">
-                                {b.meghala_count ? `${b.meghala_count} Meghala Units` : 'District Block Committee'}
-                              </span>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] text-slate-400 font-medium">
+                                  {b.meghala_count ? `${b.meghala_count} Meghalas` : 'District Block Committee'}
+                                </span>
+                                {b.isAssigned ? (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    Assigned
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                                    Unassigned
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="py-4 px-4">
                               <div className="text-slate-800 font-bold">{adminName}</div>
-                              {b.admin_mobile && (
+                              {adminMobile && adminMobile !== '—' && (
                                 <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                                  <Phone className="w-2.5 h-2.5" /> {b.admin_mobile}
+                                  <Phone className="w-2.5 h-2.5" /> {adminMobile}
                                 </span>
                               )}
                             </td>
@@ -766,12 +851,23 @@ export default function DistrictPointsTable() {
               </div>
             </div>
 
-            <div className="space-y-1 bg-slate-50/60 rounded-2xl p-4 border border-slate-100">
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Committee Lead</span>
+            <div className="space-y-2 bg-slate-50/60 rounded-2xl p-4 border border-slate-100">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Committee Admin Lead</span>
               <div className="font-extrabold text-slate-900 text-sm">{selectedBlockDetail.admin_name}</div>
-              {selectedBlockDetail.admin_mobile && (
-                <div className="text-slate-500 font-medium flex items-center gap-1.5 mt-1">
-                  <Phone className="w-3.5 h-3.5 text-slate-400" /> {selectedBlockDetail.admin_mobile}
+              {selectedBlockDetail.admin_mobile && selectedBlockDetail.admin_mobile !== '—' && (
+                <div className="text-slate-600 font-medium flex items-center gap-1.5 mt-1">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" /> Primary: {selectedBlockDetail.admin_mobile}
+                </div>
+              )}
+              {selectedBlockDetail.admin2_name && (
+                <div className="mt-2 pt-2 border-t border-slate-200/60">
+                  <span className="text-[10px] font-bold text-slate-400 block">Secondary Admin</span>
+                  <div className="font-bold text-slate-800">{selectedBlockDetail.admin2_name}</div>
+                  {selectedBlockDetail.admin2_mobile && (
+                    <div className="text-slate-500 font-medium flex items-center gap-1.5 text-[11px]">
+                      <Phone className="w-3 h-3 text-slate-400" /> {selectedBlockDetail.admin2_mobile}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
