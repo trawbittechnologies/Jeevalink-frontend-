@@ -507,8 +507,8 @@ export default function SuperAdminDashboard() {
 
         donorsPool.forEach(u => {
           const role = String(u.role || '').toLowerCase().trim();
-          const isVolunteer = String(u.role || '').toLowerCase().trim() === 'volunteer';
-          const isDonor = ['user', 'donor', 'receiver'].includes(String(u.role || '').toLowerCase().trim()) ||
+          const isVolunteer = role === 'volunteer';
+          const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
             (u.blood_group && u.blood_group !== 'N/A' && u.blood_group !== '') ||
             (u.bloodGroup && u.bloodGroup !== 'N/A' && u.bloodGroup !== '');
 
@@ -562,7 +562,7 @@ export default function SuperAdminDashboard() {
     }
 
     return Array.from(blockMap.values());
-  }, [blockAdmins, districtData.block_summary, allUsers, donors]);
+  }, [blockAdmins, districtData.block_summary, districtData.meghalas_by_block, getBlockMeghalaStats, allUsers, donors]);
 
   const maxUsersInBlock = Math.max(1, ...realBlockAnalytics.map(b => b.users));
 
