@@ -776,22 +776,42 @@ export default function BlockCommitteeManagement() {
                           </div>
                         ) : (
                           <ul className="py-2">
-                            {meghalaList.map((meghala, idx) => (
-                              <li
-                                key={idx}
-                                className="flex items-center gap-3 px-12 py-2 hover:bg-violet-50/60 dark:hover:bg-violet-950/20 transition-colors group/meghala"
-                              >
-                                {/* Tree connector lines */}
-                                <span className="flex flex-col items-center self-stretch w-4 shrink-0">
-                                  <span className="w-px flex-1 bg-slate-200 dark:bg-zinc-700" />
-                                  {idx === meghalaList.length - 1 && <span className="w-4 h-px bg-slate-200 dark:bg-zinc-700" />}
-                                </span>
-                                <span className="w-6 h-6 rounded-lg bg-violet-50 dark:bg-violet-950/40 text-violet-500 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-100 dark:border-violet-900/40">
-                                  <MapPin className="w-3 h-3" />
-                                </span>
-                                <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{meghala}</span>
-                              </li>
-                            ))}
+                            {meghalaList.map((meghala, idx) => {
+                              const mName = typeof meghala === 'string' ? meghala : (meghala.name || meghala.meghala || meghala.meghala_name || 'N/A');
+                              const mDonorCount = typeof meghala === 'object' ? (meghala.donorCount ?? meghala.donors_count ?? meghala.donors ?? 0) : 0;
+                              const mVolunteerCount = typeof meghala === 'object' ? (meghala.volunteerCount ?? meghala.volunteers_count ?? meghala.volunteers ?? 0) : 0;
+
+                              return (
+                                <li
+                                  key={idx}
+                                  className="flex items-center justify-between gap-3 px-12 py-2 hover:bg-violet-50/60 dark:hover:bg-violet-950/20 transition-colors group/meghala"
+                                >
+                                  <div className="flex items-center gap-3 min-w-0">
+                                    {/* Tree connector lines */}
+                                    <span className="flex flex-col items-center self-stretch w-4 shrink-0">
+                                      <span className="w-px flex-1 bg-slate-200 dark:bg-zinc-700" />
+                                      {idx === meghalaList.length - 1 && <span className="w-4 h-px bg-slate-200 dark:bg-zinc-700" />}
+                                    </span>
+                                    <span className="w-6 h-6 rounded-lg bg-violet-50 dark:bg-violet-950/40 text-violet-500 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-100 dark:border-violet-900/40">
+                                      <MapPin className="w-3 h-3" />
+                                    </span>
+                                    <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate">{mName}</span>
+                                  </div>
+
+                                  {/* Meghala-wise Donor & Volunteer counts */}
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/40" title={`${mDonorCount} Donors in ${mName}`}>
+                                      <Droplets className="w-3 h-3" />
+                                      {mDonorCount} Donor{mDonorCount !== 1 ? 's' : ''}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40" title={`${mVolunteerCount} Volunteers in ${mName}`}>
+                                      <Users className="w-3 h-3" />
+                                      {mVolunteerCount} Vol{mVolunteerCount !== 1 ? 's' : ''}
+                                    </span>
+                                  </div>
+                                </li>
+                              );
+                            })}
                           </ul>
                         )}
                       </div>
