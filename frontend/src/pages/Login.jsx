@@ -207,7 +207,7 @@ export default function Login() {
           <div className="grid grid-cols-2 gap-6 border-t border-white/15 pt-8">
             <div>
               <div className="text-3xl font-black text-white mb-1">{publicStats?.totalVolunteers || '-'}</div>
-              <div className="text-[10px] font-bold tracking-widest text-white/50 uppercase">Active Volunteers</div>
+              <div className="text-[10px] font-bold tracking-widest text-white/50 uppercase">Active Meghalas</div>
             </div>
             <div>
               <div className="text-3xl font-black text-white mb-1">{publicStats?.totalRequests || '-'}</div>

@@ -376,7 +376,7 @@ export default function Landing() {
               },
               {
                 val: displayVolunteerCount > 0 ? `${displayVolunteerCount.toLocaleString()}+` : (totalVolunteers > 0 ? `${totalVolunteers}+` : '0'),
-                label: 'Total Volunteers',
+                label: 'Total Meghalas',
                 highlight: true,
               },
               { val: 'Kasaragod', label: 'Donor Reach' },

@@ -168,11 +168,11 @@ export default function VolunteerDirectory() {
         <div className="text-center space-y-3 max-w-2xl mx-auto pt-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-full text-red-700 text-xs font-semibold">
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-            <span>DYFI Public Volunteer Directory</span>
+            <span>DYFI Public Meghala Directory</span>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-            Contact Your Area <span className="text-red-600">Volunteer</span>
+            Contact Your Area <span className="text-red-600">Meghala Coordinator</span>
           </h1>
 
         </div>
