@@ -296,16 +296,30 @@ export default function BlockCommitteeManagement() {
   const dynamicMeghalasByBlock = useMemo(() => {
     const combined = {};
 
+    // 0. Base initialization from DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK to ensure all canonical units are present
+    Object.entries(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK).forEach(([blk, list]) => {
+      const bName = blk.trim();
+      if (!combined[bName]) combined[bName] = [];
+      list.forEach(m => {
+        if (!combined[bName].includes(m)) combined[bName].push(m);
+      });
+    });
+
     // 1. Server-returned meghalas from blockSummary (actual registered meghalas)
     (blockSummary || []).forEach(bs => {
       const bName = (bs.block || bs.city || bs.name || '').trim();
       if (!bName || /test|dummy/i.test(bName)) return;
-      if (!combined[bName]) combined[bName] = [];
+      
+      const targetBlockKey = Object.keys(combined).find(k => normalizeBlockName(k) === normalizeBlockName(bName)) || bName;
+      if (!combined[targetBlockKey]) combined[targetBlockKey] = [];
+      
       if (Array.isArray(bs.meghalas)) {
         bs.meghalas.forEach(m => {
           const mName = typeof m === 'string' ? m : (m.meghala || m.name || '');
           if (mName && !/test|dummy/i.test(mName)) {
-            if (!combined[bName].includes(mName)) combined[bName].push(mName);
+            if (!combined[targetBlockKey].some(item => item.toLowerCase().trim() === mName.toLowerCase().trim())) {
+              combined[targetBlockKey].push(mName.trim());
+            }
           }
         });
       }
