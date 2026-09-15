@@ -456,7 +456,42 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  // Dynamic real Block Analytics with live donor counts
+  // Resolve real block-wise Meghala stats with zero dummy data
+  const getBlockMeghalaStats = useCallback((ba) => {
+    if (!ba) return { count: 0, list: [] };
+
+    // 1. Direct from API payload if returned
+    if (typeof ba.meghala_count === 'number' && Array.isArray(ba.meghalas)) {
+      return { count: ba.meghala_count, list: ba.meghalas };
+    }
+
+    // 2. Cross-reference from districtData.block_summary
+    const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
+    const normB = normalizeBlockName(bName);
+    const summaryItem = (districtData.block_summary || []).find(bs => normalizeBlockName(bs.block) === normB);
+    if (summaryItem && typeof summaryItem.meghala_count === 'number' && Array.isArray(summaryItem.meghalas)) {
+      const list = summaryItem.meghalas.map(m => typeof m === 'string' ? m : m.meghala).filter(Boolean);
+      return { count: summaryItem.meghala_count, list };
+    }
+
+    // 3. Fallback dynamically from allUsers volunteer pool
+    const matchingVols = (allUsers || []).filter(u => {
+      const role = String(u.role || '').toLowerCase();
+      if (!['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role)) return false;
+      const uOrg = normalizeBlockName(String(u.organization_name || u.block || ''));
+      const uCity = normalizeBlockName(String(u.city || ''));
+      return (uOrg && (uOrg === normB || uOrg.includes(normB) || normB.includes(uOrg))) ||
+             (uCity && uCity === normB);
+    });
+
+    const distinctMeghalas = Array.from(new Set(
+      matchingVols.map(v => v.city || v.organization_name).filter(m => m && m.toLowerCase() !== 'n/a' && !/test|dummy/i.test(m))
+    ));
+
+    return { count: distinctMeghalas.length, list: distinctMeghalas };
+  }, [districtData.block_summary, allUsers]);
+
+  // Dynamic real Block Analytics with live donor counts and real Meghala committee counts
   const realBlockAnalytics = useMemo(() => {
     const blockMap = new Map();
 
@@ -466,10 +501,13 @@ export default function SuperAdminDashboard() {
       if (bName && bName.toLowerCase() !== 'n/a') {
         const key = bName.toLowerCase();
         if (!blockMap.has(key)) {
+          const stats = getBlockMeghalaStats(ba);
           blockMap.set(key, {
             block: bName,
             users: 0,
-            volunteers: 0
+            volunteers: 0,
+            meghala_count: stats.count,
+            meghalas: stats.list
           });
         }
       }
@@ -483,12 +521,21 @@ export default function SuperAdminDashboard() {
           blockMap.set(key, {
             block: b.block,
             users: Number(b.users) || 0,
-            volunteers: Number(b.volunteers) || 0
+            volunteers: Number(b.volunteers) || 0,
+            meghala_count: Number(b.meghala_count) || (Array.isArray(b.meghalas) ? b.meghalas.length : 0),
+            meghalas: Array.isArray(b.meghalas) ? b.meghalas.map(m => typeof m === 'string' ? m : m.meghala).filter(Boolean) : []
           });
         } else {
           const existing = blockMap.get(key);
           existing.users = Math.max(existing.users, Number(b.users) || 0);
           existing.volunteers = Math.max(existing.volunteers, Number(b.volunteers) || 0);
+          if (b.meghala_count !== undefined) {
+            existing.meghala_count = Math.max(existing.meghala_count || 0, Number(b.meghala_count) || 0);
+          }
+          if (Array.isArray(b.meghalas) && b.meghalas.length > 0) {
+            const names = b.meghalas.map(m => typeof m === 'string' ? m : m.meghala).filter(Boolean);
+            existing.meghalas = Array.from(new Set([...(existing.meghalas || []), ...names]));
+          }
         }
       }
     });
@@ -1000,7 +1047,14 @@ export default function SuperAdminDashboard() {
                 <div key={ba.block} className="space-y-1 text-xs">
                   <div className="flex justify-between font-bold text-slate-800">
                     <span className="truncate max-w-[140px]">{ba.block}</span>
-                    <span className="text-slate-500 font-normal text-[11px]">{ba.users} Donors</span>
+                    <span className="text-slate-500 font-normal text-[11px]">
+                      {ba.meghala_count !== undefined && (
+                        <span className="text-violet-600 font-bold mr-1">
+                          {ba.meghala_count} Meghala{ba.meghala_count !== 1 ? 's' : ''} ·
+                        </span>
+                      )}
+                      {ba.users} Donors
+                    </span>
                   </div>
                   <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                     <div
@@ -1137,6 +1191,7 @@ export default function SuperAdminDashboard() {
                 <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
                   <th className="py-3 px-4">JL Employee ID</th>
                   <th className="py-3 px-4">Block Committee</th>
+                  <th className="py-3 px-4">Meghala Committees</th>
                   <th className="py-3 px-4">Primary Contact</th>
                   <th className="py-3 px-4">Secondary Contact</th>
                   <th className="py-3 px-4">Email</th>
@@ -1147,6 +1202,7 @@ export default function SuperAdminDashboard() {
               <tbody className="divide-y divide-slate-100">
                 {filteredBlockAdmins.map((ba) => {
                   const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = parseBlockAdminContacts(ba);
+                  const { count: mCount, list: mList } = getBlockMeghalaStats(ba);
 
                   return (
                     <tr key={ba.id} className="hover:bg-red-50/20 transition-colors">
@@ -1164,6 +1220,28 @@ export default function SuperAdminDashboard() {
                       </td>
                       <td className="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">
                         {ba.blockCommitteeName || ba.city || ba.block || 'N/A'}
+                      </td>
+
+                      {/* Meghala Committees Column (Strictly real registered count, zero dummy data) */}
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        {mCount > 0 ? (
+                          <div>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
+                              <MapPin className="w-3 h-3 text-violet-500" />
+                              {mCount} Meghala{mCount !== 1 ? 's' : ''}
+                            </span>
+                            {mList && mList.length > 0 && (
+                              <div className="text-[10px] text-slate-400 max-w-[170px] truncate mt-0.5 font-medium" title={mList.join(', ')}>
+                                {mList.slice(0, 2).join(', ')}{mList.length > 2 ? ` +${mList.length - 2}` : ''}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 border border-slate-200/80">
+                            <MapPin className="w-3 h-3 text-slate-300" />
+                            0 Meghalas
+                          </span>
+                        )}
                       </td>
 
                       <td className="py-3 px-4 whitespace-nowrap">

@@ -76,7 +76,7 @@ export default function BlockCommitteeManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'tree'
-  const [meghalasByBlock, setMeghalasByBlock] = useState(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK);
+  const [meghalasByBlock, setMeghalasByBlock] = useState({});
   const [expandedBlocks, setExpandedBlocks] = useState({});
 
   // Modals
@@ -144,7 +144,6 @@ export default function BlockCommitteeManagement() {
             }
           }
           setMeghalasByBlock(prev => ({
-            ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK,
             ...prev,
             ...cleanedMb
           }));
@@ -153,29 +152,7 @@ export default function BlockCommitteeManagement() {
       if (resAdmins?.data?.success) {
         setBlockAdmins(resAdmins.data.data || []);
       }
-      if (resOptions?.data?.success && resOptions.data?.data) {
-        const rawData = resOptions.data.data;
-        const mbMap = rawData.meghalasByBlock || rawData.meghalas_by_block || {};
-        const cleanedMbMap = {};
-        for (const [blk, mList] of Object.entries(mbMap)) {
-          if (/test|dummy/i.test(blk)) continue;
-          if (Array.isArray(mList)) {
-            cleanedMbMap[blk] = mList.filter(m => {
-              if (/test|dummy/i.test(m)) return false;
-              if (normalizeMeghalaName(m) === normalizeBlockName(blk)) return false;
-              return true;
-            });
-          }
-        }
-        setMeghalasByBlock(prev => {
-          const merged = { ...DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK, ...prev };
-          for (const [blk, mList] of Object.entries(cleanedMbMap)) {
-            const existing = merged[blk] || [];
-            merged[blk] = Array.from(new Set([...existing, ...mList]));
-          }
-          return merged;
-        });
-      }
+      // Populate local user pool for donor counting
       // Populate local user pool for donor counting
       if (resUsers?.data?.success) {
         const raw = resUsers.data.data;
