@@ -656,6 +656,44 @@ export default function BlockCommitteeManagement() {
   }, [meghalaDonorMap]);
 
 
+  // Resolve real block-wise Meghala stats with zero dummy data (reference from SuperAdminDashboard.jsx)
+  const getBlockMeghalaStats = useCallback((ba, blockName) => {
+    const bName = (blockName || ba?.blockCommitteeName || ba?.city || ba?.block || ba?.primary_name || '').trim();
+    if (!bName) return { count: 0, list: [] };
+
+    // 1. Direct from ba if provided
+    if (ba && typeof ba.meghala_count === 'number' && Array.isArray(ba.meghalas)) {
+      return { count: ba.meghala_count, list: ba.meghalas };
+    }
+
+    // 2. Cross-reference from districtData.block_summary / blockSummary
+    const normB = normalizeBlockName(bName);
+    const summaryItem = (blockSummary || []).find(bs => normalizeBlockName(bs.block || bs.city || bs.name) === normB);
+    if (summaryItem && typeof summaryItem.meghala_count === 'number' && Array.isArray(summaryItem.meghalas)) {
+      const list = summaryItem.meghalas.map(m => typeof m === 'string' ? m : (m.meghala || m.name)).filter(Boolean);
+      return { count: summaryItem.meghala_count, list };
+    }
+
+    // 3. Fallback dynamically from allUsers volunteer pool
+    const userPool = (allVolunteers && allVolunteers.length > 0) ? allVolunteers : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
+    const matchingVols = userPool.filter(u => {
+      const role = String(u.role || '').toLowerCase().trim();
+      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'
+      const isVol = role === 'volunteer';
+      if (!isVol) return false;
+      const uOrg = normalizeBlockName(String(u.organization_name || u.block || ''));
+      const uCity = normalizeBlockName(String(u.city || ''));
+      return (uOrg && (uOrg === normB || uOrg.includes(normB) || normB.includes(uOrg))) ||
+             (uCity && uCity === normB);
+    });
+
+    const distinctMeghalas = Array.from(new Set(
+      matchingVols.map(v => v.city || v.organization_name).filter(m => m && m.toLowerCase() !== 'n/a' && !/test|dummy/i.test(m))
+    ));
+
+    return { count: distinctMeghalas.length, list: distinctMeghalas };
+  }, [blockSummary, allVolunteers, allUsersLocal, allUsers]);
+
   // ── Unified Block Committee List (All 12 Blocks + Dynamic Blocks + Assigned Admins) ──
   const allBlockCommittees = useMemo(() => {
     const blockNamesMap = new Map();
@@ -690,8 +728,6 @@ export default function BlockCommitteeManagement() {
       }
     });
 
-
-
     const list = Array.from(blockNamesMap.entries()).map(([norm, canonicalName]) => {
       // Find matching admin if registered
       const admin = blockAdmins.find(ba => {
@@ -704,9 +740,15 @@ export default function BlockCommitteeManagement() {
         : { admin1Name: 'Admin Not Assigned', admin1Mobile: '—', admin2Name: '', admin2Mobile: '' };
 
       const meghalas = (() => {
-        if (dynamicMeghalasByBlock[canonicalName]) return dynamicMeghalasByBlock[canonicalName];
+        if (dynamicMeghalasByBlock[canonicalName] && dynamicMeghalasByBlock[canonicalName].length > 0) {
+          return dynamicMeghalasByBlock[canonicalName];
+        }
         const key = Object.keys(dynamicMeghalasByBlock).find(k => normalizeBlockName(k) === norm);
-        return key ? (dynamicMeghalasByBlock[key] || []) : [];
+        if (key && dynamicMeghalasByBlock[key] && dynamicMeghalasByBlock[key].length > 0) {
+          return dynamicMeghalasByBlock[key];
+        }
+        const dynamicStats = getBlockMeghalaStats(admin, canonicalName);
+        return dynamicStats.list || [];
       })();
 
       const stats = getBlockStats(canonicalName);
@@ -736,7 +778,7 @@ export default function BlockCommitteeManagement() {
     });
 
     return list;
-  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, getBlockStats]);
+  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, getBlockStats, getBlockMeghalaStats]);
 
   const filteredCommittees = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -755,15 +797,27 @@ export default function BlockCommitteeManagement() {
     });
   }, [allBlockCommittees, searchQuery, statusFilter]);
 
+  // Resilient real volunteer count matching SuperAdminDashboard.jsx reference
+  const realVolunteersCount = useMemo(() => {
+    const serverCount = Number(districtData?.total_volunteers);
+    if (!isNaN(serverCount) && serverCount >= 0) return serverCount;
+    const userPool = (allVolunteers && allVolunteers.length > 0)
+      ? allVolunteers
+      : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
+    const volUsers = userPool.filter(u => String(u.role || '').toLowerCase().trim() === 'volunteer');
+    return volUsers.length;
+  }, [districtData?.total_volunteers, allVolunteers, allUsersLocal, allUsers]);
+
   const totalBlocks = allBlockCommittees.length;
   const totalMeghalas = allBlockCommittees.reduce((acc, c) => acc + c.meghalaCount, 0);
   const totalBlockDonors = allBlockCommittees.reduce((acc, c) => acc + c.donors, 0);
+  const totalBlockVolunteers = allBlockCommittees.reduce((acc, c) => acc + (c.volunteers || 0), 0);
   const activeCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Active').length;
   const unassignedCount = allBlockCommittees.filter(c => !c.isAssigned).length;
   const suspendedCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Suspended').length;
 
   const exportCSV = () => {
-    const headers = ['Block Name', 'Meghalas Count', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Donors', 'Status'];
+    const headers = ['Block Name', 'Meghalas Count', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Donors', 'Volunteers', 'Status'];
     const rows = filteredCommittees.map(c => [
       c.blockName,
       c.meghalaCount,
@@ -772,6 +826,7 @@ export default function BlockCommitteeManagement() {
       c.admin1Mobile,
       c.admin2Mobile,
       c.donors,
+      c.volunteers,
       c.status
     ]);
     const csv = [headers, ...rows].map(r => r.map(col => `"${String(col || '').replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -845,58 +900,62 @@ export default function BlockCommitteeManagement() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+      {/* 5 KPI Cards Grid (Matching SuperAdminDashboard.jsx Active Meghalas reference) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Block Committees</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">{totalBlocks}</h3>
-              <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">{cleanDistrict} District</p>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 text-red-600 flex items-center justify-center">
-              <Building2 className="w-5 h-5" />
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Block Committees</span>
+            <div className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 flex items-center justify-center">
+              <Building2 className="w-4 h-4" />
             </div>
           </div>
+          <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">{totalBlocks}</h3>
+          <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{activeCount} Assigned</p>
         </div>
 
-        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Meghala Units</p>
-              <h3 className="text-2xl font-black text-violet-600 dark:text-violet-400 mt-1">{totalMeghalas}</h3>
-              <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Across {totalBlocks} Blocks</p>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/40 text-violet-600 flex items-center justify-center">
-              <MapPin className="w-5 h-5" />
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Meghala Units</span>
+            <div className="w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/30 text-violet-600 flex items-center justify-center">
+              <MapPin className="w-4 h-4" />
             </div>
           </div>
+          <h3 className="text-2xl font-black text-violet-600 dark:text-violet-400 mt-1">{totalMeghalas}</h3>
+          <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Across {totalBlocks} Blocks</p>
         </div>
 
-        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+        {/* Matches SuperAdminDashboard KPI 2 */}
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Block Donors</p>
-              <h3 className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{totalBlockDonors}</h3>
-              <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Meghala registered</p>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-rose-600 flex items-center justify-center">
-              <Droplets className="w-5 h-5" />
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Active Meghalas</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center">
+              <UserCheck className="w-4 h-4" />
             </div>
           </div>
+          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{realVolunteersCount}</h3>
+          <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">District Squads</p>
         </div>
 
-        <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 p-5 rounded-3xl">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Admin Status</p>
-              <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-500 mt-1">{activeCount} Active</h3>
-              <p className="text-[11px] text-amber-500 mt-0.5">{unassignedCount} Unassigned</p>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5" />
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Block Donors</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 flex items-center justify-center">
+              <Droplets className="w-4 h-4" />
             </div>
           </div>
+          <h3 className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{totalBlockDonors}</h3>
+          <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Meghala registered</p>
+        </div>
+
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl col-span-2 sm:col-span-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Admin Status</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-500 mt-1">{activeCount} Active</h3>
+          <p className="text-[10px] text-amber-500 mt-0.5">{unassignedCount} Unassigned</p>
         </div>
       </div>
 
@@ -976,6 +1035,7 @@ export default function BlockCommitteeManagement() {
                     <th className="py-3.5 px-4">Secondary Contact (Admin 2)</th>
                     <th className="py-3.5 px-4">Email</th>
                     <th className="py-3.5 px-4 text-center">Donors</th>
+                    <th className="py-3.5 px-4 text-center">Volunteers</th>
                     <th className="py-3.5 px-4 text-center">Status</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
@@ -1052,6 +1112,13 @@ export default function BlockCommitteeManagement() {
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold text-xs bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 px-2.5 py-1 rounded-full">
                             <Droplets className="w-3 h-3" />{c.donors} Donors
+                          </span>
+                        </td>
+
+                        {/* Volunteers column */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-xs bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 px-2.5 py-1 rounded-full">
+                            <Users className="w-3 h-3" />{c.volunteers} Volunteers
                           </span>
                         </td>
 
