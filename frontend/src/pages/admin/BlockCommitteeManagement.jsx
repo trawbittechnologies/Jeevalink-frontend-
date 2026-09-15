@@ -2,19 +2,27 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
   CheckCircle2, Download, ChevronRight,
-  MapPin, LayoutList, GitBranch, Users, Droplets, UserCheck
+  MapPin, LayoutList, GitBranch, Users, Droplets
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
-import { useAppStore } from '../../store/appStore.js';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 
 function parseBlockAdminContacts(ba) {
+  if (!ba) {
+    return {
+      admin1Name: 'Admin Not Assigned',
+      admin1Mobile: '—',
+      admin2Name: '',
+      admin2Mobile: '',
+    };
+  }
+
   let admin1Name = ba.primaryContactName || ba.primary_contact_name || ba.primaryName || ba.primary_name || ba.name || '';
   let admin2Name = ba.secondaryName || ba.secondary_name || '';
 
-  let admin1Mobile = ba.mobile || '';
-  let admin2Mobile = ba.secondaryContactNumber || ba.secondary_contact_number || '';
+  let admin1Mobile = ba.mobile || ba.primaryContactMobile || ba.primary_contact_mobile || '';
+  let admin2Mobile = ba.secondaryContactNumber || ba.secondary_contact_number || ba.secondary_phone || '';
   if (admin2Mobile) {
     const numMatch = admin2Mobile.match(/[\d+\-\s]{10,}/);
     if (numMatch) {
@@ -32,46 +40,26 @@ function parseBlockAdminContacts(ba) {
   };
 }
 
-
-
-function normalizeBlockName(name) {
-  if (!name || typeof name !== 'string') return '';
-  let s = name.toLowerCase().trim();
-  s = s.replace(/^(dyfi|block committee|block)\s+/i, '');
-  s = s.replace(/\s+(block committee|committee|block)$/i, '');
-  return s.trim();
-}
-
-function normalizeMeghalaName(name) {
-  if (!name || typeof name !== 'string') return '';
-  let s = name.toLowerCase().trim();
-  s = s.replace(/^(meghala committee|meghala|unit squad|unit)\s+/i, '');
-  s = s.replace(/\s+(meghala committee|committee|meghala|unit squad|unit)$/i, '');
-  return s.trim();
-}
-
 export default function BlockCommitteeManagement() {
   const { user } = useAuthStore();
-  const { allUsers, donors } = useAppStore();
-  const [blockAdmins, setBlockAdmins] = useState([]);
-  const [blockSummary, setBlockSummary] = useState([]);
-  const [serverMeghalaSummary, setServerMeghalaSummary] = useState([]);
-  const [allUsersLocal, setAllUsersLocal] = useState([]); // fetched by this page
-  const [allVolunteers, setAllVolunteers] = useState([]); // registered volunteer contacts
-  const [district, setDistrict] = useState(user?.district || 'Kasaragod');
-  const [districtData, setDistrictData] = useState({
-    total_users: 0,
-    total_volunteers: 0,
-    total_admins: 0,
-    block_summary: [],
-    meghala_summary: [],
-    meghalas_by_block: {}
+  const [blocks, setBlocks] = useState([]);
+  const [totals, setTotals] = useState({
+    blocks: 0,
+    donors: 0,
+    volunteers: 0,
+    meghalas: 0,
+    active: 0,
+    unassigned: 0,
+    suspended: 0,
+    unassigned_donors: 0,
+    unassigned_volunteers: 0
   });
+  const [district, setDistrict] = useState(user?.district || 'Kasaragod');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'tree'
-  const [meghalasByBlock, setMeghalasByBlock] = useState({});
   const [expandedBlocks, setExpandedBlocks] = useState({});
 
   // Modals
@@ -105,68 +93,36 @@ export default function BlockCommitteeManagement() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const [resDist, resAdmins, resUsers, resVols] = await Promise.all([
-        api.get('/super-admin/metrics').catch(() => null),
-        api.get('/super-admin/block-admins').catch(() => null),
-        // Fetch all users so we can compute per-meghala donor counts
-        api.get('/admin/users').catch(() =>
-          api.get('/donors/search').catch(() => null)
-        ),
-        // Fetch public volunteers to compute actual volunteer counts
-        api.get('/public/volunteers').catch(() => null)
-      ]);
-
-      if (resDist?.data?.success) {
-        const dData = resDist.data.data || resDist.data;
-        setDistrictData(dData);
+      const res = await api.get('/super-admin/blocks');
+      if (res?.data?.success) {
+        const dData = res.data.data || {};
         if (dData.district) setDistrict(dData.district);
-        const bs = dData.block_summary || dData.blockSummary || [];
-        setBlockSummary(Array.isArray(bs) ? bs : []);
-        const ms = dData.meghala_summary || dData.meghalaSummary || [];
-        setServerMeghalaSummary(Array.isArray(ms) ? ms : []);
-        if (dData.meghalas_by_block || dData.meghalasByBlock) {
-          const mb = dData.meghalas_by_block || dData.meghalasByBlock;
-          const cleanedMb = {};
-          for (const [blk, mList] of Object.entries(mb)) {
-            if (/test|dummy/i.test(blk)) continue;
-            if (Array.isArray(mList)) {
-              cleanedMb[blk] = mList.filter(m => {
-                if (/test|dummy/i.test(m)) return false;
-                if (normalizeMeghalaName(m) === normalizeBlockName(blk)) return false;
-                return true;
-              });
-            }
-          }
-          setMeghalasByBlock(prev => ({
-            ...prev,
-            ...cleanedMb
-          }));
+        const bList = Array.isArray(dData.blocks) ? dData.blocks : [];
+        setBlocks(bList);
+
+        if (dData.totals) {
+          setTotals(dData.totals);
+        } else {
+          setTotals({
+            blocks: bList.length,
+            donors: bList.reduce((acc, b) => acc + (b.donorCount ?? b.donors ?? 0), 0),
+            volunteers: bList.reduce((acc, b) => acc + (b.volunteerCount ?? b.volunteers ?? 0), 0),
+            meghalas: bList.reduce((acc, b) => acc + (b.meghalaCount ?? b.meghalas?.length ?? 0), 0),
+            active: bList.filter(b => b.isAssigned && b.status === 'Active').length,
+            unassigned: bList.filter(b => !b.isAssigned).length,
+            suspended: bList.filter(b => b.isAssigned && b.status === 'Suspended').length,
+            unassigned_donors: 0,
+            unassigned_volunteers: 0
+          });
         }
-      }
-      if (resAdmins?.data?.success) {
-        setBlockAdmins(resAdmins.data.data || []);
-      }
-      // Populate local user pool for donor counting
-      if (resUsers?.data?.success) {
-        const raw = resUsers.data.data;
-        const list = raw?.users || raw?.donors || (Array.isArray(raw) ? raw : []);
-        setAllUsersLocal(list);
-      }
-      // Populate volunteers list
-      if (resVols?.data?.success && Array.isArray(resVols.data.data)) {
-        const cleanVols = resVols.data.data.filter(v => {
-          const b = String(v.block || v.organization_name || '').toLowerCase();
-          const m = String(v.meghala || v.city || '').toLowerCase();
-          const n = String(v.name || v.primary_name || '').toLowerCase();
-          return !b.includes('test') && !b.includes('dummy') &&
-            !m.includes('test') && !m.includes('dummy') &&
-            !n.includes('test') && !n.includes('dummy');
-        });
-        setAllVolunteers(cleanVols);
+      } else {
+        setError(res?.data?.message || 'Failed to fetch block data from database.');
       }
     } catch (err) {
       console.error("Block Committee Load error:", err);
+      setError(err.response?.data?.message || 'Failed to load block data from database. Please check server connection.');
     } finally {
       setLoading(false);
     }
@@ -226,14 +182,14 @@ export default function BlockCommitteeManagement() {
   };
 
   const handleOpenEdit = (ba) => {
+    if (!ba) return;
     setEditingAdmin(ba);
-    setEditBlockName(ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.block || ba.blockName || ba.city || '');
+    setEditBlockName(ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.block || ba.city || '');
     setEditEmail(ba.email || '');
     setEditPassword('');
     setEditStatus(ba.status || 'Active');
 
     const parsed = parseBlockAdminContacts(ba);
-
     setEditFullName1(parsed.admin1Name === 'N/A' ? '' : parsed.admin1Name);
     setEditMobile1(parsed.admin1Mobile === 'N/A' ? '' : parsed.admin1Mobile);
     setEditFullName2(parsed.admin2Name);
@@ -287,554 +243,53 @@ export default function BlockCommitteeManagement() {
     }
   };
 
-  // ── Dynamic Meghalas by Block (Strictly Real Registered Committees - Zero Dummy Data) ──
-  const dynamicMeghalasByBlock = useMemo(() => {
-    const combined = {};
-
-
-
-    // 1. Server-returned meghalas from blockSummary (actual registered meghalas)
-    (blockSummary || []).forEach(bs => {
-      const bName = (bs.block || bs.city || bs.name || '').trim();
-      if (!bName || /test|dummy/i.test(bName)) return;
-
-      const targetBlockKey = Object.keys(combined).find(k => normalizeBlockName(k) === normalizeBlockName(bName)) || bName;
-      if (!combined[targetBlockKey]) combined[targetBlockKey] = [];
-
-      if (Array.isArray(bs.meghalas)) {
-        bs.meghalas.forEach(m => {
-          const mName = typeof m === 'string' ? m : (m.meghala || m.name || '');
-          if (mName && !/test|dummy/i.test(mName)) {
-            if (!combined[targetBlockKey].some(item => item.toLowerCase().trim() === mName.toLowerCase().trim())) {
-              combined[targetBlockKey].push(mName.trim());
-            }
-          }
-        });
-      }
-    });
-
-    // 2. Server-returned meghalas (includes DB registered)
-    Object.entries(meghalasByBlock || {}).forEach(([blk, list]) => {
-      if (!combined[blk]) combined[blk] = [];
-      if (Array.isArray(list)) {
-        list.forEach(m => {
-          if (!combined[blk].some(item => item.toLowerCase().trim() === String(m).toLowerCase().trim())) {
-            combined[blk].push(String(m).trim());
-          }
-        });
-      }
-    });
-
-    // 3. Registered blockAdmins meghalas
-    (blockAdmins || []).forEach(ba => {
-      const bName = (ba.blockCommitteeName || ba.city || ba.block || '').trim();
-      if (!bName) return;
-      if (!combined[bName]) combined[bName] = [];
-      if (Array.isArray(ba.meghalas)) {
-        ba.meghalas.forEach(m => {
-          if (m && !combined[bName].some(item => item.toLowerCase() === m.toLowerCase())) {
-            combined[bName].push(m);
-          }
-        });
-      }
-    });
-
-    // 4. Dynamically scan users/volunteers/unit squads for any registered Meghala
-    const userPool = (allVolunteers && allVolunteers.length > 0) ? allVolunteers : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
-    userPool.forEach(u => {
-      const role = (u.role || '').toLowerCase().trim();
-      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'
-      const isVol = role === 'volunteer';
-      const mName = (isVol ? (u.city || '') : '').trim();
-      const bName = (isVol ? (u.organization_name || '') : '').trim();
-      if (mName && bName && mName.toLowerCase() !== 'n/a' && bName.toLowerCase() !== 'n/a' && !/test|dummy/i.test(mName)) {
-        const matchedBlockKey = Object.keys(combined).find(
-          k => k.toLowerCase().trim() === bName.toLowerCase().trim() ||
-            normalizeBlockName(k) === normalizeBlockName(bName)
-        );
-        const targetBlock = matchedBlockKey || bName;
-        if (!combined[targetBlock]) combined[targetBlock] = [];
-        if (!combined[targetBlock].some(item => item.toLowerCase().trim() === mName.toLowerCase().trim())) {
-          combined[targetBlock].push(mName);
-        }
-      }
-    });
-
-    // Sort meghala names alphabetically for clean display
-    Object.keys(combined).forEach(k => {
-      combined[k].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-    });
-
-    return combined;
-  }, [blockSummary, meghalasByBlock, blockAdmins, allVolunteers, allUsersLocal, allUsers]);
-
-  // ── Donor / Volunteer count maps (Authoritative reference from SuperAdminDashboard.jsx) ──
-  // blockDonorMap  : { blockNameLower -> { donors, volunteers } }
-  // meghalaDonorMap: { meghalaNameLower -> { donors, volunteers } }
-  const { blockDonorMap, meghalaDonorMap } = useMemo(() => {
-    const bMap = new Map();
-    const mMap = new Map();
-
-    const activeMeghalasByBlock = dynamicMeghalasByBlock;
-
-    // Pre-seed blocks from activeMeghalasByBlock
-    Object.keys(activeMeghalasByBlock).forEach(b => {
-      const key = b.toLowerCase().trim();
-      bMap.set(key, { donors: 0, volunteers: 0 });
-      const normKey = normalizeBlockName(b);
-      if (normKey && !bMap.has(normKey)) {
-        bMap.set(normKey, { donors: 0, volunteers: 0 });
-      }
-    });
-
-    // Seed blocks from registered block admins
-    blockAdmins.forEach(ba => {
-      const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
-      if (!bName || bName.toLowerCase() === 'n/a') return;
-      const key = bName.toLowerCase();
-      const normKey = normalizeBlockName(bName);
-      if (!bMap.has(key)) bMap.set(key, { donors: 0, volunteers: 0 });
-      if (normKey && !bMap.has(normKey)) bMap.set(normKey, { donors: 0, volunteers: 0 });
-    });
-
-    // 1. Seed block map from block_summary (authoritative server counts)
-    blockSummary.forEach(bs => {
-      const bName = (bs.block || bs.city || bs.name || '').trim();
-      if (!bName) return;
-      const key = bName.toLowerCase();
-      const normKey = normalizeBlockName(bName);
-      const val = {
-        donors: Number(bs.donors ?? bs.users ?? 0),
-        volunteers: Number(bs.volunteers ?? 0)
-      };
-      bMap.set(key, val);
-      if (normKey) bMap.set(normKey, val);
-    });
-
-    // Pre-seed all meghalas from activeMeghalasByBlock
-    Object.values(activeMeghalasByBlock).forEach(list => {
-      if (Array.isArray(list)) {
-        list.forEach(m => {
-          const key = String(m).toLowerCase().trim();
-          mMap.set(key, { donors: 0, volunteers: 0 });
-          const normKey = normalizeMeghalaName(key);
-          if (normKey && !mMap.has(normKey)) {
-            mMap.set(normKey, { donors: 0, volunteers: 0 });
-          }
-        });
-      }
-    });
-
-    // Seed meghalas from server meghala_summary if available
-    const hasServerMeghalaCounts = serverMeghalaSummary.length > 0 &&
-      serverMeghalaSummary.some(ms => Number(ms.donors || 0) > 0 || Number(ms.volunteers || 0) > 0);
-
-    serverMeghalaSummary.forEach(ms => {
-      const mName = (ms.meghala || ms.name || '').trim();
-      if (!mName) return;
-      const key = mName.toLowerCase();
-      const normKey = normalizeMeghalaName(key);
-      const val = {
-        donors: Number(ms.donors ?? ms.users ?? 0),
-        volunteers: Number(ms.volunteers ?? 0)
-      };
-      mMap.set(key, val);
-      if (normKey) mMap.set(normKey, val);
-    });
-
-    // Also check if blockSummary items contain nested meghalas
-    blockSummary.forEach(bs => {
-      if (Array.isArray(bs.meghalas)) {
-        bs.meghalas.forEach(m => {
-          const mName = (m.meghala || m.name || '').trim();
-          if (!mName) return;
-          const key = mName.toLowerCase();
-          const normKey = normalizeMeghalaName(key);
-          const existing = mMap.get(key) || { donors: 0, volunteers: 0 };
-          const updated = {
-            donors: Math.max(existing.donors, Number(m.donors ?? m.users ?? 0)),
-            volunteers: Math.max(existing.volunteers, Number(m.volunteers ?? 0))
-          };
-          mMap.set(key, updated);
-          if (normKey) mMap.set(normKey, updated);
-        });
-      }
-    });
-
-    // Build reverse map: meghalaNameLower -> parentBlockLower
-    const meghalaToBlock = new Map();
-    for (const [blk, mList] of Object.entries(activeMeghalasByBlock)) {
-      const blkKey = normalizeBlockName(blk);
-      if (Array.isArray(mList)) {
-        mList.forEach(m => {
-          meghalaToBlock.set(String(m).toLowerCase().trim(), blkKey);
-          meghalaToBlock.set(normalizeMeghalaName(m), blkKey);
-        });
-      }
-    }
-
-    // Dynamic Meghala to Block dictionary lookup (same as SuperAdminDashboard.jsx)
-    const dynamicMeghalaBlockMap = {};
-    if (districtData?.meghalas_by_block) {
-      Object.entries(districtData.meghalas_by_block).forEach(([blk, list]) => {
-        if (Array.isArray(list)) {
-          list.forEach(m => {
-            dynamicMeghalaBlockMap[String(m).toLowerCase().trim()] = String(blk).toLowerCase().trim();
-          });
-        }
-      });
-    }
-
-    // Combined user and volunteer pool
-    const pool = (allUsersLocal && allUsersLocal.length > 0)
-      ? allUsersLocal
-      : (allUsers && allUsers.length > 0 ? allUsers : (donors || []));
-    const combinedPool = Array.from(
-      new Map([...pool, ...(allVolunteers || [])].map(u => [u.id || u._id || u.phone || u.email, u])).values()
-    );
-
-    const mKeys = Array.from(mMap.keys());
-    const bKeys = Array.from(bMap.keys());
-
-    const totalServerBlockUsers = Array.from(bMap.values()).reduce((sum, b) => sum + (b.donors || 0), 0);
-    const totalServerBlockVolunteers = Array.from(bMap.values()).reduce((sum, b) => sum + (b.volunteers || 0), 0);
-
-    const needDynamicBlockDonors = totalServerBlockUsers === 0;
-    const needDynamicBlockVolunteers = totalServerBlockVolunteers === 0;
-
-    combinedPool.forEach(u => {
-      const role = String(u.role || '').toLowerCase().trim();
-      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'
-      const isVolunteer = role === 'volunteer';
-      const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
-        ((u.blood_group || u.bloodGroup || '') !== '' &&
-          (u.blood_group || u.bloodGroup || '') !== 'N/A');
-
-      const uRemarks = String(u.remarks || '');
-      const uCity = String(u.city || '');
-      const uMeghala = String(u.meghala || u.meghalaName || '');
-      const uOrg = String(u.organization_name || u.organizationName || u.block || u.blockCommitteeName || '');
-
-      // Resolve candidate meghala in order of priority:
-      let matchedMKey = null;
-
-      // A. Remarks: Added by Meghala: <meghala>
-      const mMatch = uRemarks.match(/added by meghala:\s*([^,[\n;]+)/i);
-      if (mMatch) {
-        const rawM = mMatch[1].trim().toLowerCase();
-        const normM = normalizeMeghalaName(rawM);
-        matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
-      }
-
-      // B. Remarks: Added by Unit Squad: <squad>
-      if (!matchedMKey) {
-        const sMatch = uRemarks.match(/added by unit squad:\s*([^,[\n;]+)/i);
-        if (sMatch) {
-          const rawS = sMatch[1].trim().toLowerCase();
-          const normS = normalizeMeghalaName(rawS);
-          matchedMKey = mKeys.find(k => k === rawS || normalizeMeghalaName(k) === normS);
-        }
-      }
-
-      // C. Explicit u.meghala or u.meghalaName
-      if (!matchedMKey && uMeghala && uMeghala.toLowerCase() !== 'n/a') {
-        const rawM = uMeghala.trim().toLowerCase();
-        const normM = normalizeMeghalaName(rawM);
-        matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
-      }
-
-      // D. Volunteer's city is their Meghala
-      if (!matchedMKey && isVolunteer && uCity) {
-        const rawC = uCity.trim().toLowerCase();
-        const normC = normalizeMeghalaName(rawC);
-        matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
-      }
-
-      // E. Direct city match against known meghalas
-      if (!matchedMKey && uCity) {
-        const rawC = uCity.trim().toLowerCase();
-        const normC = normalizeMeghalaName(rawC);
-        matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
-      }
-
-      // F. Direct org match against known meghalas
-      if (!matchedMKey && uOrg) {
-        const rawO = uOrg.trim().toLowerCase();
-        const normO = normalizeMeghalaName(rawO);
-        matchedMKey = mKeys.find(k => k === rawO || normalizeMeghalaName(k) === normO);
-      }
-
-      // G. Check if remarks contains any known meghala name
-      if (!matchedMKey && uRemarks) {
-        const rLower = uRemarks.toLowerCase();
-        for (const k of mKeys) {
-          if (k.length > 3 && rLower.includes(k)) {
-            matchedMKey = k;
-            break;
-          }
-        }
-      }
-
-      // Increment Meghala counts
-      if (matchedMKey && mMap.has(matchedMKey)) {
-        const mItem = mMap.get(matchedMKey);
-        if (!hasServerMeghalaCounts && isDonor) mItem.donors += 1;
-        if (isVolunteer) {
-          if (!hasServerMeghalaCounts || mItem.volunteers === 0) {
-            mItem.volunteers += 1;
-          }
-        }
-      }
-
-      // ── Block assignment (authoritative reference from SuperAdminDashboard.jsx) ──
-      if (needDynamicBlockDonors || needDynamicBlockVolunteers) {
-        let bKey = null;
-        if (matchedMKey && meghalaToBlock.has(matchedMKey)) {
-          bKey = meghalaToBlock.get(matchedMKey);
-        }
-        if (!bKey && uOrg) {
-          const normOrg = normalizeBlockName(uOrg);
-          bKey = bKeys.find(k => k === normOrg || normalizeBlockName(k) === normOrg);
-        }
-        if (!bKey && uCity) {
-          const mapped = dynamicMeghalaBlockMap[uCity.toLowerCase().trim()];
-          if (mapped) {
-            bKey = bKeys.find(k => k === mapped || k.includes(mapped) || mapped.includes(k));
-          }
-        }
-        if (!bKey && uCity) {
-          const normCity = normalizeBlockName(uCity);
-          bKey = bKeys.find(k => k === normCity || normalizeBlockName(k) === normCity);
-        }
-        if (!bKey && uRemarks) {
-          for (const [mName, blkName] of Object.entries(dynamicMeghalaBlockMap)) {
-            if (uRemarks.includes(mName)) {
-              bKey = bKeys.find(k => k === blkName || k.includes(blkName) || blkName.includes(k));
-              if (bKey) break;
-            }
-          }
-        }
-        if (!bKey && bKeys.length > 0) {
-          bKey = bKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || bKeys[0];
-        }
-
-        if (bKey && bMap.has(bKey)) {
-          const bItem = bMap.get(bKey);
-          if (needDynamicBlockDonors && isDonor) bItem.donors += 1;
-          if (needDynamicBlockVolunteers && isVolunteer) bItem.volunteers += 1;
-        }
-      }
-    });
-
-    return { blockDonorMap: bMap, meghalaDonorMap: mMap };
-  }, [blockSummary, serverMeghalaSummary, blockAdmins, dynamicMeghalasByBlock, allUsersLocal, allUsers, donors, allVolunteers, districtData]);
-
-  // Helper: get block donor stats by block name
-  const getBlockStats = useCallback((blockLabel) => {
-    if (!blockLabel) return { donors: 0, volunteers: 0 };
-    const raw = String(blockLabel).toLowerCase().trim();
-    if (blockDonorMap.has(raw)) return blockDonorMap.get(raw);
-    const norm = normalizeBlockName(raw);
-    if (blockDonorMap.has(norm)) return blockDonorMap.get(norm);
-    for (const [k, v] of blockDonorMap.entries()) {
-      if (normalizeBlockName(k) === norm || k.includes(norm) || norm.includes(k)) return v;
-    }
-    return { donors: 0, volunteers: 0 };
-  }, [blockDonorMap]);
-
-  // Helper: get meghala donor stats by meghala name
-  const getMeghalaStats = useCallback((meghalaName) => {
-    if (!meghalaName) return { donors: 0, volunteers: 0 };
-    const raw = String(meghalaName).toLowerCase().trim();
-    if (meghalaDonorMap.has(raw)) return meghalaDonorMap.get(raw);
-    const norm = normalizeMeghalaName(raw);
-    if (meghalaDonorMap.has(norm)) return meghalaDonorMap.get(norm);
-    for (const [k, v] of meghalaDonorMap.entries()) {
-      if (normalizeMeghalaName(k) === norm) return v;
-    }
-    return { donors: 0, volunteers: 0 };
-  }, [meghalaDonorMap]);
-
-
-  // Resolve real block-wise Meghala stats with zero dummy data (reference from SuperAdminDashboard.jsx)
-  const getBlockMeghalaStats = useCallback((ba, blockName) => {
-    const bName = (blockName || ba?.blockCommitteeName || ba?.city || ba?.block || ba?.primary_name || '').trim();
-    if (!bName) return { count: 0, list: [] };
-
-    // 1. Direct from ba if provided
-    if (ba && typeof ba.meghala_count === 'number' && Array.isArray(ba.meghalas)) {
-      return { count: ba.meghala_count, list: ba.meghalas };
-    }
-
-    // 2. Cross-reference from districtData.block_summary / blockSummary
-    const normB = normalizeBlockName(bName);
-    const summaryItem = (blockSummary || []).find(bs => normalizeBlockName(bs.block || bs.city || bs.name) === normB);
-    if (summaryItem && typeof summaryItem.meghala_count === 'number' && Array.isArray(summaryItem.meghalas)) {
-      const list = summaryItem.meghalas.map(m => typeof m === 'string' ? m : (m.meghala || m.name)).filter(Boolean);
-      return { count: summaryItem.meghala_count, list };
-    }
-
-    // 3. Fallback dynamically from allUsers volunteer pool
-    const userPool = (allVolunteers && allVolunteers.length > 0) ? allVolunteers : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
-    const matchingVols = userPool.filter(u => {
-      const role = String(u.role || '').toLowerCase().trim();
-      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'
-      const isVol = role === 'volunteer';
-      if (!isVol) return false;
-      const uOrg = normalizeBlockName(String(u.organization_name || u.block || ''));
-      const uCity = normalizeBlockName(String(u.city || ''));
-      return (uOrg && (uOrg === normB || uOrg.includes(normB) || normB.includes(uOrg))) ||
-        (uCity && uCity === normB);
-    });
-
-    const distinctMeghalas = Array.from(new Set(
-      matchingVols.map(v => v.city || v.organization_name).filter(m => m && m.toLowerCase() !== 'n/a' && !/test|dummy/i.test(m))
-    ));
-
-    return { count: distinctMeghalas.length, list: distinctMeghalas };
-  }, [blockSummary, allVolunteers, allUsersLocal, allUsers]);
-
-  // ── Unified Block Committee List (All 12 Blocks + Dynamic Blocks + Assigned Admins) ──
-  const allBlockCommittees = useMemo(() => {
-    const blockNamesMap = new Map();
-
-    // 1. All blocks from dynamicMeghalasByBlock (guaranteed to have the 12 Kasaragod blocks + server meghalas)
-    Object.keys(dynamicMeghalasByBlock).forEach(bName => {
-      const norm = normalizeBlockName(bName);
-      if (norm && !blockNamesMap.has(norm)) {
-        blockNamesMap.set(norm, bName);
-      }
-    });
-
-    // 2. Any blocks from blockAdmins
-    blockAdmins.forEach(ba => {
-      const bName = (ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '').trim();
-      if (bName && bName.toLowerCase() !== 'n/a') {
-        const norm = normalizeBlockName(bName);
-        if (norm && !blockNamesMap.has(norm)) {
-          blockNamesMap.set(norm, bName);
-        }
-      }
-    });
-
-    // 3. Any blocks from blockSummary
-    blockSummary.forEach(bs => {
-      const bName = (bs.block || bs.city || bs.name || '').trim();
-      if (bName && bName.toLowerCase() !== 'n/a') {
-        const norm = normalizeBlockName(bName);
-        if (norm && !blockNamesMap.has(norm)) {
-          blockNamesMap.set(norm, bName);
-        }
-      }
-    });
-
-    const list = Array.from(blockNamesMap.entries()).map(([norm, canonicalName]) => {
-      // Find matching admin if registered
-      const admin = blockAdmins.find(ba => {
-        const b = (ba.blockCommitteeName || ba.block_committee_name || ba.block_name || ba.city || '').trim();
-        return normalizeBlockName(b) === norm || b.toLowerCase() === canonicalName.toLowerCase();
-      });
-
-      const { admin1Name, admin1Mobile, admin2Name, admin2Mobile } = admin
-        ? parseBlockAdminContacts(admin)
-        : { admin1Name: 'Admin Not Assigned', admin1Mobile: '—', admin2Name: '', admin2Mobile: '' };
-
-      const meghalas = (() => {
-        if (dynamicMeghalasByBlock[canonicalName] && dynamicMeghalasByBlock[canonicalName].length > 0) {
-          return dynamicMeghalasByBlock[canonicalName];
-        }
-        const key = Object.keys(dynamicMeghalasByBlock).find(k => normalizeBlockName(k) === norm);
-        if (key && dynamicMeghalasByBlock[key] && dynamicMeghalasByBlock[key].length > 0) {
-          return dynamicMeghalasByBlock[key];
-        }
-        const dynamicStats = getBlockMeghalaStats(admin, canonicalName);
-        return dynamicStats.list || [];
-      })();
-
-      const stats = getBlockStats(canonicalName);
-
-      return {
-        id: admin ? admin.id : `unassigned-${norm}`,
-        rawAdmin: admin || null,
-        isAssigned: !!admin,
-        blockName: canonicalName,
-        admin1Name: admin ? admin1Name : 'Admin Not Assigned',
-        admin1Mobile: admin ? admin1Mobile : '—',
-        admin2Name: admin ? admin2Name : '',
-        admin2Mobile: admin ? admin2Mobile : '',
-        email: admin ? (admin.email || '—') : '—',
-        status: admin ? (admin.status || 'Active') : 'Unassigned',
-        meghalas,
-        meghalaCount: meghalas.length,
-        donors: stats.donors,
-        volunteers: stats.volunteers,
-      };
-    });
-
-    // Sort: assigned first, then alphabetical by block name
-    list.sort((a, b) => {
-      if (a.isAssigned !== b.isAssigned) return a.isAssigned ? -1 : 1;
-      return a.blockName.localeCompare(b.blockName);
-    });
-
-    return list;
-  }, [dynamicMeghalasByBlock, blockAdmins, blockSummary, getBlockStats, getBlockMeghalaStats]);
-
   const filteredCommittees = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return allBlockCommittees.filter(c => {
+    return blocks.filter(c => {
+      const bName = String(c.blockName || c.blockCommitteeName || c.block || '');
+      const admin1Name = String(c.admin1Name || c.primary_contact_name || c.primaryName || '');
+      const admin1Mobile = String(c.admin1Mobile || c.mobile || '');
+      const emailStr = String(c.email || '');
+      const meghalaList = c.meghalas || [];
+
       const matchQuery = !q || (
-        c.blockName.toLowerCase().includes(q) ||
-        c.admin1Name.toLowerCase().includes(q) ||
-        c.admin1Mobile.includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.meghalas.some(m => m.toLowerCase().includes(q))
+        bName.toLowerCase().includes(q) ||
+        admin1Name.toLowerCase().includes(q) ||
+        admin1Mobile.includes(q) ||
+        emailStr.toLowerCase().includes(q) ||
+        meghalaList.some(m => String(m).toLowerCase().includes(q))
       );
+      const isAssigned = c.isAssigned !== undefined ? c.isAssigned : (c.status !== 'Unassigned' && c.admin1Name !== 'Admin Not Assigned');
       const matchStatus = statusFilter === 'all' || (
-        statusFilter === 'Unassigned' ? !c.isAssigned : c.status === statusFilter
+        statusFilter === 'Unassigned' ? !isAssigned : c.status === statusFilter
       );
       return matchQuery && matchStatus;
     });
-  }, [allBlockCommittees, searchQuery, statusFilter]);
+  }, [blocks, searchQuery, statusFilter]);
 
-  // Resilient real volunteer count matching SuperAdminDashboard.jsx reference
-  const realVolunteersCount = useMemo(() => {
-    const serverCount = Number(districtData?.total_volunteers);
-    if (!isNaN(serverCount) && serverCount >= 0) return serverCount;
-    const userPool = (allVolunteers && allVolunteers.length > 0)
-      ? allVolunteers
-      : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
-    const volUsers = userPool.filter(u => String(u.role || '').toLowerCase().trim() === 'volunteer');
-    return volUsers.length;
-  }, [districtData?.total_volunteers, allVolunteers, allUsersLocal, allUsers]);
-
-  const totalBlocks = allBlockCommittees.length;
-  const totalBlockDonors = allBlockCommittees.reduce((acc, c) => acc + c.donors, 0);
-  const totalBlockVolunteers = allBlockCommittees.reduce((acc, c) => acc + (Number(c.volunteers) || 0), 0);
-  const activeCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Active').length;
-  const unassignedCount = allBlockCommittees.filter(c => !c.isAssigned).length;
-  const suspendedCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Suspended').length;
-
-  // Dynamic total volunteer count fetched from all block committees
-  const totalVolunteersDisplay = useMemo(() => {
-    if (totalBlockVolunteers > 0) return totalBlockVolunteers;
-    if (realVolunteersCount > 0) return realVolunteersCount;
-    return 0;
-  }, [totalBlockVolunteers, realVolunteersCount]);
+  const totalBlocks = totals.blocks || blocks.length;
+  const totalBlockDonors = totals.donors || 0;
+  const totalBlockVolunteers = totals.volunteers || 0;
+  const activeCount = totals.active || 0;
+  const unassignedCount = totals.unassigned || 0;
+  const suspendedCount = totals.suspended || 0;
 
   const exportCSV = () => {
     const headers = ['Block Name', 'Meghalas Count', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Donors', 'Volunteers', 'Status'];
-    const rows = filteredCommittees.map(c => [
-      c.blockName,
-      c.meghalaCount,
-      c.admin1Name,
-      c.email,
-      c.admin1Mobile,
-      c.admin2Mobile,
-      c.donors,
-      c.volunteers,
-      c.status
-    ]);
+    const rows = filteredCommittees.map(c => {
+      const parsed = parseBlockAdminContacts(c.rawAdmin || c);
+      return [
+        c.blockName || c.name || 'N/A',
+        c.meghalaCount ?? c.meghalas?.length ?? 0,
+        c.admin1Name || parsed.admin1Name,
+        c.email || '—',
+        c.admin1Mobile || parsed.admin1Mobile,
+        c.admin2Mobile || parsed.admin2Mobile,
+        c.donorCount ?? c.donors ?? 0,
+        c.volunteerCount ?? c.volunteers ?? 0,
+        c.status || 'Active'
+      ];
+    });
     const csv = [headers, ...rows].map(r => r.map(col => `"${String(col || '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
@@ -904,6 +359,19 @@ export default function BlockCommitteeManagement() {
         </div>
       </div>
 
+      {/* Error state banner with Retry button */}
+      {error && !loading && (
+        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 rounded-3xl p-6 text-center space-y-3">
+          <p className="text-red-700 dark:text-red-400 text-sm font-bold">{error}</p>
+          <button
+            onClick={loadData}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-bold transition inline-flex items-center gap-2 cursor-pointer shadow-sm"
+          >
+            <RefreshCw className="w-4 h-4" /> Retry
+          </button>
+        </div>
+      )}
+
       {/* 4 KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
@@ -917,7 +385,7 @@ export default function BlockCommitteeManagement() {
           <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{activeCount} Assigned</p>
         </div>
 
-        {/* Dynamic Total Volunteers on Status Board */}
+        {/* Dynamic Total Volunteers */}
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Volunteers</span>
@@ -925,7 +393,7 @@ export default function BlockCommitteeManagement() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{totalVolunteersDisplay}</h3>
+          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{totalBlockVolunteers}</h3>
           <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Across {totalBlocks} Blocks</p>
         </div>
 
@@ -937,7 +405,7 @@ export default function BlockCommitteeManagement() {
             </div>
           </div>
           <h3 className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{totalBlockDonors}</h3>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Meghala registered</p>
+          <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Database registered</p>
         </div>
 
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
@@ -1015,7 +483,7 @@ export default function BlockCommitteeManagement() {
           filteredCommittees.length === 0 ? (
             <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400 shadow-sm text-xs">
               <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
-              No Block Committees found matching your search.
+              No Block Committees found
             </div>
           ) : (
             <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-zinc-800/80 shadow-xs">
@@ -1035,6 +503,14 @@ export default function BlockCommitteeManagement() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60 bg-white dark:bg-zinc-900">
                   {filteredCommittees.map((c) => {
+                    const parsed = parseBlockAdminContacts(c.rawAdmin || c);
+                    const bName = c.blockName || c.blockCommitteeName || c.name || 'N/A';
+                    const isAssigned = c.isAssigned !== undefined ? c.isAssigned : (c.status !== 'Unassigned' && parsed.admin1Name !== 'Admin Not Assigned');
+                    const meghalaList = c.meghalas || [];
+                    const meghalaCount = c.meghalaCount ?? c.meghala_count ?? meghalaList.length;
+                    const donorCount = c.donorCount ?? c.donors_count ?? c.donors ?? 0;
+                    const volunteerCount = c.volunteerCount ?? c.volunteers_count ?? c.volunteers ?? 0;
+
                     return (
                       <tr key={c.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-850/50 transition-colors">
                         <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-zinc-100 whitespace-nowrap">
@@ -1043,7 +519,7 @@ export default function BlockCommitteeManagement() {
                               <Building2 className="w-4 h-4" />
                             </span>
                             <div>
-                              <div className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{c.blockName}</div>
+                              <div className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{bName}</div>
                               <div className="text-[10px] text-slate-400 font-normal">{cleanDistrict} District</div>
                             </div>
                           </div>
@@ -1054,34 +530,34 @@ export default function BlockCommitteeManagement() {
                           <div className="flex items-center gap-1.5">
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-900/40">
                               <MapPin className="w-3 h-3 text-violet-500" />
-                              {c.meghalaCount} Meghala{c.meghalaCount !== 1 ? 's' : ''}
+                              {meghalaCount} Meghala{meghalaCount !== 1 ? 's' : ''}
                             </span>
                           </div>
-                          {c.meghalas.length > 0 && (
-                            <div className="text-[10px] text-slate-400 max-w-[180px] truncate mt-0.5" title={c.meghalas.join(', ')}>
-                              {c.meghalas.slice(0, 3).join(', ')}{c.meghalas.length > 3 ? ` +${c.meghalas.length - 3}` : ''}
+                          {meghalaList.length > 0 && (
+                            <div className="text-[10px] text-slate-400 max-w-[180px] truncate mt-0.5" title={meghalaList.join(', ')}>
+                              {meghalaList.slice(0, 3).join(', ')}{meghalaList.length > 3 ? ` +${meghalaList.length - 3}` : ''}
                             </div>
                           )}
                         </td>
 
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          <div className={`font-bold ${c.isAssigned ? 'text-slate-900 dark:text-zinc-100' : 'text-slate-400 italic'}`}>{c.admin1Name}</div>
-                          {c.admin1Mobile !== '—' && (
+                          <div className={`font-bold ${isAssigned ? 'text-slate-900 dark:text-zinc-100' : 'text-slate-400 italic'}`}>{parsed.admin1Name}</div>
+                          {parsed.admin1Mobile !== '—' && parsed.admin1Mobile !== 'N/A' && (
                             <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
                               <Phone className="w-3 h-3 text-slate-400" />
-                              <span>{c.admin1Mobile}</span>
+                              <span>{parsed.admin1Mobile}</span>
                             </div>
                           )}
                         </td>
 
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          {c.admin2Name || c.admin2Mobile ? (
+                          {parsed.admin2Name || parsed.admin2Mobile ? (
                             <>
-                              <div className="font-bold text-slate-900 dark:text-zinc-100">{c.admin2Name || 'Admin 2'}</div>
-                              {c.admin2Mobile && (
+                              <div className="font-bold text-slate-900 dark:text-zinc-100">{parsed.admin2Name || 'Admin 2'}</div>
+                              {parsed.admin2Mobile && (
                                 <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5">
                                   <Phone className="w-3 h-3 text-slate-400" />
-                                  <span>{c.admin2Mobile}</span>
+                                  <span>{parsed.admin2Mobile}</span>
                                 </div>
                               )}
                             </>
@@ -1091,7 +567,7 @@ export default function BlockCommitteeManagement() {
                         </td>
 
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          {c.email !== '—' ? (
+                          {c.email && c.email !== '—' ? (
                             <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300 font-mono text-xs">
                               <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                               <span>{c.email}</span>
@@ -1104,14 +580,14 @@ export default function BlockCommitteeManagement() {
                         {/* Donors column */}
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold text-xs bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 px-2.5 py-1 rounded-full">
-                            <Droplets className="w-3 h-3" />{c.donors} Donors
+                            <Droplets className="w-3 h-3" />{donorCount} Donors
                           </span>
                         </td>
 
                         {/* Volunteers column */}
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-xs bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 px-2.5 py-1 rounded-full">
-                            <Users className="w-3 h-3" />{c.volunteers} Volunteers
+                            <Users className="w-3 h-3" />{volunteerCount} Volunteers
                           </span>
                         </td>
 
@@ -1125,13 +601,13 @@ export default function BlockCommitteeManagement() {
                             }`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${c.status === 'Active' ? 'bg-emerald-500' : c.status === 'Suspended' ? 'bg-red-500' : 'bg-amber-500'
                               }`} />
-                            {c.status}
+                            {c.status || 'Active'}
                           </span>
                         </td>
 
                         {/* Actions column */}
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          {c.isAssigned ? (
+                          {isAssigned && c.rawAdmin ? (
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => handleOpenEdit(c.rawAdmin)}
@@ -1154,7 +630,7 @@ export default function BlockCommitteeManagement() {
                           ) : (
                             <button
                               onClick={() => {
-                                setBlockName(c.blockName);
+                                setBlockName(bName);
                                 setShowAddModal(true);
                               }}
                               className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1 ml-auto"
@@ -1186,12 +662,17 @@ export default function BlockCommitteeManagement() {
             {filteredCommittees.length === 0 ? (
               <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 text-center text-slate-400 shadow-sm text-xs">
                 <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-zinc-700" />
-                No Block Committees found matching your search.
+                No Block Committees found
               </div>
             ) : (
               filteredCommittees.map((c) => {
                 const isExpanded = !!expandedBlocks[c.id];
-                const meghalaList = c.meghalas;
+                const meghalaList = c.meghalas || [];
+                const parsed = parseBlockAdminContacts(c.rawAdmin || c);
+                const bName = c.blockName || c.blockCommitteeName || c.name || 'N/A';
+                const isAssigned = c.isAssigned !== undefined ? c.isAssigned : (c.status !== 'Unassigned' && parsed.admin1Name !== 'Admin Not Assigned');
+                const donorCount = c.donorCount ?? c.donors_count ?? c.donors ?? 0;
+                const volunteerCount = c.volunteerCount ?? c.volunteers_count ?? c.volunteers ?? 0;
 
                 return (
                   <div
@@ -1218,7 +699,7 @@ export default function BlockCommitteeManagement() {
                       {/* Block name + admin info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{c.blockName}</span>
+                          <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{bName}</span>
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${c.status === 'Active'
                               ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
                               : c.status === 'Suspended'
@@ -1227,20 +708,20 @@ export default function BlockCommitteeManagement() {
                             }`}>
                             <span className={`w-1 h-1 rounded-full ${c.status === 'Active' ? 'bg-emerald-500' : c.status === 'Suspended' ? 'bg-red-500' : 'bg-amber-500'
                               }`} />
-                            {c.status}
+                            {c.status || 'Active'}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400 flex-wrap">
                           <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" />{c.admin1Name}{c.admin1Mobile !== '—' ? ` · ${c.admin1Mobile}` : ''}
+                            <Phone className="w-3 h-3" />{parsed.admin1Name}{parsed.admin1Mobile !== '—' && parsed.admin1Mobile !== 'N/A' ? ` · ${parsed.admin1Mobile}` : ''}
                           </span>
                           {/* Block-level donor count */}
                           <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
-                            <Droplets className="w-3 h-3" />{c.donors} Donors
+                            <Droplets className="w-3 h-3" />{donorCount} Donors
                           </span>
                           {/* Block-level volunteer count */}
                           <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
-                            <Users className="w-3 h-3" />{c.volunteers} Volunteers
+                            <Users className="w-3 h-3" />{volunteerCount} Volunteers
                           </span>
                           {meghalaList.length > 0 && (
                             <span className="flex items-center gap-1 text-amber-500 dark:text-amber-400 font-bold">
@@ -1252,7 +733,7 @@ export default function BlockCommitteeManagement() {
 
                       {/* Action buttons */}
                       <div className="flex items-center gap-2 shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                        {c.isAssigned ? (
+                        {isAssigned && c.rawAdmin ? (
                           <>
                             <button
                               onClick={(e) => { e.stopPropagation(); handleOpenEdit(c.rawAdmin); }}
@@ -1275,7 +756,7 @@ export default function BlockCommitteeManagement() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setBlockName(c.blockName);
+                              setBlockName(bName);
                               setShowAddModal(true);
                             }}
                             className="px-2.5 py-1.5 text-[11px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
@@ -1309,20 +790,6 @@ export default function BlockCommitteeManagement() {
                                   <MapPin className="w-3 h-3" />
                                 </span>
                                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{meghala}</span>
-                                {/* Meghala donor and volunteer stats */}
-                                {(() => {
-                                  const mStats = getMeghalaStats(meghala);
-                                  return (
-                                    <div className="ml-auto flex items-center gap-2">
-                                      <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/30 px-2 py-0.5 rounded-full">
-                                        <Droplets className="w-2.5 h-2.5" />{mStats.donors} Donors
-                                      </span>
-                                      <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/30 px-2 py-0.5 rounded-full">
-                                        <Users className="w-2.5 h-2.5" />{mStats.volunteers} Volunteers
-                                      </span>
-                                    </div>
-                                  );
-                                })()}
                               </li>
                             ))}
                           </ul>
