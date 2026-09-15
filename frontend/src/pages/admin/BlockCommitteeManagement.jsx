@@ -933,7 +933,7 @@ export default function BlockCommitteeManagement() {
             </div>
           </div>
           <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{realVolunteersCount}</h3>
-          <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">District Squads</p>
+          <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">District Squads · {totalBlockVolunteers} Assigned</p>
         </div>
 
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
