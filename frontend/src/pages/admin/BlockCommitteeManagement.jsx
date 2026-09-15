@@ -809,7 +809,6 @@ export default function BlockCommitteeManagement() {
   }, [districtData?.total_volunteers, allVolunteers, allUsersLocal, allUsers]);
 
   const totalBlocks = allBlockCommittees.length;
-  const totalMeghalas = allBlockCommittees.reduce((acc, c) => acc + c.meghalaCount, 0);
   const totalBlockDonors = allBlockCommittees.reduce((acc, c) => acc + c.donors, 0);
   const totalBlockVolunteers = allBlockCommittees.reduce((acc, c) => acc + (Number(c.volunteers) || 0), 0);
   const activeCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Active').length;
