@@ -153,7 +153,6 @@ export default function BlockCommitteeManagement() {
         setBlockAdmins(resAdmins.data.data || []);
       }
       // Populate local user pool for donor counting
-      // Populate local user pool for donor counting
       if (resUsers?.data?.success) {
         const raw = resUsers.data.data;
         const list = raw?.users || raw?.donors || (Array.isArray(raw) ? raw : []);
@@ -293,12 +292,23 @@ export default function BlockCommitteeManagement() {
     }
   };
 
-  // ── Dynamic Meghalas by Block (Predefined + Server + Dynamically Added) ──
+  // ── Dynamic Meghalas by Block (Strictly Real Registered Committees - Zero Dummy Data) ──
   const dynamicMeghalasByBlock = useMemo(() => {
     const combined = {};
-    // 1. Predefined standard Kasaragod blocks and meghalas
-    Object.entries(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK).forEach(([blk, list]) => {
-      combined[blk] = [...list];
+
+    // 1. Server-returned meghalas from blockSummary (actual registered meghalas)
+    (blockSummary || []).forEach(bs => {
+      const bName = (bs.block || bs.city || bs.name || '').trim();
+      if (!bName || /test|dummy/i.test(bName)) return;
+      if (!combined[bName]) combined[bName] = [];
+      if (Array.isArray(bs.meghalas)) {
+        bs.meghalas.forEach(m => {
+          const mName = typeof m === 'string' ? m : (m.meghala || m.name || '');
+          if (mName && !/test|dummy/i.test(mName)) {
+            if (!combined[bName].includes(mName)) combined[bName].push(mName);
+          }
+        });
+      }
     });
 
     // 2. Server-returned meghalas (includes DB registered)
@@ -313,14 +323,28 @@ export default function BlockCommitteeManagement() {
       }
     });
 
-    // 3. Dynamically scan users/volunteers/unit squads for any custom Meghala
-    const userPool = (allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []);
+    // 3. Registered blockAdmins meghalas
+    (blockAdmins || []).forEach(ba => {
+      const bName = (ba.blockCommitteeName || ba.city || ba.block || '').trim();
+      if (!bName) return;
+      if (!combined[bName]) combined[bName] = [];
+      if (Array.isArray(ba.meghalas)) {
+        ba.meghalas.forEach(m => {
+          if (m && !combined[bName].some(item => item.toLowerCase() === m.toLowerCase())) {
+            combined[bName].push(m);
+          }
+        });
+      }
+    });
+
+    // 4. Dynamically scan users/volunteers/unit squads for any registered Meghala
+    const userPool = (allVolunteers && allVolunteers.length > 0) ? allVolunteers : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
     userPool.forEach(u => {
       const role = (u.role || '').toLowerCase().trim();
       const isVol = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
       const mName = (isVol ? (u.city || '') : '').trim();
       const bName = (isVol ? (u.organization_name || '') : '').trim();
-      if (mName && bName && mName.toLowerCase() !== 'n/a' && bName.toLowerCase() !== 'n/a') {
+      if (mName && bName && mName.toLowerCase() !== 'n/a' && bName.toLowerCase() !== 'n/a' && !/test|dummy/i.test(mName)) {
         const matchedBlockKey = Object.keys(combined).find(
           k => k.toLowerCase().trim() === bName.toLowerCase().trim() ||
                normalizeBlockName(k) === normalizeBlockName(bName)
@@ -339,7 +363,7 @@ export default function BlockCommitteeManagement() {
     });
 
     return combined;
-  }, [meghalasByBlock, allUsersLocal, allUsers]);
+  }, [blockSummary, meghalasByBlock, blockAdmins, allVolunteers, allUsersLocal, allUsers]);
 
   // ── Donor / Volunteer count maps ──────────────────────────────────────────
   // blockDonorMap  : { blockNameLower -> { donors, volunteers } }
@@ -649,7 +673,7 @@ export default function BlockCommitteeManagement() {
       const meghalas = (() => {
         if (dynamicMeghalasByBlock[canonicalName]) return dynamicMeghalasByBlock[canonicalName];
         const key = Object.keys(dynamicMeghalasByBlock).find(k => normalizeBlockName(k) === norm);
-        return key ? dynamicMeghalasByBlock[key] : (DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK[canonicalName] || []);
+        return key ? (dynamicMeghalasByBlock[key] || []) : [];
       })();
 
       const stats = getBlockStats(canonicalName);
