@@ -1,12 +1,14 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Eye, Edit2, Trash2, User, UserCheck, UserX, Lock,
   CheckCircle2, XCircle, Clock, X, Save, Phone, Mail,
-  MapPin, Building2, Loader2, Download
+  MapPin, Building2, Loader2, Download,
+  LayoutList, GitBranch, ChevronRight, Droplets, Users
 } from 'lucide-react';
+import api from '../../store/api.js';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
 import { getDisplayJeevalinkId } from '../../utils/jeevalinkId.js';
@@ -60,11 +62,24 @@ export default function VolunteerManagement() {
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
   const [credentialsModal, setCredentialsModal] = useState({ open: false, email: '', password: '', emailSent: false });
+  const [viewMode, setViewMode] = useState('table'); // 'table' | 'tree'
+  const [expandedBlocks, setExpandedBlocks] = useState({});
+  const [backendBlocks, setBackendBlocks] = useState([]);
 
   const canAddVolunteer = ['admin', 'super_admin', 'block_admin'].includes(user?.role);
 
   useEffect(() => {
     fetchUsers();
+
+    let active = true;
+    api.get('/super-admin/blocks')
+      .then(res => {
+        if (active && res?.data?.success && Array.isArray(res.data.data?.blocks)) {
+          setBackendBlocks(res.data.data.blocks);
+        }
+      })
+      .catch(() => null);
+    return () => { active = false; };
   }, [fetchUsers]);
 
   const isBlockAdmin = user?.role === 'block_admin';
@@ -72,8 +87,6 @@ export default function VolunteerManagement() {
 
   const isVolunteerUser = (u) => {
     if (!u) return false;
-    // Authoritative: a user is a volunteer ONLY when role === 'volunteer'.
-    // volunteer_type='Meghala' is metadata, NOT a separate role.
     return String(u.role || '').toLowerCase().trim() === 'volunteer';
   };
 
@@ -90,6 +103,68 @@ export default function VolunteerManagement() {
     });
   }, [allUsers, isBlockAdmin, myBlock]);
 
+  const donorUsers = useMemo(() => {
+    return (allUsers || []).filter(u => {
+      if (!u) return false;
+      const role = String(u.role || '').toLowerCase().trim();
+      const isDonorRole = ['user', 'donor', 'receiver'].includes(role);
+      const hasBloodGroup = u.blood_group && u.blood_group !== 'N/A' && u.blood_group !== '';
+      return isDonorRole || hasBloodGroup;
+    });
+  }, [allUsers]);
+
+  const getMeghalaStats = useCallback((vol) => {
+    const volId = String(vol._id || vol.id || '');
+    const mName = (vol.meghala || vol.city || vol.meghalaName || vol.blockCommitteeName || '').trim();
+    const mLower = mName.toLowerCase();
+
+    let localDonors = 0;
+    if (mName || volId) {
+      donorUsers.forEach(d => {
+        const dVolId = String(d.added_by_volunteer_id || d.by_volunteer_id || '');
+        const dRemarks = (d.remarks || '').toLowerCase();
+        const dMeghala = (d.meghala || d.city || '').trim().toLowerCase();
+
+        if (volId && (dVolId === volId || dRemarks.includes(`by_volunteer_id:${volId}`))) {
+          localDonors++;
+        } else if (mLower && (
+          dRemarks.includes(`added by meghala: ${mLower}`) ||
+          dRemarks.includes(`added by unit squad: ${mLower}`) ||
+          dMeghala === mLower
+        )) {
+          localDonors++;
+        }
+      });
+    }
+
+    let backendDonors = 0;
+    if (mLower && backendBlocks.length > 0) {
+      for (const b of backendBlocks) {
+        if (Array.isArray(b.meghalas)) {
+          const found = b.meghalas.find(m => {
+            const name = typeof m === 'string' ? m : (m.name || m.meghala || m.meghala_name || '');
+            return name.trim().toLowerCase() === mLower;
+          });
+          if (found && typeof found === 'object') {
+            backendDonors = found.donorCount ?? found.donors_count ?? found.donors ?? 0;
+            break;
+          }
+        }
+      }
+    }
+
+    const donorCount = Math.max(localDonors, backendDonors);
+
+    let volCount = 1;
+    const p2Name = vol.secondaryName || vol.secondary_name || vol.person2Name;
+    const p2Contact = vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact;
+    if (p2Name || p2Contact) {
+      volCount++;
+    }
+
+    return { donorCount, volCount };
+  }, [donorUsers, backendBlocks]);
+
   const filtered = volunteers.filter(v => {
     const q = search.toLowerCase();
     const secName = v.secondaryName || v.secondary_name || v.person2Name || '';
@@ -100,6 +175,21 @@ export default function VolunteerManagement() {
     const matchDistrict = filters.district === 'all' || v.district === filters.district;
     return matchSearch && matchStatus && matchDistrict;
   });
+
+  const groupedByBlock = useMemo(() => {
+    const groups = {};
+    filtered.forEach(vol => {
+      const rawB = (vol.organization_name || vol.blockCommitteeName || vol.blockName || vol.block || 'Unassigned Block').trim();
+      const cleanB = rawB.replace(/^(dyfi|block committee|committee|block)\s+|\s+(dyfi|block committee|committee|block)$/gi, '').trim() || 'Unassigned Block';
+      const formattedB = cleanB.charAt(0).toUpperCase() + cleanB.slice(1);
+
+      if (!groups[formattedB]) {
+        groups[formattedB] = [];
+      }
+      groups[formattedB].push(vol);
+    });
+    return groups;
+  }, [filtered]);
 
   const exportCSV = () => {
     const headers = ['Meghala Name', 'Primary Volunteer Name', 'Primary Phone', 'Secondary Volunteer Name', 'Secondary Volunteer Phone', 'Email', 'District', 'Status', 'Registered'];
@@ -135,8 +225,6 @@ export default function VolunteerManagement() {
     setConfirmModal({ open: false, action: null, item: null });
   };
 
-
-
   return (
     <div className="space-y-6">
       {/* Header Bar */}
@@ -157,7 +245,33 @@ export default function VolunteerManagement() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+          {/* View Mode Toggle */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
+            <button
+              onClick={() => setViewMode('table')}
+              title="Table View"
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <LayoutList className="w-3.5 h-3.5" /> Table
+            </button>
+            <button
+              onClick={() => setViewMode('tree')}
+              title="Tree View — shows Meghala units grouped by Block"
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'tree'
+                  ? 'bg-white text-red-600 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <GitBranch className="w-3.5 h-3.5" /> Tree
+            </button>
+          </div>
+
           <button
             onClick={exportCSV}
             className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
@@ -197,175 +311,357 @@ export default function VolunteerManagement() {
           onReset={() => { setSearch(''); setFilters({ status: 'all', district: 'all' }); setDateFrom(''); setDateTo(''); }}
         />
 
-        {/* Minimal Modern Table */}
-        <div className="overflow-x-auto">
-          {filtered.length === 0 ? (
-            <div className="py-16 text-center">
-              <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
-                <Building2 className="w-6 h-6" />
+        {/* ─── TABLE VIEW ─── */}
+        {viewMode === 'table' && (
+          <div className="overflow-x-auto">
+            {filtered.length === 0 ? (
+              <div className="py-16 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <p className="text-slate-700 font-bold text-sm">No Meghalas Found</p>
+                <p className="text-slate-400 text-xs mt-1">Try adjusting your search terms or filters.</p>
               </div>
-              <p className="text-slate-700 font-bold text-sm">No Meghalas Found</p>
-              <p className="text-slate-400 text-xs mt-1">Try adjusting your search terms or filters.</p>
-            </div>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-4 px-6">JL Employee ID</th>
-                  <th className="py-4 px-6">Meghala / Zone</th>
-                  <th className="py-4 px-6">Primary Coordinator (Person 1)</th>
-                  <th className="py-4 px-6">Secondary Coordinator (Person 2)</th>
-                  <th className="py-4 px-6">Login Email ID</th>
-                  <th className="py-4 px-6 text-center">Status & Toggle</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {filtered.map((vol) => {
-                  const full = vol.primaryName || vol.name || vol.primary_name || '';
-                  const nameParts = Array.from(new Set(full.split(/[&,]+/).map(s => s.trim()).filter(Boolean)));
-                  const p1Name = vol.person1Name || nameParts[0] || '—';
-                  const p1Mobile = vol.mobile || '—';
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="py-4 px-6">JL Employee ID</th>
+                    <th className="py-4 px-6">Meghala / Zone</th>
+                    <th className="py-4 px-6">Primary Coordinator (Person 1)</th>
+                    <th className="py-4 px-6">Secondary Coordinator (Person 2)</th>
+                    <th className="py-4 px-6">Login Email ID</th>
+                    <th className="py-4 px-6 text-center">Donors & Members</th>
+                    <th className="py-4 px-6 text-center">Status & Toggle</th>
+                    <th className="py-4 px-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {filtered.map((vol) => {
+                    const full = vol.primaryName || vol.name || vol.primary_name || '';
+                    const nameParts = Array.from(new Set(full.split(/[&,]+/).map(s => s.trim()).filter(Boolean)));
+                    const p1Name = vol.person1Name || nameParts[0] || '—';
+                    const p1Mobile = vol.mobile || '—';
 
-                  const p2Name = vol.secondaryName || vol.secondary_name || vol.person2Name || (nameParts.length > 1 ? nameParts[1] : '—');
-                  const p2Mobile = vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || '—';
+                    const p2Name = vol.secondaryName || vol.secondary_name || vol.person2Name || (nameParts.length > 1 ? nameParts[1] : '—');
+                    const p2Mobile = vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || '—';
+                    const stats = getMeghalaStats(vol);
 
-                  return (
-                    <motion.tr
-                      key={vol._id || vol.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="hover:bg-red-50/20 transition"
-                    >
-                      {/* iDonate ID */}
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        {(() => {
-                          const vId = getDisplayJeevalinkId(vol);
-                          return vId ? (
-                            <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
-                              {vId}
-                            </span>
-                          ) : (
-                            <span className="text-slate-300 text-[10px] italic">—</span>
-                          );
-                        })()}
-                      </td>
-                      {/* Meghala Badge */}
-                      <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 rounded-xl font-bold">
-                          <Building2 className="w-3.5 h-3.5 text-red-600" />
-                          {vol.meghala || vol.city || vol.blockCommitteeName || vol.blockName || 'Unassigned'}
-                        </span>
-                      </td>
-
-                      {/* Primary Contact (Person 1) */}
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <div className="font-bold text-slate-900 text-sm">{p1Name || '—'}</div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-mono">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span>{p1Mobile}</span>
-                        </div>
-                      </td>
-
-                      {/* Secondary Contact (Person 2) */}
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <div className="font-bold text-slate-900 text-sm">{p2Name || '—'}</div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-mono">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span>{p2Mobile}</span>
-                        </div>
-                      </td>
-
-                      {/* Email */}
-                      <td className="py-4 px-6 text-slate-700 font-medium whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="font-mono text-xs">{vol.email}</span>
-                        </div>
-                      </td>
-
-                      {/* Status & Active/Deactive Toggle */}
-                      <td className="py-4 px-6 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center gap-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                            vol.status === 'Active'
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                              : 'bg-amber-50 border-amber-200 text-amber-700'
-                          }`}>
-                            {vol.status || 'Active'}
-                          </span>
-
-                          <button
-                            onClick={() => setConfirmModal({
-                              open: true,
-                              action: vol.status === 'Active' ? 'deactivate' : 'activate',
-                              item: vol
-                            })}
-                            className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition flex items-center gap-1 cursor-pointer ${
-                              vol.status === 'Active'
-                                ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-800'
-                                : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-800'
-                            }`}
-                            title={vol.status === 'Active' ? 'Deactivate Meghala' : 'Activate Meghala'}
-                          >
-                            {vol.status === 'Active' ? (
-                              <UserX className="w-3 h-3 text-amber-600" />
+                    return (
+                      <motion.tr
+                        key={vol._id || vol.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="hover:bg-red-50/20 transition"
+                      >
+                        {/* iDonate ID */}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          {(() => {
+                            const vId = getDisplayJeevalinkId(vol);
+                            return vId ? (
+                              <span className="inline-flex items-center font-mono text-[10px] font-black text-primary bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
+                                {vId}
+                              </span>
                             ) : (
-                              <UserCheck className="w-3 h-3 text-emerald-600" />
-                            )}
-                            {vol.status === 'Active' ? 'Deactivate' : 'Activate'}
+                              <span className="text-slate-300 text-[10px] italic">—</span>
+                            );
+                          })()}
+                        </td>
+                        {/* Meghala Badge */}
+                        <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 rounded-xl font-bold">
+                            <Building2 className="w-3.5 h-3.5 text-red-600" />
+                            {vol.meghala || vol.city || vol.blockCommitteeName || vol.blockName || 'Unassigned'}
+                          </span>
+                        </td>
+
+                        {/* Primary Contact (Person 1) */}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="font-bold text-slate-900 text-sm">{p1Name || '—'}</div>
+                          <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-mono">
+                            <Phone className="w-3 h-3 text-slate-400" />
+                            <span>{p1Mobile}</span>
+                          </div>
+                        </td>
+
+                        {/* Secondary Contact (Person 2) */}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="font-bold text-slate-900 text-sm">{p2Name || '—'}</div>
+                          <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-mono">
+                            <Phone className="w-3 h-3 text-slate-400" />
+                            <span>{p2Mobile}</span>
+                          </div>
+                        </td>
+
+                        {/* Email */}
+                        <td className="py-4 px-6 text-slate-700 font-medium whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="font-mono text-xs">{vol.email}</span>
+                          </div>
+                        </td>
+
+                        {/* Meghala Donor Count & Volunteer Count */}
+                        <td className="py-4 px-6 whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200" title={`${stats.donorCount} Donors in ${vol.meghala || vol.city || 'Meghala'}`}>
+                              <Droplets className="w-3 h-3 text-rose-500" />
+                              {stats.donorCount} Donor{stats.donorCount !== 1 ? 's' : ''}
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title={`${stats.volCount} Coordinators/Volunteers in ${vol.meghala || vol.city || 'Meghala'}`}>
+                              <Users className="w-3 h-3 text-emerald-500" />
+                              {stats.volCount} Vol
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Status & Active/Deactive Toggle */}
+                        <td className="py-4 px-6 text-center whitespace-nowrap">
+                          <div className="inline-flex items-center gap-2">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                              vol.status === 'Active'
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                : 'bg-amber-50 border-amber-200 text-amber-700'
+                            }`}>
+                              {vol.status || 'Active'}
+                            </span>
+
+                            <button
+                              onClick={() => setConfirmModal({
+                                open: true,
+                                action: vol.status === 'Active' ? 'deactivate' : 'activate',
+                                item: vol
+                              })}
+                              className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition flex items-center gap-1 cursor-pointer ${
+                                vol.status === 'Active'
+                                  ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-800'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-800'
+                              }`}
+                              title={vol.status === 'Active' ? 'Deactivate Meghala' : 'Activate Meghala'}
+                            >
+                              {vol.status === 'Active' ? (
+                                <UserX className="w-3 h-3 text-amber-600" />
+                              ) : (
+                                <UserCheck className="w-3 h-3 text-emerald-600" />
+                              )}
+                              {vol.status === 'Active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                          </div>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-4 px-6 text-right space-x-1.5 whitespace-nowrap">
+                          {/* View Details Button */}
+                          <button
+                            onClick={() => { setSelectedVolunteer(vol); setShowViewModal(true); }}
+                            className="px-2.5 py-1.5 text-slate-600 hover:text-blue-600 border border-slate-200 hover:border-blue-200 rounded-xl hover:bg-blue-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
+                            title="View Details"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-blue-600" /> View
                           </button>
+
+                          {/* Edit Button */}
+                          <button
+                            onClick={() => { 
+                              setSelectedVolunteer(vol); 
+                              setForm({
+                                meghalaName: vol.meghala || vol.city || vol.blockCommitteeName || vol.blockName || '',
+                                person1Name: p1Name,
+                                person1Contact: p1Mobile,
+                                person2Name: p2Name === '—' ? '' : p2Name,
+                                person2Contact: p2Mobile === '—' ? '' : p2Mobile,
+                                whatsapp: vol.whatsappNumber || vol.whatsapp_number || vol.mobile || '',
+                                email: vol.email || ''
+                              }); 
+                              setShowEditModal(true); 
+                            }}
+                            className="px-2.5 py-1.5 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
+                            title="Edit Meghala"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" /> Edit
+                          </button>
+
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => setConfirmModal({ open: true, action: 'delete', item: vol })}
+                            className="px-2.5 py-1.5 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
+                            title="Delete Meghala"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {/* ─── TREE VIEW (TREE MODEL) ─── */}
+        {viewMode === 'tree' && (
+          <div className="p-6 space-y-4">
+            {/* Legend */}
+            <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
+              <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-red-500" /> Block Committee</span>
+              <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-violet-500" /> Meghala Unit</span>
+              <span className="flex items-center gap-1.5"><Droplets className="w-3.5 h-3.5 text-rose-500" /> Donors Count</span>
+              <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-emerald-500" /> Coordinators & Members</span>
+            </div>
+
+            {Object.keys(groupedByBlock).length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-xs">
+                <Building2 className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+                No Meghala units found matching your filters
+              </div>
+            ) : (
+              Object.entries(groupedByBlock).map(([blockName, meghalaVolunteers]) => {
+                const isExpanded = expandedBlocks[blockName] !== false; // default expanded
+                const blockTotalDonors = meghalaVolunteers.reduce((acc, v) => acc + getMeghalaStats(v).donorCount, 0);
+                const blockTotalVols = meghalaVolunteers.reduce((acc, v) => acc + getMeghalaStats(v).volCount, 0);
+
+                return (
+                  <div key={blockName} className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs bg-white">
+                    {/* Block Header Row */}
+                    <button
+                      onClick={() => setExpandedBlocks(prev => ({ ...prev, [blockName]: !isExpanded }))}
+                      className="w-full flex items-center gap-3 px-5 py-4 bg-slate-50/90 hover:bg-red-50/40 transition-colors cursor-pointer text-left group"
+                    >
+                      <span className="w-5 h-5 rounded-lg bg-slate-200/80 flex items-center justify-center shrink-0 transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+                      </span>
+
+                      <span className="w-9 h-9 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 font-bold border border-red-200">
+                        <Building2 className="w-4 h-4" />
+                      </span>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-extrabold text-sm text-slate-900">{blockName} Block</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            {meghalaVolunteers.length} Meghala{meghalaVolunteers.length !== 1 ? 's' : ''}
+                          </span>
                         </div>
-                      </td>
+                        <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500 font-medium">
+                          <span className="flex items-center gap-1 text-rose-600 font-bold">
+                            <Droplets className="w-3 h-3 text-rose-500" /> {blockTotalDonors} Donors
+                          </span>
+                          <span className="flex items-center gap-1 text-emerald-600 font-bold">
+                            <Users className="w-3 h-3 text-emerald-500" /> {blockTotalVols} Coordinators & Members
+                          </span>
+                        </div>
+                      </div>
+                    </button>
 
-                      {/* Actions */}
-                      <td className="py-4 px-6 text-right space-x-1.5 whitespace-nowrap">
-                        {/* View Details Button */}
-                        <button
-                          onClick={() => { setSelectedVolunteer(vol); setShowViewModal(true); }}
-                          className="px-2.5 py-1.5 text-slate-600 hover:text-blue-600 border border-slate-200 hover:border-blue-200 rounded-xl hover:bg-blue-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
-                          title="View Details"
-                        >
-                          <Eye className="w-3.5 h-3.5 text-blue-600" /> View
-                        </button>
+                    {/* Meghala Tree Children */}
+                    {isExpanded && (
+                      <div className="border-t border-slate-100 bg-white">
+                        <ul className="divide-y divide-slate-100">
+                          {meghalaVolunteers.map((vol, idx) => {
+                            const stats = getMeghalaStats(vol);
+                            const mName = vol.meghala || vol.city || vol.blockCommitteeName || 'Unassigned Meghala';
+                            const full = vol.primaryName || vol.name || vol.primary_name || '';
+                            const nameParts = Array.from(new Set(full.split(/[&,]+/).map(s => s.trim()).filter(Boolean)));
+                            const p1Name = vol.person1Name || nameParts[0] || '—';
+                            const p1Mobile = vol.mobile || '—';
+                            const p2Name = vol.secondaryName || vol.secondary_name || vol.person2Name || (nameParts.length > 1 ? nameParts[1] : '—');
+                            const p2Mobile = vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || '—';
 
-                        {/* Edit Button */}
-                        <button
-                          onClick={() => { 
-                            setSelectedVolunteer(vol); 
-                            setForm({
-                              meghalaName: vol.meghala || vol.city || vol.blockCommitteeName || vol.blockName || '',
-                              person1Name: p1Name,
-                              person1Contact: p1Mobile,
-                              person2Name: p2Name === '—' ? '' : p2Name,
-                              person2Contact: p2Mobile === '—' ? '' : p2Mobile,
-                              whatsapp: vol.whatsappNumber || vol.whatsapp_number || vol.mobile || '',
-                              email: vol.email || ''
-                            }); 
-                            setShowEditModal(true); 
-                          }}
-                          className="px-2.5 py-1.5 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
-                          title="Edit Meghala"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" /> Edit
-                        </button>
+                            return (
+                              <li key={vol._id || vol.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-6 py-3.5 hover:bg-violet-50/40 transition-colors">
+                                <div className="flex items-start gap-3 min-w-0">
+                                  {/* Tree connector */}
+                                  <span className="flex flex-col items-center self-stretch w-4 shrink-0 mt-1">
+                                    <span className="w-px flex-1 bg-slate-200" />
+                                    {idx === meghalaVolunteers.length - 1 && <span className="w-4 h-px bg-slate-200" />}
+                                  </span>
+                                  <span className="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 border border-violet-200 mt-0.5">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                  </span>
 
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => setConfirmModal({ open: true, action: 'delete', item: vol })}
-                          className="px-2.5 py-1.5 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl hover:bg-red-50 transition cursor-pointer inline-flex items-center gap-1 font-bold text-xs"
-                          title="Delete Meghala"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> Delete
-                        </button>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+                                  <div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-xs font-black text-slate-900">{mName}</span>
+                                      <StatusBadge status={vol.status} />
+                                      {getDisplayJeevalinkId(vol) && (
+                                        <span className="font-mono text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded">
+                                          {getDisplayJeevalinkId(vol)}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-4 mt-1 text-[11px] text-slate-500 flex-wrap">
+                                      <span>P1: <strong className="text-slate-700">{p1Name}</strong> ({p1Mobile})</span>
+                                      {p2Name !== '—' && (
+                                        <span>P2: <strong className="text-slate-700">{p2Name}</strong> ({p2Mobile})</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Right Section: Badges & Actions */}
+                                <div className="flex items-center gap-3 shrink-0 ml-10 md:ml-0">
+                                  {/* Donor Count Badge */}
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
+                                    <Droplets className="w-3.5 h-3.5 text-rose-500" />
+                                    {stats.donorCount} Donor{stats.donorCount !== 1 ? 's' : ''}
+                                  </span>
+
+                                  {/* Volunteer Count Badge */}
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                                    <Users className="w-3.5 h-3.5 text-emerald-500" />
+                                    {stats.volCount} Vol{stats.volCount !== 1 ? 's' : ''}
+                                  </span>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex items-center gap-1.5 ml-2">
+                                    <button
+                                      onClick={() => { setSelectedVolunteer(vol); setShowViewModal(true); }}
+                                      className="p-1.5 text-slate-600 hover:text-blue-600 border border-slate-200 hover:border-blue-200 rounded-lg hover:bg-blue-50 transition cursor-pointer"
+                                      title="View Details"
+                                    >
+                                      <Eye className="w-3.5 h-3.5 text-blue-600" />
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedVolunteer(vol);
+                                        setForm({
+                                          meghalaName: vol.meghala || vol.city || vol.blockCommitteeName || vol.blockName || '',
+                                          person1Name: p1Name,
+                                          person1Contact: p1Mobile,
+                                          person2Name: p2Name === '—' ? '' : p2Name,
+                                          person2Contact: p2Mobile === '—' ? '' : p2Mobile,
+                                          whatsapp: vol.whatsappNumber || vol.whatsapp_number || vol.mobile || '',
+                                          email: vol.email || ''
+                                        });
+                                        setShowEditModal(true);
+                                      }}
+                                      className="p-1.5 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                                      title="Edit Meghala"
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => setConfirmModal({ open: true, action: 'delete', item: vol })}
+                                      className="p-1.5 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                                      title="Delete Meghala"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
       </div>
 
       {/* View Details Modal */}
