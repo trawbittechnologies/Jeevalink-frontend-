@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -70,13 +70,25 @@ export default function VolunteerManagement() {
   const isBlockAdmin = user?.role === 'block_admin';
   const myBlock = (user?.organization_name || user?.city || user?.blockCommitteeName || user?.block || '').trim().toLowerCase();
 
-  const volunteers = allUsers
-    .filter(u => u.role === 'volunteer' || u.role === 'Volunteer')
-    .filter(v => {
+  const isVolunteerUser = (u) => {
+    if (!u) return false;
+    const role = String(u.role || '').toLowerCase().trim();
+    return ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
+      role.includes('volunteer') || role.includes('meghala');
+  };
+
+  const volunteers = useMemo(() => {
+    const seen = new Set();
+    return (allUsers || []).filter(u => {
+      if (!isVolunteerUser(u)) return false;
+      const uid = String(u._id || u.id || u.email || u.mobile || '');
+      if (seen.has(uid)) return false;
+      seen.add(uid);
       if (!isBlockAdmin || !myBlock) return true;
-      const vBlock = (v.blockCommitteeName || v.organization_name || v.blockName || v.block || '').trim().toLowerCase();
-      return vBlock === myBlock;
+      const vBlock = (u.blockCommitteeName || u.organization_name || u.blockName || u.block || '').trim().toLowerCase();
+      return vBlock === myBlock || vBlock.includes(myBlock) || myBlock.includes(vBlock);
     });
+  }, [allUsers, isBlockAdmin, myBlock]);
 
   const filtered = volunteers.filter(v => {
     const q = search.toLowerCase();
