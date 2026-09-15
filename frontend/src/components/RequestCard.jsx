@@ -177,8 +177,8 @@ export default function RequestCard({ request, showActions = true }) {
       return true;
     }
 
-    // Only volunteers, admins, and block admins can approve
-    if (!['volunteer', 'admin', 'block_admin'].includes(user.role)) {
+    // Only volunteers/meghalas, admins, and block admins can approve
+    if (!['volunteer', 'meghala', 'meghala_volunteer', 'block_volunteer', 'admin', 'block_admin'].includes(user.role)) {
       return false;
     }
 

@@ -341,7 +341,8 @@ export default function BlockCommitteeManagement() {
     const userPool = (allVolunteers && allVolunteers.length > 0) ? allVolunteers : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
     userPool.forEach(u => {
       const role = (u.role || '').toLowerCase().trim();
-      const isVol = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+      const isVol = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
+        role.includes('volunteer') || role.includes('meghala');
       const mName = (isVol ? (u.city || '') : '').trim();
       const bName = (isVol ? (u.organization_name || '') : '').trim();
       if (mName && bName && mName.toLowerCase() !== 'n/a' && bName.toLowerCase() !== 'n/a' && !/test|dummy/i.test(mName)) {
@@ -483,8 +484,9 @@ export default function BlockCommitteeManagement() {
 
     if (!hasServerMeghalaCounts && pool.length > 0) {
       pool.forEach(u => {
-        const role = String(u.role || '').toLowerCase();
-        const isVolunteer = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+        const role = String(u.role || '').toLowerCase().trim();
+        const isVolunteer = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
+          role.includes('volunteer') || role.includes('meghala');
         const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
           ((u.blood_group || u.bloodGroup || '') !== '' &&
            (u.blood_group || u.bloodGroup || '') !== 'N/A');

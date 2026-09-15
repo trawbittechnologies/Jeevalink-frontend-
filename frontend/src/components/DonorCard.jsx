@@ -99,9 +99,15 @@ export default function DonorCard({ donor }) {
       if (match) addedBy = match[1].toLowerCase().trim();
     }
 
-    // Look for Meghala volunteer or unit squad matching addedBy, meghala, organization, or city
+    const isVolOrMeghala = (role) => {
+      const c = (role || '').toLowerCase().trim();
+      return ['volunteer', 'meghala', 'meghala_volunteer', 'block_volunteer', 'unit_squad'].includes(c) ||
+        c.includes('volunteer') || c.includes('meghala');
+    };
+
+    // Look for Meghala coordinator or unit squad matching addedBy, meghala, organization, or city
     const matchedVols = allUsers.filter((u) => {
-      if (!['volunteer', 'unit_squad'].includes(u.role) || (u.status && u.status !== 'Active')) return false;
+      if (!isVolOrMeghala(u.role) || (u.status && u.status !== 'Active')) return false;
       const uCity = (u.city || '').toLowerCase().trim();
       const uOrg = (u.organization_name || '').toLowerCase().trim();
       const uDist = (u.district || '').toLowerCase().trim();
@@ -114,12 +120,12 @@ export default function DonorCard({ donor }) {
     });
 
     const fallbackVols = matchedVols.length > 0 ? matchedVols : allUsers.filter((u) => 
-      ['volunteer', 'unit_squad'].includes(u.role) &&
+      isVolOrMeghala(u.role) &&
       (u.status === 'Active' || !u.status) &&
       (u.district || '').toLowerCase().trim() === dDistrict
     );
 
-    const pool = fallbackVols.length > 0 ? fallbackVols : allUsers.filter((u) => ['volunteer', 'unit_squad'].includes(u.role));
+    const pool = fallbackVols.length > 0 ? fallbackVols : allUsers.filter((u) => isVolOrMeghala(u.role));
 
     if (pool[0]) {
       const primaryVol = pool[0];

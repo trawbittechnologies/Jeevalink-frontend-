@@ -390,7 +390,7 @@ export default function DistrictPointsTable() {
             { id: 'blocks', label: 'Block Committees', count: filteredBlocks.length },
             { id: 'meghalas', label: 'Meghala Units', count: filteredMeghalas.length },
             { id: 'donors', label: 'Top Donors', count: filteredDonors.length },
-            { id: 'volunteers', label: 'Volunteers', count: filteredVolunteers.length },
+            { id: 'volunteers', label: 'Meghala Leaders', count: filteredVolunteers.length },
             { id: 'rules', label: 'Point Rules', count: null },
           ].map(tab => {
             const isActive = activeTab === tab.id;
@@ -468,7 +468,7 @@ export default function DistrictPointsTable() {
                         <th className="py-3 px-4">Block Committee</th>
                         <th className="py-3 px-4">Admin Lead</th>
                         <th className="py-3 px-4 text-center">Donors</th>
-                        <th className="py-3 px-4 text-center">Volunteers</th>
+                        <th className="py-3 px-4 text-center">Meghalas</th>
                         <th className="py-3 px-4 text-center">Fulfilled</th>
                         <th className="py-3 px-4">Points Share</th>
                         <th className="py-3 px-4 text-right">Points</th>
