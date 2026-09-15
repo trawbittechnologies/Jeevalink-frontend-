@@ -72,9 +72,9 @@ export default function VolunteerManagement() {
 
   const isVolunteerUser = (u) => {
     if (!u) return false;
-    const role = String(u.role || '').toLowerCase().trim();
-    return ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
-      role.includes('volunteer') || role.includes('meghala');
+    // Authoritative: a user is a volunteer ONLY when role === 'volunteer'.
+    // volunteer_type='Meghala' is metadata, NOT a separate role.
+    return String(u.role || '').toLowerCase().trim() === 'volunteer';
   };
 
   const volunteers = useMemo(() => {

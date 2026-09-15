@@ -55,8 +55,8 @@ export const useAppStore = create((set, get) => ({
           try {
             const volRes = await api.get('/public/volunteers');
             if (volRes.data.success) {
-              const list = volRes.data.data?.volunteers || volRes.data.data || [];
-              const fallbackVol = Array.isArray(list) ? list.length : (volRes.data.data?.total || 0);
+              // Use the authoritative `total` from the API, not the paginated list length
+              const fallbackVol = volRes.data.total ?? (Array.isArray(volRes.data.data) ? volRes.data.data.length : 0);
               if (fallbackVol > 0) {
                 volunteerCount = fallbackVol;
               }
@@ -99,8 +99,8 @@ export const useAppStore = create((set, get) => ({
       try {
         const volRes = await api.get('/public/volunteers');
         if (volRes.data.success) {
-          const list = volRes.data.data?.volunteers || volRes.data.data || [];
-          const volCount = Array.isArray(list) ? list.length : (volRes.data.data?.total || 0);
+          // Use the authoritative `total` from the API, not the paginated list length
+          const volCount = volRes.data.total ?? (Array.isArray(volRes.data.data) ? volRes.data.data.length : 0);
           set((state) => ({
             publicStats: {
               ...state.publicStats,
@@ -127,13 +127,11 @@ export const useAppStore = create((set, get) => ({
     try {
       const state = get();
       const pendingRequests = state.requests.filter(r => ['Pending', 'Waiting', 'Accepted'].includes(r.status)).length;
-      const isMeghalaRole = (role) => {
-        const clean = String(role || '').toLowerCase().trim();
-        return ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(clean) ||
-          clean.includes('volunteer') || clean.includes('meghala');
-      };
-      const totalVolunteers = state.allUsers.filter(u => isMeghalaRole(u.role)).length;
-      const activeVolunteers = state.allUsers.filter(u => isMeghalaRole(u.role) && u.status === 'Active').length;
+      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'.
+      // 'meghala' is volunteer_type metadata, NOT a role. Do NOT count it here.
+      const isVolunteerRole = (role) => String(role || '').toLowerCase().trim() === 'volunteer';
+      const totalVolunteers = state.allUsers.filter(u => isVolunteerRole(u.role)).length;
+      const activeVolunteers = state.allUsers.filter(u => isVolunteerRole(u.role) && u.status === 'Active').length;
       set({
         adminStats: {
           pendingRequests,

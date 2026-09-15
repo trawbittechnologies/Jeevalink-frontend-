@@ -257,14 +257,12 @@ export default function SuperAdminDashboard() {
   }, [districtData.total_users, allUsers, donors]);
 
   const realVolunteersCount = useMemo(() => {
+    // Primary source: server-side authoritative count (role='volunteer' only)
     const serverCount = Number(districtData.total_volunteers);
     if (!isNaN(serverCount) && serverCount >= 0) return serverCount;
-    const isVol = (r) => {
-      const clean = String(r || '').toLowerCase().trim();
-      return ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(clean) ||
-        clean.includes('volunteer') || clean.includes('meghala');
-    };
-    const volUsers = (allUsers || []).filter(u => isVol(u.role));
+    // Fallback: count from allUsers — role='volunteer' ONLY.
+    // 'meghala' is volunteer_type metadata, NOT a role.
+    const volUsers = (allUsers || []).filter(u => String(u.role || '').toLowerCase().trim() === 'volunteer');
     return volUsers.length;
   }, [districtData.total_volunteers, allUsers]);
 
@@ -509,9 +507,8 @@ export default function SuperAdminDashboard() {
 
         donorsPool.forEach(u => {
           const role = String(u.role || '').toLowerCase().trim();
-          const isVolunteer = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
-            role.includes('volunteer') || role.includes('meghala');
-          const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
+          const isVolunteer = String(u.role || '').toLowerCase().trim() === 'volunteer';
+          const isDonor = ['user', 'donor', 'receiver'].includes(String(u.role || '').toLowerCase().trim()) ||
             (u.blood_group && u.blood_group !== 'N/A' && u.blood_group !== '') ||
             (u.bloodGroup && u.bloodGroup !== 'N/A' && u.bloodGroup !== '');
 

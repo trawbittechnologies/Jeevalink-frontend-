@@ -334,8 +334,8 @@ export default function BlockCommitteeManagement() {
     const userPool = (allVolunteers && allVolunteers.length > 0) ? allVolunteers : ((allUsersLocal && allUsersLocal.length > 0) ? allUsersLocal : (allUsers || []));
     userPool.forEach(u => {
       const role = (u.role || '').toLowerCase().trim();
-      const isVol = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
-        role.includes('volunteer') || role.includes('meghala');
+      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'
+      const isVol = role === 'volunteer';
       const mName = (isVol ? (u.city || '') : '').trim();
       const bName = (isVol ? (u.organization_name || '') : '').trim();
       if (mName && bName && mName.toLowerCase() !== 'n/a' && bName.toLowerCase() !== 'n/a' && !/test|dummy/i.test(mName)) {
