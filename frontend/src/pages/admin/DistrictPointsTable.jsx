@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Trophy, Award, Medal, Crown, Flame, MapPin, Users, Sparkles, RefreshCw, 
-  Building2, Droplets, Heart, Zap, Shield, Search, ArrowUpRight, Phone, Mail, 
-  CheckCircle2, ChevronRight, Info, Filter, X
+  Trophy, Award, Medal, Crown, Flame, MapPin, RefreshCw, 
+  Building2, Zap, Shield, Search, ArrowUpRight, Phone, X
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
 
 export default function DistrictPointsTable() {
   const { user } = useAuthStore();
+  const userDistrict = user?.district || 'Kasaragod';
+
   const [activeTab, setActiveTab] = useState('blocks'); // 'blocks' | 'meghalas' | 'donors' | 'volunteers' | 'rules'
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,7 +18,7 @@ export default function DistrictPointsTable() {
   const [selectedBlockDetail, setSelectedBlockDetail] = useState(null);
 
   const [data, setData] = useState({
-    district: user?.district || 'Kasaragod',
+    district: userDistrict,
     summary: {
       total_district_points: 0,
       total_blocks: 0,
@@ -360,7 +361,7 @@ export default function DistrictPointsTable() {
     } finally {
       setLoading(false);
     }
-  }, [user?.district]);
+  }, [userDistrict]);
 
   useEffect(() => {
     fetchData();
