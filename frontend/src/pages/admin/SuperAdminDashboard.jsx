@@ -865,10 +865,10 @@ export default function SuperAdminDashboard() {
           </p>
         </div>
 
-        {/* KPI 2: Volunteers */}
+        {/* KPI 2: Meghalas */}
         <div className="bg-white border border-emerald-100 p-4 rounded-2xl shadow-xs hover:border-emerald-200 transition">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Volunteers</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Meghalas</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <UserCheck className="w-4 h-4" />
             </div>

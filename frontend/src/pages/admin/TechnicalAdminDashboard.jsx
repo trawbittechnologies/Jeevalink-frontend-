@@ -240,7 +240,7 @@ export default function TechnicalAdminDashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-white/20 relative z-10">
           {[
             { label: 'Total Donors', val: metrics.total_users },
-            { label: 'Volunteers', val: metrics.total_volunteers },
+            { label: 'Meghalas', val: metrics.total_volunteers },
             { label: 'Block Admins', val: metrics.total_admins },
             { label: 'Super Admins', val: metrics.total_super_admins || superAdmins.length },
             { label: 'Blood Requests', val: metrics.total_requests },
@@ -397,7 +397,7 @@ export default function TechnicalAdminDashboard() {
               <BarChart3 className="w-5 h-5 text-red-600" />
               Live District Coverage Breakdown
             </h2>
-            <p className="text-xs text-slate-500">Real registered Volunteers & Donors grouped by District</p>
+            <p className="text-xs text-slate-500">Real registered Meghalas & Donors grouped by District</p>
           </div>
 
           <Link
@@ -422,7 +422,7 @@ export default function TechnicalAdminDashboard() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 600 }} />
                 <Tooltip content={<CustomChartTooltip />} />
                 <Bar dataKey="donors" name="Registered Donors" fill="#dc2626" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="volunteers" name="Active Volunteers" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="volunteers" name="Active Meghalas" fill="#3b82f6" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="requests" name="Blood Requests" fill="#f59e0b" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

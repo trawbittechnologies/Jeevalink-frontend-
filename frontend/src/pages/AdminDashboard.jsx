@@ -116,7 +116,7 @@ export default function AdminDashboard() {
       if (res.data?.success) {
         setCreatedResult({
           type: 'success',
-          msg: `Volunteer Committee created successfully! Login credentials sent to registered email.`
+          msg: `Meghala Committee created successfully! Login credentials sent to registered email.`
         });
         setMeghalaName(''); setPerson1Name(''); setPerson1Contact('');
         setPerson2Name(''); setPerson2Contact('');
@@ -146,12 +146,12 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteMeghalaAdmin = async (baId, baName) => {
-    if (!window.confirm(`Are you sure you want to delete Volunteer "${baName}"? This action cannot be undone.`)) return;
+    if (!window.confirm(`Are you sure you want to delete Meghala "${baName}"? This action cannot be undone.`)) return;
     try {
       const res = await api.delete(`/block-admin/volunteers/${baId}`);
       if (res.data?.success) loadData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete Volunteer');
+      alert(err.response?.data?.message || 'Failed to delete Meghala');
     }
   };
 
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
           <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-3">
             <HeartPulse className="w-5 h-5" />
           </div>
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Volunteers</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Meghalas</span>
           <p className="text-3xl font-black text-emerald-600 tracking-tight mt-0.5">{Math.max(Number(blockData.total_volunteers) || 0, meghalaAdmins.length)}</p>
         </div>
         <div className="card p-5 relative overflow-hidden">
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                 <Line type="monotone" dataKey="users" name="Total Users" stroke="#94a3b8" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="vols" name="Volunteers" stroke="#dc2626" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="vols" name="Meghalas" stroke="#dc2626" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
             )}
             <form onSubmit={handleCreateMeghalaAdmin} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1.5">Name of Meghala / Volunteer *</label>
+                <label className="block font-bold text-slate-700 mb-1.5">Name of Meghala Committee *</label>
                 <input type="text" value={meghalaName} onChange={(e) => setMeghalaName(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" />
               </div>
               <div className="grid grid-cols-2 gap-3">
