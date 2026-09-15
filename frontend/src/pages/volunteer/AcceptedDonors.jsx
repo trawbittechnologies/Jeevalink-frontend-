@@ -159,13 +159,13 @@ export default function AcceptedDonors() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider">
-              <HeartHandshake className="w-4 h-4" /> Volunteer Donor Desk
+              <HeartHandshake className="w-4 h-4" /> Meghala Donor Desk
             </div>
             <h1 className="text-2xl lg:text-3xl font-black tracking-tight">
               Accepted Donors Directory
             </h1>
             <p className="text-red-100 text-xs lg:text-sm font-medium leading-relaxed">
-              Showing accepted donors for all active blood requests. After donation is complete, click <span className="font-extrabold underline decoration-white underline-offset-2">"Donated"</span> to credit 100 points to the donor, 20 points to the Meghala Volunteer, and 20 points to the Block Admin.
+              Showing accepted donors for all active blood requests. After donation is complete, click <span className="font-extrabold underline decoration-white underline-offset-2">"Donated"</span> to credit 100 points to the donor, 20 points to the Meghala Coordinator, and 20 points to the Block Admin.
             </p>
           </div>
 
@@ -308,8 +308,8 @@ export default function AcceptedDonors() {
                     </div>
                   </div>
 
-                  {/* Actions for volunteer */}
-                  {!['Fulfilled', 'Completed', 'Cancelled', 'Expired'].includes(request.status) && (user?.role === 'volunteer' || user?.role === 'admin' || user?.role === 'block_admin' || user?.role === 'super_admin' || user?.role === 'technical_admin') && (
+                  {/* Actions for volunteer / meghala */}
+                  {!['Fulfilled', 'Completed', 'Cancelled', 'Expired'].includes(request.status) && (['volunteer', 'meghala', 'meghala_volunteer', 'admin', 'block_admin', 'super_admin', 'technical_admin'].includes(user?.role)) && (
                     <button
                       onClick={() => fulfillRequest(reqId)}
                       className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"

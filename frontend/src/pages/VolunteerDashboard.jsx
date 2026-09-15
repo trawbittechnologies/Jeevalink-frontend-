@@ -490,7 +490,7 @@ export default function VolunteerDashboard() {
               <span className="opacity-60">•</span>
               <span>Block: <strong className="text-white font-bold">{blockName}</strong></span>
               <span className="opacity-60">•</span>
-              <span>Volunteer: <strong className="text-white font-bold">{user?.primary_name || user?.name || 'Active'}</strong></span>
+              <span>Meghala Coordinator: <strong className="text-white font-bold">{user?.primary_name || user?.name || 'Active'}</strong></span>
             </div>
           </div>
 
@@ -1019,7 +1019,7 @@ export default function VolunteerDashboard() {
                 <span className="font-bold text-red-600">{committeeName}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-slate-400">Volunteer</span>
+                <span className="text-slate-400">Meghala Coordinator</span>
                 <span className="font-bold text-slate-900">{user?.primary_name || user?.name || 'Active'}</span>
               </div>
             </div>

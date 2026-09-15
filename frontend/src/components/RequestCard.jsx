@@ -74,7 +74,7 @@ function VolunteerContactModal({ open, onClose, request }) {
               <Phone className="w-5 h-5 fill-white" />
             </div>
             <div>
-              <h3 className="font-black text-base">Volunteer Coordinators</h3>
+              <h3 className="font-black text-base">Meghala Coordinators</h3>
               <p className="text-red-100 text-xs mt-0.5">For: {request.patientName}</p>
             </div>
           </div>

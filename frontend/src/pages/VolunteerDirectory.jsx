@@ -273,7 +273,7 @@ export default function VolunteerDirectory() {
                 type="text"
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                placeholder="Search volunteer by name..."
+                placeholder="Search coordinator by name..."
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 pl-9 text-slate-900 text-xs font-medium placeholder-slate-400 focus:outline-none focus:border-red-600 transition"
               />
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -290,12 +290,12 @@ export default function VolunteerDirectory() {
           </div>
         </div>
 
-        {/* ── Volunteer Cards List ───────────────────────────────────── */}
+        {/* ── Meghala Cards List ───────────────────────────────────── */}
         <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <PhoneCall className="w-4 h-4 text-red-600" />
-              Assigned Volunteers & Coordinators ({filteredVolunteers.length})
+              Assigned Meghalas & Coordinators ({filteredVolunteers.length})
             </h2>
             <span className="text-xs font-semibold text-slate-500">
               {selectedDistrict} {selectedBlock ? `• ${selectedBlock}` : ''}
@@ -305,16 +305,16 @@ export default function VolunteerDirectory() {
           {loading ? (
             <div className="py-12 text-center space-y-3 bg-white border-slate-200 shadow-sm border /80 rounded-2xl">
               <div className="w-8 h-8 border-3 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-semibold text-slate-500">Loading volunteer contacts...</p>
+              <p className="text-xs font-semibold text-slate-500">Loading Meghala contacts...</p>
             </div>
           ) : filteredVolunteers.length === 0 ? (
             /* Clean Minimal Empty State (Zero Dummy Data) */
             <div className="bg-white border-slate-200 shadow-sm border /80 rounded-2xl p-8 text-center space-y-3">
               <UserX className="w-10 h-10 text-slate-300 mx-auto" />
               <div className="space-y-1 max-w-md mx-auto">
-                <h3 className="text-sm font-bold text-slate-800">No Registered Volunteers Found</h3>
+                <h3 className="text-sm font-bold text-slate-800">No Registered Meghalas Found</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  No registered volunteer contacts found in database for <span className="font-semibold text-slate-700">{selectedDistrict}</span>
+                  No registered Meghala contacts found in database for <span className="font-semibold text-slate-700">{selectedDistrict}</span>
                   {selectedBlock ? <span> &rarr; <span className="font-semibold text-slate-700">{selectedBlock}</span></span> : ''}.
                 </p>
               </div>
@@ -323,14 +323,14 @@ export default function VolunteerDirectory() {
               </p>
             </div>
           ) : (
-            /* Real Volunteer Cards Grid */
+            /* Real Meghala Cards Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredVolunteers.map((vol, idx) => {
                 const primaryPhone = vol.mobile || vol.phone || vol.primaryPhone || '';
                 const secondaryPhone = vol.secondary_phone || vol.secondaryContactNumber || vol.secondary_contact_number || vol.secondaryContact || vol.person2Contact || vol.secondaryPhone || '';
                 
                 // Name resolution: ensure Person 1 and Person 2 names are cleanly separated
-                const rawFullName = vol.full_name || vol.name || vol.primary_name || vol.primaryName || vol.person1Name || 'DYFI Volunteer';
+                const rawFullName = vol.full_name || vol.name || vol.primary_name || vol.primaryName || vol.person1Name || 'DYFI Coordinator';
                 let secondaryName = vol.secondary_name || vol.secondaryName || vol.secondary_contact_name || vol.person2Name || '';
                 let primaryName = vol.person1Name || vol.person1_name || vol.primaryContactName || '';
 
@@ -368,7 +368,7 @@ export default function VolunteerDirectory() {
                   : rawFullName;
 
                 const volJeevalinkId = getDisplayJeevalinkId(vol);
-                const roleText = vol.roleText || vol.role_title || vol.role_name || (vol.role ? getRoleLabel(vol.role) : 'Volunteer Coordinator');
+                const roleText = vol.roleText || vol.role_title || vol.role_name || (vol.role ? getRoleLabel(vol.role) : 'Meghala Coordinator');
 
                 return (
                   <motion.div

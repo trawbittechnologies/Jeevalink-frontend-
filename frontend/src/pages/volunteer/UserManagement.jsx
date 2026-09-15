@@ -75,7 +75,8 @@ export default function UserManagement() {
   const [fetchingUsers, setFetchingUsers] = useState(false);
 
   const myRole = (currentUser?.role || '').toLowerCase().trim();
-  const isMeghalaScoped = ['volunteer', 'unit_squad'].includes(myRole);
+  const isMeghalaScoped = ['volunteer', 'meghala', 'meghala_volunteer', 'block_volunteer', 'unit_squad'].includes(myRole) ||
+    myRole.includes('meghala') || myRole.includes('volunteer');
 
   const fetchMeghalaUsers = useCallback(async () => {
     setFetchingUsers(true);
