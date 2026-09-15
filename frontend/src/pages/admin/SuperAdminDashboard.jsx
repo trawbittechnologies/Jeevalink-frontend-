@@ -64,72 +64,7 @@ function parseBlockAdminContacts(ba) {
   };
 }
 
-// Known Meghala to Block dictionary for Kasaragod
-const MEGHALA_BLOCK_MAP = {
-  'upper kottachery': 'kanhangad',
-  'puthiyakotta': 'kanhangad',
-  'ajanur': 'kanhangad',
-  'ajanoor': 'kanhangad',
-  'kottachery': 'kanhangad',
-  'kanhangad south': 'kanhangad',
-  'kanhangad north': 'kanhangad',
-  'chithari': 'kanhangad',
-  'chittari': 'kanhangad',
-  'madikai': 'kanhangad',
-  'kottappuram': 'nileshwar',
-  'kinanoor': 'nileshwar',
-  'karindalam': 'nileshwar',
-  'nileshwaram': 'nileshwar',
-  'nileshswar': 'nileshwar',
-  'cheemeni': 'cheruvathur',
-  'kayyur': 'cheruvathur',
-  'thuruthi': 'cheruvathur',
-  'pilicode': 'cheruvathur',
-  'chandera': 'cheruvathur',
-  'thrikarippur': 'trikaripur',
-  'trikaripur': 'trikaripur',
-  'olavara': 'trikaripur',
-  'elambachi': 'trikaripur',
-  'valiyaparamba': 'trikaripur',
-  'ranipuram': 'panathady',
-  'kallar': 'panathady',
-  'panathur': 'panathady',
-  'balal': 'panathady',
-  'east eleri': 'eleri',
-  'west eleri': 'eleri',
-  'chittarikkal': 'eleri',
-  'palavayal': 'eleri',
-  'kundamkuzhy': 'bedakam',
-  'kolathur': 'bedakam',
-  'kuttikol': 'bedakam',
-  'bedadka': 'bedakam',
-  'bekal': 'udma',
-  'pallikere': 'udma',
-  'melparamba': 'udma',
-  'chembirika': 'udma',
-  'kalanad': 'udma',
-  'vidyanagar': 'kasaragod',
-  'nullipady': 'kasaragod',
-  'mogral': 'kasaragod',
-  'karanthakkad': 'kasaragod',
-  'chengala': 'kasaragod',
-  'madhur': 'kasaragod',
-  'arikady': 'kumbala',
-  'badiadka': 'kumbala',
-  'badiadkka': 'kumbala',
-  'seethangoli': 'kumbala',
-  'puthige': 'kumbala',
-  'manjeshwar': 'manjeshwaram',
-  'uppala': 'manjeshwaram',
-  'hosangadi': 'manjeshwaram',
-  'paivalike': 'manjeshwaram',
-  'meenja': 'manjeshwaram',
-  'vorkady': 'manjeshwaram',
-  'mulleria': 'karadukka',
-  'bovikanam': 'karadukka',
-  'delampady': 'karadukka',
-  'bellur': 'karadukka'
-};
+
 
 export default function SuperAdminDashboard() {
   const { user } = useAuthStore();
@@ -147,7 +82,8 @@ export default function SuperAdminDashboard() {
     urgency_normal: 0,
     recent_requests: [],
     pending_approval_requests: [],
-    block_summary: []
+    block_summary: [],
+    meghalas_by_block: {}
   });
 
   const [pointsLeaderboard, setPointsLeaderboard] = useState({
@@ -280,7 +216,8 @@ export default function SuperAdminDashboard() {
           urgency_normal: dData.urgency_normal ?? dData.urgencyNormal ?? 0,
           recent_requests: dData.recent_requests || dData.recentRequests || [],
           pending_approval_requests: dData.pending_approval_requests || dData.pendingApprovalRequests || [],
-          block_summary: dData.block_summary || dData.blockSummary || []
+          block_summary: dData.block_summary || dData.blockSummary || [],
+          meghalas_by_block: dData.meghalas_by_block || dData.meghalasByBlock || {}
         });
       }
 
@@ -500,6 +437,17 @@ export default function SuperAdminDashboard() {
   const realBlockAnalytics = useMemo(() => {
     const blockMap = new Map();
 
+    const dynamicMeghalaBlockMap = {};
+    if (districtData.meghalas_by_block) {
+      Object.entries(districtData.meghalas_by_block).forEach(([blk, list]) => {
+        if (Array.isArray(list)) {
+          list.forEach(m => {
+            dynamicMeghalaBlockMap[String(m).toLowerCase().trim()] = String(blk).toLowerCase().trim();
+          });
+        }
+      });
+    }
+
     // 1. Seed from registered block admins
     (blockAdmins || []).forEach(ba => {
       const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
@@ -578,13 +526,13 @@ export default function SuperAdminDashboard() {
 
           // B. Known Meghala-to-Block dictionary lookup
           if (!matchedKey && uCity) {
-            const mapped = MEGHALA_BLOCK_MAP[uCity];
+            const mapped = dynamicMeghalaBlockMap[uCity];
             if (mapped) {
               matchedKey = blockKeys.find(k => k === mapped || k.includes(mapped) || mapped.includes(k));
             }
           }
           if (!matchedKey && uRemarks) {
-            for (const [mName, bName] of Object.entries(MEGHALA_BLOCK_MAP)) {
+            for (const [mName, bName] of Object.entries(dynamicMeghalaBlockMap)) {
               if (uRemarks.includes(mName)) {
                 matchedKey = blockKeys.find(k => k === bName || k.includes(bName) || bName.includes(k));
                 if (matchedKey) break;
