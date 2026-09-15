@@ -59,6 +59,14 @@ export default function BlockCommitteeManagement() {
   const [allUsersLocal, setAllUsersLocal] = useState([]); // fetched by this page
   const [allVolunteers, setAllVolunteers] = useState([]); // registered volunteer contacts
   const [district, setDistrict] = useState(user?.district || 'Kasaragod');
+  const [districtData, setDistrictData] = useState({
+    total_users: 0,
+    total_volunteers: 0,
+    total_admins: 0,
+    block_summary: [],
+    meghala_summary: [],
+    meghalas_by_block: {}
+  });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -111,6 +119,7 @@ export default function BlockCommitteeManagement() {
 
       if (resDist?.data?.success) {
         const dData = resDist.data.data || resDist.data;
+        setDistrictData(dData);
         if (dData.district) setDistrict(dData.district);
         const bs = dData.block_summary || dData.blockSummary || [];
         setBlockSummary(Array.isArray(bs) ? bs : []);
@@ -359,7 +368,7 @@ export default function BlockCommitteeManagement() {
     return combined;
   }, [blockSummary, meghalasByBlock, blockAdmins, allVolunteers, allUsersLocal, allUsers]);
 
-  // ── Donor / Volunteer count maps ──────────────────────────────────────────
+  // ── Donor / Volunteer count maps (Authoritative reference from SuperAdminDashboard.jsx) ──
   // blockDonorMap  : { blockNameLower -> { donors, volunteers } }
   // meghalaDonorMap: { meghalaNameLower -> { donors, volunteers } }
   const { blockDonorMap, meghalaDonorMap } = useMemo(() => {
@@ -389,9 +398,6 @@ export default function BlockCommitteeManagement() {
     });
 
     // 1. Seed block map from block_summary (authoritative server counts)
-    const hasServerBlockCounts = blockSummary.length > 0 &&
-      blockSummary.some(bs => Number(bs.users || bs.donors || 0) > 0);
-
     blockSummary.forEach(bs => {
       const bName = (bs.block || bs.city || bs.name || '').trim();
       if (!bName) return;
@@ -467,123 +473,161 @@ export default function BlockCommitteeManagement() {
       }
     }
 
-    // 3. User pool: calculate client-side counts if server has no counts or as supplementary
-    const pool = allUsersLocal.length > 0
-      ? allUsersLocal
-      : (allUsers && allUsers.length > 0 ? allUsers : (donors || []));
-
-    const mKeys = Array.from(mMap.keys());
-    const bKeys = Array.from(bMap.keys());
-
-    if (!hasServerMeghalaCounts && pool.length > 0) {
-      pool.forEach(u => {
-        const role = String(u.role || '').toLowerCase().trim();
-        const isVolunteer = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
-          role.includes('volunteer') || role.includes('meghala');
-        const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
-          ((u.blood_group || u.bloodGroup || '') !== '' &&
-           (u.blood_group || u.bloodGroup || '') !== 'N/A');
-
-        const uRemarks = String(u.remarks || '');
-        const uCity = String(u.city || '');
-        const uMeghala = String(u.meghala || u.meghalaName || '');
-        const uOrg = String(u.organization_name || u.organizationName || u.block || '');
-
-        // Resolve candidate meghala in order of priority:
-        let matchedMKey = null;
-
-        // A. Remarks: Added by Meghala: <meghala>
-        const mMatch = uRemarks.match(/added by meghala:\s*([^,[\n;]+)/i);
-        if (mMatch) {
-          const rawM = mMatch[1].trim().toLowerCase();
-          const normM = normalizeMeghalaName(rawM);
-          matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
-        }
-
-        // B. Remarks: Added by Unit Squad: <squad>
-        if (!matchedMKey) {
-          const sMatch = uRemarks.match(/added by unit squad:\s*([^,[\n;]+)/i);
-          if (sMatch) {
-            const rawS = sMatch[1].trim().toLowerCase();
-            const normS = normalizeMeghalaName(rawS);
-            matchedMKey = mKeys.find(k => k === rawS || normalizeMeghalaName(k) === normS);
-          }
-        }
-
-        // C. Explicit u.meghala or u.meghalaName
-        if (!matchedMKey && uMeghala && uMeghala.toLowerCase() !== 'n/a') {
-          const rawM = uMeghala.trim().toLowerCase();
-          const normM = normalizeMeghalaName(rawM);
-          matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
-        }
-
-        // D. Volunteer's city is their Meghala
-        if (!matchedMKey && isVolunteer && uCity) {
-          const rawC = uCity.trim().toLowerCase();
-          const normC = normalizeMeghalaName(rawC);
-          matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
-        }
-
-        // E. Direct city match against known meghalas
-        if (!matchedMKey && uCity) {
-          const rawC = uCity.trim().toLowerCase();
-          const normC = normalizeMeghalaName(rawC);
-          matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
-        }
-
-        // F. Direct org match against known meghalas
-        if (!matchedMKey && uOrg) {
-          const rawO = uOrg.trim().toLowerCase();
-          const normO = normalizeMeghalaName(rawO);
-          matchedMKey = mKeys.find(k => k === rawO || normalizeMeghalaName(k) === normO);
-        }
-
-        // G. Check if remarks contains any known meghala name
-        if (!matchedMKey && uRemarks) {
-          const rLower = uRemarks.toLowerCase();
-          for (const k of mKeys) {
-            if (k.length > 3 && rLower.includes(k)) {
-              matchedMKey = k;
-              break;
-            }
-          }
-        }
-
-        // Increment Meghala counts
-        if (matchedMKey && mMap.has(matchedMKey)) {
-          const mItem = mMap.get(matchedMKey);
-          if (isDonor) mItem.donors += 1;
-          if (isVolunteer) mItem.volunteers += 1;
-        }
-
-        // ── Block assignment (only when server has no counts) ──
-        if (!hasServerBlockCounts) {
-          let bKey = null;
-          if (matchedMKey && meghalaToBlock.has(matchedMKey)) {
-            bKey = meghalaToBlock.get(matchedMKey);
-          }
-          if (!bKey && uOrg) {
-            const normOrg = normalizeBlockName(uOrg);
-            bKey = bKeys.find(k => k === normOrg || normalizeBlockName(k) === normOrg);
-          }
-          if (!bKey && uCity) {
-            const normCity = normalizeBlockName(uCity);
-            bKey = bKeys.find(k => k === normCity || normalizeBlockName(k) === normCity);
-          }
-          if (!bKey && bKeys.length > 0) {
-            bKey = bKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || bKeys[0];
-          }
-          if (bKey && bMap.has(bKey)) {
-            const bItem = bMap.get(bKey);
-            if (isDonor) bItem.donors += 1;
-            if (isVolunteer) bItem.volunteers += 1;
-          }
+    // Dynamic Meghala to Block dictionary lookup (same as SuperAdminDashboard.jsx)
+    const dynamicMeghalaBlockMap = {};
+    if (districtData?.meghalas_by_block) {
+      Object.entries(districtData.meghalas_by_block).forEach(([blk, list]) => {
+        if (Array.isArray(list)) {
+          list.forEach(m => {
+            dynamicMeghalaBlockMap[String(m).toLowerCase().trim()] = String(blk).toLowerCase().trim();
+          });
         }
       });
     }
 
+    // Combined user and volunteer pool
+    const pool = (allUsersLocal && allUsersLocal.length > 0)
+      ? allUsersLocal
+      : (allUsers && allUsers.length > 0 ? allUsers : (donors || []));
+    const combinedPool = Array.from(
+      new Map([...pool, ...(allVolunteers || [])].map(u => [u.id || u._id || u.phone || u.email, u])).values()
+    );
+
+    const mKeys = Array.from(mMap.keys());
+    const bKeys = Array.from(bMap.keys());
+
+    const totalServerBlockUsers = Array.from(bMap.values()).reduce((sum, b) => sum + (b.donors || 0), 0);
+    const totalServerBlockVolunteers = Array.from(bMap.values()).reduce((sum, b) => sum + (b.volunteers || 0), 0);
+
+    const needDynamicBlockDonors = totalServerBlockUsers === 0;
+    const needDynamicBlockVolunteers = totalServerBlockVolunteers === 0;
+
+    combinedPool.forEach(u => {
+      const role = String(u.role || '').toLowerCase().trim();
+      // Authoritative: a user is a volunteer ONLY when role === 'volunteer'
+      const isVolunteer = role === 'volunteer';
+      const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
+        ((u.blood_group || u.bloodGroup || '') !== '' &&
+         (u.blood_group || u.bloodGroup || '') !== 'N/A');
+
+      const uRemarks = String(u.remarks || '');
+      const uCity = String(u.city || '');
+      const uMeghala = String(u.meghala || u.meghalaName || '');
+      const uOrg = String(u.organization_name || u.organizationName || u.block || u.blockCommitteeName || '');
+
+      // Resolve candidate meghala in order of priority:
+      let matchedMKey = null;
+
+      // A. Remarks: Added by Meghala: <meghala>
+      const mMatch = uRemarks.match(/added by meghala:\s*([^,[\n;]+)/i);
+      if (mMatch) {
+        const rawM = mMatch[1].trim().toLowerCase();
+        const normM = normalizeMeghalaName(rawM);
+        matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
+      }
+
+      // B. Remarks: Added by Unit Squad: <squad>
+      if (!matchedMKey) {
+        const sMatch = uRemarks.match(/added by unit squad:\s*([^,[\n;]+)/i);
+        if (sMatch) {
+          const rawS = sMatch[1].trim().toLowerCase();
+          const normS = normalizeMeghalaName(rawS);
+          matchedMKey = mKeys.find(k => k === rawS || normalizeMeghalaName(k) === normS);
+        }
+      }
+
+      // C. Explicit u.meghala or u.meghalaName
+      if (!matchedMKey && uMeghala && uMeghala.toLowerCase() !== 'n/a') {
+        const rawM = uMeghala.trim().toLowerCase();
+        const normM = normalizeMeghalaName(rawM);
+        matchedMKey = mKeys.find(k => k === rawM || normalizeMeghalaName(k) === normM);
+      }
+
+      // D. Volunteer's city is their Meghala
+      if (!matchedMKey && isVolunteer && uCity) {
+        const rawC = uCity.trim().toLowerCase();
+        const normC = normalizeMeghalaName(rawC);
+        matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
+      }
+
+      // E. Direct city match against known meghalas
+      if (!matchedMKey && uCity) {
+        const rawC = uCity.trim().toLowerCase();
+        const normC = normalizeMeghalaName(rawC);
+        matchedMKey = mKeys.find(k => k === rawC || normalizeMeghalaName(k) === normC);
+      }
+
+      // F. Direct org match against known meghalas
+      if (!matchedMKey && uOrg) {
+        const rawO = uOrg.trim().toLowerCase();
+        const normO = normalizeMeghalaName(rawO);
+        matchedMKey = mKeys.find(k => k === rawO || normalizeMeghalaName(k) === normO);
+      }
+
+      // G. Check if remarks contains any known meghala name
+      if (!matchedMKey && uRemarks) {
+        const rLower = uRemarks.toLowerCase();
+        for (const k of mKeys) {
+          if (k.length > 3 && rLower.includes(k)) {
+            matchedMKey = k;
+            break;
+          }
+        }
+      }
+
+      // Increment Meghala counts
+      if (matchedMKey && mMap.has(matchedMKey)) {
+        const mItem = mMap.get(matchedMKey);
+        if (!hasServerMeghalaCounts && isDonor) mItem.donors += 1;
+        if (isVolunteer) {
+          if (!hasServerMeghalaCounts || mItem.volunteers === 0) {
+            mItem.volunteers += 1;
+          }
+        }
+      }
+
+      // ── Block assignment (authoritative reference from SuperAdminDashboard.jsx) ──
+      if (needDynamicBlockDonors || needDynamicBlockVolunteers) {
+        let bKey = null;
+        if (matchedMKey && meghalaToBlock.has(matchedMKey)) {
+          bKey = meghalaToBlock.get(matchedMKey);
+        }
+        if (!bKey && uOrg) {
+          const normOrg = normalizeBlockName(uOrg);
+          bKey = bKeys.find(k => k === normOrg || normalizeBlockName(k) === normOrg);
+        }
+        if (!bKey && uCity) {
+          const mapped = dynamicMeghalaBlockMap[uCity.toLowerCase().trim()];
+          if (mapped) {
+            bKey = bKeys.find(k => k === mapped || k.includes(mapped) || mapped.includes(k));
+          }
+        }
+        if (!bKey && uCity) {
+          const normCity = normalizeBlockName(uCity);
+          bKey = bKeys.find(k => k === normCity || normalizeBlockName(k) === normCity);
+        }
+        if (!bKey && uRemarks) {
+          for (const [mName, blkName] of Object.entries(dynamicMeghalaBlockMap)) {
+            if (uRemarks.includes(mName)) {
+              bKey = bKeys.find(k => k === blkName || k.includes(blkName) || blkName.includes(k));
+              if (bKey) break;
+            }
+          }
+        }
+        if (!bKey && bKeys.length > 0) {
+          bKey = bKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || bKeys[0];
+        }
+
+        if (bKey && bMap.has(bKey)) {
+          const bItem = bMap.get(bKey);
+          if (needDynamicBlockDonors && isDonor) bItem.donors += 1;
+          if (needDynamicBlockVolunteers && isVolunteer) bItem.volunteers += 1;
+        }
+      }
+    });
+
     return { blockDonorMap: bMap, meghalaDonorMap: mMap };
-  }, [blockSummary, serverMeghalaSummary, blockAdmins, dynamicMeghalasByBlock, allUsersLocal, allUsers, donors]);
+  }, [blockSummary, serverMeghalaSummary, blockAdmins, dynamicMeghalasByBlock, allUsersLocal, allUsers, donors, allVolunteers, districtData]);
 
   // Helper: get block donor stats by block name
   const getBlockStats = useCallback((blockLabel) => {
