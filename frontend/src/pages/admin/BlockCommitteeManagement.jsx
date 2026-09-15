@@ -385,10 +385,10 @@ export default function BlockCommitteeManagement() {
           <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{activeCount} Assigned</p>
         </div>
 
-        {/* Dynamic Total Volunteers */}
+        {/* Dynamic Total Meghala Committees */}
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Volunteers</span>
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Meghala Committee</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center">
               <Users className="w-4 h-4" />
             </div>
