@@ -431,138 +431,19 @@ export default function SuperAdminDashboard() {
     return { count: distinctMeghalas.length, list: distinctMeghalas };
   }, [districtData.block_summary, allUsers]);
 
-  // Dynamic real Block Analytics with live donor counts and real Meghala committee counts
+  // Dynamic real Block Analytics directly from database
   const realBlockAnalytics = useMemo(() => {
-    const blockMap = new Map();
+    const list = districtData.block_summary || [];
+    if (!Array.isArray(list) || list.length === 0) return [];
 
-    const dynamicMeghalaBlockMap = {};
-    if (districtData.meghalas_by_block) {
-      Object.entries(districtData.meghalas_by_block).forEach(([blk, list]) => {
-        if (Array.isArray(list)) {
-          list.forEach(m => {
-            dynamicMeghalaBlockMap[String(m).toLowerCase().trim()] = String(blk).toLowerCase().trim();
-          });
-        }
-      });
-    }
-
-    // 1. Seed from registered block admins
-    (blockAdmins || []).forEach(ba => {
-      const bName = (ba.blockCommitteeName || ba.city || ba.block || ba.primary_name || '').trim();
-      if (bName && bName.toLowerCase() !== 'n/a') {
-        const key = bName.toLowerCase();
-        if (!blockMap.has(key)) {
-          const stats = getBlockMeghalaStats(ba);
-          blockMap.set(key, {
-            block: bName,
-            users: 0,
-            volunteers: 0,
-            meghala_count: stats.count,
-            meghalas: stats.list
-          });
-        }
-      }
-    });
-
-    // 2. Incorporate server block summary if provided
-    (districtData.block_summary || []).forEach(b => {
-      if (b.block) {
-        const key = b.block.toLowerCase().trim();
-        if (!blockMap.has(key)) {
-          blockMap.set(key, {
-            block: b.block,
-            users: Number(b.users) || 0,
-            volunteers: Number(b.volunteers) || 0,
-            meghala_count: Number(b.meghala_count) || (Array.isArray(b.meghalas) ? b.meghalas.length : 0),
-            meghalas: Array.isArray(b.meghalas) ? b.meghalas.map(m => typeof m === 'string' ? m : m.meghala).filter(Boolean) : []
-          });
-        } else {
-          const existing = blockMap.get(key);
-          existing.users = Math.max(existing.users, Number(b.users) || 0);
-          existing.volunteers = Math.max(existing.volunteers, Number(b.volunteers) || 0);
-          if (b.meghala_count !== undefined) {
-            existing.meghala_count = Math.max(existing.meghala_count || 0, Number(b.meghala_count) || 0);
-          }
-          if (Array.isArray(b.meghalas) && b.meghalas.length > 0) {
-            const names = b.meghalas.map(m => typeof m === 'string' ? m : m.meghala).filter(Boolean);
-            existing.meghalas = Array.from(new Set([...(existing.meghalas || []), ...names]));
-          }
-        }
-      }
-    });
-
-    // 3. Match from client allUsers & donors pool
-    const donorsPool = (allUsers && allUsers.length > 0) ? allUsers : (donors || []);
-    const blockKeys = Array.from(blockMap.keys());
-
-    if (blockKeys.length > 0 && donorsPool.length > 0) {
-      const totalServerBlockUsers = Array.from(blockMap.values()).reduce((sum, b) => sum + (b.users || 0), 0);
-
-      // If server counts are not present or less than pool count, recalculate dynamically
-      if (totalServerBlockUsers === 0 || totalServerBlockUsers < donorsPool.length) {
-        blockMap.forEach(v => {
-          v.users = 0;
-          v.volunteers = 0;
-        });
-
-        donorsPool.forEach(u => {
-          const role = String(u.role || '').toLowerCase().trim();
-          const isVolunteer = role === 'volunteer';
-          const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
-            (u.blood_group && u.blood_group !== 'N/A' && u.blood_group !== '') ||
-            (u.bloodGroup && u.bloodGroup !== 'N/A' && u.bloodGroup !== '');
-
-          const uBlock = String(u.organization_name || u.organizationName || u.block || u.blockCommitteeName || '').toLowerCase().trim();
-          const uCity = String(u.city || u.meghala || '').toLowerCase().trim();
-          const uRemarks = String(u.remarks || '').toLowerCase().trim();
-
-          // A. Direct organization/block match
-          let matchedKey = blockKeys.find(k =>
-            (uBlock && (uBlock === k || uBlock.includes(k) || k.includes(uBlock)))
-          );
-
-          // B. Known Meghala-to-Block dictionary lookup
-          if (!matchedKey && uCity) {
-            const mapped = dynamicMeghalaBlockMap[uCity];
-            if (mapped) {
-              matchedKey = blockKeys.find(k => k === mapped || k.includes(mapped) || mapped.includes(k));
-            }
-          }
-          if (!matchedKey && uRemarks) {
-            for (const [mName, bName] of Object.entries(dynamicMeghalaBlockMap)) {
-              if (uRemarks.includes(mName)) {
-                matchedKey = blockKeys.find(k => k === bName || k.includes(bName) || bName.includes(k));
-                if (matchedKey) break;
-              }
-            }
-          }
-
-          // C. City matches block name directly
-          if (!matchedKey && uCity) {
-            matchedKey = blockKeys.find(k => uCity === k || uCity.includes(k) || k.includes(uCity));
-          }
-
-          // D. Remarks contain block name
-          if (!matchedKey && uRemarks) {
-            matchedKey = blockKeys.find(k => uRemarks.includes(k));
-          }
-
-          // E. Fallback to Kasaragod / first block so no real registered donor is dropped
-          if (!matchedKey && blockKeys.length > 0) {
-            matchedKey = blockKeys.find(k => k.includes('kasaragod') || k.includes('kasargod')) || blockKeys[0];
-          }
-
-          if (matchedKey && blockMap.has(matchedKey)) {
-            const item = blockMap.get(matchedKey);
-            if (isDonor) item.users += 1;
-            if (isVolunteer) item.volunteers += 1;
-          }
-        });
-      }
-    }
-
-    return Array.from(blockMap.values());
-  }, [blockAdmins, districtData.block_summary, districtData.meghalas_by_block, getBlockMeghalaStats, allUsers, donors]);
+    return list.map(b => ({
+      block: b.block || b.name || 'N/A',
+      users: Number(b.users ?? b.donors ?? 0),
+      volunteers: Number(b.volunteers ?? 0),
+      meghala_count: Number(b.meghala_count ?? b.meghalas?.length ?? 0),
+      meghalas: Array.isArray(b.meghalas) ? b.meghalas : []
+    }));
+  }, [districtData.block_summary]);
 
   // Dynamic total volunteers across all blocks
   const totalVolunteersDisplay = useMemo(() => {
