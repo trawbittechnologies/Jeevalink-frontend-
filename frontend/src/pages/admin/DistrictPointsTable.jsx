@@ -85,76 +85,88 @@ export default function DistrictPointsTable() {
         const rawData = resPoints.data.data;
         const ptsBlocks = Array.isArray(rawData.blocks) ? rawData.blocks : [];
 
-        const mergedBlocks = ptsBlocks.map((pb) => {
-          const pbName = getBlockName(pb);
-          const key = normalizeName(pbName);
+        const isGenericOrInvalidBlockName = (name = '') => {
+          const norm = normalizeName(name);
+          return (
+            !norm ||
+            ['block committee', 'district block committee', 'committee', 'block', 'unassigned', 'n/a'].includes(norm)
+          );
+        };
 
-          const dir =
-            dirMap.get(key) ||
-            Array.from(dirMap.entries()).find(([dirKey]) => {
-              if (!key || !dirKey) return false;
-              return key === dirKey || key.includes(dirKey) || dirKey.includes(key);
-            })?.[1];
+        const mergedBlocks = ptsBlocks
+          .map((pb) => {
+            const pbName = getBlockName(pb);
+            const key = normalizeName(pbName);
 
-          return {
-            ...pb,
-            block_name: pbName || dir?.blockName || 'Block Committee',
+            const dir =
+              dirMap.get(key) ||
+              Array.from(dirMap.entries()).find(([dirKey]) => {
+                if (!key || !dirKey) return false;
+                return key === dirKey || key.includes(dirKey) || dirKey.includes(key);
+              })?.[1];
 
-            admin_name:
-              dir?.admin1Name &&
-              !['Admin Not Assigned', 'N/A', '—'].includes(String(dir.admin1Name).trim())
-                ? dir.admin1Name
-                : pb.admin_name || pb.admin1Name || 'Block Coordinator',
+            const resolvedName = pbName || dir?.blockName || dir?.blockCommitteeName || '';
 
-            admin_mobile:
-              dir?.admin1Mobile &&
-              !['—', 'N/A', ''].includes(String(dir.admin1Mobile).trim())
-                ? dir.admin1Mobile
-                : pb.admin_mobile || pb.admin1Mobile || '',
+            return {
+              ...pb,
+              block_name: resolvedName,
 
-            admin_email:
-              dir?.email && !['—', 'N/A', ''].includes(String(dir.email).trim())
-                ? dir.email
-                : pb.admin_email || pb.email || '',
+              admin_name:
+                dir?.admin1Name &&
+                !['Admin Not Assigned', 'N/A', '—'].includes(String(dir.admin1Name).trim())
+                  ? dir.admin1Name
+                  : pb.admin_name || pb.admin1Name || 'Block Coordinator',
 
-            admin2_name: dir?.admin2Name || pb.admin2_name || '',
-            admin2_mobile: dir?.admin2Mobile || pb.admin2_mobile || '',
-            status: dir?.status || pb.status || (dir?.isAssigned ? 'Active' : 'Unassigned'),
-            isAssigned: dir?.isAssigned ?? pb.is_assigned ?? false,
+              admin_mobile:
+                dir?.admin1Mobile &&
+                !['—', 'N/A', ''].includes(String(dir.admin1Mobile).trim())
+                  ? dir.admin1Mobile
+                  : pb.admin_mobile || pb.admin1Mobile || '',
 
-            // Never replace a real points-table value with a directory count.
-            donors_count: toNumber(
-              pb.donors_count ?? pb.donors ?? pb.donor_count ?? dir?.donors ?? dir?.donorCount
-            ),
-            volunteers_count: toNumber(
-              pb.volunteers_count ??
-                pb.volunteers ??
-                pb.volunteer_count ??
-                dir?.volunteers ??
-                dir?.volunteerCount
-            ),
-            meghala_count: toNumber(
-              pb.meghala_count ??
-                pb.meghalas_count ??
-                dir?.meghalaCount ??
-                (Array.isArray(dir?.meghalas) ? dir.meghalas.length : 0)
-            ),
-            total_points: toNumber(pb.total_points),
-            fulfilled_requests: toNumber(
-              pb.fulfilled_requests ?? pb.fulfilled_count ?? pb.fulfilled
-            ),
-            total_requests: toNumber(pb.total_requests ?? pb.request_count),
-          };
-        });
+              admin_email:
+                dir?.email && !['—', 'N/A', ''].includes(String(dir.email).trim())
+                  ? dir.email
+                  : pb.admin_email || pb.email || '',
 
-        // Add directory blocks that are genuinely missing from the points response.
-        // These rows have zero points because no points value was supplied by the API.
+              admin2_name: dir?.admin2Name || pb.admin2_name || '',
+              admin2_mobile: dir?.admin2Mobile || pb.admin2_mobile || '',
+              status: dir?.status || pb.status || (dir?.isAssigned ? 'Active' : 'Unassigned'),
+              isAssigned: dir?.isAssigned ?? pb.is_assigned ?? false,
+
+              donors_count: toNumber(
+                pb.donors_count ?? pb.donors ?? pb.donor_count ?? dir?.donors ?? dir?.donorCount
+              ),
+              volunteers_count: toNumber(
+                pb.volunteers_count ??
+                  pb.volunteers ??
+                  pb.volunteer_count ??
+                  dir?.volunteers ??
+                  dir?.volunteerCount
+              ),
+              meghala_count: toNumber(
+                pb.meghala_count ??
+                  pb.meghalas_count ??
+                  dir?.meghalaCount ??
+                  (Array.isArray(dir?.meghalas) ? dir.meghalas.length : 0)
+              ),
+              total_points: toNumber(pb.total_points),
+              fulfilled_requests: toNumber(
+                pb.fulfilled_requests ?? pb.fulfilled_count ?? pb.fulfilled
+              ),
+              total_requests: toNumber(pb.total_requests ?? pb.request_count),
+            };
+          })
+          .filter((b) => !isGenericOrInvalidBlockName(b.block_name));
+
         dirMap.forEach((db, key) => {
+          const rawName = db.blockName || db.blockCommitteeName || db.city || '';
+          if (isGenericOrInvalidBlockName(rawName)) return;
+
           const exists = mergedBlocks.some((mb) => normalizeName(mb.block_name) === key);
 
           if (!exists) {
             mergedBlocks.push({
-              block_name: db.blockName || db.blockCommitteeName || db.city || 'Block Committee',
+              block_name: rawName,
               admin_name:
                 db.admin1Name && !['Admin Not Assigned', 'N/A', '—'].includes(String(db.admin1Name).trim())
                   ? db.admin1Name
