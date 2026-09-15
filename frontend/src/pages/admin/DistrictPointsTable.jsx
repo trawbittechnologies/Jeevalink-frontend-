@@ -7,6 +7,108 @@ import {
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
 
+const processDynamicMeghalas = (rawData = {}, dirBlocks = []) => {
+  const invalidTerms = ['meghala unit', 'meghala', 'unit', 'unit committee', 'committee', 'block', 'unassigned', 'n/a', ''];
+  const map = new Map();
+
+  const addOrUpdate = (item, parentBlock = '') => {
+    if (!item) return;
+    const rawName = typeof item === 'string' ? item : (item.meghala_name || item.meghala || item.name || item.meghalaCommitteeName || '');
+    const name = String(rawName).trim();
+    if (!name) return;
+
+    const norm = name.toLowerCase();
+    if (invalidTerms.includes(norm)) return;
+
+    const blockName = (typeof item === 'object' && (item.block_name || item.block || item.blockCommitteeName || item.city)) || parentBlock || '';
+    const totalPts = typeof item === 'object' ? (Number(item.total_points) || 0) : 0;
+    const volCount = typeof item === 'object' ? (Number(item.volunteers_count ?? item.volunteers ?? item.volunteer_count) || 0) : 0;
+    const dnrCount = typeof item === 'object' ? (Number(item.donors_count ?? item.donors ?? item.donor_count) || 0) : 0;
+    const memCount = typeof item === 'object' ? (Number(item.total_members ?? item.members) || (volCount + dnrCount)) : 0;
+
+    if (map.has(norm)) {
+      const existing = map.get(norm);
+      existing.total_points = Math.max(existing.total_points, totalPts);
+      existing.volunteers_count = Math.max(existing.volunteers_count, volCount);
+      existing.donors_count = Math.max(existing.donors_count, dnrCount);
+      existing.total_members = Math.max(existing.total_members, memCount);
+      if (!existing.block_name && blockName) {
+        existing.block_name = blockName;
+      }
+    } else {
+      map.set(norm, {
+        meghala_name: name,
+        meghala: name,
+        block_name: blockName,
+        total_points: totalPts,
+        volunteers_count: volCount,
+        donors_count: dnrCount,
+        total_members: memCount,
+      });
+    }
+  };
+
+  if (Array.isArray(rawData?.meghalas)) rawData.meghalas.forEach((m) => addOrUpdate(m));
+  if (Array.isArray(rawData?.highest_meghala_committee)) rawData.highest_meghala_committee.forEach((m) => addOrUpdate(m));
+  if (Array.isArray(rawData?.highest_meghala)) rawData.highest_meghala.forEach((m) => addOrUpdate(m));
+  if (Array.isArray(rawData?.meghala_summary)) rawData.meghala_summary.forEach((m) => addOrUpdate(m));
+
+  if (rawData?.meghalas_by_block && typeof rawData.meghalas_by_block === 'object') {
+    Object.entries(rawData.meghalas_by_block).forEach(([bName, mList]) => {
+      if (Array.isArray(mList)) mList.forEach((m) => addOrUpdate(m, bName));
+    });
+  }
+
+  const blocksList = [
+    ...(Array.isArray(rawData?.blocks) ? rawData.blocks : []),
+    ...(Array.isArray(dirBlocks) ? dirBlocks : []),
+  ];
+
+  blocksList.forEach((b) => {
+    const bName = b.block_name || b.blockName || b.blockCommitteeName || b.city || b.block || '';
+    if (Array.isArray(b.meghalas)) {
+      b.meghalas.forEach((m) => addOrUpdate(m, bName));
+    }
+  });
+
+  const donors = Array.isArray(rawData?.top_donors)
+    ? rawData.top_donors
+    : Array.isArray(rawData?.highest_donors)
+      ? rawData.highest_donors
+      : [];
+  const volunteers = Array.isArray(rawData?.top_volunteers) ? rawData.top_volunteers : [];
+
+  donors.forEach((d) => {
+    if (d.meghala) addOrUpdate({ meghala_name: d.meghala, block_name: d.block || d.city || '', donors_count: 1, total_points: Number(d.reward_points) || 0 });
+  });
+
+  volunteers.forEach((v) => {
+    if (v.meghala) addOrUpdate({ meghala_name: v.meghala, block_name: v.block || v.city || '', volunteers_count: 1, total_points: Number(v.reward_points) || 0 });
+  });
+
+  const result = Array.from(map.values());
+  result.forEach((m) => {
+    if (m.total_members === 0) {
+      m.total_members = (m.volunteers_count || 0) + (m.donors_count || 0);
+    }
+    if (m.total_points === 0 && (m.donors_count > 0 || m.volunteers_count > 0)) {
+      m.total_points = (m.donors_count * 100) + (m.volunteers_count * 50);
+    }
+  });
+
+  result.sort((a, b) => {
+    if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+    if (b.total_members !== a.total_members) return b.total_members - a.total_members;
+    return a.meghala_name.localeCompare(b.meghala_name);
+  });
+
+  result.forEach((m, idx) => {
+    m.rank = idx + 1;
+  });
+
+  return result;
+};
+
 export default function DistrictPointsTable() {
   const { user } = useAuthStore();
   const userDistrict = user?.district || 'Kasaragod';
@@ -199,6 +301,8 @@ export default function DistrictPointsTable() {
           block.rank = index + 1;
         });
 
+        const processedMeghalas = processDynamicMeghalas(rawData, dirBlocks);
+
         const rawSummary = rawData.summary || {};
         const summary = {
           ...rawSummary,
@@ -209,8 +313,7 @@ export default function DistrictPointsTable() {
           ),
           total_blocks: toNumber(rawSummary.total_blocks ?? mergedBlocks.length),
           total_meghalas: toNumber(
-            rawSummary.total_meghalas ??
-              mergedBlocks.reduce((sum, block) => sum + toNumber(block.meghala_count), 0)
+            rawSummary.total_meghalas ?? processedMeghalas.length
           ),
           total_donors: toNumber(
             rawSummary.total_donors ??
@@ -233,7 +336,7 @@ export default function DistrictPointsTable() {
           district: rawData.district || user?.district || 'Kasaragod',
           summary,
           blocks: mergedBlocks,
-          meghalas: Array.isArray(rawData.meghalas) ? rawData.meghalas : [],
+          meghalas: processedMeghalas,
           top_donors: Array.isArray(rawData.top_donors)
             ? rawData.top_donors
             : Array.isArray(rawData.highest_donors)
@@ -258,7 +361,7 @@ export default function DistrictPointsTable() {
             ? pub.highest_donors
             : [];
         const volunteers = Array.isArray(pub.top_volunteers) ? pub.top_volunteers : [];
-        const meghalas = Array.isArray(pub.meghalas) ? pub.meghalas : [];
+        const processedMeghalas = processDynamicMeghalas(pub, dirBlocks);
 
         const fallbackSummary = {
           total_district_points: blocks.reduce(
@@ -266,7 +369,7 @@ export default function DistrictPointsTable() {
             0
           ),
           total_blocks: blocks.length,
-          total_meghalas: meghalas.length,
+          total_meghalas: processedMeghalas.length,
           total_donors: donors.length,
           total_volunteers: volunteers.length,
           top_block: blocks[0]?.block_name || 'N/A',
@@ -285,7 +388,7 @@ export default function DistrictPointsTable() {
             fulfilled_requests: toNumber(block.fulfilled_requests),
             meghala_count: toNumber(block.meghala_count),
           })),
-          meghalas,
+          meghalas: processedMeghalas,
           top_donors: donors,
           top_volunteers: volunteers,
           point_rules: Array.isArray(pub.point_rules) ? pub.point_rules : [],
@@ -322,15 +425,14 @@ export default function DistrictPointsTable() {
         block.rank = index + 1;
       });
 
+      const processedMeghalas = processDynamicMeghalas({}, dirBlocks);
+
       setData({
         district: user?.district || 'Kasaragod',
         summary: {
           total_district_points: 0,
           total_blocks: compiledBlocks.length,
-          total_meghalas: compiledBlocks.reduce(
-            (sum, block) => sum + toNumber(block.meghala_count),
-            0
-          ),
+          total_meghalas: processedMeghalas.length,
           total_donors: compiledBlocks.reduce(
             (sum, block) => sum + toNumber(block.donors_count),
             0
@@ -343,7 +445,7 @@ export default function DistrictPointsTable() {
           top_donor: 'N/A',
         },
         blocks: compiledBlocks,
-        meghalas: [],
+        meghalas: processedMeghalas,
         top_donors: [],
         top_volunteers: [],
         point_rules: [],
@@ -354,7 +456,7 @@ export default function DistrictPointsTable() {
       setData((current) => ({
         ...current,
         blocks: Array.isArray(current.blocks) ? current.blocks : [],
-        meghalas: Array.isArray(current.meghalas) ? current.meghalas : [],
+        meghalas: Array.isArray(current.meghalas) && current.meghalas.length > 0 ? current.meghalas : processDynamicMeghalas({}, []),
         top_donors: Array.isArray(current.top_donors) ? current.top_donors : [],
         top_volunteers: Array.isArray(current.top_volunteers) ? current.top_volunteers : [],
       }));
