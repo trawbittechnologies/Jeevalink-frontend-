@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck, Plus, RefreshCw, Edit3, Trash2, X, Building2,
-  UserCheck, BarChart3, TrendingUp, Search, Phone,
+  UserCheck, BarChart3, TrendingUp, Search, Phone, MapPin,
   Droplets, Flame, CheckCircle2, Award, ArrowUpRight,
   Trophy, AlertCircle, Video, Film, Image, Upload, Save, Sparkles
 } from 'lucide-react';
@@ -14,6 +14,14 @@ import MascotVideo from '../../components/MascotVideo.jsx';
 import { getDisplayJeevalinkId } from '../../utils/jeevalinkId.js';
 
 const ALL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+function normalizeBlockName(name) {
+  if (!name || typeof name !== 'string') return '';
+  let s = name.toLowerCase().trim();
+  s = s.replace(/^(dyfi|block committee|block)\s+/i, '');
+  s = s.replace(/\s+(block committee|committee|block)$/i, '');
+  return s.trim();
+}
 
 function parseBlockAdminContacts(ba) {
   let admin1Name = ba.primaryContactName || ba.primary_contact_name || ba.primaryName || ba.primary_name || ba.name || '';
