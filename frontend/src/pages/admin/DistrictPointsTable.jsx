@@ -37,23 +37,46 @@ export default function DistrictPointsTable() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+
     try {
-      // 1. Fetch dedicated points-table endpoint AND official blocks directory endpoint in parallel
+      // The points-table endpoint is authoritative for ranking/points data.
+      // The blocks directory is only used to enrich block metadata.
       const [resPoints, resBlocks] = await Promise.all([
         api.get('/super-admin/points-table').catch(() => null),
         api.get('/super-admin/blocks').catch(() => null),
       ]);
 
-      const dirBlocks = resBlocks?.data?.success && Array.isArray(resBlocks.data.data?.blocks)
-        ? resBlocks.data.data.blocks
-        : [];
+      const dirBlocks =
+        resBlocks?.data?.success && Array.isArray(resBlocks.data.data?.blocks)
+          ? resBlocks.data.data.blocks
+          : [];
 
-      // Create lookup map of directory blocks from /super-admin/blocks by clean block key
+      const normalizeName = (value = '') =>
+        String(value)
+          .toLowerCase()
+          .replace(/^(dyfi|block committee|block)\s+|\s+(block committee|committee|block)$/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+      const toNumber = (value, fallback = 0) => {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : fallback;
+      };
+
+      const getBlockName = (block = '') =>
+        block.block_name ||
+        block.blockCommitteeName ||
+        block.city ||
+        block.block ||
+        '';
+
       const dirMap = new Map();
-      dirBlocks.forEach(db => {
+
+      dirBlocks.forEach((db) => {
         const name = db.blockName || db.blockCommitteeName || db.city || '';
-        if (name) {
-          const key = name.toLowerCase().replace(/^(dyfi|block committee|block)\s+|\s+(block committee|committee|block)$/g, '').trim();
+        const key = normalizeName(name);
+
+        if (key) {
           dirMap.set(key, db);
         }
       });
@@ -62,161 +85,273 @@ export default function DistrictPointsTable() {
         const rawData = resPoints.data.data;
         const ptsBlocks = Array.isArray(rawData.blocks) ? rawData.blocks : [];
 
-        // Merge directory block details (admin leads, contact info, status) into points blocks
-        const mergedBlocks = ptsBlocks.map(pb => {
-          const pbName = pb.block_name || pb.blockCommitteeName || pb.city || pb.block || '';
-          const key = pbName.toLowerCase().replace(/^(dyfi|block committee|block)\s+|\s+(block committee|committee|block)$/g, '').trim();
+        const mergedBlocks = ptsBlocks.map((pb) => {
+          const pbName = getBlockName(pb);
+          const key = normalizeName(pbName);
 
-          const dir = dirMap.get(key) || Array.from(dirMap.values()).find(d => {
-            const dKey = (d.blockName || '').toLowerCase().trim();
-            return key.includes(dKey) || dKey.includes(key);
-          });
+          const dir =
+            dirMap.get(key) ||
+            Array.from(dirMap.entries()).find(([dirKey]) => {
+              if (!key || !dirKey) return false;
+              return key === dirKey || key.includes(dirKey) || dirKey.includes(key);
+            })?.[1];
 
           return {
             ...pb,
             block_name: pbName || dir?.blockName || 'Block Committee',
-            admin_name: (dir?.admin1Name && dir.admin1Name !== 'Admin Not Assigned' && dir.admin1Name !== 'N/A')
-              ? dir.admin1Name
-              : (pb.admin_name || 'Block Coordinator'),
-            admin_mobile: (dir?.admin1Mobile && dir.admin1Mobile !== '—' && dir.admin1Mobile !== 'N/A')
-              ? dir.admin1Mobile
-              : (pb.admin_mobile || ''),
-            admin2_name: dir?.admin2Name || '',
-            admin2_mobile: dir?.admin2Mobile || '',
+
+            admin_name:
+              dir?.admin1Name &&
+              !['Admin Not Assigned', 'N/A', '—'].includes(String(dir.admin1Name).trim())
+                ? dir.admin1Name
+                : pb.admin_name || pb.admin1Name || 'Block Coordinator',
+
+            admin_mobile:
+              dir?.admin1Mobile &&
+              !['—', 'N/A', ''].includes(String(dir.admin1Mobile).trim())
+                ? dir.admin1Mobile
+                : pb.admin_mobile || pb.admin1Mobile || '',
+
+            admin_email:
+              dir?.email && !['—', 'N/A', ''].includes(String(dir.email).trim())
+                ? dir.email
+                : pb.admin_email || pb.email || '',
+
+            admin2_name: dir?.admin2Name || pb.admin2_name || '',
+            admin2_mobile: dir?.admin2Mobile || pb.admin2_mobile || '',
             status: dir?.status || pb.status || (dir?.isAssigned ? 'Active' : 'Unassigned'),
             isAssigned: dir?.isAssigned ?? pb.is_assigned ?? false,
-            donors_count: pb.donors_count ?? dir?.donors ?? dir?.donorCount ?? 0,
-            volunteers_count: pb.volunteers_count ?? dir?.volunteers ?? dir?.volunteerCount ?? 0,
-            meghala_count: pb.meghala_count ?? dir?.meghalaCount ?? dir?.meghalas?.length ?? 0,
+
+            // Never replace a real points-table value with a directory count.
+            donors_count: toNumber(
+              pb.donors_count ?? pb.donors ?? pb.donor_count ?? dir?.donors ?? dir?.donorCount
+            ),
+            volunteers_count: toNumber(
+              pb.volunteers_count ??
+                pb.volunteers ??
+                pb.volunteer_count ??
+                dir?.volunteers ??
+                dir?.volunteerCount
+            ),
+            meghala_count: toNumber(
+              pb.meghala_count ??
+                pb.meghalas_count ??
+                dir?.meghalaCount ??
+                (Array.isArray(dir?.meghalas) ? dir.meghalas.length : 0)
+            ),
+            total_points: toNumber(pb.total_points),
+            fulfilled_requests: toNumber(
+              pb.fulfilled_requests ?? pb.fulfilled_count ?? pb.fulfilled
+            ),
+            total_requests: toNumber(pb.total_requests ?? pb.request_count),
           };
         });
 
-        // Add any directory blocks not present in ptsBlocks
+        // Add directory blocks that are genuinely missing from the points response.
+        // These rows have zero points because no points value was supplied by the API.
         dirMap.forEach((db, key) => {
-          const exists = mergedBlocks.some(mb => {
-            const mKey = mb.block_name.toLowerCase().replace(/^(dyfi|block committee|block)\s+|\s+(block committee|committee|block)$/g, '').trim();
-            return mKey === key || mKey.includes(key) || key.includes(mKey);
-          });
+          const exists = mergedBlocks.some((mb) => normalizeName(mb.block_name) === key);
+
           if (!exists) {
             mergedBlocks.push({
-              block_name: db.blockName || db.blockCommitteeName,
-              admin_name: db.admin1Name || 'Block Coordinator',
-              admin_mobile: db.admin1Mobile !== '—' ? db.admin1Mobile : '',
+              block_name: db.blockName || db.blockCommitteeName || db.city || 'Block Committee',
+              admin_name:
+                db.admin1Name && !['Admin Not Assigned', 'N/A', '—'].includes(String(db.admin1Name).trim())
+                  ? db.admin1Name
+                  : 'Block Coordinator',
+              admin_mobile:
+                db.admin1Mobile && !['—', 'N/A', ''].includes(String(db.admin1Mobile).trim())
+                  ? db.admin1Mobile
+                  : '',
+              admin_email:
+                db.email && !['—', 'N/A', ''].includes(String(db.email).trim()) ? db.email : '',
               admin2_name: db.admin2Name || '',
               admin2_mobile: db.admin2Mobile || '',
-              status: db.status || 'Unassigned',
-              isAssigned: db.isAssigned,
+              status: db.status || (db.isAssigned ? 'Active' : 'Unassigned'),
+              isAssigned: db.isAssigned ?? false,
               total_points: 0,
-              donors_count: db.donors || db.donorCount || 0,
-              volunteers_count: db.volunteers || db.volunteerCount || 0,
+              donors_count: toNumber(db.donors ?? db.donorCount),
+              volunteers_count: toNumber(db.volunteers ?? db.volunteerCount),
               fulfilled_requests: 0,
               total_requests: 0,
-              meghala_count: db.meghalaCount || db.meghalas?.length || 0,
+              meghala_count: toNumber(
+                db.meghalaCount ?? (Array.isArray(db.meghalas) ? db.meghalas.length : 0)
+              ),
             });
           }
         });
 
-        // Re-sort merged blocks by points
-        mergedBlocks.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
-        mergedBlocks.forEach((b, idx) => { b.rank = idx + 1; });
+        mergedBlocks.sort((a, b) => toNumber(b.total_points) - toNumber(a.total_points));
+        mergedBlocks.forEach((block, index) => {
+          block.rank = index + 1;
+        });
+
+        const rawSummary = rawData.summary || {};
+        const summary = {
+          ...rawSummary,
+          total_district_points: toNumber(
+            rawSummary.total_district_points ??
+              rawSummary.total_points ??
+              mergedBlocks.reduce((sum, block) => sum + toNumber(block.total_points), 0)
+          ),
+          total_blocks: toNumber(rawSummary.total_blocks ?? mergedBlocks.length),
+          total_meghalas: toNumber(
+            rawSummary.total_meghalas ??
+              mergedBlocks.reduce((sum, block) => sum + toNumber(block.meghala_count), 0)
+          ),
+          total_donors: toNumber(
+            rawSummary.total_donors ??
+              mergedBlocks.reduce((sum, block) => sum + toNumber(block.donors_count), 0)
+          ),
+          total_volunteers: toNumber(
+            rawSummary.total_volunteers ??
+              mergedBlocks.reduce((sum, block) => sum + toNumber(block.volunteers_count), 0)
+          ),
+          top_block:
+            rawSummary.top_block ||
+            mergedBlocks.find((block) => toNumber(block.total_points) > 0)?.block_name ||
+            mergedBlocks[0]?.block_name ||
+            'N/A',
+          top_donor: rawSummary.top_donor || rawData.top_donors?.[0]?.primary_name || 'N/A',
+        };
 
         setData({
           ...rawData,
+          district: rawData.district || user?.district || 'Kasaragod',
+          summary,
           blocks: mergedBlocks,
+          meghalas: Array.isArray(rawData.meghalas) ? rawData.meghalas : [],
+          top_donors: Array.isArray(rawData.top_donors)
+            ? rawData.top_donors
+            : Array.isArray(rawData.highest_donors)
+              ? rawData.highest_donors
+              : [],
+          top_volunteers: Array.isArray(rawData.top_volunteers) ? rawData.top_volunteers : [],
+          point_rules: Array.isArray(rawData.point_rules) ? rawData.point_rules : [],
+          badges_guide: Array.isArray(rawData.badges_guide) ? rawData.badges_guide : [],
         });
         return;
       }
 
-      // 2. Try public leaderboard endpoint if super-admin/points-table is not available
-      let resPub = await api.get('/leaderboard').catch(() => null);
+      // Public leaderboard fallback.
+      const resPub = await api.get('/leaderboard').catch(() => null);
+
       if (resPub?.data?.success && resPub.data.data) {
         const pub = resPub.data.data;
+        const blocks = Array.isArray(pub.blocks) ? pub.blocks : [];
+        const donors = Array.isArray(pub.top_donors)
+          ? pub.top_donors
+          : Array.isArray(pub.highest_donors)
+            ? pub.highest_donors
+            : [];
+        const volunteers = Array.isArray(pub.top_volunteers) ? pub.top_volunteers : [];
+        const meghalas = Array.isArray(pub.meghalas) ? pub.meghalas : [];
+
+        const fallbackSummary = {
+          total_district_points: blocks.reduce(
+            (sum, block) => sum + toNumber(block.total_points),
+            0
+          ),
+          total_blocks: blocks.length,
+          total_meghalas: meghalas.length,
+          total_donors: donors.length,
+          total_volunteers: volunteers.length,
+          top_block: blocks[0]?.block_name || 'N/A',
+          top_donor: donors[0]?.primary_name || donors[0]?.name || 'N/A',
+        };
+
         setData({
           district: pub.district || user?.district || 'Kasaragod',
-          summary: pub.summary || {
-            total_district_points: (pub.blocks || []).reduce((a, b) => a + (b.total_points || 0), 0),
-            total_blocks: (pub.blocks || []).length,
-            total_meghalas: (pub.meghalas || []).length,
-            total_donors: (pub.top_donors || []).length,
-            total_volunteers: (pub.top_volunteers || []).length,
-            top_block: pub.blocks?.[0]?.block_name || 'N/A',
-            top_donor: pub.top_donors?.[0]?.primary_name || 'N/A',
-          },
-          blocks: pub.blocks || [],
-          meghalas: pub.meghalas || [],
-          top_donors: pub.top_donors || pub.highest_donors || [],
-          top_volunteers: pub.top_volunteers || [],
-          point_rules: pub.point_rules || [],
-          badges_guide: pub.badges_guide || []
+          summary: { ...fallbackSummary, ...(pub.summary || {}) },
+          blocks: blocks.map((block, index) => ({
+            ...block,
+            rank: block.rank || index + 1,
+            total_points: toNumber(block.total_points),
+            donors_count: toNumber(block.donors_count ?? block.donors),
+            volunteers_count: toNumber(block.volunteers_count ?? block.volunteers),
+            fulfilled_requests: toNumber(block.fulfilled_requests),
+            meghala_count: toNumber(block.meghala_count),
+          })),
+          meghalas,
+          top_donors: donors,
+          top_volunteers: volunteers,
+          point_rules: Array.isArray(pub.point_rules) ? pub.point_rules : [],
+          badges_guide: Array.isArray(pub.badges_guide) ? pub.badges_guide : [],
         });
         return;
       }
 
-      // 3. Dynamic fallback from directory blocks
-      const compiledBlocks = dirBlocks.map((bs, idx) => ({
-        rank: idx + 1,
+      // Directory-only fallback. It intentionally does NOT manufacture points.
+      const compiledBlocks = dirBlocks.map((bs) => ({
+        rank: 0,
         block_name: bs.blockName || bs.blockCommitteeName || bs.city || 'Block Committee',
         admin_name: bs.admin1Name || 'Block Coordinator',
-        admin_mobile: bs.admin1Mobile !== '—' ? bs.admin1Mobile : '',
-        admin_email: bs.email !== '—' ? bs.email : '',
+        admin_mobile:
+          bs.admin1Mobile && !['—', 'N/A', ''].includes(String(bs.admin1Mobile).trim())
+            ? bs.admin1Mobile
+            : '',
+        admin_email:
+          bs.email && !['—', 'N/A', ''].includes(String(bs.email).trim()) ? bs.email : '',
         status: bs.status || 'Unassigned',
-        isAssigned: bs.isAssigned,
-        total_points: ((bs.donors || bs.donorCount || 0) * 100) + ((bs.volunteers || bs.volunteerCount || 0) * 50),
-        donors_count: bs.donors || bs.donorCount || 0,
-        volunteers_count: bs.volunteers || bs.volunteerCount || 0,
+        isAssigned: bs.isAssigned ?? false,
+        total_points: 0,
+        donors_count: toNumber(bs.donors ?? bs.donorCount),
+        volunteers_count: toNumber(bs.volunteers ?? bs.volunteerCount),
         fulfilled_requests: 0,
         total_requests: 0,
-        meghala_count: bs.meghalaCount || bs.meghalas?.length || 0
+        meghala_count: toNumber(
+          bs.meghalaCount ?? (Array.isArray(bs.meghalas) ? bs.meghalas.length : 0)
+        ),
       }));
 
-      compiledBlocks.sort((a, b) => b.total_points - a.total_points);
-      compiledBlocks.forEach((b, idx) => { b.rank = idx + 1; });
+      compiledBlocks.sort((a, b) => b.donors_count - a.donors_count);
+      compiledBlocks.forEach((block, index) => {
+        block.rank = index + 1;
+      });
 
       setData({
         district: user?.district || 'Kasaragod',
         summary: {
-          total_district_points: compiledBlocks.reduce((acc, b) => acc + b.total_points, 0),
+          total_district_points: 0,
           total_blocks: compiledBlocks.length,
-          total_meghalas: compiledBlocks.reduce((acc, b) => acc + b.meghala_count, 0),
-          total_donors: compiledBlocks.reduce((acc, b) => acc + b.donors_count, 0),
-          total_volunteers: compiledBlocks.reduce((acc, b) => acc + b.volunteers_count, 0),
-          top_block: compiledBlocks[0]?.block_name || 'N/A',
+          total_meghalas: compiledBlocks.reduce(
+            (sum, block) => sum + toNumber(block.meghala_count),
+            0
+          ),
+          total_donors: compiledBlocks.reduce(
+            (sum, block) => sum + toNumber(block.donors_count),
+            0
+          ),
+          total_volunteers: compiledBlocks.reduce(
+            (sum, block) => sum + toNumber(block.volunteers_count),
+            0
+          ),
+          top_block: 'N/A',
           top_donor: 'N/A',
         },
         blocks: compiledBlocks,
         meghalas: [],
         top_donors: [],
         top_volunteers: [],
-        point_rules: [
-          { action: 'Blood Donation Completed', target: 'Donor', badge: '🩸 +100 Pts' },
-          { action: 'Meghala Volunteer Verification', target: 'Meghala Volunteer', badge: '🛡️ +20 Pts' },
-          { action: 'Block Committee Coordination', target: 'Block Admin', badge: '🏢 +20 Pts' },
-          { action: 'Emergency SOS Acceptance', target: 'Donor / Responder', badge: '⚡ +20 Pts' },
-          { action: 'Block Fulfilled Request Bonus', target: 'Block Committee Score', badge: '🏆 +150 Pts' },
-        ],
-        badges_guide: [
-          { name: 'First Drop', points: 100, desc: 'Completed 1st verified blood donation.' },
-          { name: 'Life Saver', points: 500, desc: 'Earned 500 points rescuing lives.' },
-          { name: 'Blood Hero', points: 1000, desc: 'Reached 1,000 points milestone.' },
-          { name: 'Red Guardian', points: 2500, desc: 'Reached 2,500 points champion status.' },
-          { name: 'Legend Donor', points: 5000, desc: 'Attained highest 5,000 points tier.' },
-        ]
+        point_rules: [],
+        badges_guide: [],
       });
     } catch (err) {
       console.error('Failed to load district points table:', err);
+      setData((current) => ({
+        ...current,
+        blocks: Array.isArray(current.blocks) ? current.blocks : [],
+        meghalas: Array.isArray(current.meghalas) ? current.meghalas : [],
+        top_donors: Array.isArray(current.top_donors) ? current.top_donors : [],
+        top_volunteers: Array.isArray(current.top_volunteers) ? current.top_volunteers : [],
+      }));
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user?.district]);
 
   useEffect(() => {
-    let active = true;
-    (async () => {
-      if (active) {
-        await fetchData();
-      }
-    })();
-    return () => { active = false; };
+    fetchData();
   }, [fetchData]);
 
   const currentDistrict = data.district || user?.district || 'Kasaragod';
@@ -415,9 +550,9 @@ export default function DistrictPointsTable() {
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-200/90 block">Active Committees</span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-black text-white">
-                {filteredBlocks.length}
+                {Number(data.summary?.total_blocks) || 0}
               </span>
-              <span className="text-xs text-red-200 font-medium">Blocks • {filteredMeghalas.length} Units</span>
+              <span className="text-xs text-red-200 font-medium">Blocks • {Number(data.summary?.total_meghalas) || 0} Units</span>
             </div>
           </div>
         </div>
@@ -691,7 +826,7 @@ export default function DistrictPointsTable() {
                       <div className="flex items-center gap-6 shrink-0">
                         <div className="text-right hidden sm:block">
                           <span className="text-slate-700 font-bold text-xs block">{donor.total_donations || 0} Donations</span>
-                          <span className="text-[10px] text-emerald-600 font-bold">{donor.lives_saved || ((donor.total_donations || 1) * 3)} Lives Saved</span>
+                          <span className="text-[10px] text-emerald-600 font-bold">{donor.lives_saved ?? '—'} Lives Saved</span>
                         </div>
                         <div className="text-right min-w-[70px]">
                           <span className="font-black text-red-600 text-sm">{(donor.reward_points || 0).toLocaleString()}</span>
