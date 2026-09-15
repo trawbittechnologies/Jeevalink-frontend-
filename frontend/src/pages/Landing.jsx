@@ -12,8 +12,7 @@ import {
   Search,
   UserPlus,
   HeartHandshake,
-  CheckCircle2,
-  Heart
+  CheckCircle2
 } from "lucide-react";
 import CommunityChoiceModal from "../components/CommunityChoiceModal.jsx";
 
@@ -60,7 +59,7 @@ export default function Landing() {
     let start = 0;
     const end = Number(totalDonors) || 0;
     if (end === 0) {
-      setDisplayDonorCount(0);
+      requestAnimationFrame(() => setDisplayDonorCount(0));
       return;
     }
     const duration = 1200;
@@ -86,7 +85,7 @@ export default function Landing() {
     let start = 0;
     const end = Number(totalVolunteers) || 0;
     if (end === 0) {
-      setDisplayVolunteerCount(0);
+      requestAnimationFrame(() => setDisplayVolunteerCount(0));
       return;
     }
     const duration = 1200;
