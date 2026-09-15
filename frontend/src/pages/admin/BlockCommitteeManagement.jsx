@@ -811,10 +811,17 @@ export default function BlockCommitteeManagement() {
   const totalBlocks = allBlockCommittees.length;
   const totalMeghalas = allBlockCommittees.reduce((acc, c) => acc + c.meghalaCount, 0);
   const totalBlockDonors = allBlockCommittees.reduce((acc, c) => acc + c.donors, 0);
-  const totalBlockVolunteers = allBlockCommittees.reduce((acc, c) => acc + (c.volunteers || 0), 0);
+  const totalBlockVolunteers = allBlockCommittees.reduce((acc, c) => acc + (Number(c.volunteers) || 0), 0);
   const activeCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Active').length;
   const unassignedCount = allBlockCommittees.filter(c => !c.isAssigned).length;
   const suspendedCount = allBlockCommittees.filter(c => c.isAssigned && c.status === 'Suspended').length;
+
+  // Dynamic total volunteer count fetched from all block committees
+  const totalVolunteersDisplay = useMemo(() => {
+    if (totalBlockVolunteers > 0) return totalBlockVolunteers;
+    if (realVolunteersCount > 0) return realVolunteersCount;
+    return 0;
+  }, [totalBlockVolunteers, realVolunteersCount]);
 
   const exportCSV = () => {
     const headers = ['Block Name', 'Meghalas Count', 'Admin Name', 'Email', 'Primary Contact', 'Secondary Contact', 'Donors', 'Volunteers', 'Status'];
