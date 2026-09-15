@@ -825,7 +825,7 @@ export default function SuperAdminDashboard() {
               <UserCheck className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-emerald-700 mt-1">{realVolunteersCount}</p>
+          <p className="text-2xl font-black text-emerald-700 mt-1">{totalVolunteersDisplay}</p>
           <p className="text-[10px] text-slate-500 font-medium mt-1">District Squads</p>
         </div>
 
