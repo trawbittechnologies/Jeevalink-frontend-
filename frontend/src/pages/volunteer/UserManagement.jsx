@@ -4,12 +4,13 @@ import { useAuthStore } from '../../store/authStore.js';
 import api from '../../store/api.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, Plus, Eye, ShieldCheck, Mail, Save, X, Loader2, KeyRound, Phone, MapPin, Lock, Trash2, Upload, Droplet, Clock, CheckCircle2, AlertTriangle, Navigation, Map as MapIcon, Compass, Sparkles, Crosshair
+  Users, Plus, Eye, ShieldCheck, Mail, Save, X, Loader2, KeyRound, Phone, MapPin, Lock, Trash2, Upload, Droplet, Clock, CheckCircle2, AlertTriangle, Navigation, Map as MapIcon, Compass, Sparkles, Crosshair, Crop
 } from 'lucide-react';
 import FilterBar from '../../components/admin/FilterBar.jsx';
 import ConfirmModal from '../../components/admin/ConfirmModal.jsx';
 import LocationSearchInput from '../../components/LocationSearchInput.jsx';
 import MapLibreContainer from '../../components/MapLibreContainer.jsx';
+import ImageCropperModal from '../../components/ImageCropperModal.jsx';
 import { reverseGeocodeNominatim } from '../../services/mapService.js';
 import { getStorageUrl } from '../../store/api.js';
 
@@ -135,6 +136,34 @@ export default function UserManagement() {
   const [addMapAddress, setAddMapAddress] = useState('');
   const [showMapCanvas, setShowMapCanvas] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
+
+  // Profile Image Cropper states
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState(null);
+
+  const handleImageSelectedForCrop = (file) => {
+    if (!file) return;
+    setImageToCrop(file);
+    setCropperOpen(true);
+  };
+
+  const handleCropComplete = (croppedFile) => {
+    setForm((prev) => ({
+      ...prev,
+      profile_picture: croppedFile,
+    }));
+    triggerToast('Profile picture cropped successfully!', 'success');
+  };
+
+  const handleReCropExisting = () => {
+    if (!form.profile_picture) return;
+    if (typeof form.profile_picture === 'string') {
+      setImageToCrop(getStorageUrl(form.profile_picture));
+    } else {
+      setImageToCrop(form.profile_picture);
+    }
+    setCropperOpen(true);
+  };
 
   const handleUseGPS = () => {
     if (!navigator.geolocation) {
@@ -1101,19 +1130,28 @@ export default function UserManagement() {
                               onError={(e) => { e.target.onerror = null; e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=User`; }}
                               className="w-20 h-20 rounded-2xl object-cover border-2 border-red-200 shadow-sm"
                             />
-                            <button
-                              type="button"
-                              onClick={() => setForm({ ...form, profile_picture: null })}
-                              className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-                            >
-                              <X className="w-3.5 h-3.5" /> Remove / Change Photo
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={handleReCropExisting}
+                                className="px-2.5 py-1 text-xs font-bold text-slate-700 hover:text-red-600 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1 cursor-pointer transition"
+                              >
+                                <Crop className="w-3.5 h-3.5 text-red-600" /> Crop / Adjust
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setForm({ ...form, profile_picture: null })}
+                                className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
+                              >
+                                <X className="w-3.5 h-3.5" /> Remove
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <label className="w-full flex flex-col items-center justify-center p-4 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-red-400 rounded-2xl cursor-pointer transition-colors group">
                             <Upload className="w-5 h-5 text-slate-400 group-hover:text-red-600 transition-colors mb-1" />
                             <span className="text-xs font-bold text-slate-700 group-hover:text-red-600 transition-colors">
-                              Click to Upload New Profile Picture
+                              Click to Upload & Crop Profile Picture
                             </span>
                             <span className="text-[10px] text-slate-400 mt-0.5">Supports JPG, PNG, WEBP</span>
                             <input
@@ -1122,7 +1160,8 @@ export default function UserManagement() {
                               className="hidden"
                               onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
-                                  setForm({ ...form, profile_picture: e.target.files[0] });
+                                  handleImageSelectedForCrop(e.target.files[0]);
+                                  e.target.value = '';
                                 }
                               }}
                             />
@@ -1217,19 +1256,28 @@ export default function UserManagement() {
                             alt="Profile Preview"
                             className="w-24 h-24 rounded-2xl object-cover border-2 border-red-200 shadow-sm"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setForm({ ...form, profile_picture: null })}
-                            className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" /> Remove & Change Photo
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleReCropExisting}
+                              className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-red-600 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center gap-1.5 cursor-pointer transition"
+                            >
+                              <Crop className="w-3.5 h-3.5 text-red-600" /> Crop / Adjust Image
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setForm({ ...form, profile_picture: null })}
+                              className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" /> Remove Photo
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <label className="w-full flex flex-col items-center justify-center p-5 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-red-400 rounded-2xl cursor-pointer transition-colors group">
                           <Upload className="w-6 h-6 text-slate-400 group-hover:text-red-600 transition-colors mb-1.5" />
                           <span className="text-xs font-bold text-slate-700 group-hover:text-red-600 transition-colors">
-                            Click to upload Profile Picture
+                            Click to upload & crop Profile Picture *
                           </span>
                           <span className="text-[10px] text-slate-400 mt-0.5">Supports JPG, PNG, WEBP</span>
                           <input
@@ -1238,7 +1286,8 @@ export default function UserManagement() {
                             className="hidden"
                             onChange={(e) => {
                               if (e.target.files && e.target.files[0]) {
-                                setForm({ ...form, profile_picture: e.target.files[0] });
+                                handleImageSelectedForCrop(e.target.files[0]);
+                                e.target.value = '';
                               }
                             }}
                           />
@@ -1626,6 +1675,15 @@ export default function UserManagement() {
         message={`Are you sure you want to permanently delete user "${confirmModal.item?.primaryName || confirmModal.item?.primary_name || confirmModal.item?.name || 'this user'}"? This action cannot be undone.`}
         confirmLabel="Delete Permanently"
         variant="danger"
+      />
+
+      {/* Profile Picture Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageFile={imageToCrop}
+        onClose={() => setCropperOpen(false)}
+        onCropComplete={handleCropComplete}
+        title="Crop & Adjust Donor Profile Picture"
       />
     </div>
   );
