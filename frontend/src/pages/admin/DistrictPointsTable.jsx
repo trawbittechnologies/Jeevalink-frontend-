@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, RefreshCw } from 'lucide-react';
+import { 
+  Trophy, Award, Medal, Crown, Flame, MapPin, Users, Sparkles, RefreshCw, 
+  Building2, Droplets, Heart, Zap, Shield, Search, ArrowUpRight, Phone, Mail, 
+  CheckCircle2, ChevronRight, Info, Filter, X
+} from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
 
@@ -32,124 +36,85 @@ export default function DistrictPointsTable() {
   });
 
   const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
       // 1. Try dedicated points-table endpoint
       let res = await api.get('/super-admin/points-table').catch(() => null);
 
-      if (res?.data?.success && res.data.data?.blocks?.length > 0) {
+      if (res?.data?.success && res.data.data) {
         setData(res.data.data);
         return;
       }
 
-      // 2. Dynamic fallback from real database metrics and block-admins
-      const [resDist, resAdmins] = await Promise.all([
-        api.get('/super-admin/metrics').catch(() => null),
-        api.get('/super-admin/block-admins').catch(() => null)
-      ]);
+      // 2. Try public leaderboard endpoint as fallback
+      let resPub = await api.get('/leaderboard').catch(() => null);
+      if (resPub?.data?.success && resPub.data.data) {
+        const pub = resPub.data.data;
+        setData({
+          district: pub.district || user?.district || 'Kasaragod',
+          summary: pub.summary || {
+            total_district_points: (pub.blocks || []).reduce((a, b) => a + (b.total_points || 0), 0),
+            total_blocks: (pub.blocks || []).length,
+            total_meghalas: (pub.meghalas || []).length,
+            total_donors: (pub.top_donors || []).length,
+            total_volunteers: (pub.top_volunteers || []).length,
+            top_block: pub.blocks?.[0]?.block_name || 'N/A',
+            top_donor: pub.top_donors?.[0]?.primary_name || 'N/A',
+          },
+          blocks: pub.blocks || [],
+          meghalas: pub.meghalas || [],
+          top_donors: pub.top_donors || pub.highest_donors || [],
+          top_volunteers: pub.top_volunteers || [],
+          point_rules: pub.point_rules || [],
+          badges_guide: pub.badges_guide || []
+        });
+        return;
+      }
 
-      const dData = resDist?.data?.data || resDist?.data || {};
-      const adminsList = Array.isArray(resAdmins?.data?.data)
-        ? resAdmins.data.data
-        : (Array.isArray(resAdmins?.data) ? resAdmins.data : []);
-
+      // 3. Fallback from metrics
+      const resDist = await api.get('/super-admin/metrics').catch(() => null);
+      const dData = resDist?.data?.data || {};
       const blockSummary = Array.isArray(dData.block_summary) ? dData.block_summary : [];
-
-      // Compile unique blocks from real database block_admins and block_summary
-      const blockMap = new Map();
-
-      adminsList.forEach((ba, idx) => {
-        const bName = ba.blockCommitteeName || ba.city || ba.block || ba.blockName || ba.name;
-        if (bName && String(bName).trim() && String(bName).trim() !== 'N/A') {
-          const key = String(bName).toLowerCase().trim();
-          blockMap.set(key, {
-            rank: idx + 1,
-            block_name: bName.trim(),
-            admin_name: ba.primary_name || ba.primaryContactName || ba.name || 'Block Coordinator',
-            admin_mobile: ba.mobile || ba.phone || '',
-            admin_email: ba.email || '',
-            total_points: Number(ba.reward_points) || 0,
-            donors_count: 0,
-            volunteers_count: 0,
-            fulfilled_requests: 0,
-            total_requests: 0,
-            meghala_count: 0
-          });
-        }
-      });
-
       const meghalaSummary = Array.isArray(dData.meghala_summary) ? dData.meghala_summary : [];
 
-      blockSummary.forEach((bs) => {
-        const bName = bs.block || bs.city || bs.name;
-        if (bName && String(bName).trim()) {
-          const key = String(bName).toLowerCase().trim();
-          const dCount = Number(bs.users || bs.donors) || 0;
-          const vCount = Number(bs.volunteers) || 0;
-          const mCount = Number(bs.meghala_count || (Array.isArray(bs.meghalas) ? bs.meghalas.length : 0)) || 0;
-          if (blockMap.has(key)) {
-            const existing = blockMap.get(key);
-            existing.donors_count = dCount || existing.donors_count;
-            existing.volunteers_count = vCount || existing.volunteers_count;
-            existing.meghala_count = mCount || existing.meghala_count;
-            if (!existing.total_points || existing.total_points === 0) {
-              existing.total_points = (existing.donors_count * 100) + (existing.volunteers_count * 50) + (existing.meghala_count * 25);
-            }
-          } else {
-            blockMap.set(key, {
-              rank: blockMap.size + 1,
-              block_name: bName.trim(),
-              admin_name: 'Block Coordinator',
-              admin_mobile: '',
-              admin_email: '',
-              total_points: (dCount * 100) + (vCount * 50) + (mCount * 25),
-              donors_count: dCount,
-              volunteers_count: vCount,
-              fulfilled_requests: 0,
-              total_requests: 0,
-              meghala_count: mCount
-            });
-          }
-        }
-      });
-
-      const compiledBlocks = Array.from(blockMap.values()).map((b, idx) => ({
-        ...b,
-        rank: idx + 1
+      const compiledBlocks = blockSummary.map((bs, idx) => ({
+        rank: idx + 1,
+        block_name: bs.block || bs.blockName || bs.city || 'Block Committee',
+        admin_name: 'Block Coordinator',
+        admin_mobile: '',
+        admin_email: '',
+        total_points: (Number(bs.donors || bs.users) * 100) + (Number(bs.volunteers) * 50),
+        donors_count: Number(bs.donors || bs.users) || 0,
+        volunteers_count: Number(bs.volunteers) || 0,
+        fulfilled_requests: 0,
+        total_requests: 0,
+        meghala_count: Number(bs.meghala_count || bs.meghalas?.length) || 0
       }));
-      compiledBlocks.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+
+      compiledBlocks.sort((a, b) => b.total_points - a.total_points);
       compiledBlocks.forEach((b, idx) => { b.rank = idx + 1; });
 
-      const compiledMeghalas = meghalaSummary.map((ms, idx) => {
-        const mDonors = Number(ms.donors) || 0;
-        const mVolunteers = Number(ms.volunteers) || 0;
-        const pts = (mDonors * 100) + (mVolunteers * 50);
-        return {
-          rank: idx + 1,
-          meghala_name: ms.meghala,
-          block_name: ms.block,
-          district: dData.district || 'Kasaragod',
-          total_points: pts,
-          total_members: mDonors + mVolunteers,
-          donors_count: mDonors,
-          volunteers_count: mVolunteers,
-        };
-      });
-      compiledMeghalas.sort((a, b) => b.total_points - a.total_points);
-      compiledMeghalas.forEach((m, idx) => { m.rank = idx + 1; });
-
-      const totalDistPoints = compiledBlocks.reduce((acc, b) => acc + (b.total_points || 0), 0);
-      const topBlockName = compiledBlocks.length > 0 ? compiledBlocks[0].block_name : 'N/A';
+      const compiledMeghalas = meghalaSummary.map((ms, idx) => ({
+        rank: idx + 1,
+        meghala_name: ms.meghala,
+        block_name: ms.block,
+        district: dData.district || 'Kasaragod',
+        total_points: ((ms.donors || 0) * 100) + ((ms.volunteers || 0) * 50),
+        total_members: (ms.donors || 0) + (ms.volunteers || 0),
+        donors_count: ms.donors || 0,
+        volunteers_count: ms.volunteers || 0,
+      }));
 
       setData({
         district: dData.district || user?.district || 'Kasaragod',
         summary: {
-          total_district_points: totalDistPoints,
+          total_district_points: compiledBlocks.reduce((acc, b) => acc + b.total_points, 0),
           total_blocks: compiledBlocks.length,
           total_meghalas: compiledMeghalas.length,
           total_donors: dData.total_users || 0,
           total_volunteers: dData.total_volunteers || 0,
-          top_block: topBlockName,
-          top_donor: compiledMeghalas.length > 0 ? compiledMeghalas[0].meghala_name + ' Unit' : 'N/A',
+          top_block: compiledBlocks[0]?.block_name || 'N/A',
+          top_donor: 'N/A',
         },
         blocks: compiledBlocks,
         meghalas: compiledMeghalas,
@@ -184,9 +149,7 @@ export default function DistrictPointsTable() {
         await fetchData();
       }
     })();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [fetchData]);
 
   const currentDistrict = data.district || user?.district || 'Kasaragod';
@@ -219,7 +182,7 @@ export default function DistrictPointsTable() {
       const pts = Number(b.total_points) || 0;
       if (pts > max) max = pts;
     });
-    return max;
+    return max || 1;
   }, [filteredBlocks]);
 
   // Filtered Meghalas
@@ -267,28 +230,28 @@ export default function DistrictPointsTable() {
   const getRankBadge = (rank) => {
     if (rank === 1) {
       return (
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/10 text-amber-700 text-xs font-black border border-amber-300/50">
-          1
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white font-black text-xs shadow-sm shadow-amber-500/30 ring-2 ring-amber-300/40">
+          <Crown className="w-4 h-4 fill-white" />
         </span>
       );
     }
     if (rank === 2) {
       return (
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
-          2
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-slate-300 to-slate-500 text-white font-black text-xs shadow-sm ring-2 ring-slate-200">
+          <Medal className="w-4 h-4 fill-white" />
         </span>
       );
     }
     if (rank === 3) {
       return (
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-700/10 text-amber-800 text-xs font-bold border border-amber-600/20">
-          3
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-amber-700 to-amber-900 text-amber-100 font-black text-xs shadow-sm ring-2 ring-amber-800/30">
+          <Award className="w-4 h-4 fill-amber-200" />
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 text-xs text-slate-400 font-semibold">
-        {rank}
+      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">
+        #{rank}
       </span>
     );
   };
@@ -296,117 +259,126 @@ export default function DistrictPointsTable() {
   const getDonorTierStyle = (badge) => {
     switch (badge) {
       case 'Legend Donor':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-purple-100 text-purple-800 border-purple-300 font-bold';
       case 'Red Guardian':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold';
       case 'Blood Hero':
-        return 'bg-amber-50 text-amber-800 border-amber-200';
+        return 'bg-amber-100 text-amber-900 border-amber-300 font-bold';
       case 'Life Saver':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+        return 'bg-rose-100 text-rose-800 border-rose-300 font-bold';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-200';
+        return 'bg-slate-100 text-slate-700 border-slate-300 font-medium';
     }
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
+    <div className="space-y-6 max-w-6xl mx-auto pb-16 px-2 sm:px-4">
 
-      {/* ─── Minimal Header ─── */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded-full text-[11px] font-bold uppercase tracking-wider">
-                DYFI {cleanDistrict}
-              </span>
-              <span className="text-slate-400 text-xs">• Points League</span>
+      {/* ─── Modern Glassmorphic Banner Header ─── */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-red-900 via-red-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-red-700/40">
+        {/* Decorative Background Accents */}
+        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute right-1/3 -top-12 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-xs font-black uppercase tracking-wider text-amber-300">
+              <Trophy className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              DYFI {cleanDistrict} • Official Points League
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white flex items-center gap-3">
               Points & Performance Table
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
-              Rankings and gamified milestones across all Block Committees and blood heroes in {cleanDistrict}.
+            <p className="text-red-100/80 text-xs sm:text-sm font-medium leading-relaxed">
+              Real-time database metrics, block committee rankings, and blood donor honors across {cleanDistrict}.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <Link
               to="/super-admin/dashboard"
-              className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition"
+              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white border border-white/20 rounded-xl text-xs font-bold transition flex items-center gap-2 backdrop-blur-md"
             >
               Dashboard
             </Link>
             <button
-              onClick={() => {
-                setLoading(true);
-                fetchData();
-              }}
+              onClick={fetchData}
               disabled={loading}
-              className="px-3.5 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh Rankings
             </button>
           </div>
         </div>
 
-        {/* 4 Minimal Metric Tiles */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-100 text-xs">
-          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">District Pool</span>
-            <span className="text-lg font-black text-slate-950 block mt-0.5">
-              {(data.summary?.total_district_points || 0).toLocaleString()} <span className="text-[10px] text-red-600 font-bold uppercase">pts</span>
-            </span>
+        {/* 4 Dynamic Metric Tiles */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-8 pt-6 border-t border-white/15">
+          <div className="p-4 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl space-y-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-200/90 block">District Points Pool</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl font-black text-white">
+                {(data.summary?.total_district_points || 0).toLocaleString()}
+              </span>
+              <span className="text-[11px] font-bold text-amber-400 uppercase">pts</span>
+            </div>
           </div>
 
-          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">#1 Block</span>
-            <span className="text-sm font-black text-slate-900 block mt-1 truncate">
+          <div className="p-4 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl space-y-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-200/90 block">#1 Block Committee</span>
+            <span className="text-sm sm:text-base font-black text-amber-300 block truncate">
               {data.summary?.top_block || (filteredBlocks.length > 0 ? (filteredBlocks[0].block_name || filteredBlocks[0].city) : 'N/A')}
             </span>
           </div>
 
-          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">#1 Donor</span>
-            <span className="text-sm font-black text-slate-900 block mt-1 truncate">
+          <div className="p-4 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl space-y-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-200/90 block">#1 Top Blood Donor</span>
+            <span className="text-sm sm:text-base font-black text-amber-300 block truncate">
               {data.summary?.top_donor || (filteredDonors.length > 0 ? filteredDonors[0].primary_name : 'N/A')}
             </span>
           </div>
 
-          <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Committees</span>
-            <span className="text-lg font-black text-slate-950 block mt-0.5">
-              {filteredBlocks.length + (data.meghalas?.length || 0)} <span className="text-[10px] text-slate-400 font-normal">units</span>
-            </span>
+          <div className="p-4 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl space-y-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-200/90 block">Active Committees</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl font-black text-white">
+                {filteredBlocks.length}
+              </span>
+              <span className="text-xs text-red-200 font-medium">Blocks • {filteredMeghalas.length} Units</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ─── Minimal Segmented Tab Filter & Search ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* ─── Segmented Navigation Controls & Search ─── */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-3 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         {/* Segmented Pills */}
-        <div className="bg-slate-200/60 p-1 rounded-xl inline-flex items-center gap-1 overflow-x-auto max-w-full">
+        <div className="bg-slate-100 p-1 rounded-xl inline-flex items-center gap-1 overflow-x-auto max-w-full">
           {[
-            { id: 'blocks', label: 'Block Committees', count: filteredBlocks.length },
-            { id: 'meghalas', label: 'Meghala Units', count: filteredMeghalas.length },
-            { id: 'donors', label: 'Top Donors', count: filteredDonors.length },
-            { id: 'volunteers', label: 'Meghala Leaders', count: filteredVolunteers.length },
-            { id: 'rules', label: 'Point Rules', count: null },
+            { id: 'blocks', label: 'Block Committees', icon: Building2, count: filteredBlocks.length },
+            { id: 'meghalas', label: 'Meghala Units', icon: MapPin, count: filteredMeghalas.length },
+            { id: 'donors', label: 'Top Donors', icon: Flame, count: filteredDonors.length },
+            { id: 'volunteers', label: 'Meghala Leaders', icon: Shield, count: filteredVolunteers.length },
+            { id: 'rules', label: 'Point Rules & Badges', icon: Award, count: null },
           ].map(tab => {
+            const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-red-600 text-white shadow-md shadow-red-200'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                 <span>{tab.label}</span>
                 {tab.count !== null && (
-                  <span className={`ml-1.5 text-[10px] font-bold ${isActive ? 'text-slate-400' : 'text-slate-400'}`}>
+                  <span className={`px-1.5 py-0.2 text-[10px] rounded-full font-black ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
                     {tab.count}
                   </span>
                 )}
@@ -415,117 +387,140 @@ export default function DistrictPointsTable() {
           })}
         </div>
 
-        {/* Search & Sort Controls (Hidden on Rules) */}
+        {/* Search & Filter Controls */}
         {activeTab !== 'rules' && (
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <div className="relative flex-1 sm:w-60">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search..."
-                className="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 w-48 text-slate-900"
+                placeholder="Filter by name, block..."
+                className="w-full pl-9 pr-8 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 focus:bg-white text-slate-900 font-medium"
               />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
             {activeTab === 'blocks' && (
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-2.5 py-1.5 text-xs font-medium bg-white border border-slate-200 rounded-xl focus:outline-none text-slate-700 cursor-pointer"
+                className="px-3 py-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-slate-700 cursor-pointer"
               >
-                <option value="points">Sort: Points</option>
-                <option value="donors">Sort: Donors</option>
-                <option value="fulfilled">Sort: Fulfilled</option>
+                <option value="points">Sort: Total Points</option>
+                <option value="donors">Sort: Donors Count</option>
+                <option value="fulfilled">Sort: Fulfilled Units</option>
               </select>
             )}
           </div>
         )}
       </div>
 
-      {/* ─── Content Views ─── */}
+      {/* ─── Main Content Panels ─── */}
       {loading ? (
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center text-slate-400 text-xs font-medium">
-          Loading rankings...
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-16 text-center space-y-3">
+          <RefreshCw className="w-8 h-8 text-red-600 animate-spin mx-auto" />
+          <p className="text-slate-600 text-xs font-semibold">
+            Fetching real-time database standings...
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
 
-          {/* ═════════ 1. BLOCK COMMITTEES TAB ═════════ */}
+          {/* ═════════ TAB 1: BLOCK COMMITTEES ═════════ */}
           {activeTab === 'blocks' && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
               {filteredBlocks.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs">
-                  No block committees found in {cleanDistrict}.
+                <div className="p-12 text-center text-slate-400 text-xs font-medium">
+                  No block committees matching &quot;{searchQuery}&quot;.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-slate-50/60 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        <th className="py-3 px-4 w-12 text-center">#</th>
-                        <th className="py-3 px-4">Block Committee</th>
-                        <th className="py-3 px-4">Admin Lead</th>
-                        <th className="py-3 px-4 text-center">Donors</th>
-                        <th className="py-3 px-4 text-center">Meghalas</th>
-                        <th className="py-3 px-4 text-center">Fulfilled</th>
-                        <th className="py-3 px-4">Points Share</th>
-                        <th className="py-3 px-4 text-right">Points</th>
+                      <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                        <th className="py-3.5 px-4 w-12 text-center">Rank</th>
+                        <th className="py-3.5 px-4">Block Committee</th>
+                        <th className="py-3.5 px-4">Admin Lead</th>
+                        <th className="py-3.5 px-4 text-center">Donors</th>
+                        <th className="py-3.5 px-4 text-center">Squads</th>
+                        <th className="py-3.5 px-4 text-center">Fulfilled</th>
+                        <th className="py-3.5 px-4 min-w-[140px]">District Share</th>
+                        <th className="py-3.5 px-4 text-right">Total Points</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filteredBlocks.map((b, idx) => {
-                        const blockName = b.block_name || b.blockCommitteeName || b.city || b.block || b.name || `Block ${idx + 1}`;
-                        const adminName = b.admin_name || b.primary_name || b.primaryContactName || b.name || 'Block Coordinator';
+                        const blockName = b.block_name || b.blockCommitteeName || b.city || b.block || `Block ${idx + 1}`;
+                        const adminName = b.admin_name || b.primary_name || 'Block Coordinator';
                         const currentPts = Number(b.total_points) || 0;
-                        const percent = maxBlockPoints > 0 && currentPts > 0
-                          ? Math.min(100, Math.round((currentPts / maxBlockPoints) * 100))
-                          : 0;
+                        const percent = Math.min(100, Math.round((currentPts / maxBlockPoints) * 100));
 
                         return (
                           <tr
                             key={b.block_name || idx}
-                            className="hover:bg-slate-50/70 transition-colors cursor-pointer"
                             onClick={() => setSelectedBlockDetail({ ...b, block_name: blockName, admin_name: adminName })}
+                            className="hover:bg-red-50/40 transition-colors cursor-pointer group"
                           >
-                            <td className="py-3 px-4 text-center">
+                            <td className="py-4 px-4 text-center">
                               {getRankBadge(idx + 1)}
                             </td>
-                            <td className="py-3 px-4">
-                              <div className="font-bold text-slate-900">{blockName}</div>
-                              <span className="text-[10px] text-slate-400 font-normal">
-                                {b.meghala_count ? `${b.meghala_count} Meghalas` : 'District Committee'}
+                            <td className="py-4 px-4">
+                              <div className="font-extrabold text-slate-900 group-hover:text-red-700 transition-colors flex items-center gap-1.5">
+                                {blockName}
+                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-600 transition-colors" />
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-medium block">
+                                {b.meghala_count ? `${b.meghala_count} Meghala Units` : 'District Block Committee'}
                               </span>
                             </td>
-                            <td className="py-3 px-4">
-                              <div className="text-slate-700 font-medium">{adminName}</div>
+                            <td className="py-4 px-4">
+                              <div className="text-slate-800 font-bold">{adminName}</div>
                               {b.admin_mobile && (
-                                <span className="text-[10px] text-slate-400">{b.admin_mobile}</span>
+                                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                                  <Phone className="w-2.5 h-2.5" /> {b.admin_mobile}
+                                </span>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-center font-semibold text-slate-700">
-                              {b.donors_count || 0}
+                            <td className="py-4 px-4 text-center">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800">
+                                {b.donors_count || 0}
+                              </span>
                             </td>
-                            <td className="py-3 px-4 text-center font-semibold text-slate-700">
-                              {b.volunteers_count || 0}
+                            <td className="py-4 px-4 text-center">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800">
+                                {b.volunteers_count || 0}
+                              </span>
                             </td>
-                            <td className="py-3 px-4 text-center font-semibold text-slate-700">
-                              {b.fulfilled_requests || 0}
+                            <td className="py-4 px-4 text-center">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                {b.fulfilled_requests || 0}
+                              </span>
                             </td>
-                            <td className="py-3 px-4 min-w-[120px]">
-                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div
-                                  className="bg-red-600 h-full rounded-full transition-all duration-300"
-                                  style={{ width: `${percent}%` }}
-                                />
+                            <td className="py-4 px-4">
+                              <div className="space-y-1">
+                                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                  <div
+                                    className="bg-gradient-to-r from-red-500 to-rose-600 h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${percent}%` }}
+                                  />
+                                </div>
+                                <span className="text-[10px] text-slate-400 font-bold block text-right">{percent}%</span>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-right">
-                              <span className="font-black text-slate-900">
+                            <td className="py-4 px-4 text-right">
+                              <span className="font-black text-slate-900 text-sm">
                                 {currentPts.toLocaleString()}
                               </span>
-                              <span className="text-[10px] text-slate-400 ml-1">pts</span>
+                              <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
                             </td>
                           </tr>
                         );
@@ -537,35 +532,36 @@ export default function DistrictPointsTable() {
             </div>
           )}
 
-          {/* ═════════ 2. MEGHALA COMMITTEES TAB ═════════ */}
+          {/* ═════════ TAB 2: MEGHALA UNITS ═════════ */}
           {activeTab === 'meghalas' && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
               {filteredMeghalas.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs">
-                  No Meghala units found.
+                <div className="p-12 text-center text-slate-400 text-xs font-medium">
+                  No Meghala units found matching &quot;{searchQuery}&quot;.
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
                   {filteredMeghalas.map((m, idx) => (
                     <div
                       key={m.meghala_name || idx}
-                      className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
+                      className="p-4 px-5 flex items-center justify-between hover:bg-slate-50/80 transition-colors text-xs"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-4 min-w-0">
                         {getRankBadge(idx + 1)}
                         <div className="min-w-0">
-                          <h4 className="font-bold text-slate-900 truncate">{m.meghala_name || m.meghala || 'Meghala Unit'}</h4>
-                          <p className="text-[11px] text-slate-400 font-normal">Block: {m.block_name || m.block || cleanDistrict}</p>
+                          <h4 className="font-extrabold text-slate-900 text-sm truncate">{m.meghala_name || m.meghala || 'Meghala Unit'}</h4>
+                          <p className="text-[11px] text-slate-500 font-medium">Parent Block: <span className="text-slate-800 font-bold">{m.block_name || m.block || cleanDistrict}</span></p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-6 shrink-0">
-                        <span className="text-slate-500 font-medium text-[11px]">
-                          {m.total_members || 0} members • {m.volunteers_count || 0} squads
-                        </span>
-                        <div className="text-right min-w-[60px]">
-                          <span className="font-black text-slate-900">{m.total_points || 0}</span>
-                          <span className="text-[10px] text-slate-400 ml-1">pts</span>
+                        <div className="text-right hidden sm:block">
+                          <span className="text-slate-600 font-bold text-xs block">{m.total_members || 0} Members</span>
+                          <span className="text-[10px] text-slate-400 font-medium">{m.volunteers_count || 0} Volunteer Squads</span>
+                        </div>
+                        <div className="text-right min-w-[70px]">
+                          <span className="font-black text-slate-900 text-sm">{(m.total_points || 0).toLocaleString()}</span>
+                          <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
                         </div>
                       </div>
                     </div>
@@ -575,47 +571,46 @@ export default function DistrictPointsTable() {
             </div>
           )}
 
-          {/* ═════════ 3. TOP DONORS TAB ═════════ */}
+          {/* ═════════ TAB 3: TOP BLOOD DONORS ═════════ */}
           {activeTab === 'donors' && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
               {filteredDonors.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs">
-                  No donors found matching &quot;{searchQuery}&quot;.
+                <div className="p-12 text-center text-slate-400 text-xs font-medium">
+                  No donors matching &quot;{searchQuery}&quot;.
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
                   {filteredDonors.map((donor, idx) => (
                     <div
                       key={donor.id || idx}
-                      className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
+                      className="p-4 px-5 flex items-center justify-between hover:bg-slate-50/80 transition-colors text-xs"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-4 min-w-0">
                         {getRankBadge(idx + 1)}
-                        <span className="w-8 h-8 rounded-lg bg-red-50 text-red-700 border border-red-100 font-black text-xs flex items-center justify-center shrink-0">
+                        <span className="w-9 h-9 rounded-xl bg-red-600 text-white shadow-sm font-black text-xs flex items-center justify-center shrink-0">
                           {donor.blood_group || 'O+'}
                         </span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 truncate">{donor.primary_name || donor.name}</span>
-                            <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${getDonorTierStyle(donor.badge || 'First Drop')}`}>
+                            <span className="font-extrabold text-slate-900 text-sm truncate">{donor.primary_name || donor.name}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getDonorTierStyle(donor.badge || 'First Drop')}`}>
                               {donor.badge || 'First Drop'}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 font-normal truncate">
+                          <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
                             {donor.jeevalink_id || `JL-${donor.id}`} • {donor.block || donor.city || cleanDistrict} {donor.meghala ? `(${donor.meghala})` : ''}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-6 shrink-0">
-                        {donor.total_donations > 0 && (
-                          <span className="text-[11px] text-slate-500 hidden sm:inline font-medium">
-                            {donor.total_donations} donations
-                          </span>
-                        )}
-                        <div className="text-right min-w-[60px]">
-                          <span className="font-black text-red-600">{donor.reward_points || 0}</span>
-                          <span className="text-[10px] text-slate-400 ml-1">pts</span>
+                        <div className="text-right hidden sm:block">
+                          <span className="text-slate-700 font-bold text-xs block">{donor.total_donations || 0} Donations</span>
+                          <span className="text-[10px] text-emerald-600 font-bold">{donor.lives_saved || ((donor.total_donations || 1) * 3)} Lives Saved</span>
+                        </div>
+                        <div className="text-right min-w-[70px]">
+                          <span className="font-black text-red-600 text-sm">{(donor.reward_points || 0).toLocaleString()}</span>
+                          <span className="text-[10px] text-slate-400 font-bold ml-1">pts</span>
                         </div>
                       </div>
                     </div>
@@ -625,11 +620,11 @@ export default function DistrictPointsTable() {
             </div>
           )}
 
-          {/* ═════════ 4. TOP VOLUNTEERS TAB ═════════ */}
+          {/* ═════════ TAB 4: MEGHALA LEADERS ═════════ */}
           {activeTab === 'volunteers' && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
               {filteredVolunteers.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs">
+                <div className="p-12 text-center text-slate-400 text-xs font-medium">
                   No volunteers found matching &quot;{searchQuery}&quot;.
                 </div>
               ) : (
@@ -637,18 +632,18 @@ export default function DistrictPointsTable() {
                   {filteredVolunteers.map((vol, idx) => (
                     <div
                       key={vol.id || idx}
-                      className="p-3.5 px-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors text-xs"
+                      className="p-4 px-5 flex items-center justify-between hover:bg-slate-50/80 transition-colors text-xs"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-4 min-w-0">
                         {getRankBadge(idx + 1)}
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 truncate">{vol.primary_name || vol.name}</span>
-                            <span className="text-[10px] font-semibold px-2 py-0.2 bg-slate-100 text-slate-600 rounded-md">
-                              {vol.role || 'Volunteer'}
+                            <span className="font-extrabold text-slate-900 text-sm truncate">{vol.primary_name || vol.name}</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md border border-slate-200">
+                              {vol.role || 'Volunteer Coordinator'}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 font-normal truncate">
+                          <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
                             {vol.jeevalink_id || `JL-VOL-${vol.id}`} • {vol.block || vol.city || cleanDistrict}
                           </p>
                         </div>
@@ -656,13 +651,13 @@ export default function DistrictPointsTable() {
 
                       <div className="flex items-center gap-6 shrink-0">
                         {vol.mobile && vol.mobile !== 'N/A' && (
-                          <span className="text-[11px] text-slate-400 hidden sm:inline">
-                            {vol.mobile}
+                          <span className="text-xs text-slate-600 font-semibold hidden sm:flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-slate-400" /> {vol.mobile}
                           </span>
                         )}
-                        <div className="text-right min-w-[60px]">
-                          <span className="font-black text-slate-900">{vol.reward_points || 0}</span>
-                          <span className="text-[10px] text-slate-400 ml-1">pts</span>
+                        <div className="text-right min-w-[70px]">
+                          <span className="font-black text-slate-900 text-sm">{(vol.reward_points || 0).toLocaleString()}</span>
+                          <span className="text-[10px] text-slate-400 font-bold ml-1">pts</span>
                         </div>
                       </div>
                     </div>
@@ -672,25 +667,28 @@ export default function DistrictPointsTable() {
             </div>
           )}
 
-          {/* ═════════ 5. POINT RULES & BADGES GUIDE TAB ═════════ */}
+          {/* ═════════ TAB 5: POINT RULES & BADGES GUIDE ═════════ */}
           {activeTab === 'rules' && (
-            <div className="space-y-4">
-              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
-                <h3 className="text-sm font-bold text-slate-900 mb-1">
-                  Point Allocation Mechanics
-                </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Points are credited automatically upon verification of blood donations and coordination events.
-                </p>
+            <div className="space-y-6">
+              {/* Rules Section */}
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-4">
+                <div>
+                  <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-amber-500 fill-amber-500" /> Point Allocation Mechanics
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Points are automatically calculated and assigned based on verified real-world blood donations and coordination events.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {(data.point_rules || []).map((rule, idx) => (
-                    <div key={idx} className="p-3.5 bg-slate-50/80 border border-slate-100 rounded-xl flex items-center justify-between">
+                    <div key={idx} className="p-4 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center justify-between">
                       <div>
                         <h4 className="font-bold text-slate-900">{rule.action}</h4>
-                        <span className="text-[10px] text-slate-400 font-medium">{rule.target}</span>
+                        <span className="text-[10px] text-slate-500 font-medium">{rule.target}</span>
                       </div>
-                      <span className="text-xs font-black text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-md">
+                      <span className="text-xs font-black text-red-700 bg-red-50 border border-red-200 px-3 py-1 rounded-lg">
                         {rule.badge}
                       </span>
                     </div>
@@ -698,20 +696,27 @@ export default function DistrictPointsTable() {
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
-                <h3 className="text-sm font-bold text-slate-900 mb-1">
-                  Milestone Badges
-                </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Donors unlock certificates and milestone badges based on their lifetime points.
-                </p>
+              {/* Milestone Badges Section */}
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-4">
+                <div>
+                  <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                    <Award className="w-4 h-4 text-red-600" /> Milestone Badges & Honor Tiers
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Blood heroes unlock official digital badges and certificates upon crossing point milestones.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs text-center">
                   {(data.badges_guide || []).map((badge, idx) => (
-                    <div key={idx} className="p-3 bg-slate-50/80 border border-slate-100 rounded-xl space-y-1">
-                      <span className="text-xs font-bold text-slate-900 block">{badge.name}</span>
-                      <span className="inline-block text-[10px] font-semibold text-slate-500">{badge.points}+ pts</span>
-                      <p className="text-[10px] text-slate-400 line-clamp-2">{badge.desc}</p>
+                    <div key={idx} className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2 flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <span className="text-sm font-black text-slate-900 block">{badge.name}</span>
+                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded-full">
+                          {badge.points}+ Pts Required
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-normal">{badge.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -722,57 +727,60 @@ export default function DistrictPointsTable() {
         </div>
       )}
 
-      {/* ─── Minimal Detail Modal ─── */}
+      {/* ─── Interactive Block Committee Detail Modal ─── */}
       {selectedBlockDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/30 backdrop-blur-xs">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 max-w-sm w-full shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-100 text-xs">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Rank #{selectedBlockDetail.rank}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 text-xs">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="space-y-0.5">
+                <span className="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  Rank #{selectedBlockDetail.rank} Committee
                 </span>
-                <h3 className="text-base font-bold text-slate-900 mt-0.5">{selectedBlockDetail.block_name}</h3>
+                <h3 className="text-xl font-black text-slate-900">{selectedBlockDetail.block_name}</h3>
               </div>
               <button
                 onClick={() => setSelectedBlockDetail(null)}
-                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="bg-slate-50 rounded-xl p-3 space-y-2 border border-slate-100">
-              <div className="flex justify-between font-bold text-slate-900">
-                <span>Total Points:</span>
-                <span className="text-red-600 font-black">{(selectedBlockDetail.total_points || 0).toLocaleString()} pts</span>
+            <div className="bg-slate-50 rounded-2xl p-4 space-y-3 border border-slate-100">
+              <div className="flex justify-between items-center text-sm font-bold">
+                <span className="text-slate-600">Total Points Pool:</span>
+                <span className="text-red-600 font-black text-base">{(selectedBlockDetail.total_points || 0).toLocaleString()} pts</span>
               </div>
+              <div className="h-px bg-slate-200/60 my-1" />
               <div className="flex justify-between text-slate-600">
                 <span>Registered Donors:</span>
-                <span className="font-semibold text-slate-900">{selectedBlockDetail.donors_count || 0}</span>
+                <span className="font-extrabold text-slate-900">{selectedBlockDetail.donors_count || 0}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Active Squads:</span>
-                <span className="font-semibold text-slate-900">{selectedBlockDetail.volunteers_count || 0}</span>
+                <span>Volunteer Squads:</span>
+                <span className="font-extrabold text-slate-900">{selectedBlockDetail.volunteers_count || 0}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Fulfilled Units:</span>
-                <span className="font-semibold text-slate-900">{selectedBlockDetail.fulfilled_requests || 0}</span>
+                <span>Fulfilled Blood Units:</span>
+                <span className="font-extrabold text-slate-900">{selectedBlockDetail.fulfilled_requests || 0}</span>
               </div>
             </div>
 
-            <div className="text-slate-600">
-              <span className="font-semibold text-slate-900 block">Admin:</span>
-              <span>{selectedBlockDetail.admin_name}</span>
+            <div className="space-y-1 bg-slate-50/60 rounded-2xl p-4 border border-slate-100">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Committee Lead</span>
+              <div className="font-extrabold text-slate-900 text-sm">{selectedBlockDetail.admin_name}</div>
               {selectedBlockDetail.admin_mobile && (
-                <span className="block text-slate-400">{selectedBlockDetail.admin_mobile}</span>
+                <div className="text-slate-500 font-medium flex items-center gap-1.5 mt-1">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" /> {selectedBlockDetail.admin_mobile}
+                </div>
               )}
             </div>
 
             <button
               onClick={() => setSelectedBlockDetail(null)}
-              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold transition cursor-pointer"
+              className="w-full py-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-xl font-bold transition shadow-md cursor-pointer"
             >
-              Close
+              Close Detail
             </button>
           </div>
         </div>
