@@ -127,8 +127,13 @@ export const useAppStore = create((set, get) => ({
     try {
       const state = get();
       const pendingRequests = state.requests.filter(r => ['Pending', 'Waiting', 'Accepted'].includes(r.status)).length;
-      const totalVolunteers = state.allUsers.filter(u => u.role === 'volunteer').length;
-      const activeVolunteers = state.allUsers.filter(u => u.role === 'volunteer' && u.status === 'Active').length;
+      const isMeghalaRole = (role) => {
+        const clean = String(role || '').toLowerCase().trim();
+        return ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(clean) ||
+          clean.includes('volunteer') || clean.includes('meghala');
+      };
+      const totalVolunteers = state.allUsers.filter(u => isMeghalaRole(u.role)).length;
+      const activeVolunteers = state.allUsers.filter(u => isMeghalaRole(u.role) && u.status === 'Active').length;
       set({
         adminStats: {
           pendingRequests,
@@ -763,16 +768,16 @@ export const useAppStore = create((set, get) => ({
           set((state) => ({ allUsers: [newUser, ...state.allUsers] }));
         }
         // Show warning if email failed to send, otherwise success
-        const msg = res.data.message || 'Volunteer added successfully!';
+        const msg = res.data.message || 'Meghala added successfully!';
 
         get().triggerToast(msg, emailSent ? 'success' : 'warning');
         return { success: true, user: newUser, emailSent, generatedPassword };
       }
-      const failMsg = res.data?.message || 'Failed to add volunteer.';
+      const failMsg = res.data?.message || 'Failed to add Meghala.';
       get().triggerToast(failMsg, 'error');
       return { success: false, error: failMsg };
     } catch (err) {
-      let errMsg = err.response?.data?.message || 'Failed to add volunteer.';
+      let errMsg = err.response?.data?.message || 'Failed to add Meghala.';
       if (err.response?.data?.errors) {
         errMsg = Object.values(err.response.data.errors).flat().join(', ');
       }

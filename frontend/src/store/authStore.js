@@ -223,7 +223,7 @@ export const useAuthStore = create((set, get) => ({
         emailSent: res.data.data?.emailSent ?? true
       };
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Failed to add volunteer.';
+      const errMsg = err.response?.data?.message || 'Failed to add Meghala.';
       set({ loading: false });
       return { success: false, error: errMsg };
     }
@@ -269,7 +269,7 @@ export const useAuthStore = create((set, get) => ({
       set({ loading: false });
       return { success: true, user: updatedUser };
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Failed to update volunteer.';
+      const errMsg = err.response?.data?.message || 'Failed to update Meghala.';
       set({ loading: false });
       return { success: false, error: errMsg };
     }

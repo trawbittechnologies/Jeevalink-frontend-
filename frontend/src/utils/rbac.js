@@ -3,6 +3,7 @@ export const ROLES = {
   SUPER_ADMIN: 'super_admin',
   BLOCK_ADMIN: 'block_admin',
   VOLUNTEER: 'volunteer',
+  MEGHALA: 'volunteer',
   UNIT_SQUAD: 'unit_squad',
   USER: 'user',
 };
@@ -19,7 +20,16 @@ export const normalizeRole = (role) => {
   if (cleaned === 'block_admin' || cleaned === 'blockadmin' || cleaned === 'admin' || cleaned === 'administrator') {
     return ROLES.BLOCK_ADMIN;
   }
-  if (cleaned === 'volunteer') {
+  if (
+    cleaned === 'volunteer' ||
+    cleaned === 'meghala' ||
+    cleaned === 'meghala_volunteer' ||
+    cleaned === 'block_volunteer' ||
+    cleaned === 'meghala_coordinator' ||
+    cleaned === 'meghalacoordinator' ||
+    cleaned.includes('volunteer') ||
+    cleaned.includes('meghala')
+  ) {
     return ROLES.VOLUNTEER;
   }
   if (cleaned === 'unit_squad' || cleaned === 'unitsquad') {
@@ -44,13 +54,13 @@ export const ROLE_HIERARCHY = {
   [ROLES.BLOCK_ADMIN]: {
     manages: ROLES.VOLUNTEER,
     label: 'Block Committee Admin',
-    managesLabel: 'Meghala Committee Volunteers',
+    managesLabel: 'Meghala Committees',
     level: 3,
   },
   [ROLES.VOLUNTEER]: {
     manages: ROLES.UNIT_SQUAD,
-    label: 'Meghala Committee Volunteer',
-    managesLabel: 'Unit Squad Volunteers',
+    label: 'Meghala Committee',
+    managesLabel: 'Unit Squad Members',
     level: 4,
   },
   [ROLES.UNIT_SQUAD]: {

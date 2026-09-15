@@ -70,7 +70,7 @@ export default function Navbar() {
     user?.role === 'technical_admin' ? '/technical-admin/dashboard' :
       user?.role === 'super_admin' ? '/super-admin/dashboard' :
         (user?.role === 'block_admin' || user?.role === 'admin') ? '/block-admin/dashboard' :
-          user?.role === 'volunteer' ? '/volunteer/dashboard' :
+          (user?.role === 'volunteer' || user?.role === 'meghala' || user?.role === 'meghala_volunteer') ? '/volunteer/dashboard' :
             user?.role === 'unit_squad' ? '/unit-squad/dashboard' :
               '/dashboard';
 

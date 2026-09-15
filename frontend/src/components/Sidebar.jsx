@@ -33,7 +33,7 @@ const unitSquadLinks = [
 ];
 
 const volunteerLinks = [
-  { to: '/volunteer/dashboard', label: 'Volunteer Dashboard', icon: LayoutDashboard },
+  { to: '/volunteer/dashboard', label: 'Meghala Dashboard', icon: LayoutDashboard },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
   { to: '/volunteer/users', label: 'Manage Users & Donors', icon: Users },
@@ -49,7 +49,7 @@ const blockAdminLinks = [
   { to: '/block-admin/dashboard', label: 'Block Dashboard', icon: LayoutDashboard },
   { to: '/volunteer/accepted-donors', label: 'Accepted Donors', icon: HeartHandshake },
   { to: '/campaigns', label: 'Campaign Hub', icon: Megaphone },
-  { to: '/admin/volunteers', label: 'Add & Manage Volunteers', icon: Users },
+  { to: '/admin/volunteers', label: 'Manage Meghalas', icon: Users },
   { to: '/volunteer/unit-committee', label: 'Unit Squad Committee', icon: ShieldCheck },
   { to: '/admin/awareness', label: 'Awareness Video & Content', icon: Video },
   { to: '/admin/feedback', label: 'Feedback & Complaints', icon: ClipboardList },
@@ -99,11 +99,17 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     };
   }, [mobileOpen]);
 
+  const isVolUser = (r) => {
+    const clean = String(r || '').toLowerCase().trim();
+    return ['volunteer', 'meghala', 'meghala_volunteer', 'block_volunteer'].includes(clean) ||
+      clean.includes('volunteer') || clean.includes('meghala');
+  };
+
   let links =
     user?.role === 'technical_admin' ? technicalAdminLinks :
       user?.role === 'super_admin' ? superAdminLinks :
         user?.role === 'block_admin' ? blockAdminLinks :
-          user?.role === 'volunteer' ? volunteerLinks :
+          isVolUser(user?.role) ? volunteerLinks :
             user?.role === 'unit_squad' ? unitSquadLinks :
               userLinks;
 

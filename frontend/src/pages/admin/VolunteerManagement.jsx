@@ -117,7 +117,7 @@ export default function VolunteerManagement() {
     const csv = [headers, ...rows].map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `volunteers_meghala_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+    a.download = `meghalas_${new Date().toISOString().split('T')[0]}.csv`; a.click();
     triggerToast('CSV exported successfully!', 'success');
   };
 
@@ -144,7 +144,7 @@ export default function VolunteerManagement() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-red-600 uppercase text-xl sm:text-2xl font-black tracking-tight">
-              Volunteer Management {isBlockAdmin && (user?.organization_name || user?.city) ? `(${user?.organization_name || user?.city})` : '(Meghala Committee)'}
+              Meghala Management {isBlockAdmin && (user?.organization_name || user?.city) ? `(${user?.organization_name || user?.city})` : '(Meghala Committee)'}
             </h1>
             <span className="px-2.5 py-0.5 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
               {volunteers.length} Total
@@ -152,8 +152,8 @@ export default function VolunteerManagement() {
           </div>
           <p className="text-slate-500 text-xs mt-1">
             {isBlockAdmin 
-              ? `Manage Meghala Committee primary and secondary volunteers added by ${user?.organization_name || user?.city || 'your Block'}.`
-              : 'Manage Meghala Committee primary and secondary volunteers, access credentials, and account statuses.'}
+              ? `Manage Meghala Committee primary and secondary coordinators added by ${user?.organization_name || user?.city || 'your Block'}.`
+              : 'Manage Meghala Committee primary and secondary coordinators, access credentials, and account statuses.'}
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export default function VolunteerManagement() {
               onClick={() => { setForm(emptyVolunteerForm); setFormError(''); setShowAddModal(true); }}
               className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md shadow-red-600/20"
             >
-              <Plus className="w-4 h-4" /> Add Volunteer (Meghala)
+              <Plus className="w-4 h-4" /> Add Meghala Committee
             </button>
           ) : (
             <span className="text-xs text-slate-500 font-medium bg-slate-100 px-3.5 py-2.5 rounded-xl border border-slate-200">
@@ -185,7 +185,7 @@ export default function VolunteerManagement() {
         {/* Filter Toolbar */}
         <FilterBar
           search={search} onSearch={setSearch}
-          searchPlaceholder="Search by Meghala Name, Volunteer Name, Email, Phone..."
+          searchPlaceholder="Search by Meghala Name, Coordinator Name, Email, Phone..."
           filters={[
             { key: 'status', label: 'Status', options: STATUS_OPTIONS.map(s => ({ value: s, label: s.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) })) },
             { key: 'district', label: 'District', options: DISTRICTS.map(d => ({ value: d, label: d })) },
@@ -204,7 +204,7 @@ export default function VolunteerManagement() {
               <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
                 <Building2 className="w-6 h-6" />
               </div>
-              <p className="text-slate-700 font-bold text-sm">No Volunteers Found</p>
+              <p className="text-slate-700 font-bold text-sm">No Meghalas Found</p>
               <p className="text-slate-400 text-xs mt-1">Try adjusting your search terms or filters.</p>
             </div>
           ) : (
@@ -213,8 +213,8 @@ export default function VolunteerManagement() {
                 <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="py-4 px-6">JL Employee ID</th>
                   <th className="py-4 px-6">Meghala / Zone</th>
-                  <th className="py-4 px-6">Primary Volunteer (Person 1)</th>
-                  <th className="py-4 px-6">Secondary Volunteer (Person 2)</th>
+                  <th className="py-4 px-6">Primary Coordinator (Person 1)</th>
+                  <th className="py-4 px-6">Secondary Coordinator (Person 2)</th>
                   <th className="py-4 px-6">Login Email ID</th>
                   <th className="py-4 px-6 text-center">Status & Toggle</th>
                   <th className="py-4 px-6 text-right">Actions</th>
