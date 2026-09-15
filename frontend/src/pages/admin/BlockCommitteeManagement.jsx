@@ -906,8 +906,8 @@ export default function BlockCommitteeManagement() {
         </div>
       </div>
 
-      {/* 5 KPI Cards Grid (Matching SuperAdminDashboard.jsx Active Meghalas reference) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      {/* 4 KPI Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Block Committees</span>
@@ -917,17 +917,6 @@ export default function BlockCommitteeManagement() {
           </div>
           <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">{totalBlocks}</h3>
           <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{activeCount} Assigned</p>
-        </div>
-
-        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Meghala Units</span>
-            <div className="w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/30 text-violet-600 flex items-center justify-center">
-              <MapPin className="w-4 h-4" />
-            </div>
-          </div>
-          <h3 className="text-2xl font-black text-violet-600 dark:text-violet-400 mt-1">{totalMeghalas}</h3>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Across {totalBlocks} Blocks</p>
         </div>
 
         {/* Dynamic Total Volunteers on Status Board */}
@@ -953,7 +942,7 @@ export default function BlockCommitteeManagement() {
           <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Meghala registered</p>
         </div>
 
-        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl col-span-2 sm:col-span-1">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Admin Status</span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 flex items-center justify-center">
