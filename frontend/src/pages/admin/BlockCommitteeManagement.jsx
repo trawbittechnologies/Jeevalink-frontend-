@@ -32,20 +32,7 @@ function parseBlockAdminContacts(ba) {
   };
 }
 
-const DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK = {
-  'Kanhangad': ['Ajanur', 'Chithari', 'Kanhangad North', 'Kanhangad South', 'Kottachery', 'Madikai', 'Puthiyakotta', 'Upper Kottachery'],
-  'Nileshwar': ['Karindalam', 'Kinanoor', 'Kottappuram', 'Nileshwaram'],
-  'Cheruvathur': ['Chandera', 'Cheemeni', 'Kayyur', 'Pilicode', 'Thuruthi'],
-  'Trikaripur': ['Elambachi', 'Olavara', 'Trikaripur', 'Valiyaparamba'],
-  'Panathady': ['Balal', 'Kallar', 'Panathur', 'Ranipuram'],
-  'Eleri': ['Chittarikkal', 'East Eleri', 'Palavayal', 'West Eleri'],
-  'Bedakam': ['Bedadka', 'Kolathur', 'Kundamkuzhy', 'Kuttikol'],
-  'Udma': ['Bekal', 'Chembirika', 'Kalanad', 'Melparamba', 'Pallikere'],
-  'Kasaragod': ['Chengala', 'Karanthakkad', 'Madhur', 'Mogral', 'Nullipady', 'Vidyanagar'],
-  'Kumbala': ['Arikady', 'Badiadka', 'Puthige', 'Seethangoli'],
-  'Manjeshwaram': ['Hosangadi', 'Manjeshwar', 'Meenja', 'Paivalike', 'Uppala', 'Vorkady'],
-  'Karadukka': ['Bellur', 'Bovikanam', 'Delampady', 'Mulleria'],
-};
+
 
 function normalizeBlockName(name) {
   if (!name || typeof name !== 'string') return '';
@@ -295,14 +282,7 @@ export default function BlockCommitteeManagement() {
   const dynamicMeghalasByBlock = useMemo(() => {
     const combined = {};
 
-    // 0. Base initialization from DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK to ensure all canonical units are present
-    Object.entries(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK).forEach(([blk, list]) => {
-      const bName = blk.trim();
-      if (!combined[bName]) combined[bName] = [];
-      list.forEach(m => {
-        if (!combined[bName].includes(m)) combined[bName].push(m);
-      });
-    });
+
 
     // 1. Server-returned meghalas from blockSummary (actual registered meghalas)
     (blockSummary || []).forEach(bs => {
@@ -666,13 +646,7 @@ export default function BlockCommitteeManagement() {
       }
     });
 
-    // Ensure all standard Kasaragod blocks exist
-    Object.keys(DEFAULT_KASARAGOD_MEGHALAS_BY_BLOCK).forEach(bName => {
-      const norm = normalizeBlockName(bName);
-      if (norm && !blockNamesMap.has(norm)) {
-        blockNamesMap.set(norm, bName);
-      }
-    });
+
 
     const list = Array.from(blockNamesMap.entries()).map(([norm, canonicalName]) => {
       // Find matching admin if registered
