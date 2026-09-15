@@ -321,11 +321,14 @@ export default function SuperAdminDashboard() {
 
   const realVolunteersCount = useMemo(() => {
     const serverCount = Number(districtData.total_volunteers);
-    const volUsers = (allUsers || []).filter(u => {
-      const role = String(u.role || '').toLowerCase();
-      return ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
-    });
-    return Math.max(!isNaN(serverCount) ? serverCount : 0, volUsers.length);
+    if (!isNaN(serverCount) && serverCount >= 0) return serverCount;
+    const isVol = (r) => {
+      const clean = String(r || '').toLowerCase().trim();
+      return ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(clean) ||
+        clean.includes('volunteer') || clean.includes('meghala');
+    };
+    const volUsers = (allUsers || []).filter(u => isVol(u.role));
+    return volUsers.length;
   }, [districtData.total_volunteers, allUsers]);
 
   const realBlockAdminsCount = useMemo(() => {
@@ -476,8 +479,10 @@ export default function SuperAdminDashboard() {
 
     // 3. Fallback dynamically from allUsers volunteer pool
     const matchingVols = (allUsers || []).filter(u => {
-      const role = String(u.role || '').toLowerCase();
-      if (!['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role)) return false;
+      const role = String(u.role || '').toLowerCase().trim();
+      const isVol = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
+        role.includes('volunteer') || role.includes('meghala');
+      if (!isVol) return false;
       const uOrg = normalizeBlockName(String(u.organization_name || u.block || ''));
       const uCity = normalizeBlockName(String(u.city || ''));
       return (uOrg && (uOrg === normB || uOrg.includes(normB) || normB.includes(uOrg))) ||
@@ -555,8 +560,9 @@ export default function SuperAdminDashboard() {
         });
 
         donorsPool.forEach(u => {
-          const role = String(u.role || '').toLowerCase();
-          const isVolunteer = ['volunteer', 'unit_squad', 'meghala_volunteer'].includes(role);
+          const role = String(u.role || '').toLowerCase().trim();
+          const isVolunteer = ['volunteer', 'meghala', 'unit_squad', 'meghala_volunteer', 'block_volunteer'].includes(role) ||
+            role.includes('volunteer') || role.includes('meghala');
           const isDonor = ['user', 'donor', 'receiver'].includes(role) ||
             (u.blood_group && u.blood_group !== 'N/A' && u.blood_group !== '') ||
             (u.bloodGroup && u.bloodGroup !== 'N/A' && u.bloodGroup !== '');
