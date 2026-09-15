@@ -188,7 +188,7 @@ export default function SuperAdminDashboard() {
       if (fetchUsers) fetchUsers();
       if (searchDonors) searchDonors();
 
-      const [resDist, resAdmins, resPoints] = await Promise.all([
+      const [resDist, resAdmins, resPoints, resBlocks] = await Promise.all([
         api.get('/super-admin/metrics').catch((err) => {
           console.error("Super Admin metrics error:", err);
           return { data: null };
@@ -197,8 +197,27 @@ export default function SuperAdminDashboard() {
           console.error("Super Admin block-admins error:", err);
           return { data: null };
         }),
-        api.get('/super-admin/points-table').catch(() => ({ data: null }))
+        api.get('/super-admin/points-table').catch(() => ({ data: null })),
+        api.get('/super-admin/blocks').catch((err) => {
+          console.error("Super Admin blocks error:", err);
+          return { data: null };
+        })
       ]);
+
+      let blockSummaryList = [];
+      if (resBlocks?.data?.success && Array.isArray(resBlocks.data.data?.blocks)) {
+        blockSummaryList = resBlocks.data.data.blocks.map(b => ({
+          block: b.blockName || b.blockCommitteeName || b.block || 'N/A',
+          users: Number(b.donorCount ?? b.donors ?? b.donors_count ?? 0),
+          donors: Number(b.donorCount ?? b.donors ?? b.donors_count ?? 0),
+          volunteers: Number(b.volunteerCount ?? b.volunteers ?? b.volunteers_count ?? 0),
+          meghala_count: Number(b.meghalaCount ?? b.meghala_count ?? (Array.isArray(b.meghalas) ? b.meghalas.length : 0)),
+          meghalas: Array.isArray(b.meghalas) ? b.meghalas : []
+        }));
+      } else if (resDist?.data?.success) {
+        const dData = resDist.data.data || resDist.data;
+        blockSummaryList = dData.block_summary || dData.blockSummary || [];
+      }
 
       if (resDist?.data?.success) {
         const dData = resDist.data.data || resDist.data;
@@ -216,7 +235,7 @@ export default function SuperAdminDashboard() {
           urgency_normal: dData.urgency_normal ?? dData.urgencyNormal ?? 0,
           recent_requests: dData.recent_requests || dData.recentRequests || [],
           pending_approval_requests: dData.pending_approval_requests || dData.pendingApprovalRequests || [],
-          block_summary: dData.block_summary || dData.blockSummary || [],
+          block_summary: blockSummaryList,
           meghalas_by_block: dData.meghalas_by_block || dData.meghalasByBlock || {}
         });
       }
