@@ -432,19 +432,19 @@ export default function BlockCommitteeManagement() {
 
           <button
             onClick={() => { setBlockName(''); setShowAddModal(true); }}
-            className="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-xs font-bold shadow-md shadow-red-200 transition flex items-center gap-2 cursor-pointer"
+            className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-xs font-bold shadow-md shadow-red-200 transition flex items-center gap-2 cursor-pointer"
           >
-            <Plus className="w-4 h-4" /> Add Block Committee
+            <Plus className="w-4 h-4" /> <span className="truncate">Add Block Committee</span>
           </button>
           <button
             onClick={exportCSV}
-            className="px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
+            className="flex-1 sm:flex-none justify-center px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
           >
-            <Download className="w-4 h-4 text-blue-600" /> Export CSV
+            <Download className="w-4 h-4 text-blue-600" /> <span className="truncate">Export CSV</span>
           </button>
           <button
             onClick={loadData}
-            className="px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
+            className="flex-1 sm:flex-none justify-center px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
@@ -453,7 +453,7 @@ export default function BlockCommitteeManagement() {
 
       {/* Error state banner with Retry button */}
       {error && !loading && (
-        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 rounded-3xl p-6 text-center space-y-3">
+        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 rounded-3xl p-4 sm:p-6 text-center space-y-3">
           <p className="text-red-700 dark:text-red-400 text-sm font-bold">{error}</p>
           <button
             onClick={loadData}
@@ -465,59 +465,59 @@ export default function BlockCommitteeManagement() {
       )}
 
       {/* 4 KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-3.5 sm:p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Block Committees</span>
-            <div className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider truncate">Block Committees</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 flex items-center justify-center shrink-0">
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">{totalBlocks}</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-zinc-100 mt-1">{totalBlocks}</h3>
           <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{activeCount} Assigned</p>
         </div>
 
         {/* Dynamic Total Meghala Committees */}
-        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-3.5 sm:p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Total Meghala Committee</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider truncate">Meghala Committees</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center shrink-0">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{totalBlockVolunteers}</h3>
-          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Across {totalBlocks} Blocks</p>
+          <h3 className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{totalBlockVolunteers}</h3>
+          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5 truncate">Across {totalBlocks} Blocks</p>
         </div>
 
-        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-3.5 sm:p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Block Donors</span>
-            <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider truncate">Block Donors</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 flex items-center justify-center shrink-0">
               <Droplets className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{totalBlockDonors}</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{totalBlockDonors}</h3>
           <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Database registered</p>
         </div>
 
-        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-4 rounded-2xl">
+        <div className="bg-white border-slate-200 shadow-xs dark:bg-zinc-900 border p-3.5 sm:p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Admin Status</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider truncate">Admin Status</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-500 mt-1">{activeCount} Active</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-500 mt-1">{activeCount} Active</h3>
           <p className="text-[10px] text-amber-500 mt-0.5">{unassignedCount} Unassigned</p>
         </div>
       </div>
 
       {/* Main List Section */}
-      <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 rounded-3xl p-6 space-y-6">
+      <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 border /80 dark:border-zinc-800/80 rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6">
 
         {/* Filters & Search Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-zinc-800/60 pb-4">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-100 dark:border-zinc-800/60 pb-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <button
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${statusFilter === 'all'
