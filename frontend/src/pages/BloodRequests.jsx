@@ -174,7 +174,8 @@ export default function BloodRequests() {
 
   const sosCount = requests.filter((r) => {
     const urg = (r.urgencyLevel || r.urgency_level || '').toLowerCase();
-    return (urg.includes('immediate') || urg.includes('sos')) && ['Pending', 'Waiting', 'Accepted'].includes(r.status);
+    const st = String(r.status || '').toLowerCase().trim();
+    return (urg.includes('immediate') || urg.includes('sos')) && ['pending', 'waiting', 'accepted'].includes(st);
   }).length;
 
   return (
