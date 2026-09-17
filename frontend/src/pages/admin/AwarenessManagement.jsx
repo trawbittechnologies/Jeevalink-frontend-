@@ -3,7 +3,7 @@ import { useAppStore } from '../../store/appStore.js';
 import MascotVideo from '../../components/MascotVideo.jsx';
 import {
   Video, Film, Image, Sparkles, Upload, Save, RefreshCw,
-  CheckCircle2, AlertCircle, Eye, Play, Shield
+  CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -13,32 +13,32 @@ export default function AwarenessManagement() {
   const [posterFile, setPosterFile] = useState(null);
   const [savingAwareness, setSavingAwareness] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [prevAwarenessSettings, setPrevAwarenessSettings] = useState(awarenessSettings);
 
-  const [awarenessForm, setAwarenessForm] = useState({
-    videoUrl: '',
-    posterUrl: '',
-    badgeText: '',
-    quoteTitle: '',
-    quoteDescription: '',
-    buttonLabel: ''
-  });
+  const [awarenessForm, setAwarenessForm] = useState(() => ({
+    videoUrl: awarenessSettings?.videoUrl || '',
+    posterUrl: awarenessSettings?.posterUrl || '',
+    badgeText: awarenessSettings?.badgeText || '',
+    quoteTitle: awarenessSettings?.quoteTitle || '',
+    quoteDescription: awarenessSettings?.quoteDescription || '',
+    buttonLabel: awarenessSettings?.buttonLabel || ''
+  }));
+
+  if (awarenessSettings !== prevAwarenessSettings) {
+    setPrevAwarenessSettings(awarenessSettings);
+    setAwarenessForm({
+      videoUrl: awarenessSettings?.videoUrl || '',
+      posterUrl: awarenessSettings?.posterUrl || '',
+      badgeText: awarenessSettings?.badgeText || '',
+      quoteTitle: awarenessSettings?.quoteTitle || '',
+      quoteDescription: awarenessSettings?.quoteDescription || '',
+      buttonLabel: awarenessSettings?.buttonLabel || ''
+    });
+  }
 
   useEffect(() => {
     fetchAwarenessSettings();
   }, [fetchAwarenessSettings]);
-
-  useEffect(() => {
-    if (awarenessSettings) {
-      setAwarenessForm({
-        videoUrl: awarenessSettings.videoUrl || '',
-        posterUrl: awarenessSettings.posterUrl || '',
-        badgeText: awarenessSettings.badgeText || '',
-        quoteTitle: awarenessSettings.quoteTitle || '',
-        quoteDescription: awarenessSettings.quoteDescription || '',
-        buttonLabel: awarenessSettings.buttonLabel || ''
-      });
-    }
-  }, [awarenessSettings]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
