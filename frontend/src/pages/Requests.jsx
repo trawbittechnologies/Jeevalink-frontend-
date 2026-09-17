@@ -425,7 +425,7 @@ export default function Requests() {
   });
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-900 px-6 pt-6 pb-24 select-none">
+    <div className="min-h-screen bg-white dark:bg-zinc-900 px-3 sm:px-6 pt-4 sm:pt-6 pb-24 select-none">
       <div className="max-w-7xl mx-auto">
 
         {/* ⏳ Pending Approval Banner — shown to regular users after submission */}
