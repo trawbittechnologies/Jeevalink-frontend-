@@ -624,12 +624,12 @@ export default function DistrictPointsTable() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16 px-3 sm:px-6">
+    <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto pb-16 px-2 sm:px-6">
 
       {/* ─── Breadcrumb & Top Bar ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1 sm:pt-2">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-slate-500 flex-wrap">
             <Link to="/super-admin/dashboard" className="hover:text-red-600 transition-colors">
               Super Admin
             </Link>
@@ -640,7 +640,7 @@ export default function DistrictPointsTable() {
               {cleanDistrict} District
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
             Points & Activity Standings
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
@@ -649,28 +649,28 @@ export default function DistrictPointsTable() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap w-full sm:w-auto sm:shrink-0">
           <button
             onClick={copyShareLink}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+            className="flex-1 sm:flex-none justify-center px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
             title="Copy Leaderboard URL"
           >
             <Share2 className="w-3.5 h-3.5 text-slate-500" />
-            <span>{copiedToast ? 'Link Copied!' : 'Share'}</span>
+            <span>{copiedToast ? 'Copied!' : 'Share'}</span>
           </button>
 
           <Link
             to="/super-admin/blocks"
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all shadow-xs flex items-center gap-1.5"
+            className="flex-1 sm:flex-none justify-center px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all shadow-xs flex items-center gap-1.5"
           >
             <Building2 className="w-3.5 h-3.5 text-slate-500" />
-            <span>Manage Blocks</span>
+            <span className="truncate">Manage Blocks</span>
           </Link>
 
           <button
             onClick={() => fetchData(true)}
             disabled={loading}
-            className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className="flex-1 sm:flex-none justify-center px-3.5 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
@@ -679,98 +679,98 @@ export default function DistrictPointsTable() {
       </div>
 
       {/* ─── 4 Clean Metric Cards (Humanized, high readability) ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Card 1: Total District Points */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">District Points</span>
-            <div className="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
-              <Flame className="w-4 h-4" />
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500">District Points</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <div className="mt-2.5 sm:mt-3">
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
                 {(data.summary?.total_district_points || 0).toLocaleString()}
               </span>
-              <span className="text-xs font-bold text-red-600 uppercase tracking-wide">pts</span>
+              <span className="text-[10px] sm:text-xs font-bold text-red-600 uppercase tracking-wide">pts</span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 truncate">
               Verified community actions
             </p>
           </div>
         </div>
 
         {/* Card 2: Leading Block */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Leading Block</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Trophy className="w-4 h-4" />
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Leading Block</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <span className="text-base sm:text-lg font-bold text-slate-900 block truncate" title={data.summary?.top_block}>
+          <div className="mt-2.5 sm:mt-3">
+            <span className="text-sm sm:text-base lg:text-lg font-bold text-slate-900 block truncate" title={data.summary?.top_block}>
               {data.summary?.top_block || '—'}
             </span>
-            <p className="text-[11px] text-amber-700 font-semibold mt-0.5 flex items-center gap-1">
-              <Crown className="w-3 h-3 text-amber-500" /> Rank #1 Committee
+            <p className="text-[10px] sm:text-[11px] text-amber-700 font-semibold mt-0.5 flex items-center gap-1 truncate">
+              <Crown className="w-3 h-3 text-amber-500 shrink-0" /> Rank #1 Committee
             </p>
           </div>
         </div>
 
         {/* Card 3: Top Blood Donor */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Top Blood Donor</span>
-            <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-              <Droplets className="w-4 h-4" />
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Top Blood Donor</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              <Droplets className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <span className="text-base sm:text-lg font-bold text-slate-900 block truncate" title={data.summary?.top_donor}>
+          <div className="mt-2.5 sm:mt-3">
+            <span className="text-sm sm:text-base lg:text-lg font-bold text-slate-900 block truncate" title={data.summary?.top_donor}>
               {data.summary?.top_donor || '—'}
             </span>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+            <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium mt-0.5 truncate">
               {filteredDonors[0]?.total_donations ? `${filteredDonors[0].total_donations} verified donations` : 'District leading lifesaver'}
             </p>
           </div>
         </div>
 
         {/* Card 4: Active Coverage */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Active Units</span>
-            <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-              <MapPin className="w-4 h-4" />
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Active Units</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <div className="mt-2.5 sm:mt-3">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
                 {Number(data.summary?.total_blocks) || 0}
               </span>
-              <span className="text-xs font-semibold text-slate-500">Blocks</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-500">Blocks</span>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-              {Number(data.summary?.total_meghalas) || 0} registered Meghala squads
+            <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium mt-0.5 truncate">
+              {Number(data.summary?.total_meghalas) || 0} registered units
             </p>
           </div>
         </div>
       </div>
 
       {/* ─── Segmented Navigation Controls & Search Bar ─── */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-xs space-y-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xs space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-3">
           
           {/* Minimalist Segmented Tabs */}
-          <div className="bg-slate-100/90 p-1 rounded-xl inline-flex items-center gap-1 overflow-x-auto max-w-full">
+          <div className="bg-slate-100/90 p-1 rounded-xl flex items-center gap-1 overflow-x-auto max-w-full no-scrollbar">
             {[
               { id: 'blocks', label: 'Block Committees', icon: Building2, count: filteredBlocks.length },
               { id: 'meghalas', label: 'Meghala Units', icon: MapPin, count: filteredMeghalas.length },
               { id: 'donors', label: 'Top Blood Donors', icon: Droplets, count: filteredDonors.length },
               { id: 'volunteers', label: 'Volunteer Leaders', icon: Shield, count: filteredVolunteers.length },
-              { id: 'rules', label: 'Points & Badges Guide', icon: Award, count: null },
+              { id: 'rules', label: 'Points Guide', icon: Award, count: null },
             ].map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -778,13 +778,13 @@ export default function DistrictPointsTable() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer shrink-0 ${
                     isActive
                       ? 'bg-white text-slate-900 shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-red-600' : 'text-slate-400'}`} />
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-red-600' : 'text-slate-400'}`} />
                   <span>{tab.label}</span>
                   {tab.count !== null && (
                     <span className={`px-1.5 py-0.2 text-[10px] rounded-full font-bold ${
@@ -800,8 +800,8 @@ export default function DistrictPointsTable() {
 
           {/* Search & Action Controls */}
           {activeTab !== 'rules' && (
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative flex-1 sm:w-64 min-w-[200px]">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
+              <div className="relative flex-1 sm:w-64 min-w-0">
                 <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
@@ -821,25 +821,25 @@ export default function DistrictPointsTable() {
               </div>
 
               {activeTab === 'blocks' && (
-                <div className="flex items-center gap-1.5">
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 w-full sm:w-auto">
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-2.5 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-slate-700 cursor-pointer"
+                    className="w-full sm:w-auto px-2.5 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-slate-700 cursor-pointer"
                   >
-                    <option value="points">Sort: Total Points</option>
-                    <option value="donors">Sort: Donors</option>
-                    <option value="fulfilled">Sort: Fulfilled Requests</option>
+                    <option value="points">Points</option>
+                    <option value="donors">Donors</option>
+                    <option value="fulfilled">Fulfilled</option>
                   </select>
 
                   <select
                     value={blockFilter}
                     onChange={(e) => setBlockFilter(e.target.value)}
-                    className="px-2.5 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-slate-700 cursor-pointer"
+                    className="w-full sm:w-auto px-2.5 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-slate-700 cursor-pointer"
                   >
                     <option value="all">All Blocks</option>
-                    <option value="assigned">Assigned Only</option>
-                    <option value="top5">Top 5 Only</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="top5">Top 5</option>
                   </select>
                 </div>
               )}
@@ -849,8 +849,8 @@ export default function DistrictPointsTable() {
 
         {/* Quick Blood Group Filter Chips (When Top Donors tab is active) */}
         {activeTab === 'donors' && (
-          <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto text-xs">
-            <span className="text-slate-400 text-[11px] font-medium mr-1 flex items-center gap-1">
+          <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar">
+            <span className="text-slate-400 text-[11px] font-medium mr-1 flex items-center gap-1 shrink-0">
               <Filter className="w-3 h-3" /> Group:
             </span>
             {ALL_BLOOD_GROUPS.map((bg) => {
@@ -859,7 +859,7 @@ export default function DistrictPointsTable() {
                 <button
                   key={bg}
                   onClick={() => setSelectedBloodGroup(bg)}
-                  className={`px-2.5 py-1 rounded-lg font-semibold text-[11px] transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`px-2.5 py-1 rounded-lg font-semibold text-[11px] transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     isSelected
                       ? 'bg-red-600 text-white shadow-xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
@@ -892,103 +892,199 @@ export default function DistrictPointsTable() {
                   No block committees found matching your filter criteria.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        <th className="py-3.5 px-4 w-12 text-center">Rank</th>
-                        <th className="py-3.5 px-4">Block Committee</th>
-                        <th className="py-3.5 px-4">Admin Lead</th>
-                        <th className="py-3.5 px-4 text-center">Donors</th>
-                        <th className="py-3.5 px-4 text-center">Volunteers</th>
-                        <th className="py-3.5 px-4 text-center">Fulfilled Units</th>
-                        <th className="py-3.5 px-4 min-w-[130px]">Contribution</th>
-                        <th className="py-3.5 px-4 text-right">Total Points</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {filteredBlocks.map((b, idx) => {
-                        const blockName = b.block_name || b.blockCommitteeName || b.city || b.block || `Block ${idx + 1}`;
-                        const adminName = b.admin_name || b.admin1Name || b.primary_name || 'Block Coordinator';
-                        const adminMobile = b.admin_mobile || b.admin1Mobile || '';
-                        const currentPts = Number(b.total_points) || 0;
-                        const percent = Math.min(100, Math.round((currentPts / maxBlockPoints) * 100));
+                <>
+                  {/* Mobile Cards View (< md) */}
+                  <div className="md:hidden divide-y divide-slate-100">
+                    {filteredBlocks.map((b, idx) => {
+                      const blockName = b.block_name || b.blockCommitteeName || b.city || b.block || `Block ${idx + 1}`;
+                      const adminName = b.admin_name || b.admin1Name || b.primary_name || 'Block Coordinator';
+                      const adminMobile = b.admin_mobile || b.admin1Mobile || '';
+                      const currentPts = Number(b.total_points) || 0;
+                      const percent = Math.min(100, Math.round((currentPts / maxBlockPoints) * 100));
 
-                        return (
-                          <tr
-                            key={b.block_name || idx}
-                            onClick={() => setSelectedBlockDetail({ ...b, block_name: blockName, admin_name: adminName, admin_mobile: adminMobile })}
-                            className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                          >
-                            <td className="py-3.5 px-4 text-center">
+                      return (
+                        <div
+                          key={b.block_name || idx}
+                          onClick={() => setSelectedBlockDetail({ ...b, block_name: blockName, admin_name: adminName, admin_mobile: adminMobile })}
+                          className="p-3.5 hover:bg-slate-50/80 active:bg-slate-100/80 transition-colors cursor-pointer space-y-2.5"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
                               {getRankBadge(idx + 1)}
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <div className="font-bold text-slate-900 group-hover:text-red-600 transition-colors flex items-center gap-1.5">
-                                {blockName}
-                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                              </div>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[11px] text-slate-400 font-medium">
-                                  {b.meghala_count ? `${b.meghala_count} Meghala Units` : 'Block Committee'}
-                                </span>
-                                {b.isAssigned ? (
-                                  <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    Assigned
+                              <div className="min-w-0">
+                                <h4 className="font-bold text-slate-900 text-sm truncate flex items-center gap-1">
+                                  {blockName}
+                                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                </h4>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-[11px] text-slate-400 font-medium truncate">
+                                    {b.meghala_count ? `${b.meghala_count} Units` : 'Block Committee'}
                                   </span>
-                                ) : (
-                                  <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
-                                    Unassigned
+                                  {b.isAssigned ? (
+                                    <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                      Assigned
+                                    </span>
+                                  ) : (
+                                    <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                                      Unassigned
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <span className="font-bold text-slate-900 text-sm">{currentPts.toLocaleString()}</span>
+                              <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
+                            </div>
+                          </div>
+
+                          {/* Stats Grid */}
+                          <div className="grid grid-cols-3 gap-2 bg-slate-50/80 rounded-xl p-2 text-center text-xs border border-slate-100">
+                            <div>
+                              <span className="text-[10px] font-semibold text-slate-400 block">Donors</span>
+                              <span className="font-bold text-slate-800">{b.donors_count || 0}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-semibold text-slate-400 block">Volunteers</span>
+                              <span className="font-bold text-slate-800">{b.volunteers_count || 0}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-semibold text-slate-400 block">Fulfilled</span>
+                              <span className="font-bold text-emerald-700">{b.fulfilled_requests || 0}</span>
+                            </div>
+                          </div>
+
+                          {/* Contribution Bar & Admin info */}
+                          <div className="flex items-center justify-between gap-3 text-xs pt-0.5">
+                            <div className="flex items-center gap-1.5 min-w-0 text-[11px] text-slate-600">
+                              <span className="truncate">Lead: <strong>{adminName}</strong></span>
+                              {adminMobile && adminMobile !== '—' && (
+                                <a
+                                  href={`tel:${adminMobile}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="p-1 bg-white border border-slate-200 rounded-lg text-emerald-600 hover:bg-slate-50 shrink-0"
+                                  title="Call Admin"
+                                >
+                                  <Phone className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0 w-24">
+                              <div className="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div
+                                  className="bg-red-600 h-full rounded-full"
+                                  style={{ width: `${percent}%` }}
+                                />
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-medium">{percent}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Desktop Table View (>= md) */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                          <th className="py-3.5 px-4 w-12 text-center">Rank</th>
+                          <th className="py-3.5 px-4">Block Committee</th>
+                          <th className="py-3.5 px-4">Admin Lead</th>
+                          <th className="py-3.5 px-4 text-center">Donors</th>
+                          <th className="py-3.5 px-4 text-center">Volunteers</th>
+                          <th className="py-3.5 px-4 text-center">Fulfilled Units</th>
+                          <th className="py-3.5 px-4 min-w-[130px]">Contribution</th>
+                          <th className="py-3.5 px-4 text-right">Total Points</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredBlocks.map((b, idx) => {
+                          const blockName = b.block_name || b.blockCommitteeName || b.city || b.block || `Block ${idx + 1}`;
+                          const adminName = b.admin_name || b.admin1Name || b.primary_name || 'Block Coordinator';
+                          const adminMobile = b.admin_mobile || b.admin1Mobile || '';
+                          const currentPts = Number(b.total_points) || 0;
+                          const percent = Math.min(100, Math.round((currentPts / maxBlockPoints) * 100));
+
+                          return (
+                            <tr
+                              key={b.block_name || idx}
+                              onClick={() => setSelectedBlockDetail({ ...b, block_name: blockName, admin_name: adminName, admin_mobile: adminMobile })}
+                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                            >
+                              <td className="py-3.5 px-4 text-center">
+                                {getRankBadge(idx + 1)}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="font-bold text-slate-900 group-hover:text-red-600 transition-colors flex items-center gap-1.5">
+                                  {blockName}
+                                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-[11px] text-slate-400 font-medium">
+                                    {b.meghala_count ? `${b.meghala_count} Meghala Units` : 'Block Committee'}
+                                  </span>
+                                  {b.isAssigned ? (
+                                    <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                      Assigned
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                                      Unassigned
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="text-slate-800 font-semibold">{adminName}</div>
+                                {adminMobile && adminMobile !== '—' && (
+                                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                                    <Phone className="w-2.5 h-2.5 text-slate-400" /> {adminMobile}
                                   </span>
                                 )}
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <div className="text-slate-800 font-semibold">{adminName}</div>
-                              {adminMobile && adminMobile !== '—' && (
-                                <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
-                                  <Phone className="w-2.5 h-2.5 text-slate-400" /> {adminMobile}
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800">
+                                  {b.donors_count || 0}
                                 </span>
-                              )}
-                            </td>
-                            <td className="py-3.5 px-4 text-center">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800">
-                                {b.donors_count || 0}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 text-center">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800">
-                                {b.volunteers_count || 0}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 text-center">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                {b.fulfilled_requests || 0}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <div className="space-y-1">
-                                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                  <div
-                                    className="bg-red-600 h-full rounded-full transition-all duration-300"
-                                    style={{ width: `${percent}%` }}
-                                  />
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800">
+                                  {b.volunteers_count || 0}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                  {b.fulfilled_requests || 0}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="space-y-1">
+                                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                    <div
+                                      className="bg-red-600 h-full rounded-full transition-all duration-300"
+                                      style={{ width: `${percent}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-[10px] text-slate-400 font-medium block text-right">{percent}%</span>
                                 </div>
-                                <span className="text-[10px] text-slate-400 font-medium block text-right">{percent}%</span>
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4 text-right">
-                              <span className="font-bold text-slate-900 text-sm">
-                                {currentPts.toLocaleString()}
-                              </span>
-                              <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                              </td>
+                              <td className="py-3.5 px-4 text-right">
+                                <span className="font-bold text-slate-900 text-sm">
+                                  {currentPts.toLocaleString()}
+                                </span>
+                                <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -1005,24 +1101,25 @@ export default function DistrictPointsTable() {
                   {filteredMeghalas.map((m, idx) => (
                     <div
                       key={m.meghala_name || idx}
-                      className="p-3.5 sm:p-4 px-4 sm:px-5 flex items-center justify-between hover:bg-slate-50/80 transition-colors text-xs"
+                      className="p-3.5 sm:p-4 px-3 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 hover:bg-slate-50/80 transition-colors text-xs"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         {getRankBadge(idx + 1)}
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <h4 className="font-bold text-slate-900 text-sm truncate">{m.meghala_name || m.meghala || 'Meghala Unit'}</h4>
-                          <p className="text-[11px] text-slate-500 font-medium">
+                          <p className="text-[11px] text-slate-500 font-medium truncate">
                             Parent Block: <span className="text-slate-800 font-semibold">{m.block_name || m.block || cleanDistrict}</span>
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6 shrink-0">
-                        <div className="text-right hidden sm:block">
-                          <span className="text-slate-700 font-semibold text-xs block">{m.total_members || 0} Members</span>
-                          <span className="text-[11px] text-slate-400 font-medium">{m.volunteers_count || 0} Volunteers</span>
+                      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 pl-10 sm:pl-0">
+                        <div className="flex items-center gap-2 text-slate-600 font-medium text-[11px]">
+                          <span className="bg-slate-100 px-2 py-0.5 rounded-md font-semibold text-slate-700">{m.total_members || 0} Members</span>
+                          <span className="text-slate-400">•</span>
+                          <span>{m.volunteers_count || 0} Vols</span>
                         </div>
-                        <div className="text-right min-w-[80px]">
+                        <div className="text-right shrink-0 min-w-[70px]">
                           <span className="font-bold text-slate-900 text-sm">{(m.total_points || 0).toLocaleString()}</span>
                           <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
                         </div>
@@ -1052,18 +1149,18 @@ export default function DistrictPointsTable() {
                     return (
                       <div
                         key={donor.id || idx}
-                        className="p-3.5 sm:p-4 px-4 sm:px-5 flex items-center justify-between hover:bg-slate-50/80 transition-colors text-xs"
+                        className="p-3.5 sm:p-4 px-3 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 hover:bg-slate-50/80 transition-colors text-xs"
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="flex items-center gap-3 min-w-0">
                           {getRankBadge(idx + 1)}
                           
                           {/* Blood Group Badge */}
-                          <span className="w-9 h-9 rounded-xl bg-red-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                          <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-red-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
                             {bloodGroup}
                           </span>
 
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-bold text-slate-900 text-sm truncate">{donorName}</span>
                               <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getBadgePillStyle(badgeName)}`}>
                                 {badgeName}
@@ -1075,12 +1172,17 @@ export default function DistrictPointsTable() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-6 shrink-0">
-                          <div className="text-right hidden sm:block">
-                            <span className="text-slate-700 font-semibold text-xs block">{donor.total_donations || 0} Donations</span>
-                            <span className="text-[11px] text-emerald-600 font-medium">{donor.lives_saved ?? '—'} Lives Saved</span>
+                        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 pl-11 sm:pl-0">
+                          <div className="flex items-center gap-2 text-[11px]">
+                            <span className="text-slate-700 font-semibold">{donor.total_donations || 0} Donations</span>
+                            {donor.lives_saved !== undefined && donor.lives_saved !== null && (
+                              <>
+                                <span className="text-slate-300">•</span>
+                                <span className="text-emerald-600 font-medium">{donor.lives_saved} Lives Saved</span>
+                              </>
+                            )}
                           </div>
-                          <div className="text-right min-w-[75px]">
+                          <div className="text-right shrink-0 min-w-[70px]">
                             <span className="font-bold text-slate-900 text-sm">{(donor.reward_points || 0).toLocaleString()}</span>
                             <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
                           </div>
@@ -1109,12 +1211,12 @@ export default function DistrictPointsTable() {
                     return (
                       <div
                         key={vol.id || idx}
-                        className="p-3.5 sm:p-4 px-4 sm:px-5 flex items-center justify-between hover:bg-slate-50/80 transition-colors text-xs"
+                        className="p-3.5 sm:p-4 px-3 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 hover:bg-slate-50/80 transition-colors text-xs"
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="flex items-center gap-3 min-w-0">
                           {getRankBadge(idx + 1)}
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-bold text-slate-900 text-sm truncate">{volName}</span>
                               <span className="text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md border border-slate-200">
                                 {vol.role || 'Volunteer'}
@@ -1126,16 +1228,16 @@ export default function DistrictPointsTable() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-6 shrink-0">
+                        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 pl-10 sm:pl-0">
                           {vol.mobile && vol.mobile !== 'N/A' && (
                             <a
                               href={`tel:${vol.mobile}`}
-                              className="text-xs text-slate-600 hover:text-red-600 font-medium hidden sm:flex items-center gap-1 transition-colors"
+                              className="text-xs text-slate-600 hover:text-red-600 font-medium flex items-center gap-1 transition-colors"
                             >
                               <Phone className="w-3 h-3 text-slate-400" /> {vol.mobile}
                             </a>
                           )}
-                          <div className="text-right min-w-[75px]">
+                          <div className="text-right shrink-0 min-w-[70px]">
                             <span className="font-bold text-slate-900 text-sm">{(vol.reward_points || 0).toLocaleString()}</span>
                             <span className="text-[10px] text-red-600 font-bold uppercase ml-1">pts</span>
                           </div>
@@ -1150,11 +1252,11 @@ export default function DistrictPointsTable() {
 
           {/* ═════════ TAB 5: POINT RULES & BADGES GUIDE ═════════ */}
           {activeTab === 'rules' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Rules Section */}
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                     <Zap className="w-4 h-4 text-amber-500" /> How Points Are Earned
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -1162,7 +1264,7 @@ export default function DistrictPointsTable() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
                   {(data.point_rules?.length ? data.point_rules : [
                     { action: 'Blood Donation Completed', target: 'Donor', points: 100, badge: '🩸 +100 Pts' },
                     { action: 'Meghala Volunteer Verification', target: 'Meghala Volunteer', points: 20, badge: '🛡️ +20 Pts' },
@@ -1170,12 +1272,12 @@ export default function DistrictPointsTable() {
                     { action: 'Emergency SOS Acceptance', target: 'Donor / Responder', points: 20, badge: '⚡ +20 Pts' },
                     { action: 'Block Fulfilled Request Bonus', target: 'Block Committee Score', points: 150, badge: '🏆 +150 Pts' },
                   ]).map((rule, idx) => (
-                    <div key={idx} className="p-3.5 bg-slate-50/80 border border-slate-200/70 rounded-xl flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-slate-900">{rule.action}</h4>
-                        <span className="text-[11px] text-slate-500 font-medium">Eligible: {rule.target}</span>
+                    <div key={idx} className="p-3 sm:p-3.5 bg-slate-50/80 border border-slate-200/70 rounded-xl flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-slate-900 truncate">{rule.action}</h4>
+                        <span className="text-[11px] text-slate-500 font-medium block truncate">Eligible: {rule.target}</span>
                       </div>
-                      <span className="text-xs font-bold text-red-700 bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">
+                      <span className="text-xs font-bold text-red-700 bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg shrink-0">
                         {rule.badge || `+${rule.points} Pts`}
                       </span>
                     </div>
@@ -1184,9 +1286,9 @@ export default function DistrictPointsTable() {
               </div>
 
               {/* Milestone Badges Section */}
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                     <Award className="w-4 h-4 text-red-600" /> Recognition Tiers & Milestone Badges
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -1194,7 +1296,7 @@ export default function DistrictPointsTable() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 text-xs">
                   {(data.badges_guide?.length ? data.badges_guide : [
                     { name: 'First Drop', points: 100, desc: 'Awarded upon completing 1st verified blood donation.' },
                     { name: 'Life Saver', points: 500, desc: 'Reached 500 points milestone saving lives.' },
@@ -1202,7 +1304,7 @@ export default function DistrictPointsTable() {
                     { name: 'Red Guardian', points: 2500, desc: 'Reached 2,500 points master guardian status.' },
                     { name: 'Legend Donor', points: 5000, desc: 'Attained highest 5,000 points Hall of Fame status.' },
                   ]).map((badge, idx) => (
-                    <div key={idx} className="p-4 bg-slate-50/80 border border-slate-200/80 rounded-xl space-y-2 flex flex-col justify-between">
+                    <div key={idx} className="p-3.5 sm:p-4 bg-slate-50/80 border border-slate-200/80 rounded-xl space-y-2 flex flex-col justify-between">
                       <div className="space-y-1">
                         <span className="text-sm font-bold text-slate-900 block">{badge.name}</span>
                         <span className="inline-block text-[10px] font-semibold px-2 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded-full">
@@ -1222,24 +1324,24 @@ export default function DistrictPointsTable() {
 
       {/* ─── Detail Modal for Block Committee ─── */}
       {selectedBlockDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-150 text-xs">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-              <div className="space-y-1">
-                <span className="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded-full text-[10px] font-bold uppercase tracking-wider">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-xl space-y-4 my-auto animate-in fade-in zoom-in-95 duration-150 text-xs max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3 sm:pb-4">
+              <div className="space-y-1 min-w-0 flex-1 pr-2">
+                <span className="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded-full text-[10px] font-bold uppercase tracking-wider inline-block">
                   Rank #{selectedBlockDetail.rank} Committee
                 </span>
-                <h3 className="text-xl font-bold text-slate-900">{selectedBlockDetail.block_name}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{selectedBlockDetail.block_name}</h3>
               </div>
               <button
                 onClick={() => setSelectedBlockDetail(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="bg-slate-50/80 rounded-xl p-4 space-y-3 border border-slate-100">
+            <div className="bg-slate-50/80 rounded-xl p-3.5 sm:p-4 space-y-2.5 border border-slate-100">
               <div className="flex justify-between items-center text-sm font-semibold">
                 <span className="text-slate-600">Total Points:</span>
                 <span className="text-red-600 font-bold text-base">{(selectedBlockDetail.total_points || 0).toLocaleString()} pts</span>
@@ -1259,7 +1361,7 @@ export default function DistrictPointsTable() {
               </div>
             </div>
 
-            <div className="space-y-2 bg-slate-50/60 rounded-xl p-4 border border-slate-100">
+            <div className="space-y-2 bg-slate-50/60 rounded-xl p-3.5 sm:p-4 border border-slate-100">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Committee Lead</span>
               <div className="font-bold text-slate-900 text-sm">{selectedBlockDetail.admin_name}</div>
               {selectedBlockDetail.admin_mobile && selectedBlockDetail.admin_mobile !== '—' && (

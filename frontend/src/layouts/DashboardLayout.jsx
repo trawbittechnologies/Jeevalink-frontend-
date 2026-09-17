@@ -43,18 +43,19 @@ export default function DashboardLayout() {
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Top bar */}
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-100 h-14 flex items-center justify-between px-4 lg:px-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-100 h-14 flex items-center justify-between px-3 sm:px-4 lg:px-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
 
           {/* Mobile Menu & Logo */}
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden min-w-0">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 -ml-2 text-gray-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="p-2 -ml-1 text-gray-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer shrink-0"
+              aria-label="Open navigation menu"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            <Link to="/" className="flex items-center">
-              <JeevaLinkLogo size={32} textClassName="text-sm" showSubtitle={true} />
+            <Link to="/" className="flex items-center truncate">
+              <JeevaLinkLogo size={28} textClassName="text-sm" showSubtitle={false} />
             </Link>
           </div>
 
@@ -65,13 +66,13 @@ export default function DashboardLayout() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Emergency SOS */}
             <button
               onClick={() => startSOSCountdown(user)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 active:bg-red-200 border border-red-200 text-primary text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-red-50 hover:bg-red-100 active:bg-red-200 border border-red-200 text-primary text-xs font-bold rounded-xl transition-colors cursor-pointer"
             >
-              <Siren className="w-3.5 h-3.5 animate-pulse" /> SOS
+              <Siren className="w-3.5 h-3.5 animate-pulse" /> <span className="text-xs font-bold">SOS</span>
             </button>
 
             {/* Notifications */}
@@ -103,7 +104,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6 pb-6 min-h-0">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 pb-6 min-h-0 w-full max-w-full overflow-x-hidden">
           <Outlet />
         </main>
       </div>
