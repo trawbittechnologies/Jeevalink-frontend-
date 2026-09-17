@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Building2, Plus, Search, RefreshCw, Edit3, Trash2, X, Mail, Phone,
-  CheckCircle2, Download, ChevronRight,
+  CheckCircle2, Download, ChevronRight, Power, AlertTriangle, AlertCircle,
   MapPin, LayoutList, GitBranch, Users, Droplets
 } from 'lucide-react';
 import api from '../../store/api.js';
@@ -69,6 +69,22 @@ export default function BlockCommitteeManagement() {
   const [deletingAdminName, setDeletingAdminName] = useState('');
   const [credentialsModal, setCredentialsModal] = useState({ open: false, email: '', password: '', blockName: '' });
 
+  // Deactivation and Reactivation Modals
+  const [deactivationModal, setDeactivationModal] = useState({
+    open: false,
+    block: null,
+    reason: '',
+    submitting: false,
+    error: null
+  });
+
+  const [reactivationModal, setReactivationModal] = useState({
+    open: false,
+    block: null,
+    submitting: false,
+    error: null
+  });
+
   // Add Form State
   const [blockName, setBlockName] = useState('');
   const [primaryContactName, setPrimaryContactName] = useState('');
@@ -88,6 +104,7 @@ export default function BlockCommitteeManagement() {
   const [editEmail, setEditEmail] = useState('');
   const [editPassword, setEditPassword] = useState('');
   const [editStatus, setEditStatus] = useState('Active');
+  const [editDeactivationReason, setEditDeactivationReason] = useState('');
   const [submittingEdit, setSubmittingEdit] = useState(false);
   const [editMsg, setEditMsg] = useState(null);
 
