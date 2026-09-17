@@ -26,7 +26,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const unread = notifications.filter((n) => !n.read).length;
+  const unread = notifications.filter((n) => !n.read && !n.is_read).length;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -190,22 +190,27 @@ export default function Navbar() {
                         {notifications.length === 0 ? (
                           <p className="text-center py-6 text-xs text-slate-400 font-semibold">No recent alerts</p>
                         ) : (
-                          notifications.slice(0, 3).map((n) => (
-                            <div
-                              key={n._id}
-                              onClick={() => useAppStore.getState().markNotificationRead(n._id)}
-                              className={`p-2.5 rounded-xl border cursor-pointer flex gap-2.5 items-start transition-all ${n.read
-                                  ? 'opacity-50 bg-slate-50 border-slate-100'
-                                  : 'bg-red-50 hover:bg-red-100/60 border-red-100'
+                          notifications.slice(0, 3).map((n) => {
+                            const isRead = Boolean(n.read || n.is_read);
+                            const notifId = n._id || n.id;
+                            return (
+                              <div
+                                key={notifId}
+                                onClick={() => useAppStore.getState().markNotificationRead(notifId)}
+                                className={`p-2.5 rounded-xl border cursor-pointer flex gap-2.5 items-start transition-all ${
+                                  isRead
+                                    ? 'opacity-50 bg-slate-50 border-slate-100'
+                                    : 'bg-red-50 hover:bg-red-100/60 border-red-100'
                                 }`}
-                            >
-                              {getMiniIcon(n.type)}
-                              <div className="min-w-0 flex-1 text-left">
-                                <p className="text-[11px] font-bold text-slate-900 truncate">{n.title}</p>
-                                <p className="text-[10px] text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">{n.message}</p>
+                              >
+                                {getMiniIcon(n.type)}
+                                <div className="min-w-0 flex-1 text-left">
+                                  <p className="text-[11px] font-bold text-slate-900 truncate">{n.title}</p>
+                                  <p className="text-[10px] text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">{n.message}</p>
+                                </div>
                               </div>
-                            </div>
-                          ))
+                            );
+                          })
                         )}
                       </div>
                     </motion.div>

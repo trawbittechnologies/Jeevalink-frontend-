@@ -158,37 +158,51 @@ export default function App() {
   const { token, loadProfile } = useAuthStore();
   const { triggerToast } = useAppStore();
 
+  const { fetchNotifications } = useAppStore();
+
   useEffect(() => {
     if (token) {
       loadProfile();
+      fetchNotifications();
       // Silently refresh FCM token on every login/page load so the DB always
       // has a valid, up-to-date token after service worker updates.
       refreshFcmToken();
     }
-  }, [token, loadProfile]);
-
+  }, [token, loadProfile, fetchNotifications]);
 
   useEffect(() => {
     let unsubscribe = null;
+    let lastAlertAt = 0;
+    let lastAlertTitle = '';
 
-    // Channel 1: Firebase onMessage (may or may not fire depending on SW state)
+    const handleIncomingAlert = (title, body) => {
+      const now = Date.now();
+      // Deduplicate identical alerts within 3 seconds to avoid dual-channel double-toasts
+      if (title === lastAlertTitle && (now - lastAlertAt) < 3000) {
+        return;
+      }
+      lastAlertAt = now;
+      lastAlertTitle = title;
+
+      if (title && title !== '(no title)') {
+        triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
+      }
+      // Instantly refresh the notification badge & list in store
+      useAppStore.getState().fetchNotifications();
+    };
+
+    // Channel 1: Firebase onMessage (foreground tab)
     onForegroundMessage((payload) => {
-      const title = payload.notification?.title || 'New Notification';
-      const body = payload.notification?.body || '';
-      triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
+      const title = payload.notification?.title || payload.data?.title || 'New Blood Alert';
+      const body = payload.notification?.body || payload.data?.body || '';
+      handleIncomingAlert(title, body);
     }).then((unsub) => { unsubscribe = unsub; });
 
-    // Channel 2: Raw push relay from service worker — ALWAYS fires regardless of focus state
+    // Channel 2: Service worker push event relay (always fires)
     const handleSwMessage = (event) => {
-      const { type, title, body, raw } = event.data || {};
+      const { type, title, body } = event.data || {};
       if (type === 'FCM_PUSH') {
-        console.log('[App] FCM_PUSH received — title:', title, '| body:', body, '| raw:', raw);
-        if (title && title !== '(no title)') {
-          triggerToast(`${title}${body ? ` — ${body}` : ''}`, 'info');
-          if (Notification.permission === 'granted') {
-            new Notification(title, { body, icon: '/idonate.png' });
-          }
-        }
+        handleIncomingAlert(title, body);
       }
     };
     navigator.serviceWorker?.addEventListener('message', handleSwMessage);

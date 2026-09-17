@@ -516,8 +516,18 @@ export const useAppStore = create((set, get) => ({
   fetchNotifications: async () => {
     try {
       const res = await api.get('/notifications');
-      if (res.data.success) {
-        set({ notifications: res.data.data.notifications || [] });
+      if (res.data?.success) {
+        const rawList = res.data.data?.notifications || (Array.isArray(res.data.data) ? res.data.data : []);
+        const normalized = rawList.map((n) => ({
+          ...n,
+          _id: n._id ?? n.id,
+          id: n.id ?? n._id,
+          read: Boolean(n.read ?? n.is_read),
+          is_read: Boolean(n.is_read ?? n.read),
+          createdAt: n.createdAt ?? n.created_at ?? new Date().toISOString(),
+          created_at: n.created_at ?? n.createdAt ?? new Date().toISOString(),
+        }));
+        set({ notifications: normalized });
       }
     } catch (err) {
       console.error('Failed to fetch notifications', err);
@@ -525,11 +535,16 @@ export const useAppStore = create((set, get) => ({
   },
 
   markNotificationRead: async (id) => {
+    if (!id) return;
     try {
       const res = await api.patch(`/notifications/${id}/read`);
-      if (res.data.success) {
+      if (res.data?.success) {
         set((state) => ({
-          notifications: state.notifications.map((n) => String(n._id) === String(id) ? { ...n, read: true } : n)
+          notifications: state.notifications.map((n) =>
+            (String(n._id) === String(id) || String(n.id) === String(id))
+              ? { ...n, read: true, is_read: true }
+              : n
+          )
         }));
       }
     } catch (err) {
@@ -540,9 +555,9 @@ export const useAppStore = create((set, get) => ({
   markAllNotificationsRead: async () => {
     try {
       const res = await api.patch('/notifications/read-all');
-      if (res.data.success) {
+      if (res.data?.success) {
         set((state) => ({
-          notifications: state.notifications.map((n) => ({ ...n, read: true }))
+          notifications: state.notifications.map((n) => ({ ...n, read: true, is_read: true }))
         }));
         get().triggerToast('All notifications marked as read.', 'success');
       }

@@ -86,3 +86,26 @@ self.addEventListener('push', (event) => {
   );
 });
 
+// ─── Notification Click Handler ──────────────────────────────────────────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const clickActionUrl = event.notification.data?.url || '/notifications';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          client.focus();
+          if ('navigate' in client && clickActionUrl) {
+            return client.navigate(clickActionUrl);
+          }
+          return;
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(clickActionUrl);
+      }
+    })
+  );
+});
+

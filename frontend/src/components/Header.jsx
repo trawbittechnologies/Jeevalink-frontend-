@@ -24,7 +24,7 @@ export default function Header() {
     triggerToast(nextDark ? 'Dark mode enabled!' : 'Light mode enabled!', 'info');
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.read && !n.is_read).length;
 
   const handleLogout = () => {
     logout();

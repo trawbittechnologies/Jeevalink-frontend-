@@ -1,4 +1,4 @@
-﻿import { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Siren, Award, CheckSquare, Sparkles, Inbox, ArrowLeft, MapPin } from 'lucide-react';
@@ -21,10 +21,9 @@ export default function Notifications() {
   };
 
   const handleMarkAllRead = () => {
-    const unread = notifications.filter(n => !n.read);
+    const unread = notifications.filter(n => !n.read && !n.is_read);
     if (unread.length === 0) return;
-    unread.forEach(n => markNotificationRead(n._id));
-    triggerToast('All notifications marked as read!', 'success');
+    useAppStore.getState().markAllNotificationsRead();
   };
 
   const getIcon = (type) => {
@@ -86,7 +85,7 @@ export default function Notifications() {
           </div>
         </div>
 
-        {notifications.filter(n => !n.read).length > 0 && (
+        {notifications.filter(n => !n.read && !n.is_read).length > 0 && (
           <button
             onClick={handleMarkAllRead}
             className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
@@ -105,33 +104,43 @@ export default function Notifications() {
         </div>
       ) : (
         <div className="space-y-3">
-          {notifications.map((notif) => (
-            <div
-              key={notif._id}
-              onClick={() => !notif.read && handleMarkRead(notif._id)}
-              className={`p-4 rounded-2xl border transition-all duration-200 flex gap-3.5 items-start ${
-                notif.read 
-                  ? 'bg-white/50 dark:bg-zinc-900/50 border-slate-100 dark:border-zinc-800 opacity-70' 
-                  : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-750 cursor-pointer shadow-sm'
-              }`}
-            >
-              {getIcon(notif.type)}
+          {notifications.map((notif) => {
+            const isRead = Boolean(notif.read || notif.is_read);
+            const notifId = notif._id || notif.id;
+            const timeStr = notif.createdAt
+              ? new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : '';
 
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                  <h4 className={`text-xs font-bold truncate ${notif.read ? 'text-slate-700 dark:text-zinc-400' : 'text-slate-900 dark:text-zinc-100'}`}>
-                    {notif.title}
-                  </h4>
-                  <span className="text-[9px] text-slate-400 dark:text-zinc-550 shrink-0 font-medium pl-2">
-                    {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+            return (
+              <div
+                key={notifId}
+                onClick={() => !isRead && handleMarkRead(notifId)}
+                className={`p-4 rounded-2xl border transition-all duration-200 flex gap-3.5 items-start ${
+                  isRead 
+                    ? 'bg-white/50 dark:bg-zinc-900/50 border-slate-100 dark:border-zinc-800 opacity-70' 
+                    : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-750 cursor-pointer shadow-sm'
+                }`}
+              >
+                {getIcon(notif.type)}
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
+                    <h4 className={`text-xs font-bold truncate ${isRead ? 'text-slate-700 dark:text-zinc-400' : 'text-slate-900 dark:text-zinc-100'}`}>
+                      {notif.title}
+                    </h4>
+                    {timeStr && (
+                      <span className="text-[9px] text-slate-400 dark:text-zinc-550 shrink-0 font-medium pl-2">
+                        {timeStr}
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-xs mt-1.5 leading-relaxed ${isRead ? 'text-slate-500 dark:text-zinc-500' : 'text-slate-650 dark:text-zinc-350'}`}>
+                    {notif.message}
+                  </p>
                 </div>
-                <p className={`text-xs mt-1.5 leading-relaxed ${notif.read ? 'text-slate-500 dark:text-zinc-500' : 'text-slate-650 dark:text-zinc-350'}`}>
-                  {notif.message}
-                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       </div>

@@ -13,7 +13,7 @@ export default function BottomNav() {
   ];
 
   // Count unread notifications
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.read && !n.is_read).length;
 
   // Render bottom nav only if not on Splash or Login/Register screens
   if (['Splash', 'Login', 'Register'].includes(activeView)) return null;

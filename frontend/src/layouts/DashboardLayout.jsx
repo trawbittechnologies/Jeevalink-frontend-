@@ -17,7 +17,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const unread = notifications.filter((n) => !n.read).length;
+  const unread = notifications.filter((n) => !n.read && !n.is_read).length;
 
   useEffect(() => {
     loadProfile();
