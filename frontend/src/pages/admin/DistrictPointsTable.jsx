@@ -468,7 +468,15 @@ export default function DistrictPointsTable() {
   }, [cleanDistrict]);
 
   useEffect(() => {
-    fetchData();
+    let active = true;
+    (async () => {
+      if (active) {
+        await fetchData();
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, [fetchData]);
 
   // Filtered and Sorted Blocks
