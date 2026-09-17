@@ -149,8 +149,14 @@ export default function DonorDashboard() {
 
   // Requests filtering for SOS
   const currentUserId = user ? String(user._id || user.id) : null;
-  const isNotOwner = (r) => currentUserId !== String(r.requested_by || r.requestedBy);
-  const sos = requests.filter((r) => ['Immediate', 'Emergency SOS'].includes(r.urgencyLevel || r.urgency_level) && ['Pending', 'Waiting', 'Accepted'].includes(r.status) && isNotOwner(r));
+  const isNotOwner = (r) => currentUserId !== String(r.requested_by || r.requestedBy || r.requested_by_id || '');
+  const sos = requests.filter((r) => {
+    const urg = String(r.urgencyLevel || r.urgency_level || '').toLowerCase();
+    const status = String(r.status || '').toLowerCase();
+    const isSos = urg.includes('immediate') || urg.includes('sos');
+    const isActive = ['pending', 'waiting', 'accepted', 'active', 'in progress'].includes(status);
+    return isSos && isActive && isNotOwner(r);
+  });
 
   const userBg = (user?.bloodGroup || user?.blood_group || 'O+').toUpperCase();
 

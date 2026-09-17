@@ -329,9 +329,16 @@ export default function VolunteerDashboard() {
     });
   }, [allRequestsPool]);
 
-  const pendingList = (pendingFromServer && pendingFromServer.length > 0)
-    ? pendingFromServer
-    : unverified;
+  const pendingList = useMemo(() => {
+    const list = [...(pendingFromServer || [])];
+    (unverified || []).forEach((ur) => {
+      const uId = String(ur.id || ur._id || '');
+      if (uId && !list.some((r) => String(r.id || r._id || '') === uId)) {
+        list.push(ur);
+      }
+    });
+    return list;
+  }, [pendingFromServer, unverified]);
 
   // Active Tab Requests
   const rawTabRequests = useMemo(() => {
