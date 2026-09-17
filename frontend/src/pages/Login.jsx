@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { useAppStore } from '../store/appStore.js';
 import { normalizeRole } from '../utils/rbac.js';
-import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck, Heart } from 'lucide-react';
+import { Mail, Eye, EyeOff, Lock, ArrowRight, ArrowLeft, ShieldCheck, Heart, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Login() {
@@ -14,6 +14,7 @@ export default function Login() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotInput, setForgotInput] = useState('');
   const [modalType, setModalType] = useState(null);
+  const [deactivatedAccountModal, setDeactivatedAccountModal] = useState(null);
 
   const { login, loading } = useAuthStore();
   const { triggerToast, fetchRequests, fetchNotifications, fetchUsers, publicStats, fetchPublicStats } = useAppStore();
@@ -50,6 +51,11 @@ export default function Login() {
         ]).catch(err => console.warn('[DEBUG Login] Background fetch warning:', err));
 
         redirectByRole(res.role);
+      } else if (res?.isDeactivated) {
+        setDeactivatedAccountModal({
+          message: res.error,
+          reason: res.deactivationReason || null
+        });
       } else {
         const errorMsg = res?.error || 'Invalid credentials. Please try again.';
         triggerToast(errorMsg, 'error');

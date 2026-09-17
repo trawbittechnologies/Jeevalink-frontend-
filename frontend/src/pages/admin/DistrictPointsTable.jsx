@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Trophy, Award, Medal, Crown, Flame, MapPin, RefreshCw, 
-  Building2, Zap, Shield, Search, ArrowUpRight, Phone, Mail,
-  X, Users, Droplets, CheckCircle2, ChevronRight, Share2, 
-  Filter, Sparkles, ExternalLink, Info
+  Building2, Zap, Shield, Search, ArrowUpRight, Phone,
+  X, Droplets, ChevronRight, Share2, Filter
 } from 'lucide-react';
 import api from '../../store/api.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -147,8 +146,10 @@ export default function DistrictPointsTable() {
     badges_guide: []
   });
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (isManual = false) => {
+    if (isManual) {
+      setLoading(true);
+    }
 
     try {
       const [resPoints, resBlocks] = await Promise.all([
@@ -417,7 +418,7 @@ export default function DistrictPointsTable() {
         fulfilled_requests: 0,
         total_requests: 0,
         meghala_count: toNumber(
-          bs.meghalaCount ?? (Array.isArray(bs.meghalas) ? db.meghalas.length : 0)
+          bs.meghalaCount ?? (Array.isArray(bs.meghalas) ? bs.meghalas.length : 0)
         ),
       }));
 
@@ -659,7 +660,7 @@ export default function DistrictPointsTable() {
           </Link>
 
           <button
-            onClick={fetchData}
+            onClick={() => fetchData(true)}
             disabled={loading}
             className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >

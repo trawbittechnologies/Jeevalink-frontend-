@@ -70,9 +70,16 @@ export const useAuthStore = create((set, get) => ({
       return { success: true, role: user.role };
     } catch (err) {
       console.error('[DEBUG authStore] Catch block caught login error:', err);
+      const isDeactivated = !!err.response?.data?.is_deactivated || (err.response?.status === 403 && (err.response?.data?.message?.toLowerCase().includes('deactivat') || err.response?.data?.message?.toLowerCase().includes('suspend')));
+      const deactivationReason = err.response?.data?.deactivation_reason || null;
       const errMsg = err.response?.data?.message || err.message || 'Invalid credentials. Try again.';
       set({ loading: false, error: errMsg });
-      return { success: false, error: errMsg };
+      return { 
+        success: false, 
+        error: errMsg, 
+        isDeactivated, 
+        deactivationReason 
+      };
     }
   },
 
