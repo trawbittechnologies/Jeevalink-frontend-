@@ -88,7 +88,7 @@ export default function BloodRequests() {
     const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin', 'block_admin'].includes(user.role);
     
     const statusLower = String(r.status || 'pending').toLowerCase().trim();
-    const isPendingApproval = !r.verified || r.pending_approval === true || statusLower === 'pending approval';
+    const isPendingApproval = statusLower === 'pending approval' || r.pending_approval === true || r.pendingApproval === true;
 
     // If pending approval, only the requester and privileged staff can see it until approved
     if (isPendingApproval && !isOwner && !isPrivileged) {

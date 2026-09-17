@@ -178,7 +178,8 @@ export const useAppStore = create((set, get) => ({
       // No extra params needed — the server filters by the caller's role
       const res = await api.get('/requests', { params });
       if (res.data.success) {
-        set({ requests: res.data.data.requests || [] });
+        const reqList = res.data.data?.requests || res.data?.requests || (Array.isArray(res.data.data) ? res.data.data : []);
+        set({ requests: reqList || [] });
       }
     } catch (err) {
       console.error('Failed to fetch requests', err);

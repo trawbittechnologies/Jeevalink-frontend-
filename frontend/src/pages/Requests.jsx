@@ -411,7 +411,7 @@ export default function Requests() {
     const isOwner = Boolean(currentUserId && reqUserId && reqUserId === currentUserId);
     const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin', 'block_admin'].includes(user.role);
     const statusLower = String(req.status || '').toLowerCase().trim();
-    const isPending = req.pending_approval === true || statusLower === 'pending approval' || !req.verified;
+    const isPending = req.pending_approval === true || req.pendingApproval === true || statusLower === 'pending approval';
 
     if (myRequestsOnly && user) {
       // Show own requests including pending approval ones
