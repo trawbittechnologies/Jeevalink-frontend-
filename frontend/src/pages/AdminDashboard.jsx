@@ -206,7 +206,7 @@ export default function AdminDashboard() {
           <div className="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mb-3">
             <Users className="w-5 h-5" />
           </div>
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Block Users</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Block Donors</span>
           <p className="text-3xl font-black text-slate-900 tracking-tight mt-0.5">{blockData.total_users || 0}</p>
         </div>
         <div className="card p-5 relative overflow-hidden">
