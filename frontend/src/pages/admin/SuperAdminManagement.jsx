@@ -92,8 +92,26 @@ export default function SuperAdminManagement() {
   const [editMobile2, setEditMobile2] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editStatus, setEditStatus] = useState('Active');
+  const [editDeactivationReason, setEditDeactivationReason] = useState('');
   const [actionMsg, setActionMsg] = useState(null);
   const [submittingEdit, setSubmittingEdit] = useState(false);
+
+  // Deactivate Super Admin Confirmation Modal State
+  const [deactivationModal, setDeactivationModal] = useState({
+    open: false,
+    sa: null,
+    reason: '',
+    submitting: false,
+    error: null
+  });
+
+  // Reactivate Super Admin Confirmation Modal State
+  const [reactivationModal, setReactivationModal] = useState({
+    open: false,
+    sa: null,
+    submitting: false,
+    error: null
+  });
 
   // Send Message / Warning Modal State
   const [messagingSA, setMessagingSA] = useState(null);
@@ -214,22 +232,75 @@ export default function SuperAdminManagement() {
     }
   };
 
-  const handleToggleStatus = async (sa) => {
-    const newStatus = sa.status === 'Active' ? 'Inactive' : 'Active';
-    setTogglingId(sa.id);
+  const handleOpenDeactivate = (sa) => {
+    setDeactivationModal({
+      open: true,
+      sa,
+      reason: '',
+      submitting: false,
+      error: null
+    });
+  };
+
+  const handleConfirmDeactivate = async (e) => {
+    e?.preventDefault();
+    if (!deactivationModal.sa) return;
+    if (!deactivationModal.reason.trim()) {
+      setDeactivationModal(prev => ({ ...prev, error: 'Please specify the reason for deactivating this Super Admin.' }));
+      return;
+    }
+    setDeactivationModal(prev => ({ ...prev, submitting: true, error: null }));
     try {
-      const res = await api.put(`/technical-admin/super-admins/${sa.id}`, {
-        status: newStatus
+      const res = await api.put(`/technical-admin/super-admins/${deactivationModal.sa.id}`, {
+        status: 'Inactive',
+        deactivation_reason: deactivationModal.reason.trim()
       });
       if (res.data?.success) {
-        setSuperAdmins(prev => prev.map(item => item.id === sa.id ? { ...item, status: newStatus } : item));
+        setSuperAdmins(prev => prev.map(item => item.id === deactivationModal.sa.id ? { 
+          ...item, 
+          status: 'Inactive',
+          deactivation_reason: deactivationModal.reason.trim()
+        } : item));
+        setDeactivationModal({ open: false, sa: null, reason: '', submitting: false, error: null });
+        loadData();
       } else {
-        alert("Failed to toggle status: " + (res.data?.message || 'Error'));
+        setDeactivationModal(prev => ({ ...prev, submitting: false, error: res.data?.message || 'Failed to deactivate' }));
       }
     } catch (err) {
-      alert("Error toggling status: " + (err.response?.data?.message || err.message));
-    } finally {
-      setTogglingId(null);
+      setDeactivationModal(prev => ({ ...prev, submitting: false, error: err.response?.data?.message || err.message || 'Error deactivating super admin' }));
+    }
+  };
+
+  const handleOpenReactivate = (sa) => {
+    setReactivationModal({
+      open: true,
+      sa,
+      submitting: false,
+      error: null
+    });
+  };
+
+  const handleConfirmReactivate = async () => {
+    if (!reactivationModal.sa) return;
+    setReactivationModal(prev => ({ ...prev, submitting: true, error: null }));
+    try {
+      const res = await api.put(`/technical-admin/super-admins/${reactivationModal.sa.id}`, {
+        status: 'Active',
+        deactivation_reason: null
+      });
+      if (res.data?.success) {
+        setSuperAdmins(prev => prev.map(item => item.id === reactivationModal.sa.id ? { 
+          ...item, 
+          status: 'Active',
+          deactivation_reason: null
+        } : item));
+        setReactivationModal({ open: false, sa: null, submitting: false, error: null });
+        loadData();
+      } else {
+        setReactivationModal(prev => ({ ...prev, submitting: false, error: res.data?.message || 'Failed to activate' }));
+      }
+    } catch (err) {
+      setReactivationModal(prev => ({ ...prev, submitting: false, error: err.response?.data?.message || err.message || 'Error activating super admin' }));
     }
   };
 
@@ -271,6 +342,7 @@ export default function SuperAdminManagement() {
     setEditDistrict(sa.district || 'Kozhikode');
     setEditEmail(sa.email || '');
     setEditStatus(sa.status || 'Active');
+    setEditDeactivationReason(sa.deactivation_reason || '');
 
     const parsed = parseSuperAdminContacts(sa);
     setEditFullName1(parsed.admin1Name === 'N/A' ? '' : parsed.admin1Name);
@@ -295,7 +367,8 @@ export default function SuperAdminManagement() {
         secondaryContactNumber: editMobile2,
         super_admin_1_name: editFullName1,
         super_admin_1_mobile: editMobile1,
-        status: editStatus
+        status: editStatus,
+        deactivation_reason: editStatus === 'Active' ? null : editDeactivationReason
       });
       if (res.data?.success) {
         setEditingSA(null);

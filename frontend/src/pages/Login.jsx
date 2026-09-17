@@ -460,6 +460,60 @@ export default function Login() {
           </div>
         )}
       </AnimatePresence>
+      {/* ── Deactivated Account Modal ── */}
+      <AnimatePresence>
+        {deactivatedAccountModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
+              onClick={() => setDeactivatedAccountModal(null)}
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative z-10 w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-red-100 overflow-hidden"
+            >
+              <div className="text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center mx-auto shadow-xs">
+                  <ShieldAlert className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Account Deactivated</h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Your account access has been restricted by an administrator.
+                  </p>
+                </div>
+
+                {/* Deactivation Reason Callout Box */}
+                <div className="bg-red-50/70 border border-red-200/80 rounded-2xl p-4 text-left space-y-1.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-700 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-red-600" /> Reason for Deactivation
+                  </span>
+                  <p className="text-xs font-semibold text-slate-800 leading-relaxed">
+                    {deactivatedAccountModal.reason || 'Administrative Review & Compliance Hold'}
+                  </p>
+                </div>
+
+                <p className="text-[11px] text-slate-500 font-medium">
+                  If you believe this is an error or need your account reactivated, please contact the State / Technical Administration team.
+                </p>
+
+                <div className="pt-2 flex gap-3">
+                  <button
+                    onClick={() => setDeactivatedAccountModal(null)}
+                    className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  >
+                    I Understand
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
