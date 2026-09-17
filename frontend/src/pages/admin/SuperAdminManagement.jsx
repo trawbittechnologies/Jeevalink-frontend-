@@ -68,7 +68,6 @@ export default function SuperAdminManagement() {
   const [selectedDistrictFilter, setSelectedDistrictFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [copiedId, setCopiedId] = useState(null);
-  const [togglingId, setTogglingId] = useState(null);
 
   // Add Super Admin Popup Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
