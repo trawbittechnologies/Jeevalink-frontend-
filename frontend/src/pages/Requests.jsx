@@ -406,9 +406,12 @@ export default function Requests() {
   );
 
   const displayRequests = requests.filter((req) => {
-    const isOwner = user && String(req.requested_by || req.requestedBy) === String(user.id || user._id);
+    const reqUserId = String(req.requested_by || req.requestedBy || req.requested_by_id || (req.requester && (req.requester.id || req.requester._id)) || '');
+    const currentUserId = user ? String(user.id || user._id || '') : '';
+    const isOwner = Boolean(currentUserId && reqUserId && reqUserId === currentUserId);
     const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin', 'block_admin'].includes(user.role);
-    const isPending = req.pending_approval === true || req.status === 'Pending Approval';
+    const statusLower = String(req.status || '').toLowerCase().trim();
+    const isPending = req.pending_approval === true || statusLower === 'pending approval' || !req.verified;
 
     if (myRequestsOnly && user) {
       // Show own requests including pending approval ones

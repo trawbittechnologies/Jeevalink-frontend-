@@ -82,19 +82,23 @@ export default function BloodRequests() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = requests.filter((r) => {
-    const isOwner = user && (String(r.requested_by || r.requestedBy) === String(user.id || user._id));
+    const reqUserId = String(r.requested_by || r.requestedBy || r.requested_by_id || (r.requester && (r.requester.id || r.requester._id)) || '');
+    const currentUserId = user ? String(user.id || user._id || '') : '';
+    const isOwner = Boolean(currentUserId && reqUserId && reqUserId === currentUserId);
     const isPrivileged = user && ['admin', 'volunteer', 'super_admin', 'technical_admin', 'block_admin'].includes(user.role);
-    const isPending = !r.verified || r.pending_approval === true || r.status === 'Pending Approval';
+    
+    const statusLower = String(r.status || 'pending').toLowerCase().trim();
+    const isPendingApproval = !r.verified || r.pending_approval === true || statusLower === 'pending approval';
 
     // If pending approval, only the requester and privileged staff can see it until approved
-    if (isPending && !isOwner && !isPrivileged) {
+    if (isPendingApproval && !isOwner && !isPrivileged) {
       return false;
     }
 
-    const bg = r.bloodGroup || r.blood_group;
+    const bg = (r.bloodGroup || r.blood_group || '').toUpperCase().trim();
     const reqUrg = (r.urgencyLevel || r.urgency_level || '').toLowerCase();
 
-    const matchesBg = !filterBG || bg === filterBG;
+    const matchesBg = !filterBG || bg === filterBG.toUpperCase().trim();
     const matchesUrgency = !filterUrgency ||
       (filterUrgency === 'Immediate' && (reqUrg.includes('immediate') || reqUrg.includes('sos'))) ||
       (filterUrgency === 'Critical' && (reqUrg.includes('critical') || reqUrg.includes('urgent'))) ||
@@ -103,9 +107,13 @@ export default function BloodRequests() {
     let matches = matchesBg && matchesUrgency;
     if (filterStatus && filterStatus !== 'All') {
       if (filterStatus === 'Active') {
-        matches = matches && ['Pending', 'Waiting', 'Accepted', 'Pending Approval'].includes(r.status);
+        matches = matches && ['pending', 'waiting', 'accepted', 'pending approval', 'active', 'in progress', 'urgent'].includes(statusLower);
+      } else if (filterStatus === 'Fulfilled') {
+        matches = matches && ['fulfilled', 'completed'].includes(statusLower);
+      } else if (filterStatus === 'Cancelled') {
+        matches = matches && ['cancelled', 'expired', 'rejected'].includes(statusLower);
       } else {
-        matches = matches && r.status === filterStatus;
+        matches = matches && statusLower === filterStatus.toLowerCase();
       }
     }
     return matches;
