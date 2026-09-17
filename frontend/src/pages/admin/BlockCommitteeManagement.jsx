@@ -198,6 +198,79 @@ export default function BlockCommitteeManagement() {
     }
   };
 
+  const handleOpenDeactivateBlock = (block) => {
+    const adminObj = block.rawAdmin || block;
+    setDeactivationModal({
+      open: true,
+      block,
+      admin: adminObj,
+      reason: '',
+      submitting: false,
+      error: null
+    });
+  };
+
+  const handleConfirmDeactivateBlock = async (e) => {
+    e?.preventDefault();
+    if (!deactivationModal.block) return;
+    const adminId = deactivationModal.admin?.id || deactivationModal.block?.id;
+    if (!adminId) return;
+
+    if (!deactivationModal.reason.trim()) {
+      setDeactivationModal(prev => ({ ...prev, error: 'Please specify the reason for deactivating this Block Committee.' }));
+      return;
+    }
+
+    setDeactivationModal(prev => ({ ...prev, submitting: true, error: null }));
+    try {
+      const res = await api.put(`/super-admin/block-admins/${adminId}`, {
+        status: 'Suspended',
+        deactivation_reason: deactivationModal.reason.trim()
+      });
+      if (res.data?.success) {
+        setDeactivationModal({ open: false, block: null, admin: null, reason: '', submitting: false, error: null });
+        loadData();
+      } else {
+        setDeactivationModal(prev => ({ ...prev, submitting: false, error: res.data?.message || 'Failed to deactivate' }));
+      }
+    } catch (err) {
+      setDeactivationModal(prev => ({ ...prev, submitting: false, error: err.response?.data?.message || err.message || 'Error deactivating block committee' }));
+    }
+  };
+
+  const handleOpenReactivateBlock = (block) => {
+    const adminObj = block.rawAdmin || block;
+    setReactivationModal({
+      open: true,
+      block,
+      admin: adminObj,
+      submitting: false,
+      error: null
+    });
+  };
+
+  const handleConfirmReactivateBlock = async () => {
+    if (!reactivationModal.block) return;
+    const adminId = reactivationModal.admin?.id || reactivationModal.block?.id;
+    if (!adminId) return;
+
+    setReactivationModal(prev => ({ ...prev, submitting: true, error: null }));
+    try {
+      const res = await api.put(`/super-admin/block-admins/${adminId}`, {
+        status: 'Active',
+        deactivation_reason: null
+      });
+      if (res.data?.success) {
+        setReactivationModal({ open: false, block: null, admin: null, submitting: false, error: null });
+        loadData();
+      } else {
+        setReactivationModal(prev => ({ ...prev, submitting: false, error: res.data?.message || 'Failed to activate' }));
+      }
+    } catch (err) {
+      setReactivationModal(prev => ({ ...prev, submitting: false, error: err.response?.data?.message || err.message || 'Error activating block committee' }));
+    }
+  };
+
   const handleOpenEdit = (ba) => {
     if (!ba) return;
     setEditingAdmin(ba);
@@ -205,6 +278,7 @@ export default function BlockCommitteeManagement() {
     setEditEmail(ba.email || '');
     setEditPassword('');
     setEditStatus(ba.status || 'Active');
+    setEditDeactivationReason(ba.deactivation_reason || '');
 
     const parsed = parseBlockAdminContacts(ba);
     setEditFullName1(parsed.admin1Name === 'N/A' ? '' : parsed.admin1Name);
@@ -231,6 +305,7 @@ export default function BlockCommitteeManagement() {
         password: editPassword || undefined,
         mobile: editMobile1,
         status: editStatus,
+        deactivation_reason: editStatus === 'Active' ? null : editDeactivationReason,
         district,
         city: editBlockName,
       });
@@ -610,35 +685,61 @@ export default function BlockCommitteeManagement() {
 
                         {/* Status column */}
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${c.status === 'Active'
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
-                              : c.status === 'Suspended'
-                                ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
-                                : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-400'
-                            }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${c.status === 'Active' ? 'bg-emerald-500' : c.status === 'Suspended' ? 'bg-red-500' : 'bg-amber-500'
-                              }`} />
-                            {c.status || 'Active'}
-                          </span>
+                          <div className="flex flex-col items-center gap-1">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${c.status === 'Active'
+                                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
+                                : c.status === 'Suspended' || c.status === 'Inactive'
+                                  ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
+                                  : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-400'
+                              }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${c.status === 'Active' ? 'bg-emerald-500' : (c.status === 'Suspended' || c.status === 'Inactive') ? 'bg-red-500' : 'bg-amber-500'
+                                }`} />
+                              {c.status || 'Active'}
+                            </span>
+                            {(c.deactivation_reason || c.rawAdmin?.deactivation_reason) && (
+                              <div className="text-[10px] text-red-600 dark:text-red-400 font-medium bg-red-50/80 dark:bg-red-950/30 px-2 py-0.5 rounded border border-red-100 dark:border-red-900/30 max-w-[170px] truncate" title={c.deactivation_reason || c.rawAdmin?.deactivation_reason}>
+                                Why: {c.deactivation_reason || c.rawAdmin?.deactivation_reason}
+                              </div>
+                            )}
+                          </div>
                         </td>
 
                         {/* Actions column */}
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          {isAssigned && c.rawAdmin ? (
-                            <div className="flex items-center justify-end gap-2">
+                          {isAssigned && (c.rawAdmin || c.id) ? (
+                            <div className="flex items-center justify-end gap-1.5">
+                              {c.status === 'Active' ? (
+                                <button
+                                  onClick={() => handleOpenDeactivateBlock(c)}
+                                  className="px-2.5 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                                  title="Deactivate Block Admin (blocks login)"
+                                >
+                                  <Power className="w-3.5 h-3.5" /> Deactivate
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleOpenReactivateBlock(c)}
+                                  className="px-2.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                                  title="Reactivate Block Admin (allows login)"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" /> Activate
+                                </button>
+                              )}
                               <button
-                                onClick={() => handleOpenEdit(c.rawAdmin)}
-                                className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                                onClick={() => handleOpenEdit(c.rawAdmin || c)}
+                                className="px-2.5 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
                                 title="Edit Block Committee"
                               >
                                 <Edit3 className="w-3.5 h-3.5" /> Edit
                               </button>
                               <button
                                 onClick={() => {
-                                  setDeletingAdminId(c.rawAdmin.id);
-                                  setDeletingAdminName(c.rawAdmin.primary_name || c.rawAdmin.name);
+                                  const targetId = c.rawAdmin?.id || c.id;
+                                  const targetName = c.rawAdmin?.primary_name || c.rawAdmin?.name || c.admin1Name || bName;
+                                  setDeletingAdminId(targetId);
+                                  setDeletingAdminName(targetName);
                                 }}
-                                className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
+                                className="px-2.5 py-1.5 text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition cursor-pointer flex items-center gap-1"
                                 title="Delete Block Committee"
                               >
                                 <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -719,14 +820,19 @@ export default function BlockCommitteeManagement() {
                           <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-100">{bName}</span>
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${c.status === 'Active'
                               ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400'
-                              : c.status === 'Suspended'
+                              : c.status === 'Suspended' || c.status === 'Inactive'
                                 ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400'
                                 : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-400'
                             }`}>
-                            <span className={`w-1 h-1 rounded-full ${c.status === 'Active' ? 'bg-emerald-500' : c.status === 'Suspended' ? 'bg-red-500' : 'bg-amber-500'
+                            <span className={`w-1 h-1 rounded-full ${c.status === 'Active' ? 'bg-emerald-500' : (c.status === 'Suspended' || c.status === 'Inactive') ? 'bg-red-500' : 'bg-amber-500'
                               }`} />
                             {c.status || 'Active'}
                           </span>
+                          {(c.deactivation_reason || c.rawAdmin?.deactivation_reason) && (
+                            <span className="text-[10px] text-red-600 dark:text-red-400 font-medium bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded border border-red-200 dark:border-red-900/40">
+                              Why: {c.deactivation_reason || c.rawAdmin?.deactivation_reason}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400 flex-wrap">
                           <span className="flex items-center gap-1">
@@ -749,11 +855,28 @@ export default function BlockCommitteeManagement() {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex items-center gap-2 shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isAssigned && c.rawAdmin ? (
+                      <div className="flex items-center gap-1.5 shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                        {isAssigned && (c.rawAdmin || c.id) ? (
                           <>
+                            {c.status === 'Active' ? (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleOpenDeactivateBlock(c); }}
+                                className="px-2.5 py-1.5 text-[11px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                                title="Deactivate Block"
+                              >
+                                <Power className="w-3 h-3" /> Deactivate
+                              </button>
+                            ) : (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleOpenReactivateBlock(c); }}
+                                className="px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                                title="Reactivate Block"
+                              >
+                                <CheckCircle2 className="w-3 h-3" /> Activate
+                              </button>
+                            )}
                             <button
-                              onClick={(e) => { e.stopPropagation(); handleOpenEdit(c.rawAdmin); }}
+                              onClick={(e) => { e.stopPropagation(); handleOpenEdit(c.rawAdmin || c); }}
                               className="px-2.5 py-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
                             >
                               <Edit3 className="w-3 h-3" /> Edit
@@ -761,8 +884,10 @@ export default function BlockCommitteeManagement() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setDeletingAdminId(c.rawAdmin.id);
-                                setDeletingAdminName(c.rawAdmin.primary_name || c.rawAdmin.name);
+                                const targetId = c.rawAdmin?.id || c.id;
+                                const targetName = c.rawAdmin?.primary_name || c.rawAdmin?.name || c.admin1Name || bName;
+                                setDeletingAdminId(targetId);
+                                setDeletingAdminName(targetName);
                               }}
                               className="px-2.5 py-1.5 text-[11px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-xl transition flex items-center gap-1 cursor-pointer"
                             >
@@ -1118,6 +1243,24 @@ export default function BlockCommitteeManagement() {
                   </div>
                 </div>
 
+                {editStatus !== 'Active' && (
+                  <div className="p-3.5 rounded-2xl bg-red-50/70 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 space-y-1.5 animate-fade-in">
+                    <label className="block text-xs font-bold text-red-800 dark:text-red-300 uppercase tracking-wider">
+                      Reason for Deactivation / Status Change *
+                    </label>
+                    <textarea
+                      value={editDeactivationReason}
+                      onChange={(e) => setEditDeactivationReason(e.target.value)}
+                      rows={2}
+                      placeholder="e.g. Block reorganization, inactive contact person, temporary suspension..."
+                      className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-800/80 rounded-xl text-slate-900 dark:text-zinc-100 text-xs font-normal focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    />
+                    <p className="text-[11px] text-red-600 dark:text-red-400 font-medium">
+                      This reason will be visible across admin panels and displayed to the user if they try to log in.
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-zinc-800/60 mt-4">
                   <button
                     type="button"
@@ -1135,6 +1278,155 @@ export default function BlockCommitteeManagement() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deactivate Block Confirmation Modal */}
+      {deactivationModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm select-none animate-fade-in">
+          <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border dark:border-zinc-800">
+            <div className="bg-red-600 p-5 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold tracking-tight">Deactivate Block Committee</h3>
+                  <p className="text-[11px] text-red-100">Disable login & operational access</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDeactivationModal({ open: false, block: null, admin: null, reason: '', submitting: false, error: null })}
+                className="p-1 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmDeactivateBlock} className="p-5 space-y-4">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-950 rounded-2xl border border-slate-200/80 dark:border-zinc-800/80">
+                <div className="text-xs text-slate-500 dark:text-zinc-400">Target Committee</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-zinc-100 mt-0.5">
+                  {deactivationModal.block?.blockName || deactivationModal.block?.blockCommitteeName || deactivationModal.block?.name || 'Block Committee'}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                  Primary Admin: <span className="font-semibold text-slate-700 dark:text-zinc-300">{deactivationModal.block?.admin1Name || deactivationModal.admin?.primary_name || deactivationModal.admin?.name || 'N/A'}</span>
+                </div>
+              </div>
+
+              {deactivationModal.error && (
+                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 text-xs font-semibold text-red-700 dark:text-red-400 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{deactivationModal.error}</span>
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">
+                  Why is this account being deactivated? *
+                </label>
+                <textarea
+                  value={deactivationModal.reason}
+                  onChange={(e) => setDeactivationModal(prev => ({ ...prev, reason: e.target.value, error: null }))}
+                  required
+                  rows={3}
+                  placeholder="Specify clear reason (e.g. Block election pending, inactive committee, compliance issue)..."
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                  This explanation will be logged and shown to the admin when they attempt to log in.
+                </p>
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeactivationModal({ open: false, block: null, admin: null, reason: '', submitting: false, error: null })}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={deactivationModal.submitting || !deactivationModal.reason.trim()}
+                  className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold text-xs transition shadow-sm cursor-pointer"
+                >
+                  {deactivationModal.submitting ? 'Deactivating...' : 'Confirm Deactivate'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reactivate Block Confirmation Modal */}
+      {reactivationModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm select-none animate-fade-in">
+          <div className="bg-white border-slate-200 shadow-sm dark:bg-zinc-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border dark:border-zinc-800">
+            <div className="bg-emerald-600 p-5 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold tracking-tight">Reactivate Block Committee</h3>
+                  <p className="text-[11px] text-emerald-100">Restore full access & login permissions</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setReactivationModal({ open: false, block: null, admin: null, submitting: false, error: null })}
+                className="p-1 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-950 rounded-2xl border border-slate-200/80 dark:border-zinc-800/80">
+                <div className="text-xs text-slate-500 dark:text-zinc-400">Target Committee</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-zinc-100 mt-0.5">
+                  {reactivationModal.block?.blockName || reactivationModal.block?.blockCommitteeName || reactivationModal.block?.name || 'Block Committee'}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                  Primary Admin: <span className="font-semibold text-slate-700 dark:text-zinc-300">{reactivationModal.block?.admin1Name || reactivationModal.admin?.primary_name || reactivationModal.admin?.name || 'N/A'}</span>
+                </div>
+                {(reactivationModal.block?.deactivation_reason || reactivationModal.block?.rawAdmin?.deactivation_reason) && (
+                  <div className="text-xs text-red-600 dark:text-red-400 mt-2 font-medium bg-red-50 dark:bg-red-950/40 p-2 rounded-lg">
+                    Previous Deactivation Reason: {reactivationModal.block?.deactivation_reason || reactivationModal.block?.rawAdmin?.deactivation_reason}
+                  </div>
+                )}
+              </div>
+
+              {reactivationModal.error && (
+                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 text-xs font-semibold text-red-700 dark:text-red-400 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{reactivationModal.error}</span>
+                </div>
+              )}
+
+              <p className="text-xs text-slate-600 dark:text-zinc-400">
+                Are you sure you want to reactivate this Block Committee? The admin will immediately be allowed to log in and manage donors, volunteers, and Meghala units.
+              </p>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setReactivationModal({ open: false, block: null, admin: null, submitting: false, error: null })}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmReactivateBlock}
+                  disabled={reactivationModal.submitting}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs transition shadow-sm cursor-pointer"
+                >
+                  {reactivationModal.submitting ? 'Activating...' : 'Confirm Reactivate'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

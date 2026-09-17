@@ -106,6 +106,7 @@ export default function SuperAdminDashboard() {
   const [editEmail, setEditEmail] = useState('');
   const [editPassword, setEditPassword] = useState('');
   const [editStatus, setEditStatus] = useState('Active');
+  const [editDeactivationReason, setEditDeactivationReason] = useState('');
   const [submittingEdit, setSubmittingEdit] = useState(false);
   const [editMsg, setEditMsg] = useState(null);
 
@@ -356,6 +357,7 @@ export default function SuperAdminDashboard() {
     setEditEmail(ba.email || '');
     setEditPassword('');
     setEditStatus(ba.status || 'Active');
+    setEditDeactivationReason(ba.deactivation_reason || '');
 
     const parsed = parseBlockAdminContacts(ba);
     setEditFullName1(parsed.admin1Name === 'N/A' ? '' : parsed.admin1Name);
@@ -385,7 +387,8 @@ export default function SuperAdminDashboard() {
         secondary_name: editFullName2,
         secondary_phone: editMobile2,
         secondaryContactNumber: editMobile2 ? `Admin 2: ${editFullName2} (${editMobile2})` : '',
-        status: editStatus
+        status: editStatus,
+        deactivation_reason: editStatus === 'Active' ? null : editDeactivationReason
       });
 
       if (res.data?.success) {
@@ -1482,6 +1485,21 @@ export default function SuperAdminDashboard() {
                     </select>
                   </div>
                 </div>
+
+                {editStatus !== 'Active' && (
+                  <div className="p-3 bg-red-50 rounded-xl border border-red-200 space-y-1">
+                    <label className="block text-[10px] font-bold text-red-800 uppercase">
+                      Reason for Deactivation / Status Change *
+                    </label>
+                    <textarea
+                      value={editDeactivationReason}
+                      onChange={(e) => setEditDeactivationReason(e.target.value)}
+                      rows={2}
+                      placeholder="e.g. Block reorganization, temporary suspension..."
+                      className="w-full px-3 py-1.5 bg-white border border-red-200 rounded-lg text-slate-900 text-xs focus:outline-none focus:ring-1 focus:ring-red-500"
+                    />
+                  </div>
+                )}
 
                 <div className="flex gap-3 pt-3 border-t border-slate-100">
                   <button
