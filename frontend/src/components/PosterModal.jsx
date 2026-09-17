@@ -224,21 +224,11 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
         {/* Top Accent Gradient Line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-rose-500 to-red-600" />
 
-        {/* Modal Header & Close */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-              <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Official Blood Request Poster</span>
-            </div>
-            <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-              Generated Blood Request Poster
-            </h2>
-            <p className="text-[11px] text-slate-400 font-medium">Live dynamic patient & hospital emergency broadcast</p>
-          </div>
+        {/* Modal Close Button */}
+        <div className="flex items-center justify-end mb-2.5">
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition cursor-pointer"
             title="Close"
           >
             <X className="w-5 h-5" />
