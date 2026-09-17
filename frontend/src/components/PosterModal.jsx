@@ -218,30 +218,37 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto select-none">
-      <div className="bg-white/5 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl relative text-white border border-white/10 animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-3 sm:p-4 overflow-y-auto select-none">
+      <div className="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative text-slate-900 border border-slate-200/90 animate-in fade-in zoom-in duration-200 overflow-hidden">
+        
+        {/* Top Accent Gradient Line */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-rose-500 to-red-600" />
 
         {/* Modal Header & Close */}
-        <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-white/10">
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+              <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Official Blood Request Poster</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
               Generated Blood Request Poster
             </h2>
-            <p className="text-[11px] text-slate-300">Preview with live dynamic patient data</p>
+            <p className="text-[11px] text-slate-400 font-medium">Live dynamic patient & hospital emergency broadcast</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700 rounded-full transition cursor-pointer"
+            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition cursor-pointer"
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* POSTER RENDER CONTAINER */}
-        <div className="mx-auto w-full shadow-2xl rounded-2xl overflow-hidden border border-slate-700/50 flex justify-center bg-slate-100">
+        <div className="mx-auto w-full shadow-xs rounded-2xl overflow-hidden border border-slate-200/80 flex justify-center bg-slate-50 p-2 sm:p-2.5">
           {/* Explicit physical sizing in mm as requested by user */}
-          <div ref={posterRef} className="relative bg-white shrink-0 m-0 p-0 overflow-hidden" style={{ width: '90mm', height: '112.5mm' }}>
+          <div ref={posterRef} className="relative bg-white shrink-0 m-0 p-0 overflow-hidden shadow-xs rounded-xl" style={{ width: '90mm', height: '112.5mm' }}>
 
             {/* Background Template */}
             <img
@@ -265,20 +272,20 @@ export default function PosterModal({ isOpen, onClose, data, requestData }) {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-2.5 mt-4">
+        {/* Action Buttons (White & Red Combo) */}
+        <div className="flex flex-wrap gap-2.5 mt-4 pt-1">
           <button
             onClick={handleDownloadPNG}
             disabled={downloading}
-            className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 transition cursor-pointer text-xs sm:text-sm disabled:opacity-50"
+            className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-sm shadow-red-600/25 transition cursor-pointer text-xs sm:text-sm disabled:opacity-50"
           >
-            {downloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {downloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 stroke-[2.5]" />}
             {downloading ? 'Rendering HD Poster...' : 'Download Poster (HD)'}
           </button>
 
           <button
             onClick={handleShare}
-            className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition flex items-center gap-2 text-xs sm:text-sm cursor-pointer border border-slate-600"
+            className="px-4 py-3 bg-slate-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-slate-800 font-bold rounded-2xl transition flex items-center gap-2 text-xs sm:text-sm cursor-pointer border border-slate-200 active:scale-95 shadow-xs"
           >
             <Share2 className="w-4 h-4" />
             Share
