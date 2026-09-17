@@ -91,9 +91,9 @@ export default function AdminDashboard() {
   const displayBlock = `DYFI ${formattedBlock}`;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Modern Minimal Header */}
-      <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
+      <div className="bg-white border border-slate-200/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
