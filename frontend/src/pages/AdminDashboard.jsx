@@ -214,7 +214,7 @@ export default function AdminDashboard() {
           <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-3">
             <HeartPulse className="w-5 h-5" />
           </div>
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Meghalas</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Meghala Committee</span>
           <p className="text-3xl font-black text-emerald-600 tracking-tight mt-0.5">{Math.max(Number(blockData.total_volunteers) || 0, meghalaAdmins.length)}</p>
         </div>
         <div className="card p-5 relative overflow-hidden">
