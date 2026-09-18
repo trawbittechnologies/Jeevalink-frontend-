@@ -8,6 +8,7 @@ import BetaWarningPopup from './components/BetaWarningPopup.jsx';
 import { Loader2 } from 'lucide-react';
 // Web Push foreground message relay (no Firebase — backed by webPushService.js)
 import { onForegroundMessage, refreshFcmToken } from './services/firebaseMessaging.js';
+import { playEmergencyAlertBurst, playNotificationChime } from './utils/sirenAudio.js';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout.jsx';
@@ -195,8 +196,21 @@ export default function App() {
 
     // Web Push foreground relay: WEBPUSH_FOREGROUND message from sw.js
     onForegroundMessage((payload) => {
+      const priority = payload.priority || payload.data?.priority || 'moderate';
       const title = payload.notification?.title || payload.data?.title || 'New Blood Alert';
       const body  = payload.notification?.body  || payload.data?.body  || '';
+      const isEmergency = priority === 'immediate' ||
+        payload.data?.type === 'SOS' ||
+        title.includes('🚨') ||
+        title.toLowerCase().includes('immediate') ||
+        title.toLowerCase().includes('emergency');
+
+      if (isEmergency) {
+        playEmergencyAlertBurst();
+      } else {
+        playNotificationChime();
+      }
+
       handleIncomingAlert(title, body);
     }).then((unsub) => { unsubscribe = unsub; });
 
