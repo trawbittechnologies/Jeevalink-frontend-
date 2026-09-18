@@ -1,4 +1,4 @@
-﻿/**
+/**
  * sw.js — JeevaLink Service Worker
  *
  * Standards-based VAPID Web Push handler.
@@ -55,18 +55,128 @@ function getPriorityConfig(priority) {
   return PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.moderate;
 }
 
+// ─── Cache Configuration (PWA Shell Only) ────────────────────────────────────
+
+const CACHE_NAME = 'jeevalink-shell-v1';
+const PRECACHE_ASSETS = [
+  '/',
+  '/index.html',
+  '/manifest.webmanifest',
+  '/logo.png',
+  '/idonate.png',
+  '/favicon.png',
+  '/pwa-192x192.png',
+  '/pwa-512x512.png',
+  '/pwa-maskable-512x512.png',
+  '/apple-touch-icon.png',
+];
+
 // ─── Service Worker Lifecycle ─────────────────────────────────────────────────
 
 self.addEventListener('install', (event) => {
   console.log('[SW] Installed.');
   // Skip waiting so new SW activates immediately on update
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
+        console.warn('[SW] Shell pre-cache notice (non-fatal):', err);
+      });
+    })
+  );
 });
 
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activated.');
-  // Take control of all clients immediately
-  event.waitUntil(clients.claim());
+  // Take control of all clients immediately and purge obsolete caches
+  event.waitUntil(
+    Promise.all([
+      clients.claim(),
+      caches.keys().then((keys) => {
+        return Promise.all(
+          keys.map((key) => {
+            if (key.startsWith('jeevalink-') && key !== CACHE_NAME) {
+              console.log('[SW] Cleaning stale cache:', key);
+              return caches.delete(key);
+            }
+            return Promise.resolve();
+          })
+        );
+      }),
+    ])
+  );
+});
+
+// ─── Fetch Handler (Safe Offline Shell — Never caches /api, auth, or mutative requests) ───
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+
+  // Only handle GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  const url = new URL(request.url);
+  const isSameOrigin = url.origin === JEEVALINK_ORIGIN;
+
+  // CRITICAL: NEVER cache or intercept API endpoints, storage uploads, or requests with Authorization
+  if (
+    url.pathname.startsWith('/api') ||
+    url.pathname.startsWith('/storage') ||
+    request.headers.has('Authorization')
+  ) {
+    return;
+  }
+
+  // SPA Navigation requests: Network-first with cache fallback to /index.html
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => {
+        return caches.match('/index.html').then((response) => {
+          return response || caches.match('/');
+        });
+      })
+    );
+    return;
+  }
+
+  // Static shell assets on the same origin (images, fonts, bundles)
+  if (isSameOrigin) {
+    const isStaticAsset =
+      url.pathname.startsWith('/assets/') ||
+      url.pathname.endsWith('.png') ||
+      url.pathname.endsWith('.jpg') ||
+      url.pathname.endsWith('.jpeg') ||
+      url.pathname.endsWith('.svg') ||
+      url.pathname.endsWith('.ico') ||
+      url.pathname.endsWith('.webmanifest');
+
+    if (isStaticAsset) {
+      event.respondWith(
+        caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            // Stale-while-revalidate in background
+            fetch(request)
+              .then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                  caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse));
+                }
+              })
+              .catch(() => {});
+            return cachedResponse;
+          }
+          return fetch(request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const clone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            }
+            return networkResponse;
+          });
+        })
+      );
+    }
+  }
 });
 
 // ─── Push Event Handler ───────────────────────────────────────────────────────
