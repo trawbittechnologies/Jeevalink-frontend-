@@ -9,6 +9,8 @@ import { Loader2 } from 'lucide-react';
 // Web Push foreground message relay (no Firebase — backed by webPushService.js)
 import { onForegroundMessage, refreshFcmToken } from './services/firebaseMessaging.js';
 import { playEmergencyAlertBurst, playNotificationChime } from './utils/sirenAudio.js';
+import { PWAInstallProvider } from './context/PWAInstallContext.jsx';
+import InstallWebAppModal from './components/pwa/InstallWebAppModal.jsx';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout.jsx';
@@ -222,15 +224,17 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      {showSplash ? (
-        <Suspense fallback={<PageLoader />}>
-          <Splash onComplete={() => setShowSplash(false)} />
-        </Suspense>
-      ) : (
-        <>
-          <Toast />
-          <BetaWarningPopup />
+      <PWAInstallProvider>
+        {showSplash ? (
           <Suspense fallback={<PageLoader />}>
+            <Splash onComplete={() => setShowSplash(false)} />
+          </Suspense>
+        ) : (
+          <>
+            <Toast />
+            <BetaWarningPopup />
+            <InstallWebAppModal />
+            <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Splash screen route for manual/direct access */}
               <Route path="/splash" element={<Splash />} />
