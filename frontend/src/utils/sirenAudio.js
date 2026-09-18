@@ -77,7 +77,9 @@ export async function startEmergencySiren(volume = 0.85) {
               lfo.stop();
               ctx.close().catch(() => {});
             }, 120);
-          } catch {}
+          } catch (stopErr) {
+            console.debug('[Siren] WebAudio stop error:', stopErr);
+          }
           activeWebAudioSiren = null;
         }
       };
@@ -106,14 +108,18 @@ export function stopEmergencySiren() {
       activeAudioElement.pause();
       activeAudioElement.currentTime = 0;
       activeAudioElement.src = '';
-    } catch {}
+    } catch (err) {
+      console.debug('[Siren] Audio element pause error:', err);
+    }
     activeAudioElement = null;
   }
 
   if (activeWebAudioSiren) {
     try {
       activeWebAudioSiren.stop();
-    } catch {}
+    } catch (err) {
+      console.debug('[Siren] WebAudio stop error:', err);
+    }
     activeWebAudioSiren = null;
   }
 }
@@ -129,7 +135,9 @@ export async function playEmergencyAlertBurst() {
       stopEmergencySiren();
     }, 3800);
     return controller;
-  } catch {}
+  } catch (err) {
+    console.debug('[Siren] Burst play error:', err);
+  }
 }
 
 /**
@@ -156,5 +164,7 @@ export function playNotificationChime() {
     osc.start();
     osc.stop(ctx.currentTime + 0.4);
     setTimeout(() => ctx.close().catch(() => {}), 500);
-  } catch {}
+  } catch (err) {
+    console.debug('[Siren] Chime error:', err);
+  }
 }

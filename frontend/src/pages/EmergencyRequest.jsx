@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertTriangle, MapPin, Heart, VolumeX, Volume2, Phone, ChevronLeft, Clock, Droplets } from 'lucide-react';
 import api from '../store/api.js';
@@ -33,7 +33,7 @@ function useSiren() {
     setSirenBlocked(false);
   }, []);
 
-  return { sirenActive, sirenBlocked, sirenReady: true, startSiren, stopSiren };
+  return { sirenActive, sirenBlocked, startSiren, stopSiren };
 }
 
 // ─── Blood Group Badge ────────────────────────────────────────────────────────
@@ -74,21 +74,17 @@ function PulseRing() {
 export default function EmergencyRequest() {
   const { id }      = useParams();
   const navigate    = useNavigate();
-  const { sirenActive, sirenBlocked, sirenReady, startSiren, stopSiren } = useSiren();
+  const { sirenActive, sirenBlocked, startSiren, stopSiren } = useSiren();
 
   const [request, setRequest]   = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState(null);
+  const [loading, setLoading]   = useState(!!id);
+  const [error, setError]       = useState(!id ? 'No request ID specified.' : null);
   const [accepted, setAccepted] = useState(false);
   const [accepting, setAccepting] = useState(false);
 
   // Fetch blood request details
   useEffect(() => {
-    if (!id) {
-      setError('No request ID specified.');
-      setLoading(false);
-      return;
-    }
+    if (!id) return;
 
     let cancelled = false;
 
