@@ -1,65 +1,39 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertTriangle, MapPin, Heart, VolumeX, Volume2, Phone, ChevronLeft, Clock, Droplets } from 'lucide-react';
 import api from '../store/api.js';
 
+import { startEmergencySiren, stopEmergencySiren } from '../utils/sirenAudio.js';
+
 // ─── Emergency Siren Manager ──────────────────────────────────────────────────
 
 function useSiren() {
-  const audioRef = useRef(null);
   const [sirenActive, setSirenActive] = useState(false);
   const [sirenBlocked, setSirenBlocked] = useState(false);
-  const [sirenReady, setSirenReady] = useState(false);
-
-  // Initialise audio on mount
-  useEffect(() => {
-    const audio = new Audio('/sounds/emergency-siren.mp3');
-    audio.loop = true;
-    audio.volume = 0.85;
-    audio.preload = 'auto';
-
-    audio.addEventListener('canplaythrough', () => setSirenReady(true));
-    audio.addEventListener('error', () => {
-      console.warn('[Siren] Audio file not found or unplayable — using silent fallback.');
-      setSirenReady(false);
-    });
-
-    audioRef.current = audio;
-
-    return () => {
-      audio.pause();
-      audio.src = '';
-      audioRef.current = null;
-    };
-  }, []);
 
   const startSiren = useCallback(async () => {
-    if (!audioRef.current) return;
     try {
-      audioRef.current.currentTime = 0;
-      await audioRef.current.play();
-      setSirenActive(true);
-      setSirenBlocked(false);
-    } catch (err) {
-      if (err.name === 'NotAllowedError') {
-        console.warn('[Siren] Autoplay blocked — tap "Activate Siren" to play.');
-        setSirenBlocked(true);
-        setSirenActive(false);
+      const res = await startEmergencySiren(0.85);
+      if (res.type !== 'none') {
+        setSirenActive(true);
+        setSirenBlocked(false);
       } else {
-        console.error('[Siren] Playback error:', err);
+        setSirenBlocked(true);
       }
+    } catch (err) {
+      console.warn('[Siren] Playback blocked or failed:', err);
+      setSirenBlocked(true);
+      setSirenActive(false);
     }
   }, []);
 
   const stopSiren = useCallback(() => {
-    if (!audioRef.current) return;
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
+    stopEmergencySiren();
     setSirenActive(false);
     setSirenBlocked(false);
   }, []);
 
-  return { sirenActive, sirenBlocked, sirenReady, startSiren, stopSiren };
+  return { sirenActive, sirenBlocked, sirenReady: true, startSiren, stopSiren };
 }
 
 // ─── Blood Group Badge ────────────────────────────────────────────────────────
