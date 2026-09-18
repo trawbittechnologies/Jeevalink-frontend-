@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import {
@@ -6,8 +6,9 @@ import {
   Settings as SettingsIcon, BellOff, AlertTriangle, CheckCircle2
 } from 'lucide-react';
 import AccountSecurityModal from '../components/AccountSecurityModal.jsx';
+import api from '../store/api.js';
 import { requestNotificationPermission, removeNotificationToken } from '../services/firebaseMessaging.js';
-import { isPushSupported, getPermissionStatus, hasActiveSubscription } from '../services/webPushService.js';
+import { isPushSupported, getPermissionStatus, hasActiveSubscription, initPushNotifications } from '../services/webPushService.js';
 
 // Reusable toggle switch
 function Toggle({ enabled, onToggle, id, disabled }) {
