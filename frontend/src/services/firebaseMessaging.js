@@ -1,147 +1,132 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
-import api from '../store/api';
-
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
-
-// Prevent "Firebase App already exists" error on hot reload
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-
-const getSwUrl = () =>
-  `/firebase-messaging-sw.js?apiKey=${firebaseConfig.apiKey}` +
-  `&authDomain=${firebaseConfig.authDomain}` +
-  `&projectId=${firebaseConfig.projectId}` +
-  `&storageBucket=${firebaseConfig.storageBucket}` +
-  `&messagingSenderId=${firebaseConfig.messagingSenderId}` +
-  `&appId=${firebaseConfig.appId}`;
-
-let messagingInstance = null;
-
-const getMessagingInstance = async () => {
-  if (messagingInstance) return messagingInstance;
-  try {
-    const supported = await isSupported();
-    if (!supported) return null;
-    messagingInstance = getMessaging(app);
-    return messagingInstance;
-  } catch (err) {
-    console.error('[FCM] getMessaging failed:', err);
-    return null;
-  }
-};
-
-// ─── Public API ────────────────────────────────────────────────────────────────
-
-export const initializeMessaging = getMessagingInstance;
-
-/**
- * Silently get the latest FCM token and sync it to the backend.
- * Called on page load to ensure the token is always fresh after SW updates.
+﻿/**
+ * firebaseMessaging.js
+ *
+ * MIGRATED: Firebase Cloud Messaging removed.
+ * Now backed by standards-based VAPID Web Push (webPushService.js).
+ *
+ * Public API is IDENTICAL to the original file so that all existing callers
+ * (App.jsx, Settings.jsx) do not require any import changes.
+ *
+ * Exported functions:
+ *   initializeMessaging()          — no-op, kept for compatibility
+ *   refreshFcmToken()              — silently (re)registers Web Push subscription
+ *   requestNotificationPermission() — requests permission + subscribes to Web Push
+ *   removeNotificationToken()       — unsubscribes + removes from backend
+ *   onForegroundMessage(callback)   — listens for SW foreground relay messages
  */
+
+import {
+  initPushNotifications,
+  cleanupPushNotifications,
+  isPushSupported,
+  getPermissionStatus,
+  registerServiceWorker,
+} from './webPushService.js';
+
+// ─── initializeMessaging ──────────────────────────────────────────────────────
+// Kept for API compatibility. No-op in Web Push mode.
+export const initializeMessaging = async () => {
+  return null;
+};
+
+// ─── refreshFcmToken ─────────────────────────────────────────────────────────
+// Silently (re-)registers the VAPID push subscription on page load.
+// Called by App.jsx on every token-present page load.
 export const refreshFcmToken = async () => {
   try {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    if (!isPushSupported()) return;
+    if (getPermissionStatus() !== 'granted') return;
 
-    const msg = await getMessagingInstance();
-    if (!msg) return;
-
-    const registration = await navigator.serviceWorker.register(getSwUrl());
-    await navigator.serviceWorker.ready;
-
-    const token = await getToken(msg, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration
-    });
-
-    if (token) {
-      await api.post('/notifications/register-token', {
-        token,
-        device_type: navigator.userAgent
-      });
-      console.log('[FCM] Token refreshed and synced:', token.slice(0, 20) + '...');
+    const result = await initPushNotifications();
+    if (result.success) {
+      console.info('[WebPush] Push subscription refreshed and synced.');
     }
   } catch (err) {
-    console.warn('[FCM] Token refresh failed (non-critical):', err.message);
+    console.warn('[WebPush] refreshFcmToken (non-critical):', err?.message);
   }
 };
 
+// ─── requestNotificationPermission ───────────────────────────────────────────
+// Called by Settings.jsx toggle when user wants to enable push notifications.
+// Returns a truthy value on success (subscription endpoint), null on failure.
 export const requestNotificationPermission = async () => {
   try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return null;
-
-    const msg = await getMessagingInstance();
-    if (!msg) return null;
-
-    const registration = await navigator.serviceWorker.register(getSwUrl());
-
-    const token = await getToken(msg, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration
-    });
-
-    if (token) {
-      await api.post('/notifications/register-token', {
-        token,
-        device_type: navigator.userAgent
-      });
-      console.log('[FCM] Token registered successfully');
-      return token;
+    if (!isPushSupported()) {
+      console.warn('[WebPush] Push not supported in this browser.');
+      return null;
     }
+
+    const result = await initPushNotifications();
+
+    if (result.success) {
+      // Return a non-null truthy value to indicate success (caller checks truthiness)
+      // Get the actual endpoint from the active subscription
+      const swReg = await navigator.serviceWorker.ready.catch(() => null);
+      if (swReg) {
+        const sub = await swReg.pushManager.getSubscription().catch(() => null);
+        return sub?.endpoint || 'subscribed';
+      }
+      return 'subscribed';
+    }
+
     return null;
   } catch (error) {
-    console.error('[FCM] requestNotificationPermission error:', error);
+    console.error('[WebPush] requestNotificationPermission error:', error);
     throw error;
   }
 };
 
+// ─── removeNotificationToken ──────────────────────────────────────────────────
+// Called by Settings.jsx when user disables push notifications.
 export const removeNotificationToken = async () => {
   try {
-    const msg = await getMessagingInstance();
-    if (!msg) return;
-
-    const registration = await navigator.serviceWorker.register(getSwUrl());
-    const token = await getToken(msg, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration
-    });
-
-    if (token) {
-      await api.delete('/notifications/remove-token', { data: { token } });
-    }
+    await cleanupPushNotifications();
   } catch (error) {
-    console.error('[FCM] removeNotificationToken error:', error);
+    console.error('[WebPush] removeNotificationToken error:', error);
     throw error;
   }
 };
 
-/**
- * Register a foreground message listener.
- * Firebase's onMessage only fires when the page is in the foreground.
- */
+// ─── onForegroundMessage ──────────────────────────────────────────────────────
+// Register a callback for foreground push messages relayed by the service worker.
+// Returns an unsubscribe function (same API as firebase onMessage).
 export const onForegroundMessage = async (callback) => {
-  try {
-    const msg = await getMessagingInstance();
-    if (!msg) {
-      console.warn('[FCM] Messaging not available — foreground listener skipped.');
-      return () => {};
-    }
-    console.log('[FCM] Registering foreground message listener...');
-    const unsubscribe = onMessage(msg, (payload) => {
-      console.log('[FCM] Foreground message received:', payload);
-      callback(payload);
-    });
-    console.log('[FCM] Foreground listener active.');
-    return unsubscribe;
-  } catch (err) {
-    console.error('[FCM] onForegroundMessage setup error:', err);
+  if (!('serviceWorker' in navigator)) {
+    console.warn('[WebPush] Service Worker not available — foreground listener skipped.');
     return () => {};
   }
+
+  // Ensure SW is registered so the message channel is active
+  await registerServiceWorker().catch(() => {});
+
+  const handler = (event) => {
+    const data = event.data;
+    if (!data || data.type !== 'WEBPUSH_FOREGROUND') return;
+
+    // Normalize to a structure similar to what callers expect from FCM payloads
+    const normalizedPayload = {
+      notification: {
+        title: data.title || '',
+        body:  data.body  || '',
+      },
+      data: {
+        ...(data.data || {}),
+        title:     data.title || '',
+        body:      data.body  || '',
+        priority:  data.priority || 'moderate',
+        requestId: data.requestId || '',
+        url:       data.url || '',
+      },
+    };
+
+    callback(normalizedPayload);
+  };
+
+  navigator.serviceWorker.addEventListener('message', handler);
+  console.info('[WebPush] Foreground message listener active.');
+
+  // Return unsubscribe function
+  return () => {
+    navigator.serviceWorker.removeEventListener('message', handler);
+  };
 };

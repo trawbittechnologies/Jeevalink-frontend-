@@ -6,6 +6,7 @@ import { normalizeRole } from './utils/rbac.js';
 import Toast from './components/Toast.jsx';
 import BetaWarningPopup from './components/BetaWarningPopup.jsx';
 import { Loader2 } from 'lucide-react';
+// Web Push foreground message relay (no Firebase — backed by webPushService.js)
 import { onForegroundMessage, refreshFcmToken } from './services/firebaseMessaging.js';
 
 // Layouts
@@ -48,6 +49,7 @@ const Terms = safeLazy(() => import('./pages/Terms.jsx'));
 const Notifications = safeLazy(() => import('./pages/Notifications.jsx'));
 const Settings = safeLazy(() => import('./pages/Settings.jsx'));
 const EmergencyDashboard = safeLazy(() => import('./pages/EmergencyDashboard.jsx'));
+const EmergencyRequest = safeLazy(() => import('./pages/EmergencyRequest.jsx'));
 
 // Volunteer Module Pages
 const VolunteerUserManagement = safeLazy(() => import('./pages/volunteer/UserManagement.jsx'));
@@ -177,7 +179,7 @@ export default function App() {
 
     const handleIncomingAlert = (title, body) => {
       const now = Date.now();
-      // Deduplicate identical alerts within 3 seconds to avoid dual-channel double-toasts
+      // Deduplicate identical alerts within 3 seconds to avoid double-toasts
       if (title === lastAlertTitle && (now - lastAlertAt) < 3000) {
         return;
       }
@@ -191,25 +193,15 @@ export default function App() {
       useAppStore.getState().fetchNotifications();
     };
 
-    // Channel 1: Firebase onMessage (foreground tab)
+    // Web Push foreground relay: WEBPUSH_FOREGROUND message from sw.js
     onForegroundMessage((payload) => {
       const title = payload.notification?.title || payload.data?.title || 'New Blood Alert';
-      const body = payload.notification?.body || payload.data?.body || '';
+      const body  = payload.notification?.body  || payload.data?.body  || '';
       handleIncomingAlert(title, body);
     }).then((unsub) => { unsubscribe = unsub; });
 
-    // Channel 2: Service worker push event relay (always fires)
-    const handleSwMessage = (event) => {
-      const { type, title, body } = event.data || {};
-      if (type === 'FCM_PUSH') {
-        handleIncomingAlert(title, body);
-      }
-    };
-    navigator.serviceWorker?.addEventListener('message', handleSwMessage);
-
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
-      navigator.serviceWorker?.removeEventListener('message', handleSwMessage);
     };
   }, [triggerToast]);
 
@@ -391,6 +383,12 @@ export default function App() {
                 <Route path="/blood-requests/:id" element={
                   <ProtectedRoute roles={['user', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
                     <BloodRequests />
+                  </ProtectedRoute>
+                } />
+                {/* Emergency SOS detail page — opened by immediate priority push notifications */}
+                <Route path="/emergency-request/:id" element={
+                  <ProtectedRoute roles={['user', 'volunteer', 'block_admin', 'super_admin', 'technical_admin']}>
+                    <EmergencyRequest />
                   </ProtectedRoute>
                 } />
                 <Route path="/support" element={<UserSupport />} />

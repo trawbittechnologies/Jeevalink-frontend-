@@ -1,22 +1,29 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import {
-  Moon, Sun, BellRing, Smartphone, KeyRound, Mail, ChevronRight, Settings as SettingsIcon
+  Moon, Sun, BellRing, Smartphone, KeyRound, Mail, ChevronRight,
+  Settings as SettingsIcon, BellOff, AlertTriangle, CheckCircle2
 } from 'lucide-react';
 import AccountSecurityModal from '../components/AccountSecurityModal.jsx';
 import { requestNotificationPermission, removeNotificationToken } from '../services/firebaseMessaging.js';
+import { isPushSupported, getPermissionStatus, hasActiveSubscription } from '../services/webPushService.js';
 
 // Reusable toggle switch
-function Toggle({ enabled, onToggle, id }) {
+function Toggle({ enabled, onToggle, id, disabled }) {
   return (
     <button
       id={id}
-      onClick={onToggle}
+      onClick={disabled ? undefined : onToggle}
       role="switch"
       aria-checked={enabled}
-      className={`relative w-11 h-6 rounded-full p-0.5 transition-colors duration-300 cursor-pointer shrink-0 ${
-        enabled ? 'bg-primary' : 'bg-slate-200'
+      disabled={disabled}
+      className={`relative w-11 h-6 rounded-full p-0.5 transition-colors duration-300 shrink-0 ${
+        disabled
+          ? 'bg-slate-200 cursor-not-allowed opacity-50'
+          : enabled
+          ? 'bg-primary cursor-pointer'
+          : 'bg-slate-200 cursor-pointer'
       }`}
     >
       <div
@@ -49,20 +56,72 @@ function SettingRow({ icon: Icon, iconBg, title, subtitle, right, onClick, id })
   );
 }
 
+// Push notification status indicator
+function PushStatusBanner({ permission }) {
+  if (permission === 'unsupported') {
+    return (
+      <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3 mt-2">
+        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-xs font-semibold text-amber-700">Not supported</p>
+          <p className="text-xs text-amber-600 mt-0.5">
+            Push notifications are not supported in this browser. Try Chrome or Edge.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (permission === 'denied') {
+    return (
+      <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3 mt-2">
+        <BellOff className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-xs font-semibold text-red-700">Notifications blocked</p>
+          <p className="text-xs text-red-600 mt-0.5">
+            You have blocked notifications for JeevaLink. To re-enable:{' '}
+            <span className="font-bold">Browser menu &gt; Site settings &gt; Notifications &gt; Allow</span>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (permission === 'granted') {
+    return (
+      <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl p-3 mt-2">
+        <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+        <p className="text-xs font-semibold text-green-700">Push notifications are active</p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function Settings() {
   const { triggerToast } = useAppStore();
-  const { user } = useAuthStore();
+  const { user }         = useAuthStore();
 
   const [isDarkMode, setIsDarkMode] = useState(() =>
     document.documentElement.classList.contains('dark')
   );
-  const [pushEnabled, setPushEnabled] = useState(() => 
-    'Notification' in window && Notification.permission === 'granted'
-  );
-  const [smsEnabled, setSmsEnabled] = useState(false);
-  const [securityModal, setSecurityModal] = useState(null); // 'password' | 'email' | null
+
+  const [pushPermission, setPushPermission] = useState(() => {
+    if (!isPushSupported()) return 'unsupported';
+    return getPermissionStatus();
+  });
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+
+  const [smsEnabled, setSmsEnabled]       = useState(false);
+  const [securityModal, setSecurityModal] = useState(null);
 
   const showAccountSecurity = user?.role !== 'unit_squad';
+
+  // Check active subscription on mount
+  useEffect(() => {
+    if (pushPermission === 'granted') {
+      hasActiveSubscription().then((active) => setPushEnabled(active));
+    }
+  }, [pushPermission]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -76,30 +135,56 @@ export default function Settings() {
     setIsDarkMode(v => !v);
     triggerToast(!isDarkMode ? 'Dark mode enabled!' : 'Light mode enabled!', 'info');
   };
+
   const togglePush = async () => {
+    if (pushLoading) return;
+    if (pushPermission === 'unsupported') {
+      triggerToast('Push notifications are not supported in this browser.', 'error');
+      return;
+    }
+    if (pushPermission === 'denied') {
+      triggerToast('Notifications are blocked. Enable them in browser site settings.', 'error');
+      return;
+    }
+
+    setPushLoading(true);
     try {
       if (pushEnabled) {
         await removeNotificationToken();
         setPushEnabled(false);
+        setPushPermission(getPermissionStatus());
         triggerToast('Push notifications disabled.', 'info');
       } else {
-        const token = await requestNotificationPermission();
-        if (token) {
+        const result       = await requestNotificationPermission();
+        const newPermission = getPermissionStatus();
+        setPushPermission(newPermission);
+
+        if (result) {
           setPushEnabled(true);
           triggerToast('Push notifications enabled!', 'success');
+        } else if (newPermission === 'denied') {
+          triggerToast('Notifications blocked in browser. Enable from site settings.', 'error');
         } else {
-          triggerToast(Notification.permission === 'denied' ? 'Notifications blocked in browser.' : 'Failed to enable push notifications.', 'error');
+          triggerToast('Failed to enable push notifications. Please try again.', 'error');
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error('[Settings] Push toggle error:', err);
       triggerToast('Error updating notification preferences.', 'error');
+    } finally {
+      setPushLoading(false);
     }
   };
+
   const toggleSms = () => {
     setSmsEnabled(v => !v);
     triggerToast(!smsEnabled ? 'SMS alerts enabled!' : 'SMS alerts disabled.', 'info');
   };
+
+  const isPushToggleDisabled =
+    pushLoading ||
+    pushPermission === 'unsupported' ||
+    pushPermission === 'denied';
 
   return (
     <>
@@ -116,10 +201,9 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ── Appearance ─────────────────────────────────── */}
+        {/* Appearance */}
         <div className="card p-5 space-y-1">
           <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Appearance</p>
-
           <SettingRow
             id="dark-mode-row"
             icon={isDarkMode ? Moon : Sun}
@@ -130,7 +214,7 @@ export default function Settings() {
           />
         </div>
 
-        {/* ── Notifications ──────────────────────────────── */}
+        {/* Notifications */}
         <div className="card p-5 space-y-1">
           <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Notifications</p>
 
@@ -139,11 +223,30 @@ export default function Settings() {
             icon={BellRing}
             iconBg="bg-blue-50 text-blue-600"
             title="Push Notifications"
-            subtitle="Receive nearby blood request alerts"
-            right={<Toggle enabled={pushEnabled} onToggle={togglePush} id="push-toggle" />}
+            subtitle={
+              pushLoading
+                ? 'Updating...'
+                : pushPermission === 'unsupported'
+                ? 'Not supported in this browser'
+                : pushPermission === 'denied'
+                ? 'Blocked — enable in browser settings'
+                : pushEnabled
+                ? 'Receiving nearby blood request alerts'
+                : 'Tap to enable blood request alerts'
+            }
+            right={
+              <Toggle
+                enabled={pushEnabled && pushPermission === 'granted'}
+                onToggle={togglePush}
+                id="push-toggle"
+                disabled={isPushToggleDisabled}
+              />
+            }
           />
 
-          <div className="border-t border-slate-100 my-1" />
+          <PushStatusBanner permission={pushPermission} />
+
+          <div className="border-t border-slate-100 my-1 mt-3" />
 
           <SettingRow
             id="sms-alerts-row"
@@ -155,7 +258,7 @@ export default function Settings() {
           />
         </div>
 
-        {/* ── Account Security — not for unit_squad ─────── */}
+        {/* Account Security */}
         {showAccountSecurity && (
           <div className="card p-5 space-y-1">
             <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">Account Security</p>
@@ -186,7 +289,6 @@ export default function Settings() {
 
       </div>
 
-      {/* Account Security Modal */}
       {securityModal && (
         <AccountSecurityModal
           mode={securityModal}
