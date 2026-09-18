@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AlertTriangle, MapPin, Heart, VolumeX, Volume2, Phone, ChevronLeft, Clock, Droplets } from 'lucide-react';
 import api from '../store/api.js';
 
-import { startEmergencySiren, stopEmergencySiren } from '../utils/sirenAudio.js';
+import { startEmergencySiren, stopEmergencySiren, attachGlobalAudioUnlock } from '../utils/sirenAudio.js';
 
 // ─── Emergency Siren Manager ──────────────────────────────────────────────────
 
@@ -14,16 +14,20 @@ function useSiren() {
   const startSiren = useCallback(async () => {
     try {
       const res = await startEmergencySiren(0.85);
-      if (res.type !== 'none') {
+      if (res && res.type !== 'none' && !res.blocked) {
         setSirenActive(true);
         setSirenBlocked(false);
+        return { success: true, blocked: false };
       } else {
+        setSirenActive(false);
         setSirenBlocked(true);
+        return { success: false, blocked: true };
       }
     } catch (err) {
       console.warn('[Siren] Playback blocked or failed:', err);
       setSirenBlocked(true);
       setSirenActive(false);
+      return { success: false, blocked: true };
     }
   }, []);
 
@@ -127,24 +131,37 @@ export default function EmergencyRequest() {
     return () => { cancelled = true; };
   }, [id]);
 
-  // Auto-attempt siren on first user interaction with the page
-  // (will silently fail if blocked — user sees the activate button)
+  // Auto-attempt siren on load, with reliable auto-unlock on first tap/interaction
   useEffect(() => {
     if (!loading && !error && request) {
-      // Brief delay so the page is fully painted before we attempt audio
-      const t = setTimeout(() => {
-        startSiren();
-      }, 800);
-      return () => clearTimeout(t);
-    }
-  }, [loading, error, request, startSiren]);
+      let isCancelled = false;
+      let cleanupUnlock = null;
 
-  // Stop siren when leaving the page
-  useEffect(() => {
-    return () => {
-      stopSiren();
-    };
-  }, [stopSiren]);
+      const attemptSirenFlow = async () => {
+        const res = await startSiren();
+        if (isCancelled) return;
+
+        // If browser autoplay blocked sound, auto-unlock on first user interaction anywhere
+        if (res?.blocked) {
+          cleanupUnlock = attachGlobalAudioUnlock(async () => {
+            if (isCancelled) return;
+            await startSiren();
+          });
+        }
+      };
+
+      const timer = setTimeout(attemptSirenFlow, 400);
+
+      return () => {
+        isCancelled = true;
+        clearTimeout(timer);
+        if (typeof cleanupUnlock === 'function') {
+          cleanupUnlock();
+        }
+        stopSiren();
+      };
+    }
+  }, [loading, error, request, startSiren, stopSiren]);
 
   // Accept blood request
   const handleAccept = async () => {
@@ -347,29 +364,40 @@ export default function EmergencyRequest() {
         {/* ─── Siren Status ─────────────────────────────────────────────────── */}
         {sirenBlocked && (
           <div
-            className="bg-amber-900/40 border border-amber-600/40 rounded-2xl p-4 text-center"
+            className="bg-amber-950/60 border-2 border-amber-500/60 rounded-2xl p-4 text-center shadow-lg shadow-amber-950/40"
             role="alert"
           >
-            <Volume2 className="w-6 h-6 text-amber-400 mx-auto mb-2" />
-            <p className="text-sm font-bold text-amber-300 mb-3">
-              Tap to activate emergency alert sound
+            <Volume2 className="w-6 h-6 text-amber-300 mx-auto mb-1.5 animate-bounce" />
+            <p className="text-sm font-black text-white mb-0.5">
+              🚨 Emergency Siren Ready
+            </p>
+            <p className="text-xs text-amber-200 mb-3">
+              Tap anywhere on screen or click below to sound the siren
             </p>
             <button
+              type="button"
               onClick={startSiren}
-              className="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-black py-2.5 px-6 rounded-xl transition-colors min-h-[44px]"
+              className="w-full bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-black py-3 px-6 rounded-xl transition-all shadow-md active:scale-[0.99] cursor-pointer text-sm"
             >
-              Activate Siren
+              🔊 Activate Emergency Siren
             </button>
           </div>
         )}
 
         {sirenActive && (
-          <div className="bg-red-800/30 border border-red-600/30 rounded-2xl p-3 flex items-center gap-3">
+          <div className="bg-red-900/60 border border-red-500/50 rounded-2xl p-3.5 flex items-center gap-3 shadow-md shadow-red-950/40">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
             </span>
-            <p className="text-sm text-red-300 font-semibold flex-1">Emergency siren active</p>
+            <p className="text-sm text-red-200 font-bold flex-1">🚨 Emergency siren is active</p>
+            <button
+              type="button"
+              onClick={stopSiren}
+              className="text-xs font-bold text-red-200 hover:text-white bg-red-950 hover:bg-red-900 px-3 py-1.5 rounded-lg border border-red-800 transition-colors cursor-pointer"
+            >
+              Mute
+            </button>
           </div>
         )}
 
