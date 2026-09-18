@@ -427,6 +427,7 @@ export default function App() {
           </Suspense>
         </>
       )}
+      </PWAInstallProvider>
     </BrowserRouter>
   );
 }

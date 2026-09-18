@@ -3,12 +3,13 @@ import { useAppStore } from '../store/appStore.js';
 import { useAuthStore } from '../store/authStore.js';
 import {
   Moon, Sun, BellRing, Smartphone, KeyRound, Mail, ChevronRight,
-  Settings as SettingsIcon, BellOff, AlertTriangle, CheckCircle2
+  Settings as SettingsIcon, BellOff, AlertTriangle, CheckCircle2, Download
 } from 'lucide-react';
 import AccountSecurityModal from '../components/AccountSecurityModal.jsx';
 import api from '../store/api.js';
 import { requestNotificationPermission, removeNotificationToken } from '../services/firebaseMessaging.js';
 import { isPushSupported, getPermissionStatus, hasActiveSubscription, initPushNotifications } from '../services/webPushService.js';
+import { usePWAInstall } from '../hooks/usePWAInstall.js';
 
 // Reusable toggle switch
 function Toggle({ enabled, onToggle, id, disabled }) {
@@ -114,6 +115,8 @@ export default function Settings() {
 
   const [smsEnabled, setSmsEnabled]       = useState(false);
   const [securityModal, setSecurityModal] = useState(null);
+
+  const { canInstall, isInstalled, platform, showInstallPrompt } = usePWAInstall();
 
   const showAccountSecurity = user?.role !== 'unit_squad';
 
