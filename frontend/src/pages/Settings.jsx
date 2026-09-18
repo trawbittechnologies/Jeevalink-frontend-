@@ -177,6 +177,28 @@ export default function Settings() {
     }
   };
 
+  const [testPushLoading, setTestPushLoading] = useState(false);
+
+  const handleTestPush = async () => {
+    if (testPushLoading) return;
+    setTestPushLoading(true);
+    try {
+      // Ensure subscription is synced with backend
+      await initPushNotifications();
+      const res = await api.post('/notifications/test-web-push', { priority: 'immediate' });
+      if (res.data?.success) {
+        triggerToast('🚨 Test Emergency Push notification sent to your device!', 'success');
+      } else {
+        triggerToast(res.data?.message || 'Could not send test push.', 'error');
+      }
+    } catch (err) {
+      console.error('[Settings] Test push failed:', err);
+      triggerToast(err?.response?.data?.message || 'Failed to dispatch test notification.', 'error');
+    } finally {
+      setTestPushLoading(false);
+    }
+  };
+
   const toggleSms = () => {
     setSmsEnabled(v => !v);
     triggerToast(!smsEnabled ? 'SMS alerts enabled!' : 'SMS alerts disabled.', 'info');
@@ -246,6 +268,24 @@ export default function Settings() {
           />
 
           <PushStatusBanner permission={pushPermission} />
+
+          {pushPermission === 'granted' && (
+            <div className="pt-2 px-1">
+              <button
+                id="send-test-push-btn"
+                type="button"
+                onClick={handleTestPush}
+                disabled={testPushLoading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-sm active:scale-[0.99] disabled:opacity-50"
+              >
+                <BellRing className={`w-4 h-4 ${testPushLoading ? 'animate-bounce' : ''}`} />
+                {testPushLoading ? 'Dispatching Push Notification...' : '🔔 Send Test Push Notification to This Device'}
+              </button>
+              <p className="text-[11px] text-slate-500 text-center mt-1.5">
+                Tests delivery directly through Chrome / Windows / Mobile notification system.
+              </p>
+            </div>
+          )}
 
           <div className="border-t border-slate-100 my-1 mt-3" />
 
