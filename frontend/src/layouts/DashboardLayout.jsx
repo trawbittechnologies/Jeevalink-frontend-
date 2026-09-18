@@ -5,15 +5,14 @@ import { useAppStore } from '../store/appStore.js';
 import Toast from '../components/Toast.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import JeevaLinkLogo from '../components/JeevaLinkLogo.jsx';
-import SOSButton from '../components/SOSButton.jsx';
 import GlobalNotificationPopup from '../components/GlobalNotificationPopup.jsx';
-import { Bell, Siren, Menu } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 import { getStorageUrl } from '../store/api.js';
 
 export default function DashboardLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loadProfile } = useAuthStore();
-  const { notifications, startSOSCountdown } = useAppStore();
+  const { notifications } = useAppStore();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -67,14 +66,6 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Emergency SOS */}
-            <button
-              onClick={() => startSOSCountdown(user)}
-              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-red-50 hover:bg-red-100 active:bg-red-200 border border-red-200 text-primary text-xs font-bold rounded-xl transition-colors cursor-pointer"
-            >
-              <Siren className="w-3.5 h-3.5 animate-pulse" /> <span className="text-xs font-bold">SOS</span>
-            </button>
-
             {/* Notifications */}
             <Link
               to="/notifications"
@@ -108,9 +99,6 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
       </div>
-
-      {/* Floating SOS button */}
-      <SOSButton />
 
       {/* Global Notification Prompt Modal */}
       <GlobalNotificationPopup />
