@@ -302,6 +302,55 @@ export default function Settings() {
           />
         </div>
 
+        {/* App & Device Experience (PWA) */}
+        <div className="card p-5 space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">App & Device Experience</p>
+          {isInstalled ? (
+            <SettingRow
+              id="pwa-installed-row"
+              icon={CheckCircle2}
+              iconBg="bg-emerald-50 text-emerald-600"
+              title="Web App Installed"
+              subtitle="Running as a standalone home screen application"
+              right={
+                <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200/60">
+                  Installed
+                </span>
+              }
+            />
+          ) : canInstall ? (
+            <SettingRow
+              id="pwa-install-row"
+              icon={Download}
+              iconBg="bg-red-50 text-primary"
+              title="Install Web App"
+              subtitle={
+                platform === 'ios'
+                  ? 'Add iDonate to your iPhone or iPad Home Screen'
+                  : 'Install iDonate for fast one-tap access & offline support'
+              }
+              onClick={showInstallPrompt}
+              right={
+                <button
+                  type="button"
+                  onClick={showInstallPrompt}
+                  className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-red-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer shrink-0"
+                >
+                  {platform === 'ios' ? 'Add Guide' : 'Install'}
+                </button>
+              }
+            />
+          ) : (
+            <SettingRow
+              id="pwa-browser-row"
+              icon={Smartphone}
+              iconBg="bg-slate-100 text-slate-500"
+              title="Web Application"
+              subtitle="Browser mode — install is supported on Chrome, Edge & Safari"
+            />
+          )}
+        </div>
+
         {/* Account Security */}
         {showAccountSecurity && (
           <div className="card p-5 space-y-1">

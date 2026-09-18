@@ -4,14 +4,13 @@ import {
   Download,
   Share2,
   PlusSquare,
-  CheckCircle2,
   Zap,
   BellRing,
   X,
   Smartphone,
   ExternalLink,
 } from 'lucide-react';
-import { usePWAInstall } from '../../context/PWAInstallContext.jsx';
+import { usePWAInstall } from '../../hooks/usePWAInstall.js';
 
 export default function InstallWebAppModal() {
   const {

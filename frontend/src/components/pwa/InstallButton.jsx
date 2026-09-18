@@ -1,5 +1,5 @@
-import { Download, CheckCircle2, Smartphone } from 'lucide-react';
-import { usePWAInstall } from '../../context/PWAInstallContext.jsx';
+import { Download, CheckCircle2 } from 'lucide-react';
+import { usePWAInstall } from '../../hooks/usePWAInstall.js';
 
 export default function InstallButton({
   variant = 'button',

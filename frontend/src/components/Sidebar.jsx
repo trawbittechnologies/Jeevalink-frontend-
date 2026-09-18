@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import JeevaLinkLogo from './JeevaLinkLogo.jsx';
+import InstallButton from './pwa/InstallButton.jsx';
 
 const userLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -227,6 +228,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
         {/* Settings & Sign out - Pinned at bottom */}
         <div className="p-3 border-t border-slate-100 space-y-0.5 shrink-0 bg-white pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <InstallButton variant="sidebar-item" />
           <Link
             to="/settings"
             onClick={() => setMobileOpen && setMobileOpen(false)}

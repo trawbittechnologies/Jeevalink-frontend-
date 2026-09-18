@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { pwaManager, PWA_STATE } from '../services/pwaInstallManager.js';
-
-const PWAInstallContext = createContext(null);
+import { PWAInstallContext } from './pwaContext.js';
 
 export function PWAInstallProvider({ children }) {
   const [managerState, setManagerState] = useState(() => pwaManager.getState());
@@ -100,12 +99,4 @@ export function PWAInstallProvider({ children }) {
       {children}
     </PWAInstallContext.Provider>
   );
-}
-
-export function usePWAInstall() {
-  const context = useContext(PWAInstallContext);
-  if (!context) {
-    throw new Error('usePWAInstall must be used within a PWAInstallProvider');
-  }
-  return context;
 }
